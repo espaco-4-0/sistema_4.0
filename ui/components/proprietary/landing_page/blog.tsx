@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -67,7 +68,7 @@ export default function Blog() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pt-20">
-          <div className="group relative lg:col-span-3 h-90 rounded-xl overflow-hidden shadow-lg">
+          <div className="group relative lg:col-span-3 h-90 hover:cursor-pointer rounded-xl overflow-hidden shadow-lg">
             <Image
               src={lista[0].imagem}
               alt={lista[0].titulo}
@@ -88,7 +89,7 @@ export default function Blog() {
             </div>
           </div>
 
-          <div className="lg:col-span-2 grid grid-cols-2 gap-6">
+          <div className="lg:col-span-2 grid hover:cursor-pointer grid-cols-2 gap-6">
             {lista.slice(1, 5).map((noticia) => (
               <div
                 key={noticia.id}
@@ -117,9 +118,9 @@ export default function Blog() {
         </div>
 
         <div className="flex justify-center mt-14">
-          <button className="border-2 border-[#D1D5DC] px-8 py-3 rounded-md font-medium transition hover:bg-black hover:text-white">
+          <Button variant="outline" className="border-2 cursor-pointer border-[#D1D5DC] px-8 py-3 rounded-md font-medium transition hover:bg-black hover:text-white">
             Mais Notícias
-          </button>
+          </Button>
         </div>
       </div>
     </section>
