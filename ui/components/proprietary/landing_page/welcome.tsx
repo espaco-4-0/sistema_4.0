@@ -6,8 +6,10 @@ export function Welcome() {
         <section className="flex justify-around items-center h-185 bg-black text-white pl-10">
             <div>
                 <h2 className="text-6xl leading-tight">
-                    Bem-vindo ao
-                    <span className="block text-yellow-400">ESPAÇO 4.0</span>
+                    Bem-vindo ao {" "}
+                    <span className="block text-yellow-400">
+                        ESPAÇO 4.0
+                    </span>
                 </h2>
                 <p className="mt-9 w-140 text-gray-400 text-xl">
                     Sistema integrado de gestão do espaço maker do Instituto
