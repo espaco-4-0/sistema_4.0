@@ -137,13 +137,13 @@ export function UpcomingEvents() {
         className="
           mt-11
           w-60 h-10
-          sm:w-80 sm:h-12
+          2xl:w-80 2xl:h-12
           rounded-xl
           border-2 border-black
           bg-white
           text-sm text-black
           cursor-pointer
-          sm:text-[20px]
+          2xl:text-[20px]
           hover:bg-black
           hover:text-white
         "
