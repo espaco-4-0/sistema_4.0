@@ -47,7 +47,7 @@ export function UpcomingEvents() {
         Participe de workshops, hackathons e eventos de inovação
       </p>
 
-      <div className="grid grid-cols-1 gap-8 2xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {dados.map((dado) => (
           <div key={dado.id}>
             <Card
@@ -55,7 +55,7 @@ export function UpcomingEvents() {
                 flex flex-col sm:flex-row
                 w-full
                 sm:w-150 sm:max-w-215
-                lg:w-190
+                lg:w-160
                 2xl:w-215
                 mx-auto
                 gap-4 sm:gap-0
@@ -82,10 +82,10 @@ export function UpcomingEvents() {
                   sm:mr-6 sm:mb-0
                 "
               >
-                <p className="text-4xl leading-none sm:text-[42px]">
+                <p className="2xl:text-4xl leading-none sm:text-[42px]">
                   {dado.day}
                 </p>
-                <p className="mt-1 text-xl uppercase sm:mt-2">
+                <p className="mt-1 2xl:text-xl uppercase sm:mt-2">
                   {dado.mounth}
                 </p>
               </CardContent>
@@ -100,7 +100,7 @@ export function UpcomingEvents() {
                     sm:max-w-158
                   "
                 >
-                  <CardTitle className="text-xl sm:text-2xl">
+                  <CardTitle className="text-xl 2xl:text-2xl">
                     {dado.title}
                   </CardTitle>
 
@@ -108,8 +108,9 @@ export function UpcomingEvents() {
                     className="
                       text-base
                       text-gray-600
-                      sm:text-xl
-                      sm:leading-8
+                      lg:text-md
+                      2xl:text-xl
+                      2xl:leading-8
                     "
                   >
                     {dado.descriptions}
@@ -121,7 +122,7 @@ export function UpcomingEvents() {
                     p-0
                     text-base
                     text-gray-600
-                    sm:text-xl
+                    2xl:text-xl
                   "
                 >
                   {dado.time}h • Espaço 4.0
