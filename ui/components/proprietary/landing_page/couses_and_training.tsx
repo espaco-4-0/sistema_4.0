@@ -89,7 +89,7 @@ export default function CoursesAndTraining() {
               </CardContent>
 
               <CardFooter>
-                <button className="w-full rounded-lg bg-[#F4C430] py-2 text-sm font-semibold text-black hover:bg-[#e0b52a] transition">
+                <button className="w-full rounded-lg hover:cursor-pointer bg-[#F4C430] py-2 text-sm font-semibold text-black hover:bg-[#e0b52a] transition">
                   INSCREVA-SE
                 </button>
               </CardFooter>
@@ -98,7 +98,7 @@ export default function CoursesAndTraining() {
         </div>
 
         <div className="flex justify-center pt-20">
-          <Button className="mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-sm text-black cursor-pointer 2xl:text-[20px] hover:bg-black hover:text-white">
+          <Button className="mt-11 w-60 h-10 hover:cursor-pointer 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-sm text-black cursor-pointer 2xl:text-[20px] hover:bg-black hover:text-white">
             Ver todos os Cursos
           </Button>
         </div>

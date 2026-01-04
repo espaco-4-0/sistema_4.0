@@ -21,7 +21,7 @@ export default function WhatIsSpace(){
                                         </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 hover:cursor-default gap-6 mb-24">
 
                                         <Card className="flex flex-col items-center text-center transition-all duration-300">
                                                 <CardTitle className="bg-[#FEF9C2] h-15 w-15 flex justify-center rounded-full items-center">
