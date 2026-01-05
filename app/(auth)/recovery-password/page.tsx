@@ -42,7 +42,7 @@ export default function RecoveryPassword() {
                         </Button>
 
                         <p className="text-sm text-gray-600">
-                            Não recebeu o e-mail? <span className="cursor-pointer underline hover:text-yellow-600/50">Tente novamente</span>
+                            Não recebeu o e-mail? <Button onClick={() => setSent(false)} className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-600/50">Tente novamente</Button>
                         </p>
                     </div>
                 ) : (
