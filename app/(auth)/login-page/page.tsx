@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -53,21 +54,22 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-2">
-                <Checkbox id="remember" />
+                <Checkbox id="remember"
+                className="hover:cursor-pointer" />
                 <Label htmlFor="remember">Lembrar-me</Label>
               </div>
 
-              <button
-                type="button"
+              <Link
+                href="/recovery-password"
                 className="text-muted-foreground hover:text-foreground transition"
               >
                 Esqueci minha senha ?
-              </button>
+              </Link>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-12 text-base font-semibold bg-black text-yellow-400 hover:bg-black/90"
+              className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-400 hover:bg-black/90"
             >
               SIGN IN
             </Button>
@@ -80,12 +82,12 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-12 gap-2">
+            <Button variant="outline" className="h-12 hover:cursor-pointer gap-2">
               <Image src="/google.svg" alt="Google" width={18} height={18} />
               GOOGLE
             </Button>
 
-            <Button variant="outline" className="h-12 gap-2">
+            <Button variant="outline" className="h-12 hover:cursor-pointer gap-2">
               <Image src="/github-mark.svg" alt="GitHub" width={18} height={18} />
               GITHUB
             </Button>
