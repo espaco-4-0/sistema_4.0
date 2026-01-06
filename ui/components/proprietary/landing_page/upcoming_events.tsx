@@ -38,7 +38,7 @@ export function UpcomingEvents() {
   ];
 
   return (
-    <section className="flex flex-col items-center mt-20 mb-20">
+    <section className="flex  flex-col items-center mt-20 mb-20">
       <h2 className="text-4xl font-semibold text-center">
         Próximos <span className="text-[#FFD700]">Eventos</span>
       </h2>

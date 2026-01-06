@@ -4,7 +4,7 @@ import { Welcome } from "@/ui/components/proprietary/landing_page/welcome";
 import WhatIsSpace from "@/ui/components/proprietary/landing_page/what_is";
 import { UpcomingEvents } from "@/ui/components/proprietary/landing_page/upcoming_events";
 import ComeAndDiscover from "@/ui/components/proprietary/landing_page/come_and_discover";
-import CoursesAndTraining from "@/ui/components/proprietary/landing_page/couses_and_training";
+import CoursesAndTraining from "@/ui/components/proprietary/landing_page/courses_and_training";
 import Footer from "@/ui/components/proprietary/landing_page/footer";
 
 export default function Home() {
