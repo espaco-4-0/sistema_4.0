@@ -62,7 +62,7 @@ export default function CoursesAndTraining() {
   ];
 
   return (
-    <section className="bg-white py-28">
+    <section id="courses" className="bg-white py-28">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center">
           <h2 className="text-4xl font-medium">
