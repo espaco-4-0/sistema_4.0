@@ -4,11 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/ui/components/button";
 import LeftSpaceDecoration from "@/ui/components/proprietary/auth_pages/left-space-decoration";
 import { ArrowLeft, Mail } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function RecoveryPassword() {
     const [sent, setSent] = useState(false);
-    const email = "email@email.com";
+    const [email, setEmail] = useState("");
 
     return (
         <div className="lg:grid lg:grid-cols-2">
@@ -17,7 +18,8 @@ export default function RecoveryPassword() {
             <div className="flex flex-col items-center justify-center">
                 <div className="mt-2 mb-8 w-full max-w-md lg:mt-0">
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
-                        <ArrowLeft /> <span>Voltar para login</span>
+                        <ArrowLeft />
+                        <Link href="/login-page">Voltar para login</Link>
                     </Button>
                 </div>
 
@@ -27,22 +29,34 @@ export default function RecoveryPassword() {
                             <Mail className="h-8 w-8" strokeWidth={2} />
                         </div>
 
-                        <h2 className="mb-2 text-[16px]">E-mail Enviado!</h2>
+                        <h2 className="mb-2 text-[16px]">E-mail enviado!</h2>
 
                         <p className="mb-2 text-sm text-gray-600">
-                            Enviamos um link de redefinição de senha para <strong>{email}</strong>
+                            Enviamos um link de redefinição de senha para{" "}
+                            <strong>{email}</strong>
                         </p>
 
                         <p className="mb-8 text-sm text-gray-600">
                             Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
                         </p>
 
-                        <Button className="mb-6 w-full max-w-md rounded-lg cursor-pointer text-[#FDC700]">
-                            VOLTAR PARA LOGIN
-                        </Button>
+                        <Link href="/login-page" className="w-full max-w-md">
+                            <Button className="mb-6 w-full rounded-lg cursor-pointer text-[#FDC700]">
+                                VOLTAR PARA LOGIN
+                            </Button>
+                        </Link>
 
                         <p className="text-sm text-gray-600">
-                            Não recebeu o e-mail? <Button onClick={() => setSent(false)} className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-600/50">Tente novamente</Button>
+                            Não recebeu o e-mail?{" "}
+                            <Button
+                                onClick={() => {
+                                    setSent(false);
+                                    setEmail("");
+                                }}
+                                className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-600/50"
+                            >
+                                Tente novamente
+                            </Button>
                         </p>
                     </div>
                 ) : (
@@ -55,10 +69,20 @@ export default function RecoveryPassword() {
 
                         <div className="w-full text-sm">
                             <span>E-mail</span>
-                            <Input placeholder="Digite seu e-mail" className="h-12 border-gray-400 lg:h-9" />
+                            <Input
+                                type="email"
+                                placeholder="Digite seu e-mail"
+                                className="h-12 border-gray-400 lg:h-9"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
                         </div>
 
-                        <Button onClick={() => setSent(true)} className="w-full h-10 lg:h-9 cursor-pointer text-yellow-400 -mt-2">
+                        <Button
+                            onClick={() => setSent(true)}
+                            disabled={!email}
+                            className="w-full h-10 lg:h-9 cursor-pointer text-yellow-400 -mt-2"
+                        >
                             ENVIAR LINK DE REDEFINIÇÃO
                         </Button>
                     </div>
