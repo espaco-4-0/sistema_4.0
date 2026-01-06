@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle,} from "@/components/ui/card";
 import { Clock4Icon,Box,Cpu,Bot,Zap,Layers,KanbanSquare,} from "lucide-react";
 
-import CourseDialog from "@/components/CouseDialog";
+import CourseDialog from "@/ui/components/proprietary/landing_page/CourseDialog";
 
 export default function CoursesAndTraining() {
   const [open, setOpen] = useState(false);
@@ -102,7 +102,7 @@ export default function CoursesAndTraining() {
               <CardFooter>
                 <button
                   onClick={() => abrirDialog(course.title)}
-                  className="w-full rounded-lg bg-[#F4C430] py-2 text-sm font-semibold text-black hover:bg-[#e0b52a] transition"
+                  className="cursor-pointer w-full rounded-lg bg-[#F4C430] py-2 text-sm font-semibold text-black hover:bg-[#e0b52a] transition"
                 >
                   INSCREVA-SE
                 </button>

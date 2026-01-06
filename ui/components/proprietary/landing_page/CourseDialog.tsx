@@ -20,6 +20,7 @@ type Props = {
 export default function CourseDialog({ open, setOpen, curso }: Props) {
     const [cep, setCep] = useState("");
     const [rua, setRua] = useState("");
+    const [numero, setNumero] = useState("");
     const [bairro, setBairro] = useState("");
     const [cidade, setCidade] = useState("");
     const [estado, setEstado] = useState("");
@@ -53,13 +54,15 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
     }
 
     const inputClass =
-        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+  "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm " +
+  "focus-visible:ring-2 focus-visible:ring-yellow-400 " +
+  "accent-[unset] outline-none";
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-semibold">
+                    <DialogTitle className="text-2xl font-semibold {}">
                         Inscrição no Curso{" "}
                         <span className="text-[#C49D00] font-bold">
                             - {curso}
@@ -68,20 +71,23 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                     <DialogDescription>
                         Preencha os dados abaixo para efetivar sua inscrição.
                     </DialogDescription>
+                    <DialogDescription>
+                         <span>Todos os dados são <strong className="text-red-500/70">obrigatórios</strong>.</span>
+                    </DialogDescription>
                 </DialogHeader>
 
-                <section className="mt-8 space-y-4">
-                    <h3 className="font-semibold text-lg">Dados Pessoais</h3>
-                    <Separator />
+                <section className="mt-4 space-y-4">
+                    <h3 className="mb-2 font-semibold text-lg">Dados Pessoais</h3>
+                    <Separator/>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input placeholder="Nome completo *" />
-                        <Input type="email" placeholder="E-mail *" />
-                        <Input placeholder="Idade *" />
+                        <Input className={inputClass} placeholder="Nome completo" />
+                        <Input className={inputClass} type="email" placeholder="E-mail" />
+                        <Input className={inputClass} placeholder="Idade" />
 
                         <Select>
                             <SelectTrigger>
-                                <SelectValue placeholder="Raça *" />
+                                <SelectValue placeholder="Raça" />
                             </SelectTrigger>
                             <SelectContent>
                                 {[
@@ -102,7 +108,8 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                         <IMaskInput
                             mask="(00) 00000-0000"
                             className={inputClass}
-                            placeholder="WhatsApp com DDD *"
+                            placeholder="WhatsApp com DDD"
+                            aria-invalid="false"
                         />
                     </div>
 
@@ -110,68 +117,70 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                         <Checkbox
                             checked={pcd}
                             onCheckedChange={(v) => setPcd(Boolean(v))}
+                            id="check-def"
+                            className="cursor-pointer rounded-[5px]"
                         />
-                        <Label>Pessoa com deficiência</Label>
+                        <Label htmlFor="check-def">Pessoa com deficiência</Label>
                     </div>
 
-                    {pcd && <Input placeholder="Informe a deficiência *" />}
+                    {pcd && <Input className={inputClass} placeholder="Informe a deficiência" />}
                 </section>
 
                 <section className="mt-8 space-y-4">
-                    <h3 className="font-semibold text-lg">Documentação</h3>
+                    <h3 className="mb-2 font-semibold text-lg">Documentação</h3>
                     <Separator />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <Label>CPF – Frente *</Label>
-                            <Input type="file" accept="image/*,.pdf" />
+                            <Label>CPF – Frente</Label>
+                            <Input className="cursor-pointer align-middle" type="file" accept="image/*,.pdf" />
                         </div>
 
                         <div className="space-y-1">
-                            <Label>CPF – Verso *</Label>
-                            <Input type="file" accept="image/*,.pdf" />
+                            <Label>CPF – Verso</Label>
+                            <Input className="cursor-pointer" type="file" accept="image/*,.pdf" />
                         </div>
 
                         <div className="space-y-1">
-                            <Label>RG – Frente *</Label>
-                            <Input type="file" accept="image/*,.pdf" />
+                            <Label>RG – Frente</Label>
+                            <Input className="cursor-pointer" type="file" accept="image/*,.pdf" />
                         </div>
 
                         <div className="space-y-1">
-                            <Label>RG – Verso *</Label>
-                            <Input type="file" accept="image/*,.pdf" />
+                            <Label>RG – Verso</Label>
+                            <Input className="cursor-pointer" type="file" accept="image/*,.pdf" />
                         </div>
 
                         <IMaskInput
                             mask="000.000.000-00"
                             className={inputClass}
-                            placeholder="CPF *"
+                            placeholder="CPF"
                         />
 
                         <IMaskInput
                             mask="00.000.000-0"
                             className={inputClass}
-                            placeholder="RG *"
+                            placeholder="RG"
                         />
 
                         <Select>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Órgão expedidor *" />
+                            <SelectTrigger className="cursor-pointer">
+                                <SelectValue placeholder="Órgão expedidor" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="ssp-al">SSP / AL</SelectItem>
-                                <SelectItem value="pc-al">Polícia Civil / AL</SelectItem>
-                                <SelectItem value="pm-al">Polícia Militar / AL</SelectItem>
-                                <SelectItem value="detran-al">DETRAN / AL</SelectItem>
+                                <SelectItem className="cursor-pointer" value="ssp-al">SSP / AL</SelectItem>
+                                <SelectItem className="cursor-pointer" value="pc-al">Polícia Civil / AL</SelectItem>
+                                <SelectItem className="cursor-pointer" value="pm-al">Polícia Militar / AL</SelectItem>
+                                <SelectItem className="cursor-pointer" value="detran-al">DETRAN / AL</SelectItem>
                             </SelectContent>
                         </Select>
 
-                        <Input type="date" />
+                        <Input className={inputClass} type="date" />
                     </div>
                 </section>
 
                 <section className="mt-8 space-y-4">
-                    <h3 className="font-semibold text-lg">Endereço</h3>
+                    <h3 className="mb-2 font-semibold text-lg">Endereço</h3>
                     <Separator />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -181,40 +190,52 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                             onAccept={(v) => setCep(v)}
                             onBlur={(e) => buscarCEP(e.target.value)}
                             className={inputClass}
-                            placeholder="CEP *"
+                            placeholder="CEP"
+                        />
+                        
+                        <Input
+                            value={numero}
+                            onChange={(e) => setNumero(e.target.value)}
+                            placeholder="Número"
+                            className={inputClass}
                         />
 
                         <Input
                             value={rua}
                             onChange={(e) => setRua(e.target.value)}
-                            placeholder="Rua *"
+                            placeholder="Rua"
+                            className={inputClass}
                         />
+
                         <Input
                             value={bairro}
                             onChange={(e) => setBairro(e.target.value)}
-                            placeholder="Bairro *"
+                            placeholder="Bairro"
+                            className={inputClass}
                         />
                         <Input
                             value={cidade}
                             onChange={(e) => setCidade(e.target.value)}
-                            placeholder="Cidade *"
+                            placeholder="Cidade"
+                            className={inputClass}
                         />
                         <Input
                             value={estado}
                             onChange={(e) => setEstado(e.target.value)}
-                            placeholder="Estado *"
+                            placeholder="Estado"
+                            className={inputClass}
                         />
                     </div>
                 </section>
 
                 <section className="mt-8 space-y-4">
-                    <h3 className="font-semibold text-lg">Formação e Vínculo</h3>
+                    <h3 className="mb-2 font-semibold text-lg">Formação e Vínculo</h3>
                     <Separator />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Escolaridade *" />
+                            <SelectTrigger className="cursor-pointer">
+                                <SelectValue placeholder="Escolaridade" />
                             </SelectTrigger>
                             <SelectContent>
                                 {[
@@ -229,6 +250,7 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                                         key={item.value}
                                         value={item.value}
                                         onClick={() => setEscolaridade(item.value)}
+                                        className="cursor-pointer"
                                     >
                                         {item.label}
                                     </SelectItem>
@@ -237,8 +259,8 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                         </Select>
 
                         <Select>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Vínculo com o IFAL *" />
+                            <SelectTrigger className="cursor-pointer">
+                                <SelectValue placeholder="Vínculo com o IFAL" />
                             </SelectTrigger>
                             <SelectContent>
                                 {[
@@ -250,6 +272,7 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
                                         key={item.value}
                                         value={item.value}
                                         onClick={() => setVinculo(item.value)}
+                                        className="cursor-pointer"
                                     >
                                         {item.label}
                                     </SelectItem>
@@ -261,12 +284,12 @@ export default function CourseDialog({ open, setOpen, curso }: Props) {
 
 
                 <div className="flex justify-end gap-3 mt-10">
-                    <Button variant="outline" onClick={() => setOpen(false)}>
+                    <Button className="cursor-pointer" variant="outline" onClick={() => setOpen(false)}>
                         Cancelar
                     </Button>
                     <Button
                         onClick={finalizarInscricao}
-                        className="bg-[#FDC700] text-black hover:bg-[#FDC700]/90"
+                        className="bg-[#FDC700] text-black hover:bg-[#FDC700]/90 cursor-pointer"
                     >
                         Finalizar Inscrição
                     </Button>
