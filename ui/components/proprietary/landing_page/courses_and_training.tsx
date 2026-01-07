@@ -102,7 +102,7 @@ export default function CoursesAndTraining() {
               <CardFooter>
                 <button
                   onClick={() => abrirDialog(course.title)}
-                  className="cursor-pointer w-full rounded-lg bg-[#F4C430] py-2 text-sm font-semibold text-black hover:bg-[#e0b52a] transition"
+                  className="cursor-pointer w-full rounded-lg bg-[#F4C430] py-2 text-sm font-semibold text-black hover:bg-[#e0b52a] active:bg-[#cda627] transition duration-200 ease-in-out"
                 >
                   INSCREVA-SE
                 </button>
