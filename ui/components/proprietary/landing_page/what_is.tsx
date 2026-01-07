@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function WhatIsSpace(){
         return(
-                <section className="bg-[#F9FAFB] py-28">
+                <section id="what-is" className="bg-[#F9FAFB] py-28">
                         <div className="max-w-7xl mx-auto px-6">
 
                                 <div className="justify-center items-center text-center flex flex-col mb-16">

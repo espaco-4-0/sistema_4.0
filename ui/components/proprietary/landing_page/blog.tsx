@@ -58,7 +58,7 @@ export default function Blog() {
   }, []);
 
   return (
-    <section className="bg-white py-28">
+    <section id="blog" className="bg-white py-28">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-center">
           <h2 className="font-medium text-4xl text-center">

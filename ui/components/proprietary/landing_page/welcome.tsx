@@ -4,7 +4,9 @@ import { Button } from "../../button";
 export function Welcome() {
   return (
     <section
+      id="welcome"
       className="
+        mt-20 lg:mt-18 2xl:mt-22
         flex flex-col-reverse
         items-center justify-around
         gap-12
