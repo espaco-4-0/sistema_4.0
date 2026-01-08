@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/ui/components/button";
+import { Button } from "@/components/ui/button";
 import LeftSpaceDecoration from "@/ui/components/proprietary/auth_pages/left-space-decoration";
 import { ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";

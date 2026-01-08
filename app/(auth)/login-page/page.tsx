@@ -13,7 +13,6 @@ export default function LoginPage() {
   return (
     <div className="lg:grid lg:grid-cols-2 min-h-screen">
       <LeftSpaceDecoration />
-
       <div className="flex items-center justify-center px-6">
         <div className="w-full max-w-md space-y-8">
           <div className="flex flex-col items-center gap-4 text-center">
@@ -56,7 +55,7 @@ export default function LoginPage() {
               <div className="flex items-center space-x-2">
                 <Checkbox id="remember"
                 className="hover:cursor-pointer" />
-                <Label htmlFor="remember">Lembrar-me</Label>
+                <Label htmlFor="remember" className="hover:cursor-pointer hover:text-gray-600">Lembrar-me</Label>
               </div>
 
               <Link
