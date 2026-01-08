@@ -11,11 +11,11 @@ export default function Footer() {
           <div className="flex items-start gap-6">
             <div className="flex items-center relative w-24 h-24">
               <Image
-			  	  src="/logosuperior.svg"
+			  	        src="/logosuperior.svg"
                   fill
                   alt="Instituto Federal de Alagoas"
                   className="object-contain"
-			  	/>
+			  	    />
             </div>
 
             <div className="pt-1">
@@ -60,7 +60,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* RECURSOS */}
         <div>
           <h4 className="text-[#FACC15] font-semibold mb-8 text-lg">
             Recursos

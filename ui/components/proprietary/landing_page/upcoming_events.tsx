@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "../../button";
+import { Button } from "@/components/ui/button";
 
 export function UpcomingEvents() {
   const dados = [

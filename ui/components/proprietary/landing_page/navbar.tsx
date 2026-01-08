@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@radix-ui/react-navigation-menu";
+import {NavigationMenu,NavigationMenuItem,NavigationMenuLink,NavigationMenuList,} from "@radix-ui/react-navigation-menu";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";

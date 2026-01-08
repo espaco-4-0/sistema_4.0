@@ -1,4 +1,4 @@
-import { Button } from "../../button";
+import { Button } from "@/components/ui/button";
 
 export default function ComeAndDiscover() {
     return (
@@ -18,9 +18,7 @@ export default function ComeAndDiscover() {
 
                 <Button
                     variant="outline"
-                    className="w-50 h-14 rounded-xl border-2 border-black text-xl font-normal cursor-pointer hover:bg-black
-                    hover:text-white sm:border-3 2xl:w-60 2xl:h-16 2xl:rounded-3xl 2xl:text-2xl"
-                >
+                    className="w-50 h-14 rounded-xl border-2 border-black text-xl font-normal cursor-pointer hover:bg-black hover:text-white sm:border-3 2xl:w-60 2xl:h-16 2xl:rounded-3xl 2xl:text-2xl">
                     Entre em Contato
                 </Button>
             </div>
