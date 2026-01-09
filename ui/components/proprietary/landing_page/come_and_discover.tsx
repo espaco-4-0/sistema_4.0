@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function ComeAndDiscover() {
     return (
@@ -12,9 +13,9 @@ export default function ComeAndDiscover() {
             </p>
 
             <div className="flex flex-col gap-7 sm:flex-row sm:gap-29">
-                <Button className="w-50 h-14 rounded-xl text-xl font-normal cursor-pointer 2xl:w-60 2xl:h-16 2xl:rounded-3xl 2xl:text-2xl">
+                <Link href="/calendar" className="w-50 bg-black text-white items-center justify-center flex h-14 rounded-xl text-xl font-normal cursor-pointer 2xl:w-60 2xl:h-16 2xl:rounded-3xl 2xl:text-2xl">
                     Agendar Visita
-                </Button>
+                </Link>
 
                 <Button
                     variant="outline"

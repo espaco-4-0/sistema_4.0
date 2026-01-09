@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function UpcomingEvents() {
   const dados = [
@@ -51,37 +52,9 @@ export function UpcomingEvents() {
         {dados.map((dado) => (
           <div key={dado.id}>
             <Card
-              className="
-                flex flex-col sm:flex-row
-                w-full
-                sm:w-150 sm:max-w-215
-                lg:w-160
-                2xl:w-215
-                mx-auto
-                gap-4 sm:gap-0
-                items-start sm:items-center
-                p-4 sm:p-8
-                transition-all duration-200 ease-out
-                will-change-transform
-                hover:scale-[1.01]
-                hover:shadow-xl
-                hover:border-yellow-500
-              "
-            >
+              className=" flex flex-col sm:flex-row w-full sm:w-150 sm:max-w-215 lg:w-160 2xl:w-215 mx-auto gap-4 sm:gap-0 items-start sm:items-center p-4 sm:p-8 transition-all duration-200 ease-out will-change-transform hover:scale-[1.01] hover:shadow-xl hover:border-yellow-500 " >
               <CardContent
-                className="
-                  flex items-center justify-center
-                  w-65 h-20
-                  sm:w-28 sm:h-38
-                  shrink-0
-                  gap-2 sm:gap-0
-                  p-0
-                  rounded-2xl
-                  bg-[#FFD700]
-                  sm:flex-col
-                  sm:mr-6 sm:mb-0
-                "
-              >
+                className=" flex items-center justify-center w-65 h-2 sm:w-28 sm:h-38 shrink-0 gap-2 sm:gap-0  p-0 rounded-2xl bg-[#FFD700] sm:flex-col sm:mr-6 sm:mb-0 ">
                 <p className="2xl:text-4xl leading-none sm:text-[42px]">
                   {dado.day}
                 </p>
@@ -92,39 +65,19 @@ export function UpcomingEvents() {
 
               <div className="flex flex-col flex-1 w-full gap-2.5">
                 <CardHeader
-                  className="
-                    flex flex-col
-                    w-full
-                    gap-2.5
-                    p-0
-                    sm:max-w-158
-                  "
-                >
+                  className=" flex flex-col w-full gap-2.5 p-0 sm:max-w-158">
                   <CardTitle className="text-xl 2xl:text-2xl">
                     {dado.title}
                   </CardTitle>
 
                   <CardDescription
-                    className="
-                      text-base
-                      text-gray-600
-                      lg:text-md
-                      2xl:text-xl
-                      2xl:leading-8
-                    "
-                  >
+                    className=" text-base text-gray-600 lg:text-md 2xl:text-xl 2xl:leading-8" >
                     {dado.descriptions}
                   </CardDescription>
                 </CardHeader>
 
                 <CardFooter
-                  className="
-                    p-0
-                    text-base
-                    text-gray-600
-                    2xl:text-xl
-                  "
-                >
+                  className="p-0 text-base text-gray-600 2xl:text-xl">
                   {dado.time}h • Espaço 4.0
                 </CardFooter>
               </div>
@@ -133,23 +86,13 @@ export function UpcomingEvents() {
         ))}
       </div>
 
-      <Button
-        className="
-          mt-11
-          w-60 h-10
-          2xl:w-80 2xl:h-12
-          rounded-xl
-          border-2 border-black
-          bg-white
-          text-sm text-black
-          cursor-pointer
-          2xl:text-[20px]
-          hover:bg-black
-          hover:text-white
+      <Link
+        href="/calendar"
+        className="flex justify-center items-center mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-sm text-black cursor-pointer 2xl:text-[20px] hover:bg-black hover:text-white hover:cursor-pointer
         "
       >
         VER TODOS OS EVENTOS
-      </Button>
+      </Link>
     </section>
   )
 }
