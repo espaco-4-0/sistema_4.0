@@ -153,7 +153,10 @@ export default function AllCalendar() {
                             onNavigate={(date) => setViewDate(date)}
                             selectable
                             onSelectSlot={handleSelectSlot}
-                            onSelectEvent={(ev) => { setSelectedEventId(ev.id); setStep('detail'); }}
+                            onSelectEvent={(ev) => {
+                                setSelectedDate(ev.start);
+                                setStep('list');
+                            }}
                             style={{ height: 480 }}
                             culture='pt-BR'
                             views={['month']}
@@ -193,6 +196,9 @@ export default function AllCalendar() {
                                             </div>
                                         </div>
                                     ))}
+                                    {events.filter(e => isSameDay(e.start, selectedDate)).length === 0 && (
+                                        <p className="text-xs text-gray-400 text-center py-4">Nenhum evento neste dia.</p>
+                                    )}
                                 </div>
                                 <button onClick={() => setStep('idle')} className="mt-auto w-full py-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-gray-600 transition-colors">Fechar Painel</button>
                             </PanelWrapper>
