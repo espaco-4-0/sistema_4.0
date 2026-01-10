@@ -18,8 +18,7 @@ export default function RecoveryPassword() {
             <div className="flex flex-col items-center justify-center">
                 <div className="mt-2 mb-8 w-full max-w-md lg:mt-0">
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
-                        <ArrowLeft />
-                        <Link href="/login-page">Voltar para login</Link>
+                        <Link href="/login-page" className="flex gap-2 text-center items-center"><ArrowLeft />Voltar para login</Link>
                     </Button>
                 </div>
 
