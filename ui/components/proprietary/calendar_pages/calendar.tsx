@@ -5,7 +5,7 @@ import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import { format, isSameDay, parse, startOfWeek, getDay, setHours, setMinutes } from 'date-fns';
 import { ptBR } from 'date-fns/locale/pt-BR';
 import { useForm, Controller } from 'react-hook-form';
-import { Calendar as CalendarIcon, MapPin, Clock, CheckCircle2, Loader2, ChevronRight, User, School, ArrowLeft, Plus, Users, Phone } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Clock, CheckCircle2, Loader2, ChevronRight, User, School, ArrowLeft, Plus, Users, Phone, Home } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Link from 'next/link';
@@ -133,7 +133,7 @@ export default function AllCalendar() {
         <section className="bg-gray-50 min-h-screen py-8 px-4 md:px-20 font-sans">
             <div className="max-w-7xl mx-auto">
                 <div className='text-yellow-600 p-2 pb-4 flex items-center gap-1 text-xs font-medium'>
-                    <Link href="/" className="text-gray-400 hover:underline">Home</Link>
+                    <Link href="/" className="text-gray-400 hover:underline flex gap-1"><Home className='h-3 w-3'/>Home</Link>
                     <ChevronRight size={12} className="text-gray-400"/>
                     <span>Calendário Espaço 4.0</span>
                 </div>

@@ -70,7 +70,7 @@ export default function Blog() {
                 <div className="flex justify-center">
                     <h2 className="font-medium text-4xl text-center">
                         Novidades do <span className="text-[#C49D00] font-bold">
-                            {" "}Espaço 4.0!
+                            {" "}Espaço 4.0 :
                         </span>
                     </h2>
                 </div>

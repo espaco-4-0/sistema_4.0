@@ -1,23 +1,35 @@
-import {Home,Users,BookOpen,Box, Lightbulb,Calendar, Headphones, Mail, MapPin,} from "lucide-react";
+import {
+  Home,
+  Users,
+  BookOpen,
+  Lightbulb,
+  Calendar,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
+  const mapLink = "https://www.google.com/maps/dir//Instituto+Federal+de+Alagoas+-+Campus+Arapiraca,+AL-110,+S%2Fn+-+Sen.+Arnon+de+Melo,+Arapiraca+-+AL,+57312-000";
+
+  const whatsappLink = "https://wa.me/558221266200";
+
   return (
     <footer id="footer" className="bg-black text-white px-6 py-20">
       <div className="max-w-7xl mx-auto grid grid-cols-1 gap-16 lg:grid-cols-4">
-
         <div className="space-y-10">
           <div className="flex items-start gap-6">
             <div className="flex items-center relative w-24 h-24">
               <Image
-			  	        src="/logosuperior.svg"
-                  fill
-                  alt="Instituto Federal de Alagoas"
-                  className="object-contain"
-			  	    />
+                src="/logosuperior.svg"
+                fill
+                alt="Instituto Federal de Alagoas"
+                className="object-contain"
+              />
             </div>
-
             <div className="pt-1">
               <h3 className="text-xl font-semibold text-[#FACC15] leading-tight">
                 Espaço 4.0
@@ -38,7 +50,6 @@ export default function Footer() {
                   className="object-contain"
                 />
               </div>
-
               <div className="text-sm leading-tight">
                 <p className="font-semibold text-[#FACC15]">
                   INSTITUTO FEDERAL
@@ -49,14 +60,30 @@ export default function Footer() {
             </div>
           </div>
         </div>
+
         <div>
           <h4 className="text-[#FACC15] font-semibold mb-8 text-lg">
             Navegação
           </h4>
           <ul className="space-y-6">
-            <FooterItem icon={Home} title="Sobre" desc="Conheça nossa história" />
-            <FooterItem icon={Users} title="Equipe" desc="Nossos colaboradores" />
-            <FooterItem icon={BookOpen} title="Cursos" desc="Capacitações oferecidas" />
+            <FooterItem
+              icon={Home}
+              title="Sobre"
+              desc="Conheça nossa história"
+              href="/#what-is"
+            />
+            <FooterItem
+              icon={Users}
+              title="Equipe"
+              desc="Nossos colaboradores"
+              href="/#blog"
+            />
+            <FooterItem
+              icon={BookOpen}
+              title="Cursos"
+              desc="Capacitações oferecidas"
+              href="/#courses"
+            />
           </ul>
         </div>
 
@@ -65,9 +92,18 @@ export default function Footer() {
             Recursos
           </h4>
           <ul className="space-y-6">
-            <FooterItem icon={Box} title="Reserva de Equipamentos" desc="Agende recursos" />
-            <FooterItem icon={Lightbulb} title="Projetos" desc="Desenvolva suas ideias" />
-            <FooterItem icon={Calendar} title="Eventos" desc="Participe de atividades" />
+            <FooterItem
+              icon={Lightbulb}
+              title="Projetos"
+              desc="Conheça novidades"
+              href="/#blog"
+            />
+            <FooterItem
+              icon={Calendar}
+              title="Eventos"
+              desc="Participe de atividades"
+              href="/calendar"
+            />
           </ul>
         </div>
 
@@ -76,9 +112,28 @@ export default function Footer() {
             Suporte
           </h4>
           <ul className="space-y-6">
-            <FooterItem icon={Headphones} title="Central de Ajuda" desc="Tire suas dúvidas" />
-            <FooterItem icon={Mail} title="Fale Conosco" desc="espaco4.0@ifal.edu.br" />
-            <FooterItem icon={MapPin} title="Como Chegar" desc="IFAL Campus Arapiraca" />
+            <FooterItem
+              icon={Mail}
+              title="Email"
+              desc="espaco4.0@ifal.edu.br"
+              href="mailto:espaco4.0@ifal.edu.br"
+            />
+
+            <FooterItem
+              icon={Phone}
+              title="WhatsApp"
+              desc="(82) 2126-6200"
+              href={whatsappLink}
+              external
+            />
+
+            <FooterItem
+              icon={MapPin}
+              title="Como Chegar"
+              desc="IFAL Campus Arapiraca"
+              href={mapLink}
+              external
+            />
           </ul>
         </div>
       </div>
@@ -93,22 +148,32 @@ type FooterItemProps = Readonly<{
   icon: LucideIcon;
   title: string;
   desc: string;
+  href: string;
+  external?: boolean;
 }>;
 
-function FooterItem({ icon: Icon, title, desc }: FooterItemProps) {
+function FooterItem({ icon: Icon, title, desc, href, external = false }: FooterItemProps) {
+  const target = external ? "_blank" : "_self";
+
   return (
-    <li className="flex gap-5 items-start">
-      <div className="bg-[#FACC15] text-black p-4 rounded-2xl shrink-0">
-        <Icon size={20} />
-      </div>
-      <div>
-        <p className="font-medium text-base leading-tight">
-          {title}
-        </p>
-        <p className="text-sm text-gray-400">
-          {desc}
-        </p>
-      </div>
+    <li>
+      <Link
+        href={href}
+        target={target}
+        className="flex gap-5 items-start hover:opacity-80 transition-opacity group"
+      >
+        <div className="bg-[#FACC15] text-black p-4 rounded-2xl shrink-0 group-hover:scale-105 transition-transform">
+          <Icon size={20} />
+        </div>
+        <div>
+          <p className="font-medium text-base leading-tight">
+            {title}
+          </p>
+          <p className="text-sm text-gray-400 mt-1 max-w-[200px] break-words">
+            {desc}
+          </p>
+        </div>
+      </Link>
     </li>
   );
 }
