@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LeftSpaceDecoration from "@/ui/components/proprietary/auth_pages/left-space-decoration";
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, Mail, Home } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -12,11 +12,19 @@ export default function RecoveryPassword() {
     const [email, setEmail] = useState("");
 
     return (
-        <div className="lg:grid lg:grid-cols-2">
+        <div className="lg:grid lg:grid-cols-2 min-h-screen">
             <LeftSpaceDecoration />
 
-            <div className="flex flex-col items-center justify-center">
-                <div className="mt-2 mb-8 w-full max-w-md lg:mt-0">
+            <div className="relative flex flex-col items-center justify-center px-6">
+                <Link
+                    href="/"
+                    className="absolute top-8 left-6 flex items-center gap-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 hover:cursor-pointer"
+                >
+                    <Home className="h-4 w-4" />
+                    Home Page
+                </Link>
+
+                <div className="mt-12 mb-8 w-full max-w-md lg:mt-0">
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
                         <Link href="/login-page" className="flex gap-2 text-center items-center"><ArrowLeft />Voltar para login</Link>
                     </Button>

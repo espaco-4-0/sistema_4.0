@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function UpcomingEvents() {
@@ -88,10 +87,9 @@ export function UpcomingEvents() {
 
       <Link
         href="/calendar"
-        className="flex justify-center items-center mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-sm text-black cursor-pointer 2xl:text-[20px] hover:bg-black hover:text-white hover:cursor-pointer
-        "
+        className="flex justify-center items-center mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-bold text-black cursor-pointer 2xl:text-[16px] hover:bg-black hover:text-white hover:cursor-pointer"
       >
-        VER TODOS OS EVENTOS
+        Ver todos os Eventos
       </Link>
     </section>
   )
