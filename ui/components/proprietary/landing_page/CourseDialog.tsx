@@ -3,18 +3,25 @@
 import { useSyncExternalStore } from "react";
 import { useForm, Controller, FieldError, useWatch } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { courseRegisterSchema,type CourseRegisterType,raceOptions,consignorOrganOptions,educationOptions,affiliationIfalOptions} from "@/ui/forms/schemas/course-registration-schema";
+import {
+    courseRegisterSchema,
+    type CourseRegisterType,
+    raceOptions,
+    consignorOrganOptions,
+    educationOptions,
+    affiliationIfalOptions,
+} from "@/ui/forms/schemas/course-registration-schema";
 
 function useIsMounted() {
     return useSyncExternalStore(
@@ -45,17 +52,15 @@ const FormField = ({ label, error, children }: FormFieldProps) => (
     <div className="space-y-1">
         <Label className="text-sm font-medium">{label}</Label>
         {children}
-        {error?.message && (
-            <p className="text-xs text-red-500 font-medium">{error.message}</p>
-        )}
+        {error?.message && <p className="text-xs font-medium text-red-500">{error.message}</p>}
     </div>
 );
 
 const FormSection = ({ title, children }: FormSectionProps) => (
     <section className="mt-8 space-y-4">
-        <h3 className="font-semibold text-lg text-foreground">{title}</h3>
+        <h3 className="text-foreground text-lg font-semibold">{title}</h3>
         <Separator />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>
     </section>
 );
 
@@ -73,8 +78,8 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
             road: "",
             city: "",
             neighborhood: "",
-            state: ""
-        }
+            state: "",
+        },
     });
 
     const {
@@ -82,12 +87,12 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         control,
         handleSubmit,
         setValue,
-        formState: { errors, isSubmitting }
+        formState: { errors, isSubmitting },
     } = form;
 
     const deficiencyValue = useWatch({
         control,
-        name: "deficiency"
+        name: "deficiency",
     });
 
     const pcd = deficiencyValue !== "Nenhuma";
@@ -110,17 +115,15 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         }
     };
 
-    const inputClass =
-        "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none";
+    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none";
     const maskInputClass =
-        inputClass +
-        " flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+        inputClass + " flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
     if (!isMounted) return null;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] max-w-7xl overflow-y-auto">
                 <form
                     onSubmit={handleSubmit((data) => {
                         console.log("Submit Data:", data);
@@ -130,20 +133,17 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                 >
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-semibold">
-                            Inscrição:{" "}
-                            <span className="text-[#C49D00]">{curso}</span>
+                            Inscrição: <span className="text-[#C49D00]">{curso}</span>
                         </DialogTitle>
                         <DialogDescription asChild>
                             <div className="space-y-2">
                                 <p className="text-sm font-medium">
                                     Preencha os dados abaixo para efetivar sua inscrição.
                                 </p>
-                                <p className="text-yellow-600 text-sm font-medium">
-                                    Todos os campos são obrigatórios.
-                                </p>
-                                <Alert className="bg-yellow-50 border-yellow-200">
+                                <p className="text-sm font-medium text-yellow-600">Todos os campos são obrigatórios.</p>
+                                <Alert className="border-yellow-200 bg-yellow-50">
                                     <AlertCircle className="h-4 w-4 text-yellow-600" />
-                                    <AlertDescription className="text-yellow-800 font-semibold">
+                                    <AlertDescription className="font-semibold text-yellow-800">
                                         A inscrição não garante sua entrada no curso.
                                     </AlertDescription>
                                 </Alert>
@@ -153,11 +153,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
 
                     <FormSection title="Dados Pessoais">
                         <FormField label="Nome Completo" error={errors.name}>
-                            <Input
-                                {...register("name")}
-                                className={inputClass}
-                                placeholder="Ex: João Silva Santos"
-                            />
+                            <Input {...register("name")} className={inputClass} placeholder="Ex: João Silva Santos" />
                         </FormField>
 
                         <FormField label="E-mail" error={errors.email}>
@@ -210,14 +206,8 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                         </SelectTrigger>
                                         <SelectContent>
                                             {raceOptions.map((r) => (
-                                                <SelectItem
-                                                    key={r}
-                                                    value={r}
-                                                    className="cursor-pointer"
-                                                >
-                                                    {(r.charAt(0).toUpperCase() +
-                                                        r.slice(1)
-                                                    ).replace("Nao", "Não")}
+                                                <SelectItem key={r} value={r} className="cursor-pointer">
+                                                    {(r.charAt(0).toUpperCase() + r.slice(1)).replace("Nao", "Não")}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -229,15 +219,11 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         <div className="flex items-end pb-2">
                             <div className="flex items-center gap-2">
                                 <Checkbox
-                                    className="rounded-sm cursor-pointer"
+                                    className="cursor-pointer rounded-sm"
                                     id="pcd"
                                     checked={pcd}
                                     onCheckedChange={(v) =>
-                                        setValue(
-                                            "deficiency",
-                                            v ? "" : "Nenhuma",
-                                            { shouldValidate: true }
-                                        )
+                                        setValue("deficiency", v ? "" : "Nenhuma", { shouldValidate: true })
                                     }
                                 />
                                 <Label htmlFor="pcd" className="cursor-pointer">
@@ -258,12 +244,14 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                     </FormSection>
 
                     <FormSection title="Documentação">
-                        {([
-                            { id: "cpfFront", label: "CPF – Frente" },
-                            { id: "cpfBack", label: "CPF – Verso" },
-                            { id: "rgFront", label: "RG – Frente" },
-                            { id: "rgBack", label: "RG – Verso" }
-                        ] as const).map((fileField) => (
+                        {(
+                            [
+                                { id: "cpfFront", label: "CPF – Frente" },
+                                { id: "cpfBack", label: "CPF – Verso" },
+                                { id: "rgFront", label: "RG – Frente" },
+                                { id: "rgBack", label: "RG – Verso" },
+                            ] as const
+                        ).map((fileField) => (
                             <FormField
                                 key={fileField.id}
                                 label={fileField.label}
@@ -272,7 +260,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 <Input
                                     type="file"
                                     accept="image/*,.pdf"
-                                    className={`${inputClass} cursor-pointer file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-yellow-700 hover:file:text-yellow-800 text-start`}
+                                    className={`${inputClass} cursor-pointer text-start file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-yellow-700 hover:file:text-yellow-800`}
                                     {...register(fileField.id)}
                                 />
                             </FormField>
@@ -296,11 +284,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         </FormField>
 
                         <FormField label="RG (Número)" error={errors.rg}>
-                            <Input
-                                {...register("rg")}
-                                className={inputClass}
-                                placeholder="Ex: 1234567-8"
-                            />
+                            <Input {...register("rg")} className={inputClass} placeholder="Ex: 1234567-8" />
                         </FormField>
 
                         <FormField label="Órgão Expedidor" error={errors.consignorOrgan}>
@@ -318,11 +302,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                         </SelectTrigger>
                                         <SelectContent>
                                             {consignorOrganOptions.map((o) => (
-                                                <SelectItem
-                                                    key={o}
-                                                    value={o}
-                                                    className="cursor-pointer"
-                                                >
+                                                <SelectItem key={o} value={o} className="cursor-pointer">
                                                     {o}
                                                 </SelectItem>
                                             ))}
@@ -373,36 +353,19 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         </FormField>
 
                         <FormField label="Rua" error={errors.road}>
-                            <Input
-                                {...register("road")}
-                                className={inputClass}
-                                placeholder="Ex: Av. Fernandes Lima"
-                            />
+                            <Input {...register("road")} className={inputClass} placeholder="Ex: Av. Fernandes Lima" />
                         </FormField>
 
                         <FormField label="Bairro" error={errors.neighborhood}>
-                            <Input
-                                {...register("neighborhood")}
-                                className={inputClass}
-                                placeholder="Ex: Farol"
-                            />
+                            <Input {...register("neighborhood")} className={inputClass} placeholder="Ex: Farol" />
                         </FormField>
 
                         <FormField label="Cidade" error={errors.city}>
-                            <Input
-                                {...register("city")}
-                                className={inputClass}
-                                placeholder="Ex: Maceió"
-                            />
+                            <Input {...register("city")} className={inputClass} placeholder="Ex: Maceió" />
                         </FormField>
 
                         <FormField label="Estado (UF)" error={errors.state}>
-                            <Input
-                                {...register("state")}
-                                className={inputClass}
-                                placeholder="Ex: AL"
-                                maxLength={2}
-                            />
+                            <Input {...register("state")} className={inputClass} placeholder="Ex: AL" maxLength={2} />
                         </FormField>
                     </FormSection>
 
@@ -458,7 +421,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         </FormField>
                     </FormSection>
 
-                    <div className="flex justify-end gap-3 mt-10">
+                    <div className="mt-10 flex justify-end gap-3">
                         <Button
                             type="button"
                             className="cursor-pointer"
@@ -470,7 +433,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="cursor-pointer bg-[#FDC700] text-black hover:bg-[#FDC700]/90 px-8 font-bold"
+                            className="cursor-pointer bg-[#FDC700] px-8 font-bold text-black hover:bg-[#FDC700]/90"
                         >
                             {isSubmitting ? "Enviando..." : "Finalizar Inscrição"}
                         </Button>
