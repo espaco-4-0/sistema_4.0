@@ -50,37 +50,50 @@ export function UpcomingEvents() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {dados.map((dado) => (
           <div key={dado.id}>
-            <Card
-              className=" flex flex-col sm:flex-row w-full sm:w-150 sm:max-w-215 lg:w-160 2xl:w-215 mx-auto gap-4 sm:gap-0 items-start sm:items-center p-4 sm:p-8 transition-all duration-200 ease-out will-change-transform hover:scale-[1.01] hover:shadow-xl hover:border-yellow-500 " >
-              <CardContent
-                className=" flex items-center justify-center w-65 h-2 sm:w-28 sm:h-38 shrink-0 gap-2 sm:gap-0  p-0 rounded-2xl bg-[#FFD700] sm:flex-col sm:mr-6 sm:mb-0 ">
-                <p className="2xl:text-4xl leading-none sm:text-[42px]">
-                  {dado.day}
-                </p>
-                <p className="mt-1 2xl:text-xl uppercase sm:mt-2">
-                  {dado.mounth}
-                </p>
-              </CardContent>
+            {/* ALTERAÇÃO AQUI:
+              Envolvemos o Card com o Link passando os parâmetros na URL
+            */}
+            <Link
+              href={`/calendar?day=${dado.day}&month=${dado.mounth}`}
+              className="block w-full h-full"
+            >
+              <Card
+                className="flex flex-col sm:flex-row w-full sm:w-150 sm:max-w-215 lg:w-160 2xl:w-215 mx-auto gap-4 sm:gap-0 items-start sm:items-center p-4 sm:p-8 transition-all duration-200 ease-out will-change-transform hover:scale-[1.01] hover:shadow-xl hover:border-yellow-500 cursor-pointer"
+              >
+                <CardContent
+                  className="flex items-center justify-center w-65 h-2 sm:w-28 sm:h-38 shrink-0 gap-2 sm:gap-0 p-0 rounded-2xl bg-[#FFD700] sm:flex-col sm:mr-6 sm:mb-0"
+                >
+                  <p className="2xl:text-4xl leading-none sm:text-[42px]">
+                    {dado.day}
+                  </p>
+                  <p className="mt-1 2xl:text-xl uppercase sm:mt-2">
+                    {dado.mounth}
+                  </p>
+                </CardContent>
 
-              <div className="flex flex-col flex-1 w-full gap-2.5">
-                <CardHeader
-                  className=" flex flex-col w-full gap-2.5 p-0 sm:max-w-158">
-                  <CardTitle className="text-xl 2xl:text-2xl">
-                    {dado.title}
-                  </CardTitle>
+                <div className="flex flex-col flex-1 w-full gap-2.5">
+                  <CardHeader
+                    className="flex flex-col w-full gap-2.5 p-0 sm:max-w-158"
+                  >
+                    <CardTitle className="text-xl 2xl:text-2xl">
+                      {dado.title}
+                    </CardTitle>
 
-                  <CardDescription
-                    className=" text-base text-gray-600 lg:text-md 2xl:text-xl 2xl:leading-8" >
-                    {dado.descriptions}
-                  </CardDescription>
-                </CardHeader>
+                    <CardDescription
+                      className="text-base text-gray-600 lg:text-md 2xl:text-xl 2xl:leading-8"
+                    >
+                      {dado.descriptions}
+                    </CardDescription>
+                  </CardHeader>
 
-                <CardFooter
-                  className="p-0 text-base text-gray-600 2xl:text-xl">
-                  {dado.time}h • Espaço 4.0
-                </CardFooter>
-              </div>
-            </Card>
+                  <CardFooter
+                    className="p-0 text-base text-gray-600 2xl:text-xl"
+                  >
+                    {dado.time}h • Espaço 4.0
+                  </CardFooter>
+                </div>
+              </Card>
+            </Link>
           </div>
         ))}
       </div>

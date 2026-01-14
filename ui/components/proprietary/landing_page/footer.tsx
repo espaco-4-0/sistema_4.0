@@ -13,9 +13,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
-  const mapLink = "https://www.google.com/maps/dir//Instituto+Federal+de+Alagoas+-+Campus+Arapiraca,+AL-110,+S%2Fn+-+Sen.+Arnon+de+Melo,+Arapiraca+-+AL,+57312-000";
+  const mapLink = "https://www.google.com/maps/search/?api=1&query=IFAL+Campus+Arapiraca";
 
-  const whatsappLink = "https://wa.me/558221266200";
+  const whatsappLink = "https://wa.me/558597947611?text=Ol%C3%A1%2C%20professora%20Renata.%20Vim%20pelo%20site%20do%20espa%C3%A7o+4.0!!";
 
   return (
     <footer id="footer" className="bg-black text-white px-6 py-20">
@@ -122,7 +122,7 @@ export default function Footer() {
             <FooterItem
               icon={Phone}
               title="WhatsApp"
-              desc="(82) 2126-6200"
+              desc="(85) 9794-7611"
               href={whatsappLink}
               external
             />
