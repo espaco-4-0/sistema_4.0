@@ -26,8 +26,24 @@ const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales
 const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 const monthMap: { [key: string]: number } = { 'jan': 0, 'fev': 1, 'mar': 2, 'abr': 3, 'mai': 4, 'jun': 5, 'jul': 6, 'ago': 7, 'set': 8, 'out': 9, 'nov': 10, 'dez': 11 };
 
+const formatPhoneNumber = (value: string) => {
+    if (!value) return "";
+    const cleaned = value.replaceAll(/\D/g, '');
+    const regex = (/^(\d{0,2})(\d{0,5})(\d{0,4})$/);
+	const match = regex.exec(cleaned)
+    if (!match) return value
+
+	const [_, ddd, prefixo, sufixo] = match;
+
+	if (!prefixo) return ddd;
+	const base = `${ddd} ${prefixo}`
+	return sufixo ? ` ${base}-${sufixo}` : base;
+
+
+};
+
 const initialEvents: IEvent[] = [
-    { id: 1, title: 'Workshop de Impressão 3D', start: new Date(2026, 5, 15, 14, 0), end: new Date(2026, 5, 15, 16, 0), type: 'agendado', description: 'Aprenda os fundamentos e tecnologias da impressão 3D.', time: '14:00 - 16:00', local: 'Espaço 4.0', quantidade: '20' },
+    { id: 1,title: 'Workshop de Impressão 3D', start: new Date(2026, 5, 15, 14, 0), end: new Date(2026, 5, 15, 16, 0), type: 'agendado', description: 'Aprenda os fundamentos e tecnologias da impressão 3D.', time: '14:00 - 16:00', local: 'Espaço 4.0', quantidade: '20' },
     { id: 2, title: 'Introdução à Robótica Educacional', start: new Date(2026, 5, 18, 15, 0), end: new Date(2026, 5, 18, 17, 0), type: 'agendado', description: 'Explore conceitos básicos de robótica com atividades práticas.', time: '15:00 - 17:00', local: 'Espaço 4.0', quantidade: '15' },
     { id: 3, title: 'Curso Básico de Programação', start: new Date(2026, 5, 22, 14, 0), end: new Date(2026, 5, 22, 16, 0), type: 'agendado', description: 'Aprenda lógica de programação e desenvolvimento de software.', time: '14:00 - 16:00', local: 'Espaço 4.0', quantidade: '20' },
     { id: 4, title: 'Oficina de Tecnologia e Criatividade', start: new Date(2026, 5, 28, 16, 0), end: new Date(2026, 5, 28, 18, 0), type: 'agendado', description: 'Desenvolva projetos criativos utilizando tecnologia.', time: '16:00 - 18:00', local: 'Espaço 4.0', quantidade: '25' }
@@ -211,7 +227,25 @@ const BookingForm = ({ methods, onSubmit, onCancel }: { methods: UseFormReturn<I
                 <InputWithIcon icon={<School size={14}/>} register={methods.register('instituicao', { required: true })} placeholder="Instituição" />
                 <InputWithIcon icon={<User size={14}/>} register={methods.register('professor', { required: true })} placeholder="Professor Responsável" />
                 <div className="grid grid-cols-2 gap-2">
-                    <InputWithIcon icon={<Phone size={14}/>} register={methods.register('whatsapp', { required: true })} placeholder="WhatsApp" />
+                    <div className="relative">
+                        <div className="absolute left-2.5 top-2.5 text-gray-400"><Phone size={14}/></div>
+                        <Controller
+                            name="whatsapp"
+                            control={methods.control}
+                            rules={{ required: true }}
+                            render={({ field: { onChange, value } }) => (
+                                <input
+                                    value={value}
+                                    onChange={(e) => {
+                                        onChange(formatPhoneNumber(e.target.value));
+                                    }}
+                                    className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-400"
+                                    placeholder="Whatsapp"
+                                    maxLength={15}
+                                />
+                            )}
+                        />
+                    </div>
                     <InputWithIcon icon={<Users size={14}/>} register={methods.register('quantidade', { required: true })} type="number" placeholder="Pessoas" />
                 </div>
                 <input {...methods.register('email', { required: true })} type="email" className="w-full border border-gray-200 rounded-md py-2 px-3 text-xs outline-none focus:border-yellow-400" placeholder="Email" />

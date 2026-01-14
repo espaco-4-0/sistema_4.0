@@ -50,9 +50,6 @@ export function UpcomingEvents() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {dados.map((dado) => (
           <div key={dado.id}>
-            {/* ALTERAÇÃO AQUI:
-              Envolvemos o Card com o Link passando os parâmetros na URL
-            */}
             <Link
               href={`/calendar?day=${dado.day}&month=${dado.mounth}`}
               className="block w-full h-full"
