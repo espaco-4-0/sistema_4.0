@@ -16,14 +16,6 @@ export default function RecoveryPassword() {
             <LeftSpaceDecoration />
 
             <div className="relative flex flex-col items-center justify-center px-6">
-                <Link
-                    href="/"
-                    className="absolute top-8 left-6 flex items-center gap-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 hover:cursor-pointer"
-                >
-                    <Home className="h-4 w-4" />
-                    Home Page
-                </Link>
-
                 <div className="mt-12 mb-8 w-full max-w-md lg:mt-0">
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
                         <Link href="/login-page" className="flex gap-2 text-center items-center"><ArrowLeft />Voltar para login</Link>
