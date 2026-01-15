@@ -48,7 +48,7 @@ interface CourseDialogProps {
     readonly curso: string;
 }
 
-const FormField = ({ label, error, children }: FormFieldProps) => (
+export const FormField = ({ label, error, children }: FormFieldProps) => (
     <div className="space-y-1">
         <Label className="text-sm font-medium">{label}</Label>
         {children}
@@ -56,7 +56,7 @@ const FormField = ({ label, error, children }: FormFieldProps) => (
     </div>
 );
 
-const FormSection = ({ title, children }: FormSectionProps) => (
+export const FormSection = ({ title, children }: FormSectionProps) => (
     <section className="mt-8 space-y-4">
         <h3 className="text-foreground text-lg font-semibold">{title}</h3>
         <Separator />

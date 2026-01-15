@@ -23,12 +23,14 @@ export default function SubscribeSucess({ course, setCloseCourse }: SubscribeSuc
             </p>
 
             <div className="mt-6 w-full rounded-xl border border-yellow-200 bg-yellow-50 p-5 text-sm leading-relaxed shadow-sm lg:max-w-120 lg:p-6 lg:text-base">
-                <strong className="mb-1 block text-yellow-800">Próximos passos:</strong>
-                Aguarde o contato de nossa equipe via <span className="font-bold text-green-700 italic">
-                    WhatsApp
-                </span>{" "}
-                e/ou <span className="font-bold text-blue-700 italic">e-mail</span> com mais informações sobre o curso e
-                confirmação da matrícula.
+                <p>
+                    <strong className="mb-1 block text-yellow-800">Próximos passos:</strong>
+                    {}
+                    Aguarde o contato de nossa equipe via
+                    <span className="font-bold text-green-700 italic">WhatsApp</span> e/ou{" "}
+                    <span className="font-bold text-blue-700 italic">e-mail</span> com mais informações sobre o curso e
+                    confirmação da matrícula.
+                </p>
             </div>
 
             <div className="mt-8 flex w-full flex-col items-center gap-3">

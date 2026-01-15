@@ -1,14 +1,11 @@
-"use client";
-
-import { useSyncExternalStore, useState } from "react";
-import { useForm, Controller, FieldError, useWatch } from "react-hook-form";
+import { useState } from "react";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
 import {
@@ -20,43 +17,9 @@ import {
     affiliationIfalOptions,
 } from "@/ui/forms/schemas/course-registration-schema";
 import SubscribeSucess from "./subscribe_sucess";
-
-function useIsMounted() {
-    return useSyncExternalStore(
-        () => () => {},
-        () => true,
-        () => false
-    );
-}
-
-interface FormFieldProps {
-    readonly label: string;
-    readonly error?: FieldError;
-    readonly children: React.ReactNode;
-}
-
-interface FormSectionProps {
-    readonly title: string;
-    readonly children: React.ReactNode;
-}
-
-const FormField = ({ label, error, children }: FormFieldProps) => (
-    <div className="space-y-1.5">
-        <Label className="text-sm font-medium">{label}</Label>
-        {children}
-        {error?.message && (
-            <p className="animate-in fade-in slide-in-from-top-1 text-xs font-medium text-red-500">{error.message}</p>
-        )}
-    </div>
-);
-
-const FormSection = ({ title, children }: FormSectionProps) => (
-    <section className="mt-8 space-y-4 lg:mt-10">
-        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-        <Separator />
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">{children}</div>
-    </section>
-);
+import { useIsMounted } from "@/ui/hooks/useIsMounted";
+import { useCep } from "@/ui/hooks/useCep";
+import { FormField, FormSection } from "../landing_page/CourseDialog";
 
 interface CourseFormProps {
     readonly course: string;
@@ -93,23 +56,7 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
     const deficiencyValue = useWatch({ control, name: "deficiency" });
     const pcd = deficiencyValue !== "Nenhuma";
 
-    const handleCepBlur = async (cep: string) => {
-        const cleanCep = cep.replaceAll(/\D/g, "");
-        if (cleanCep.length !== 8) return;
-
-        try {
-            const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-            const data = await res.json();
-            if (!data.erro) {
-                setValue("road", data.logradouro || "", { shouldValidate: true });
-                setValue("neighborhood", data.bairro || "", { shouldValidate: true });
-                setValue("city", data.localidade || "", { shouldValidate: true });
-                setValue("state", data.uf || "", { shouldValidate: true });
-            }
-        } catch {
-            toast.error("Falha ao buscar CEP");
-        }
-    };
+    const handleCepBlur = useCep(setValue);
 
     const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none h-10 mt-1 rounded-md w-full";
 
@@ -415,7 +362,7 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-12 w-full cursor-pointer bg-yellow-400 text-lg font-semibold text-white shadow-md transition-all hover:bg-yellow-500 active:scale-95 md:w-2/3"
+                            className="h-12 w-full cursor-pointer bg-yellow-400 text-lg font-semibold text-black shadow-md transition-all hover:bg-yellow-500 active:scale-95 md:w-2/3"
                         >
                             {isSubmitting ? "Enviando..." : "Finalizar Inscrição"}
                         </Button>

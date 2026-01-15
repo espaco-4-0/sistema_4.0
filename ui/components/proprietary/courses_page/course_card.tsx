@@ -1,37 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Clock, Users } from "lucide-react";
 import Image from "next/image";
+import { CourseDetails } from "../../../../mock/mock_courses";
 
-interface CourseCardProps {
-    tittle: string;
-    description: string;
-    duration_weeks: number;
-    subscribes: number;
-    start: string;
-    level: string;
+interface CourseCardProps extends CourseDetails {
     onAction: () => void;
-    image: string;
 }
 
-export default function CourseCard({
-    tittle,
-    description,
-    duration_weeks,
-    subscribes,
-    start,
-    level,
-    onAction,
-    image,
-}: Readonly<CourseCardProps>) {
+export default function CourseCard({ onAction, ...course }: Readonly<CourseCardProps>) {
     return (
         <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-xl">
-            <div className="absolute top-4 right-4 z-10 rounded-full border border-yellow-100 bg-white/90 px-3 py-1 text-xs font-bold tracking-wider text-yellow-700 uppercase shadow-sm backdrop-blur-sm">
-                {level}
+            <div className="absolute top-4 right-4 z-10 rounded-full border border-yellow-100 bg-white/95 px-3 py-1 text-xs font-bold tracking-wider text-[#dbb126] uppercase shadow-md backdrop-blur-sm">
+                {course.level}
             </div>
             <div className="relative h-48 w-full overflow-hidden sm:h-52">
                 <Image
-                    src={image}
-                    alt={tittle}
+                    src={course.cardImage}
+                    alt={course.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
@@ -40,34 +25,34 @@ export default function CourseCard({
             </div>
 
             <div className="flex grow flex-col p-5">
-                <h4 className="mb-2 line-clamp-1 text-xl font-bold text-gray-800">{tittle}</h4>
+                <h4 className="mb-2 line-clamp-1 text-xl font-bold text-gray-800">{course.title}</h4>
 
-                <p className="mb-5 line-clamp-2 grow text-sm text-gray-600">{description}</p>
+                <p className="mb-5 line-clamp-2 grow text-sm text-gray-600">{course.description}</p>
 
                 <div className="mb-6 space-y-2.5">
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <Clock className="h-4 w-4 shrink-0 text-yellow-500" />
+                        <Clock className="h-4 w-4 shrink-0 text-[#F4C430]" />
                         <span>
-                            {duration_weeks} {duration_weeks > 1 ? "semanas" : "semana"}
+                            {course.durationWeeks} {course.durationWeeks > 1 ? "semanas" : "semana"}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <Users className="h-4 w-4 shrink-0 text-yellow-500" />
+                        <Users className="h-4 w-4 shrink-0 text-[#F4C430]" />
                         <span>
-                            {subscribes} {subscribes > 1 ? "alunos inscritos" : "aluno inscrito"}
+                            {course.subscribes} {course.subscribes > 1 ? "alunos inscritos" : "aluno inscrito"}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <Calendar className="h-4 w-4 shrink-0 text-yellow-500" />
+                        <Calendar className="h-4 w-4 shrink-0 text-[#F4C430]" />
                         <span>
-                            Início: <span className="font-medium text-gray-700">{start}</span>
+                            Início: <span className="font-medium text-gray-700">{course.startDate}</span>
                         </span>
                     </div>
                 </div>
                 <Button
-                    className="text-md group/btn flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-yellow-400 py-6 font-semibold text-white transition-colors hover:bg-yellow-500"
+                    className="text-md group/btn flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#F4C430] py-6 font-semibold text-black transition-colors hover:bg-[#e0b52a]"
                     onClick={onAction}
                 >
                     Saiba mais
