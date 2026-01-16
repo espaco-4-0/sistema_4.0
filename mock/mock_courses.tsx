@@ -1,4 +1,5 @@
 export type CourseDetails = {
+    id: number;
     title: string;
     instructor: string;
     description: string;
@@ -8,13 +9,26 @@ export type CourseDetails = {
     level: string;
     startDate: string;
     cardImage: string;
-    gallery: string[];
-    topics: string[];
-    requirements: string[];
+    gallery: {
+        id: number;
+        url: string;
+        alt?: string;
+    }[];
+
+    topics: {
+        id: number;
+        title: string;
+    }[];
+
+    requirements: {
+        id: number;
+        label: string;
+    }[];
 };
 
 export const courses: CourseDetails[] = [
     {
+        id: 1,
         title: "Introdução ao React",
         instructor: "Professor Lucas Andrade",
         description: "Fundamentos do React e componentização",
@@ -26,21 +40,38 @@ export const courses: CourseDetails[] = [
         startDate: "2026-02-01",
         cardImage: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=800&q=80",
+                alt: "Aula React",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80",
+                alt: "Componentes",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+                alt: "Trabalho em equipe",
+            },
         ],
         topics: [
-            "Conceitos fundamentais do React",
-            "JSX e renderização de componentes",
-            "Props e estado",
-            "Eventos e ciclo de vida básico",
-            "Boas práticas de componentização",
+            { id: 1, title: "Conceitos fundamentais do React" },
+            { id: 2, title: "JSX e renderização de componentes" },
+            { id: 3, title: "Props e estado" },
+            { id: 4, title: "Eventos e ciclo de vida básico" },
+            { id: 5, title: "Boas práticas de componentização" },
         ],
-        requirements: ["Conhecimentos básicos de HTML", "Conhecimentos básicos de CSS", "JavaScript básico"],
+        requirements: [
+            { id: 1, label: "Conhecimentos básicos de HTML" },
+            { id: 2, label: "Conhecimentos básicos de CSS" },
+            { id: 3, label: "JavaScript básico" },
+        ],
     },
 
     {
+        id: 2,
         title: "React Avançado",
         instructor: "Professor Rafael Menezes",
         description: "Hooks avançados, performance e padrões",
@@ -52,27 +83,40 @@ export const courses: CourseDetails[] = [
         level: "Avançado",
         cardImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1555066931-bf19f8fd1085?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80",
+                alt: "Padrões avançados",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=800&q=80",
+                alt: "Otimização",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1555066931-bf19f8fd1085?auto=format&fit=crop&w=800&q=80",
+                alt: "Hooks",
+            },
         ],
         topics: [
-            "Hooks avançados (Ex.: useMemo, useCallback ...)",
-            "Context API em larga escala",
-            "Performance e renderizações",
-            "Padrões de componentes",
-            "Arquitetura de aplicações React",
-            "Gerenciamento de estado avançado",
+            { id: 1, title: "Hooks avançados (Ex.: useMemo, useCallback ...)" },
+            { id: 2, title: "Context API em larga escala" },
+            { id: 3, title: "Performance e renderizações" },
+            { id: 4, title: "Padrões de componentes" },
+            { id: 5, title: "Arquitetura de aplicações React" },
+            { id: 6, title: "Gerenciamento de estado avançado" },
         ],
         requirements: [
-            "React intermediário",
-            "JavaScript moderno",
-            "Experiência com hooks básicos",
-            "Conhecimento de componentização",
+            { id: 1, label: "React intermediário" },
+            { id: 2, label: "JavaScript moderno" },
+            { id: 3, label: "Experiência com hooks básicos" },
+            { id: 4, label: "Conhecimento de componentização" },
         ],
     },
 
     {
+        id: 3,
         title: "TypeScript Essencial",
         instructor: "Professora Mariana Lopes",
         description: "Tipagem estática aplicada ao dia a dia",
@@ -84,21 +128,38 @@ export const courses: CourseDetails[] = [
         startDate: "2026-02-05",
         cardImage: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
+                alt: "TypeScript",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80",
+                alt: "Tipos",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=800&q=80",
+                alt: "IDE",
+            },
         ],
         topics: [
-            "Tipos primitivos e avançados",
-            "Interfaces e types",
-            "Generics",
-            "Tipagem em funções e classes",
-            "Integração com projetos JavaScript",
+            { id: 1, title: "Tipos primitivos e avançados" },
+            { id: 2, title: "Interfaces e types" },
+            { id: 3, title: "Generics" },
+            { id: 4, title: "Tipagem em funções e classes" },
+            { id: 5, title: "Integração com projetos JavaScript" },
         ],
-        requirements: ["JavaScript básico", "Conhecimento de lógica de programação", "Noções de ES6+"],
+        requirements: [
+            { id: 1, label: "JavaScript básico" },
+            { id: 2, label: "Conhecimento de lógica de programação" },
+            { id: 3, label: "Noções de ES6+" },
+        ],
     },
 
     {
+        id: 4,
         title: "Next.js Fundamentals",
         instructor: "Professor Bruno Almeida",
         description: "SSR, SSG e App Router",
@@ -110,15 +171,38 @@ export const courses: CourseDetails[] = [
         level: "Intermediário",
         cardImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
+                alt: "Next.js",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+                alt: "SSR/SSG",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=800&q=80",
+                alt: "Performance",
+            },
         ],
-        topics: ["Fundamentos do Next.js", "SSR e SSG", "App Router", "Rotas e layouts", "SEO e performance"],
-        requirements: ["React básico", "JavaScript intermediário", "Conhecimento de HTML e CSS"],
+        topics: [
+            { id: 1, title: "Fundamentos do Next.js" },
+            { id: 2, title: "SSR e SSG" },
+            { id: 3, title: "App Router" },
+            { id: 4, title: "Rotas e layouts" },
+            { id: 5, title: "SEO e performance" },
+        ],
+        requirements: [
+            { id: 1, label: "React básico" },
+            { id: 2, label: "JavaScript intermediário" },
+            { id: 3, label: "Conhecimento de HTML e CSS" },
+        ],
     },
 
     {
+        id: 5,
         title: "Next.js Avançado",
         instructor: "Professor Eduardo Nogueira",
         description: "Auth, middleware e otimização",
@@ -130,21 +214,39 @@ export const courses: CourseDetails[] = [
         level: "Avançado",
         cardImage: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=800&q=80",
+                alt: "Middlewares",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+                alt: "Cache",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
+                alt: "Produção",
+            },
         ],
         topics: [
-            "Autenticação e autorização",
-            "Middlewares",
-            "Otimização de performance",
-            "Cache e revalidação",
-            "Boas práticas para produção",
+            { id: 1, title: "Autenticação e autorização" },
+            { id: 2, title: "Middlewares" },
+            { id: 3, title: "Otimização de performance" },
+            { id: 4, title: "Cache e revalidação" },
+            { id: 5, title: "Boas práticas para produção" },
         ],
-        requirements: ["Next.js intermediário", "React avançado", "Conhecimento de APIs", "Experiência com deploy"],
+        requirements: [
+            { id: 1, label: "Next.js intermediário" },
+            { id: 2, label: "React avançado" },
+            { id: 3, label: "Conhecimento de APIs" },
+            { id: 4, label: "Experiência com deploy" },
+        ],
     },
 
     {
+        id: 6,
         title: "Node.js Backend",
         instructor: "Professor Diego Ramos",
         description: "APIs REST com boas práticas",
@@ -156,21 +258,38 @@ export const courses: CourseDetails[] = [
         level: "Intermediário",
         cardImage: "https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1555949963-fcdb3fef48b0?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1555949963-fcdb3fef48b0?auto=format&fit=crop&w=800&q=80",
+                alt: "API REST",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+                alt: "Express",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=800&q=80",
+                alt: "Backend",
+            },
         ],
         topics: [
-            "Fundamentos do Node.js",
-            "Criação de APIs REST",
-            "Middlewares",
-            "Tratamento de erros",
-            "Boas práticas de backend",
+            { id: 1, title: "Fundamentos do Node.js" },
+            { id: 2, title: "Criação de APIs REST" },
+            { id: 3, title: "Middlewares" },
+            { id: 4, title: "Tratamento de erros" },
+            { id: 5, title: "Boas práticas de backend" },
         ],
-        requirements: ["JavaScript intermediário", "Conhecimento de HTTP", "Noções de backend"],
+        requirements: [
+            { id: 1, label: "JavaScript intermediário" },
+            { id: 2, label: "Conhecimento de HTTP" },
+            { id: 3, label: "Noções de backend" },
+        ],
     },
 
     {
+        id: 7,
         title: "Prisma ORM",
         instructor: "Monitora Ana Souza",
         description: "Modelagem e acesso a dados",
@@ -182,15 +301,37 @@ export const courses: CourseDetails[] = [
         level: "Intermediário",
         cardImage: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+                alt: "Prisma",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
+                alt: "ORM",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+                alt: "Banco de dados",
+            },
         ],
-        topics: ["Modelagem de dados", "Schemas e migrações", "Relacionamentos", "Consultas eficientes"],
-        requirements: ["Node.js básico", "Conhecimento de banco de dados", "SQL básico"],
+        topics: [
+            { id: 1, title: "Modelagem de dados" },
+            { id: 2, title: "Schemas e migrações" },
+            { id: 3, title: "Relacionamentos" },
+            { id: 4, title: "Consultas eficientes" },
+        ],
+        requirements: [
+            { id: 1, label: "Node.js básico" },
+            { id: 2, label: "Conhecimento de banco de dados" },
+            { id: 3, label: "SQL básico" },
+        ],
     },
 
     {
+        id: 8,
         title: "PostgreSQL para Devs",
         instructor: "Professor Carlos Tavares",
         description: "SQL, índices e performance",
@@ -202,21 +343,38 @@ export const courses: CourseDetails[] = [
         startDate: "2026-03-05",
         cardImage: "https://images.unsplash.com/photo-1585079542156-2755d9c8a094?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80",
+                alt: "PostgreSQL",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
+                alt: "SQL",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
+                alt: "Performance",
+            },
         ],
         topics: [
-            "Fundamentos de SQL",
-            "Criação de tabelas",
-            "Índices e performance",
-            "Consultas avançadas",
-            "Boas práticas",
+            { id: 1, title: "Fundamentos de SQL" },
+            { id: 2, title: "Criação de tabelas" },
+            { id: 3, title: "Índices e performance" },
+            { id: 4, title: "Consultas avançadas" },
+            { id: 5, title: "Boas práticas" },
         ],
-        requirements: ["Lógica de programação", "Conhecimento básico de backend", "Interesse em banco de dados"],
+        requirements: [
+            { id: 1, label: "Lógica de programação" },
+            { id: 2, label: "Conhecimento básico de backend" },
+            { id: 3, label: "Interesse em banco de dados" },
+        ],
     },
 
     {
+        id: 9,
         title: "Autenticação com NextAuth",
         instructor: "Monitora Beatriz Lima",
         description: "Sessões, JWT e providers",
@@ -228,15 +386,37 @@ export const courses: CourseDetails[] = [
         level: "Intermediário",
         cardImage: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1526378722430-4f3a74f9dcb1?auto=format&fit=crop&w=800&q=80",
+                alt: "NextAuth",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+                alt: "OAuth",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+                alt: "Sessões",
+            },
         ],
-        topics: ["Conceitos de autenticação", "JWT e sessões", "Providers OAuth", "Proteção de rotas"],
-        requirements: ["Next.js básico", "React intermediário", "Conhecimento de APIs"],
+        topics: [
+            { id: 1, title: "Conceitos de autenticação" },
+            { id: 2, title: "JWT e sessões" },
+            { id: 3, title: "Providers OAuth" },
+            { id: 4, title: "Proteção de rotas" },
+        ],
+        requirements: [
+            { id: 1, label: "Next.js básico" },
+            { id: 2, label: "React intermediário" },
+            { id: 3, label: "Conhecimento de APIs" },
+        ],
     },
 
     {
+        id: 10,
         title: "Segurança Web",
         instructor: "Professor André Pacheco",
         description: "OWASP, IDOR e boas práticas",
@@ -248,20 +428,37 @@ export const courses: CourseDetails[] = [
         startDate: "2026-03-12",
         cardImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1510511450818-9e4a9f3f4a4b?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1510511450818-9e4a9f3f4a4b?auto=format&fit=crop&w=800&q=80",
+                alt: "Segurança web",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80",
+                alt: "Proteção",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=800&q=80",
+                alt: "OWASP",
+            },
         ],
         topics: [
-            "Princípios de segurança web",
-            "OWASP Top 10",
-            "Autorização e autenticação",
-            "Boas práticas de proteção",
+            { id: 1, title: "Princípios de segurança web" },
+            { id: 2, title: "OWASP Top 10" },
+            { id: 3, title: "Autorização e autenticação" },
+            { id: 4, title: "Boas práticas de proteção" },
         ],
-        requirements: ["Conhecimento básico de web", "Noções de backend", "Interesse em segurança"],
+        requirements: [
+            { id: 1, label: "Conhecimento básico de web" },
+            { id: 2, label: "Noções de backend" },
+            { id: 3, label: "Interesse em segurança" },
+        ],
     },
 
     {
+        id: 11,
         title: "Clean Code",
         instructor: "Professora Juliana Freitas",
         description: "Código legível e sustentável",
@@ -273,19 +470,37 @@ export const courses: CourseDetails[] = [
         startDate: "2026-03-15",
         cardImage: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
+                alt: "Clean Code",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+                alt: "Refatoração",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80",
+                alt: "Qualidade",
+            },
         ],
-        topics: ["Princípios do Clean Code", "Nomenclatura e organização", "Refatoração", "Boas práticas gerais"],
+        topics: [
+            { id: 1, title: "Princípios do Clean Code" },
+            { id: 2, title: "Nomenclatura e organização" },
+            { id: 3, title: "Refatoração" },
+            { id: 4, title: "Boas práticas gerais" },
+        ],
         requirements: [
-            "Conhecimento básico de programação",
-            "Experiência com qualquer linguagem",
-            "Interesse em qualidade de código",
+            { id: 1, label: "Conhecimento básico de programação" },
+            { id: 2, label: "Experiência com qualquer linguagem" },
+            { id: 3, label: "Interesse em qualidade de código" },
         ],
     },
 
     {
+        id: 12,
         title: "Arquitetura Frontend",
         instructor: "Professor Felipe Moura",
         description: "Escalabilidade e padrões",
@@ -297,21 +512,38 @@ export const courses: CourseDetails[] = [
         startDate: "2026-03-18",
         cardImage: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+                alt: "Arquitetura",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=800&q=80",
+                alt: "Estrutura",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
+                alt: "Escalabilidade",
+            },
         ],
         topics: [
-            "Princípios de arquitetura",
-            "Padrões frontend",
-            "Organização de projetos",
-            "Escalabilidade",
-            "Manutenção de código",
+            { id: 1, title: "Princípios de arquitetura" },
+            { id: 2, title: "Padrões frontend" },
+            { id: 3, title: "Organização de projetos" },
+            { id: 4, title: "Escalabilidade" },
+            { id: 5, title: "Manutenção de código" },
         ],
-        requirements: ["React básico", "JavaScript intermediário", "Conhecimento de projetos frontend"],
+        requirements: [
+            { id: 1, label: "React básico" },
+            { id: 2, label: "JavaScript intermediário" },
+            { id: 3, label: "Conhecimento de projetos frontend" },
+        ],
     },
 
     {
+        id: 13,
         title: "Testes com Jest",
         instructor: "Monitor Paulo Henrique",
         description: "Testes unitários e de integração",
@@ -323,17 +555,33 @@ export const courses: CourseDetails[] = [
         level: "Intermediário",
         cardImage: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600&q=80",
         gallery: [
-            "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1555066931-bf19f8fd1085?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=800&q=80",
+            {
+                id: 1,
+                url: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80",
+                alt: "Jest",
+            },
+            {
+                id: 2,
+                url: "https://images.unsplash.com/photo-1555066931-bf19f8fd1085?auto=format&fit=crop&w=800&q=80",
+                alt: "Testes",
+            },
+            {
+                id: 3,
+                url: "https://images.unsplash.com/photo-1537432376769-00f5c2f4c8d2?auto=format&fit=crop&w=800&q=80",
+                alt: "Cobertura",
+            },
         ],
         topics: [
-            "Fundamentos de testes",
-            "Jest na prática",
-            "Mocks e spies",
-            "Testes de integração",
-            "Boas práticas de testes",
+            { id: 1, title: "Fundamentos de testes" },
+            { id: 2, title: "Jest na prática" },
+            { id: 3, title: "Mocks e spies" },
+            { id: 4, title: "Testes de integração" },
+            { id: 5, title: "Boas práticas de testes" },
         ],
-        requirements: ["JavaScript intermediário", "Conhecimento de projetos frontend ou backend", "Noções de testes"],
+        requirements: [
+            { id: 1, label: "JavaScript intermediário" },
+            { id: 2, label: "Conhecimento de projetos frontend ou backend" },
+            { id: 3, label: "Noções de testes" },
+        ],
     },
 ];

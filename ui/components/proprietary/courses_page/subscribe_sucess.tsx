@@ -9,7 +9,7 @@ interface SubscribeSucessProps {
 
 export default function SubscribeSucess({ course, setCloseCourse }: SubscribeSucessProps) {
     return (
-        <div className="mx-auto flex h-auto w-full max-w-4xl flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-6 py-10 text-center shadow-lg transition-all hover:shadow-xl md:p-12 lg:h-full 2xl:p-16">
+        <div className="mx-auto flex h-auto w-full max-w-4xl flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-6 py-10 text-center shadow-lg transition-all hover:shadow-xl md:p-12 lg:h-170 2xl:p-16">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-green-100 lg:h-30 lg:w-30">
                 <CheckCircle className="h-12 w-12 text-green-600 lg:h-16 lg:w-16" strokeWidth={1.5} />
             </div>

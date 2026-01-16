@@ -8,12 +8,14 @@ import { CourseDetails, courses } from "../../../../mock/mock_courses";
 import Image from "next/image";
 
 type RightInformation = {
+    id: number;
     icon: LucideIcon;
     title: string;
     description: string | number;
 };
 
 const initialCourseDetails: CourseDetails = {
+    id: 0,
     title: "",
     instructor: "",
     description: "",
@@ -34,21 +36,25 @@ export default function CoursesMainPage() {
 
     const rightInformations: RightInformation[] = [
         {
+            id: 1,
             icon: Clock,
             title: "Duração",
             description: course.durationWeeks,
         },
         {
+            id: 2,
             icon: Calendar,
             title: "Alunos inscritos",
             description: course.subscribes,
         },
         {
+            id: 3,
             icon: Users,
             title: "Instrutor responsável",
             description: course.instructor,
         },
         {
+            id: 4,
             icon: Book,
             title: "Início das aulas",
             description: course.startDate,
@@ -89,7 +95,7 @@ export default function CoursesMainPage() {
                                 level={course.level}
                                 instructor={course.instructor}
                                 students={course.subscribes}
-                                images={course.gallery}
+                                gallery={course.gallery}
                             />
                         </div>
 
@@ -99,9 +105,9 @@ export default function CoursesMainPage() {
                             </div>
 
                             <div className="order-1 flex w-full flex-col gap-4 lg:order-2 lg:w-96">
-                                {rightInformations.map(({ icon: Icon, title, description }, index) => (
+                                {rightInformations.map(({ icon: Icon, title, description, id }) => (
                                     <div
-                                        key={index}
+                                        key={id}
                                         className="flex h-auto min-h-20 w-full gap-4 rounded-xl bg-white p-5 shadow-lg transition-all hover:shadow-xl"
                                     >
                                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-yellow-100">
@@ -121,24 +127,24 @@ export default function CoursesMainPage() {
 
                                 <div className="flex w-full flex-col gap-4 rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl">
                                     <h5 className="text-md mb-2 font-bold">O que você vai aprender</h5>
-                                    {course.topics.map((topic, index) => (
+                                    {course.topics.map((topic) => (
                                         <div
-                                            key={index}
+                                            key={topic.id}
                                             className="flex w-full items-center gap-2 rounded-xl border border-green-300 bg-green-100 p-3 text-sm text-green-900"
                                         >
-                                            <Book className="h-4 w-4 shrink-0" /> {topic}
+                                            <Book className="h-4 w-4 shrink-0" /> {topic.title}
                                         </div>
                                     ))}
                                 </div>
 
                                 <div className="flex w-full flex-col gap-4 rounded-xl bg-white p-6 shadow-lg transition-all hover:shadow-xl">
                                     <h5 className="text-md mb-2 font-bold">Requisitos</h5>
-                                    {course.requirements.map((req, index) => (
+                                    {course.requirements.map((req) => (
                                         <div
-                                            key={index}
+                                            key={req.id}
                                             className="flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 p-3 text-sm"
                                         >
-                                            <SquareCheck className="h-4 w-4 shrink-0 text-yellow-400" /> {req}
+                                            <SquareCheck className="h-4 w-4 shrink-0 text-yellow-400" /> {req.label}
                                         </div>
                                     ))}
                                 </div>
@@ -148,7 +154,6 @@ export default function CoursesMainPage() {
                 ) : (
                     <>
                         <div className="flex min-h-60 flex-col items-center justify-between bg-black px-4 py-10 text-white lg:h-60 lg:flex-row lg:px-20 2xl:px-80">
-                            {/* Container do Texto */}
                             <div className="flex flex-col">
                                 <h1 className="text-3xl font-semibold text-[#F4C430] lg:text-5xl">Nossos cursos</h1>
                                 <p className="mt-4 max-w-3xl text-lg text-[#F4C430] lg:mt-8 lg:text-xl">
@@ -156,7 +161,6 @@ export default function CoursesMainPage() {
                                 </p>
                             </div>
 
-                            {/* Logo */}
                             <Image
                                 alt="Logo do Espaço 4.0"
                                 src="/espaco-logo.svg"
@@ -169,9 +173,9 @@ export default function CoursesMainPage() {
 
                         <div className="mt-10 px-4 lg:px-20 2xl:px-80">
                             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2 lg:gap-15 2xl:grid-cols-3">
-                                {courses.map((course, index) => (
+                                {courses.map((course) => (
                                     <CourseCard
-                                        key={index}
+                                        key={course.id}
                                         onAction={() => {
                                             setCourse(course);
                                             setShowCourse(true);

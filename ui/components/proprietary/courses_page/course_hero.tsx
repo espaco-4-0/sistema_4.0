@@ -8,10 +8,14 @@ interface CourseHeroProps {
     level: string;
     instructor: string;
     students: number;
-    images: string[];
+    gallery: {
+        id: number;
+        url: string;
+        alt?: string;
+    }[];
 }
 
-export function CourseHero({ title, description, level, instructor, students, images }: Readonly<CourseHeroProps>) {
+export function CourseHero({ title, description, level, instructor, students, gallery }: Readonly<CourseHeroProps>) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [progress, setProgress] = useState(0);
 
@@ -19,12 +23,12 @@ export function CourseHero({ title, description, level, instructor, students, im
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setCurrentImageIndex((prev) => (prev + 1) % images.length);
+            setCurrentImageIndex((prev) => (prev + 1) % gallery.length);
             setProgress(0);
         }, SLIDE_DURATION);
 
         return () => clearTimeout(timer);
-    }, [currentImageIndex, images.length, SLIDE_DURATION]);
+    }, [currentImageIndex, gallery.length, SLIDE_DURATION]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -35,28 +39,28 @@ export function CourseHero({ title, description, level, instructor, students, im
     }, [currentImageIndex, SLIDE_DURATION]);
 
     const nextSlide = () => {
-        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+        setCurrentImageIndex((prev) => (prev + 1) % gallery.length);
         setProgress(0);
     };
 
     const prevSlide = () => {
-        setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+        setCurrentImageIndex((prev) => (prev - 1 + gallery.length) % gallery.length);
         setProgress(0);
     };
 
     return (
         <div className="relative h-112.5 overflow-hidden bg-linear-to-r from-yellow-500 to-amber-600 lg:h-105 2xl:h-120">
             <div className="relative h-full">
-                {images.map((image, index) => (
+                {gallery.map((image, index) => (
                     <div
-                        key={index}
+                        key={image.id}
                         className={`absolute inset-0 transition-opacity duration-1000 ${
                             index === currentImageIndex ? "opacity-30" : "opacity-0"
                         }`}
                     >
                         <Image
-                            src={image}
-                            alt={`Slide ${index + 1}`}
+                            src={image.url}
+                            alt={`Slide ${index + 1} - ${image.alt}`}
                             className="h-full w-full object-cover"
                             fill
                             priority={index === 0}
@@ -109,9 +113,9 @@ export function CourseHero({ title, description, level, instructor, students, im
             <div className="absolute right-0 bottom-0 left-0 bg-black/20 px-6 py-3 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-7xl items-center gap-4">
                     <div className="flex gap-1.5">
-                        {images.map((_, index) => (
+                        {gallery.map((image, index) => (
                             <button
-                                key={index}
+                                key={image.id}
                                 onClick={() => {
                                     setCurrentImageIndex(index);
                                     setProgress(0);
@@ -131,7 +135,7 @@ export function CourseHero({ title, description, level, instructor, students, im
                     </div>
 
                     <span className="min-w-12.5 text-right font-mono text-xs text-white/80">
-                        {currentImageIndex + 1} / {images.length}
+                        {currentImageIndex + 1} / {gallery.length}
                     </span>
                 </div>
             </div>
