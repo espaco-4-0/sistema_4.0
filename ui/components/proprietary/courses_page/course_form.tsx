@@ -1,19 +1,13 @@
-"use client";
-
-import { useSyncExternalStore } from "react";
-import { useForm, Controller, FieldError, useWatch } from "react-hook-form";
+import { useState, useRef, useEffect } from "react";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import {
     courseRegisterSchema,
     type CourseRegisterType,
@@ -22,50 +16,40 @@ import {
     educationOptions,
     affiliationIfalOptions,
 } from "@/ui/forms/schemas/course-registration-schema";
+import SubscribeSucess from "./subscribe_sucess";
+import { useIsMounted } from "@/ui/hooks/useIsMounted";
+import { useCep } from "@/ui/hooks/useCep";
+import { FormField, FormSection } from "../landing_page/CourseDialog";
+import { Loader2 } from "lucide-react";
 
-function useIsMounted() {
-    return useSyncExternalStore(
-        () => () => {},
-        () => true,
-        () => false
-    );
+interface CourseFormProps {
+    readonly course: string;
+    readonly setCloseCourse: (value: boolean) => void;
 }
 
-interface FormFieldProps {
-    readonly label: string;
-    readonly error?: FieldError;
-    readonly children: React.ReactNode;
-}
-
-interface FormSectionProps {
-    readonly title: string;
-    readonly children: React.ReactNode;
-}
-
-interface CourseDialogProps {
-    readonly open: boolean;
-    readonly setOpen: (open: boolean) => void;
-    readonly curso: string;
-}
-
-export const FormField = ({ label, error, children }: FormFieldProps) => (
-    <div className="space-y-1">
-        <Label className="text-sm font-medium">{label}</Label>
-        {children}
-        {error?.message && <p className="text-xs font-medium text-red-500">{error.message}</p>}
+const LoadingState = ({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) => (
+    <div
+        ref={ref}
+        className="mx-auto flex h-auto w-full max-w-4xl flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-6 py-10 text-center shadow-lg transition-all hover:shadow-xl md:p-12 lg:h-170 2xl:p-16"
+    >
+        <Loader2 className="animate-spin text-yellow-500" size={50} />
+        <span className="mt-4 text-sm font-semibold text-gray-400 uppercase">Enviando inscrição...</span>
     </div>
 );
 
-export const FormSection = ({ title, children }: FormSectionProps) => (
-    <section className="mt-8 space-y-4">
-        <h3 className="text-foreground text-lg font-semibold">{title}</h3>
-        <Separator />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>
-    </section>
-);
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps) {
+export default function CourseForm({ course, setCloseCourse }: CourseFormProps) {
+    const [formComplete, setFormComplete] = useState(false);
+    const [loading, setLoading] = useState(false);
     const isMounted = useIsMounted();
+    const loadingRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (loading && loadingRef.current) {
+            loadingRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    }, [loading]);
 
     const form = useForm<CourseRegisterType>({
         resolver: valibotResolver(courseRegisterSchema),
@@ -90,67 +74,54 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         formState: { errors, isSubmitting },
     } = form;
 
-    const deficiencyValue = useWatch({
-        control,
-        name: "deficiency",
-    });
-
+    const deficiencyValue = useWatch({ control, name: "deficiency" });
     const pcd = deficiencyValue !== "Nenhuma";
 
-    const handleCepBlur = async (cep: string) => {
-        const cleanCep = cep.replaceAll(/\D/g, "");
-        if (cleanCep.length !== 8) return;
+    const handleCepBlur = useCep(setValue);
 
-        try {
-            const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-            const data = await res.json();
-            if (!data.erro) {
-                setValue("road", data.logradouro || "", { shouldValidate: true });
-                setValue("neighborhood", data.bairro || "", { shouldValidate: true });
-                setValue("city", data.localidade || "", { shouldValidate: true });
-                setValue("state", data.uf || "", { shouldValidate: true });
-            }
-        } catch {
-            toast.error("Falha ao buscar CEP");
-        }
-    };
+    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none h-10 mt-1 rounded-md w-full";
 
-    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none";
     const maskInputClass =
-        inputClass + " flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none mt-1";
 
     if (!isMounted) return null;
 
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="max-h-[90vh] max-w-7xl overflow-y-auto">
-                <form
-                    onSubmit={handleSubmit((data) => {
-                        console.log("Submit Data:", data);
-                        toast.success("Inscrição realizada com sucesso!");
-                        setOpen(false);
-                    })}
-                >
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-semibold">
-                            Inscrição: <span className="text-[#C49D00]">{curso}</span>
-                        </DialogTitle>
-                        <DialogDescription asChild>
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium">
-                                    Preencha os dados abaixo para efetivar sua inscrição.
-                                </p>
-                                <p className="text-sm font-medium text-yellow-600">Todos os campos são obrigatórios.</p>
-                                <Alert className="border-yellow-200 bg-yellow-50">
-                                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                                    <AlertDescription className="font-semibold text-yellow-800">
-                                        A inscrição não garante sua entrada no curso.
-                                    </AlertDescription>
-                                </Alert>
-                            </div>
-                        </DialogDescription>
-                    </DialogHeader>
+    const renderContent = () => {
+        if (formComplete) {
+            return <SubscribeSucess course={course} setCloseCourse={setCloseCourse} />;
+        }
+        if (loading) {
+            return <LoadingState ref={loadingRef} />;
+        }
 
+        return (
+            <form
+                onSubmit={handleSubmit(async (data) => {
+                    try {
+                        setLoading(true);
+
+                        console.log("Submit Data:", data);
+
+                        await sleep(2000);
+
+                        toast.success("Inscrição realizada com sucesso!");
+                        setFormComplete(true);
+
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    } catch {
+                        toast.error("Erro ao enviar inscrição");
+                    } finally {
+                        setLoading(false);
+                    }
+                })}
+                className="mx-auto w-full max-w-4xl rounded-2xl border border-gray-100 bg-white px-4 py-6 shadow-lg transition-all hover:shadow-xl md:p-8"
+            >
+                <header className="space-y-2 border-b pb-4">
+                    <h2 className="text-xl font-bold text-gray-900 md:text-2xl">Formulário de inscrição</h2>
+                    <p className="text-sm text-gray-500">Preencha seus dados para se inscrever no curso.</p>
+                </header>
+
+                <div className="space-y-2">
                     <FormSection title="Dados Pessoais">
                         <FormField label="Nome Completo" error={errors.name}>
                             <Input {...register("name")} className={inputClass} placeholder="Ex: João Silva Santos" />
@@ -182,7 +153,6 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                     <IMaskInput
                                         {...field}
                                         mask="(00) 00000-0000"
-                                        unmask={true}
                                         className={maskInputClass}
                                         placeholder="(00) 00000-0000"
                                         onAccept={field.onChange}
@@ -196,18 +166,14 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 name="race"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        onOpenChange={(o) => !o && field.onBlur()}
-                                    >
-                                        <SelectTrigger className="cursor-pointer">
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className="mt-1 cursor-pointer">
                                             <SelectValue placeholder="Selecione sua raça" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {raceOptions.map((r) => (
                                                 <SelectItem key={r} value={r} className="cursor-pointer">
-                                                    {(r.charAt(0).toUpperCase() + r.slice(1)).replace("Nao", "Não")}
+                                                    {r.charAt(0).toUpperCase() + r.slice(1).replace("Nao", "Não")}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -217,54 +183,57 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         </FormField>
 
                         <div className="flex items-end pb-2">
-                            <div className="flex items-center gap-2">
+                            <div className="flex h-10 items-center gap-2">
                                 <Checkbox
-                                    className="cursor-pointer rounded-sm"
                                     id="pcd"
                                     checked={pcd}
                                     onCheckedChange={(v) =>
                                         setValue("deficiency", v ? "" : "Nenhuma", { shouldValidate: true })
                                     }
                                 />
-                                <Label htmlFor="pcd" className="cursor-pointer">
+                                <Label htmlFor="pcd" className="cursor-pointer text-sm">
                                     Pessoa com deficiência
                                 </Label>
                             </div>
                         </div>
 
                         {pcd && (
-                            <FormField label="Qual deficiência?" error={errors.deficiency}>
-                                <Input
-                                    {...register("deficiency")}
-                                    className={inputClass}
-                                    placeholder="Ex: Deficiência visual parcial"
-                                />
-                            </FormField>
+                            <div className="md:col-span-2">
+                                <FormField label="Qual deficiência?" error={errors.deficiency}>
+                                    <Input
+                                        {...register("deficiency")}
+                                        className={inputClass}
+                                        placeholder="Ex: Deficiência visual parcial"
+                                    />
+                                </FormField>
+                            </div>
                         )}
                     </FormSection>
 
                     <FormSection title="Documentação">
-                        {(
-                            [
-                                { id: "cpfFront", label: "CPF – Frente" },
-                                { id: "cpfBack", label: "CPF – Verso" },
-                                { id: "rgFront", label: "RG – Frente" },
-                                { id: "rgBack", label: "RG – Verso" },
-                            ] as const
-                        ).map((fileField) => (
-                            <FormField
-                                key={fileField.id}
-                                label={fileField.label}
-                                error={errors[fileField.id as keyof CourseRegisterType]}
-                            >
-                                <Input
-                                    type="file"
-                                    accept="image/*,.pdf"
-                                    className={`${inputClass} cursor-pointer text-start file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-yellow-700 hover:file:text-yellow-800`}
-                                    {...register(fileField.id)}
-                                />
-                            </FormField>
-                        ))}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-2">
+                            {(
+                                [
+                                    { id: "cpfFront", label: "CPF – Frente" },
+                                    { id: "cpfBack", label: "CPF – Verso" },
+                                    { id: "rgFront", label: "RG – Frente" },
+                                    { id: "rgBack", label: "RG – Verso" },
+                                ] as const
+                            ).map((fileField) => (
+                                <FormField
+                                    key={fileField.id}
+                                    label={fileField.label}
+                                    error={errors[fileField.id as keyof CourseRegisterType]}
+                                >
+                                    <Input
+                                        type="file"
+                                        accept="image/*,.pdf"
+                                        className={`${inputClass} className="h-10 file:leading-none" cursor-pointer leading-none file:mr-4 file:cursor-pointer file:rounded-md file:border-0 file:bg-yellow-50 file:px-4 file:py-1 file:text-xs file:font-semibold file:text-yellow-700 hover:file:bg-yellow-100`}
+                                        {...register(fileField.id)}
+                                    />
+                                </FormField>
+                            ))}
+                        </div>
 
                         <FormField label="CPF (Número)" error={errors.cpf}>
                             <Controller
@@ -277,7 +246,6 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                         className={maskInputClass}
                                         placeholder="000.000.000-00"
                                         onAccept={field.onChange}
-                                        onBlur={field.onBlur}
                                     />
                                 )}
                             />
@@ -292,17 +260,13 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 name="consignorOrgan"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        onOpenChange={(o) => !o && field.onBlur()}
-                                    >
-                                        <SelectTrigger className="cursor-pointer">
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className="mt-1 cursor-pointer">
                                             <SelectValue placeholder="Selecione o órgão" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {consignorOrganOptions.map((o) => (
-                                                <SelectItem key={o} value={o} className="cursor-pointer">
+                                                <SelectItem className="cursor-pointer" key={o} value={o}>
                                                     {o}
                                                 </SelectItem>
                                             ))}
@@ -330,7 +294,6 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                     <IMaskInput
                                         {...field}
                                         mask="00000-000"
-                                        unmask={true}
                                         className={maskInputClass}
                                         placeholder="00000-000"
                                         onAccept={field.onChange}
@@ -352,21 +315,30 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                             />
                         </FormField>
 
-                        <FormField label="Rua" error={errors.road}>
-                            <Input {...register("road")} className={inputClass} placeholder="Ex: Av. Fernandes Lima" />
-                        </FormField>
+                        <div className="md:col-span-2">
+                            <FormField label="Rua" error={errors.road}>
+                                <Input
+                                    {...register("road")}
+                                    className={inputClass}
+                                    placeholder="Ex: Av. Fernandes Lima"
+                                />
+                            </FormField>
+                        </div>
 
                         <FormField label="Bairro" error={errors.neighborhood}>
                             <Input {...register("neighborhood")} className={inputClass} placeholder="Ex: Farol" />
                         </FormField>
 
-                        <FormField label="Cidade" error={errors.city}>
-                            <Input {...register("city")} className={inputClass} placeholder="Ex: Maceió" />
-                        </FormField>
-
-                        <FormField label="Estado (UF)" error={errors.state}>
-                            <Input {...register("state")} className={inputClass} placeholder="Ex: AL" maxLength={2} />
-                        </FormField>
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="col-span-2">
+                                <FormField label="Cidade" error={errors.city}>
+                                    <Input {...register("city")} className={inputClass} placeholder="Ex: Maceió" />
+                                </FormField>
+                            </div>
+                            <FormField label="UF" error={errors.state}>
+                                <Input {...register("state")} className={inputClass} placeholder="AL" maxLength={2} />
+                            </FormField>
+                        </div>
                     </FormSection>
 
                     <FormSection title="Formação e Vínculo">
@@ -375,17 +347,13 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 name="education"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        onOpenChange={(o) => !o && field.onBlur()}
-                                    >
-                                        <SelectTrigger className="cursor-pointer">
-                                            <SelectValue placeholder="Selecione sua escolaridade" />
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className="mt-1 cursor-pointer">
+                                            <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {educationOptions.map((e) => (
-                                                <SelectItem key={e} value={e} className="cursor-pointer">
+                                                <SelectItem className="cursor-pointer" key={e} value={e}>
                                                     {e.charAt(0).toUpperCase() + e.slice(1)}
                                                 </SelectItem>
                                             ))}
@@ -400,18 +368,14 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 name="affiliation"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        onOpenChange={(o) => !o && field.onBlur()}
-                                    >
-                                        <SelectTrigger className="cursor-pointer">
-                                            <SelectValue placeholder="Selecione seu vínculo" />
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className="mt-1 cursor-pointer">
+                                            <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {affiliationIfalOptions.map((a) => (
-                                                <SelectItem key={a} value={a} className="cursor-pointer">
-                                                    {(a.charAt(0).toUpperCase() + a.slice(1)).replace("Nao", "Não")}
+                                                <SelectItem key={a} className="cursor-pointer" value={a}>
+                                                    {a.charAt(0).toUpperCase() + a.slice(1).replace("Nao", "Não")}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -420,26 +384,21 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                             />
                         </FormField>
                     </FormSection>
+                </div>
 
-                    <div className="mt-10 flex justify-end gap-3">
-                        <Button
-                            type="button"
-                            className="cursor-pointer"
-                            variant="outline"
-                            onClick={() => setOpen(false)}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="cursor-pointer bg-[#FDC700] px-8 font-bold text-black hover:bg-[#FDC700]/90"
-                        >
-                            {isSubmitting ? "Enviando..." : "Finalizar Inscrição"}
-                        </Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
+                <footer className="mt-10 flex flex-col items-center gap-4">
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting || loading}
+                        className="h-12 w-full cursor-pointer bg-yellow-400 text-lg font-semibold text-black shadow-md transition-all hover:bg-yellow-500 active:scale-95 md:w-2/3"
+                    >
+                        {isSubmitting ? "Enviando..." : "Finalizar Inscrição"}
+                    </Button>
+                    <p className="text-xs text-gray-400">Certifique-se de que todos os dados estão corretos.</p>
+                </footer>
+            </form>
+        );
+    };
+
+    return renderContent();
 }
