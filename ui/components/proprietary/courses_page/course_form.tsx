@@ -1,26 +1,27 @@
-import { useState, useRef, useEffect } from "react";
-import { useForm, Controller, useWatch } from "react-hook-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Input } from "@/components/ui/input";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    affiliationIfalOptions,
+    consignorOrganOptions,
+    courseRegisterSchema,
+    educationOptions,
+    raceOptions,
+    type CourseRegisterType,
+} from "@/ui/forms/schemas/course-registration-schema";
+import { useCep } from "@/ui/hooks/useCep";
+import { useIsMounted } from "@/ui/hooks/useIsMounted";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Loader2 } from "lucide-react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
-import {
-    courseRegisterSchema,
-    type CourseRegisterType,
-    raceOptions,
-    consignorOrganOptions,
-    educationOptions,
-    affiliationIfalOptions,
-} from "@/ui/forms/schemas/course-registration-schema";
-import SubscribeSucess from "./subscribe_sucess";
-import { useIsMounted } from "@/ui/hooks/useIsMounted";
-import { useCep } from "@/ui/hooks/useCep";
+
 import { FormField, FormSection } from "../landing_page/CourseDialog";
-import { Loader2 } from "lucide-react";
+import SubscribeSucess from "./subscribe_sucess";
 
 interface CourseFormProps {
     readonly course: string;
@@ -32,7 +33,7 @@ const LoadingState = ({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) 
         ref={ref}
         className="mx-auto flex h-auto w-full max-w-4xl flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-6 py-10 text-center shadow-lg transition-all hover:shadow-xl md:p-12 lg:h-170 2xl:p-16"
     >
-        <Loader2 className="animate-spin text-yellow-500" size={50} />
+        <Loader2 className="animate-spin text-yellow-primary" size={50} />
         <span className="mt-4 text-sm font-semibold text-gray-400 uppercase">Enviando inscrição...</span>
     </div>
 );
@@ -79,10 +80,11 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
 
     const handleCepBlur = useCep(setValue);
 
-    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none h-10 mt-1 rounded-md w-full";
+    const inputClass =
+        "focus-visible:ring-2 focus-visible:ring-yellow-primary outline-none h-10 mt-1 rounded-md w-full";
 
     const maskInputClass =
-        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none mt-1";
+        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-yellow-primary outline-none mt-1";
 
     if (!isMounted) return null;
 
@@ -390,7 +392,7 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                     <Button
                         type="submit"
                         disabled={isSubmitting || loading}
-                        className="h-12 w-full cursor-pointer bg-yellow-400 text-lg font-semibold text-black shadow-md transition-all hover:bg-yellow-500 active:scale-95 md:w-2/3"
+                        className="h-12 w-full cursor-pointer bg-yellow-secondary text-lg font-semibold text-black shadow-md transition-all hover:bg-yellow-secondary-dark active:scale-95 md:w-2/3"
                     >
                         {isSubmitting ? "Enviando..." : "Finalizar Inscrição"}
                     </Button>
