@@ -1,27 +1,27 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useForm, Controller, FieldError, useWatch } from "react-hook-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+    affiliationIfalOptions,
+    consignorOrganOptions,
+    courseRegisterSchema,
+    educationOptions,
+    raceOptions,
+    type CourseRegisterType,
+} from "@/ui/forms/schemas/course-registration-schema";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { AlertCircle } from "lucide-react";
+import { Controller, FieldError, useForm, useWatch } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import {
-    courseRegisterSchema,
-    type CourseRegisterType,
-    raceOptions,
-    consignorOrganOptions,
-    educationOptions,
-    affiliationIfalOptions,
-} from "@/ui/forms/schemas/course-registration-schema";
 
 function useIsMounted() {
     return useSyncExternalStore(
@@ -115,7 +115,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         }
     };
 
-    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-400 outline-none";
+    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-primary-light outline-none";
     const maskInputClass =
         inputClass + " flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
@@ -133,17 +133,19 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                 >
                     <DialogHeader>
                         <DialogTitle className="text-2xl font-semibold">
-                            Inscrição: <span className="text-[#C49D00]">{curso}</span>
+                            Inscrição: <span className="text-yellow-muted">{curso}</span>
                         </DialogTitle>
                         <DialogDescription asChild>
                             <div className="space-y-2">
                                 <p className="text-sm font-medium">
                                     Preencha os dados abaixo para efetivar sua inscrição.
                                 </p>
-                                <p className="text-sm font-medium text-yellow-600">Todos os campos são obrigatórios.</p>
-                                <Alert className="border-yellow-200 bg-yellow-50">
-                                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                                    <AlertDescription className="font-semibold text-yellow-800">
+                                <p className="text-sm font-medium text-yellow-muted-light">
+                                    Todos os campos são obrigatórios.
+                                </p>
+                                <Alert className="border-yellow-back-icon-dark bg-yellow-back-icon-light">
+                                    <AlertCircle className="h-4 w-4" color="var(--color-yellow-icon)" />
+                                    <AlertDescription className="font-semibold text-yellow-icon">
                                         A inscrição não garante sua entrada no curso.
                                     </AlertDescription>
                                 </Alert>
@@ -260,7 +262,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 <Input
                                     type="file"
                                     accept="image/*,.pdf"
-                                    className={`${inputClass} cursor-pointer text-start file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-yellow-700 hover:file:text-yellow-800`}
+                                    className={`${inputClass} cursor-pointer text-start file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-yellow-primary hover:file:text-yellow-primary-dark`}
                                     {...register(fileField.id)}
                                 />
                             </FormField>
@@ -433,7 +435,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="cursor-pointer bg-[#FDC700] px-8 font-bold text-black hover:bg-[#FDC700]/90"
+                            className="cursor-pointer bg-yellow-primary px-8 font-bold text-black hover:bg-yellow-primary/90"
                         >
                             {isSubmitting ? "Enviando..." : "Finalizar Inscrição"}
                         </Button>

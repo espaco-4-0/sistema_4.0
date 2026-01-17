@@ -1,5 +1,5 @@
-import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 interface SubscribeSucessProps {
@@ -19,10 +19,10 @@ export default function SubscribeSucess({ course, setCloseCourse }: SubscribeSuc
             </h3>
 
             <p className="mt-3 text-sm text-gray-600 lg:text-base">
-                Sua inscrição no curso <span className="font-semibold text-yellow-500">{course}</span> foi recebida.
+                Sua inscrição no curso <span className="font-semibold text-yellow-primary">{course}</span> foi recebida.
             </p>
 
-            <div className="mt-6 w-full rounded-xl border border-yellow-200 bg-yellow-50 p-5 text-sm leading-relaxed shadow-sm lg:max-w-120 lg:p-6 lg:text-base">
+            <div className="mt-6 w-full rounded-xl border border-yellow-200 bg-yellow-back-icon-light p-5 text-sm leading-relaxed shadow-sm lg:max-w-120 lg:p-6 lg:text-base">
                 <p>
                     <strong className="mb-1 block text-yellow-800">Próximos passos:</strong>
                     {}
@@ -36,7 +36,7 @@ export default function SubscribeSucess({ course, setCloseCourse }: SubscribeSuc
             <div className="mt-8 flex w-full flex-col items-center gap-3">
                 <Button
                     onClick={() => setCloseCourse(false)}
-                    className="text-md h-12 w-full cursor-pointer border-none bg-yellow-400 font-semibold text-black shadow-md transition-transform hover:bg-yellow-500 active:scale-95 lg:max-w-sm"
+                    className="text-md h-12 w-full cursor-pointer border-none bg-yellow-secondary font-semibold text-black shadow-md transition-transform hover:bg-yellow-secondary-dark active:scale-95 lg:max-w-sm"
                 >
                     Ver mais cursos
                 </Button>

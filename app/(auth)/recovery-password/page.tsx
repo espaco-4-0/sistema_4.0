@@ -1,11 +1,11 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import LeftSpaceDecoration from "@/ui/components/proprietary/auth_pages/left-space-decoration";
-import { ArrowLeft, Mail, Home } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import LeftSpaceDecoration from "@/ui/components/proprietary/auth_pages/left-space-decoration";
+import { ArrowLeft, Mail } from "lucide-react";
+import Link from "next/link";
 
 export default function RecoveryPassword() {
     const [sent, setSent] = useState(false);
@@ -18,21 +18,23 @@ export default function RecoveryPassword() {
             <div className="relative flex flex-col items-center justify-center px-6">
                 <div className="mt-12 mb-8 w-full max-w-md lg:mt-0">
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
-                        <Link href="/login-page" className="flex gap-2 text-center items-center"><ArrowLeft />Voltar para login</Link>
+                        <Link href="/login-page" className="flex gap-2 text-center items-center">
+                            <ArrowLeft />
+                            Voltar para login
+                        </Link>
                     </Button>
                 </div>
 
                 {sent ? (
                     <div className="flex flex-col items-center text-center w-10/12 max-w-md lg:w-full">
-                        <div className="mb-6 w-16 h-16 flex items-center justify-center rounded-lg border-2 border-black bg-[#FDC700]">
+                        <div className="mb-6 w-16 h-16 flex items-center justify-center rounded-lg border-2 border-black bg-yellow-primary">
                             <Mail className="h-8 w-8" strokeWidth={2} />
                         </div>
 
                         <h2 className="mb-2 text-[16px]">E-mail enviado!</h2>
 
                         <p className="mb-2 text-sm text-gray-600">
-                            Enviamos um link de redefinição de senha para{" "}
-                            <strong>{email}</strong>
+                            Enviamos um link de redefinição de senha para <strong>{email}</strong>
                         </p>
 
                         <p className="mb-8 text-sm text-gray-600">
@@ -40,7 +42,7 @@ export default function RecoveryPassword() {
                         </p>
 
                         <Link href="/login-page" className="w-full max-w-md">
-                            <Button className="mb-6 w-full rounded-lg cursor-pointer text-[#FDC700]">
+                            <Button className="mb-6 w-full rounded-lg cursor-pointer text-yellow-primary">
                                 VOLTAR PARA LOGIN
                             </Button>
                         </Link>
@@ -52,7 +54,7 @@ export default function RecoveryPassword() {
                                     setSent(false);
                                     setEmail("");
                                 }}
-                                className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-600/50"
+                                className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-muted/50"
                             >
                                 Tente novamente
                             </Button>
@@ -80,7 +82,7 @@ export default function RecoveryPassword() {
                         <Button
                             onClick={() => setSent(true)}
                             disabled={!email}
-                            className="w-full h-10 lg:h-9 cursor-pointer text-yellow-400 -mt-2"
+                            className="w-full h-10 lg:h-9 cursor-pointer text-yellow-primary -mt-2"
                         >
                             ENVIAR LINK DE REDEFINIÇÃO
                         </Button>

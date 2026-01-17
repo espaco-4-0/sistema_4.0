@@ -1,11 +1,12 @@
-import { Home, ChevronRight, Clock, Calendar, Users, Book, SquareCheck, LucideIcon } from "lucide-react";
-import Link from "next/link";
-import CourseCard from "./course_card";
 import { useState } from "react";
-import { CourseHero } from "./course_hero";
-import CourseForm from "./course_form";
-import { CourseDetails, courses } from "../../../../mock/mock_courses";
+import { Book, Calendar, ChevronRight, Clock, Home, LucideIcon, SquareCheck, Users } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+
+import { CourseDetails, courses } from "../../../../mock/mock_courses";
+import CourseCard from "./course_card";
+import CourseForm from "./course_form";
+import { CourseHero } from "./course_hero";
 
 type RightInformation = {
     id: number;
@@ -64,7 +65,7 @@ export default function CoursesMainPage() {
     return (
         <section className="min-h-screen bg-gray-50 py-7 font-sans">
             <div className="mx-auto w-full">
-                <div className="ml-2 flex h-auto min-h-12 flex-wrap items-center gap-1 p-2 px-4 pb-4 text-xs font-medium text-yellow-600 lg:px-20 2xl:px-80">
+                <div className="ml-2 flex h-auto min-h-12 flex-wrap items-center gap-1 p-2 px-4 pb-4 text-xs font-medium text-yellow-muted lg:px-20 2xl:px-80">
                     <Link href="/" className="flex items-center gap-1 text-gray-400 hover:underline">
                         <Home className="h-3 w-3" />
                         Home
@@ -110,8 +111,8 @@ export default function CoursesMainPage() {
                                         key={id}
                                         className="flex h-auto min-h-20 w-full gap-4 rounded-xl bg-white p-5 shadow-lg transition-all hover:shadow-xl"
                                     >
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-yellow-100">
-                                            <Icon className="h-6 w-6 text-yellow-500" />
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-yellow-back-icon">
+                                            <Icon className="h-6 w-6 text-yellow-icon" />
                                         </div>
                                         <div className="flex flex-col justify-center">
                                             <span className="text-sm font-semibold text-gray-600">{title}</span>
@@ -144,7 +145,7 @@ export default function CoursesMainPage() {
                                             key={req.id}
                                             className="flex w-full items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 p-3 text-sm"
                                         >
-                                            <SquareCheck className="h-4 w-4 shrink-0 text-yellow-400" /> {req.label}
+                                            <SquareCheck className="h-4 w-4 shrink-0 text-yellow-icon" /> {req.label}
                                         </div>
                                     ))}
                                 </div>
@@ -155,8 +156,10 @@ export default function CoursesMainPage() {
                     <>
                         <div className="flex min-h-60 flex-col items-center justify-between bg-black px-4 py-10 text-white lg:h-60 lg:flex-row lg:px-20 2xl:px-80">
                             <div className="flex flex-col">
-                                <h1 className="text-3xl font-semibold text-[#F4C430] lg:text-5xl">Nossos cursos</h1>
-                                <p className="mt-4 max-w-3xl text-lg text-[#F4C430] lg:mt-8 lg:text-xl">
+                                <h1 className="text-3xl font-semibold text-yellow-primary lg:text-5xl">
+                                    Nossos cursos
+                                </h1>
+                                <p className="mt-4 max-w-3xl text-lg text-yellow-primary lg:mt-8 lg:text-xl">
                                     Descubra nossos cursos de tecnologia e transforme sua carreira.
                                 </p>
                             </div>

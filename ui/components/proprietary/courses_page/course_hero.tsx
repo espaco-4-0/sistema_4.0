@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Users, ChevronLeft, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight as ChevronRightIcon, Users } from "lucide-react";
 import Image from "next/image";
 
 interface CourseHeroProps {
@@ -97,12 +97,12 @@ export function CourseHero({ title, description, level, instructor, students, ga
 
                         <div className="flex flex-wrap gap-6 text-white/90">
                             <div className="flex items-center gap-2">
-                                <BookOpen className="size-4 text-yellow-300 lg:size-5" />
+                                <BookOpen className="size-4 text-yellow-icon lg:size-5" />
                                 <span className="text-sm font-medium lg:text-base">{instructor}</span>
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <Users className="size-4 text-yellow-300 lg:size-5" />
+                                <Users className="size-4 text-yellow-icon lg:size-5" />
                                 <span className="text-sm font-medium lg:text-base">{students} alunos</span>
                             </div>
                         </div>
@@ -129,7 +129,7 @@ export function CourseHero({ title, description, level, instructor, students, ga
 
                     <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
                         <div
-                            className="h-full bg-yellow-400 transition-all ease-linear"
+                            className="h-full bg-yellow-primary transition-all ease-linear"
                             style={{ width: `${progress}%` }}
                         />
                     </div>

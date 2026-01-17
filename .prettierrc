@@ -15,5 +15,21 @@
 
     "arrowParens": "always",
 
-    "plugins": ["prettier-plugin-tailwindcss"]
+    "plugins": ["prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"],
+
+    "importOrder": [
+        "^react$",
+        "^react/(.*)$",
+        "<THIRD_PARTY_MODULES>",
+        "",
+        "^@core/(.*)$",
+        "^@server/(.*)$",
+        "^@ui/(.*)$",
+        "",
+        "^[./]"
+    ],
+
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true,
+    "importOrderCaseSensitive": true
 }

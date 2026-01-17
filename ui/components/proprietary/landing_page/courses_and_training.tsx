@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock4Icon, Box, Cpu, Bot, Zap, Layers, KanbanSquare } from "lucide-react";
-
 import CourseDialog from "@/ui/components/proprietary/landing_page/CourseDialog";
+import { Bot, Box, Clock4Icon, Cpu, KanbanSquare, Layers, Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function CoursesAndTraining() {
@@ -66,7 +66,7 @@ export default function CoursesAndTraining() {
             <div className="mx-auto max-w-7xl px-6">
                 <div className="text-center">
                     <h2 className="text-4xl font-medium">
-                        Cursos e <span className="font-bold text-[#C49D00]">Capacitações</span>
+                        Cursos e <span className="font-bold text-yellow-muted">Capacitações</span>
                     </h2>
                     <p className="mt-4 text-gray-600">
                         Desenvolva suas habilidades com nossos cursos práticos em tecnologias da indústria 4.0
@@ -80,8 +80,8 @@ export default function CoursesAndTraining() {
                             className="rounded-2xl border border-gray-200 shadow-sm transition hover:shadow-md"
                         >
                             <CardHeader>
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#FAD442]/50">
-                                    <course.icon className="h-6 w-6 text-[#C49D00]" />
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-back-icon">
+                                    <course.icon className="h-6 w-6 text-yellow-icon" />
                                 </div>
 
                                 <CardTitle className="text-lg font-semibold">{course.title}</CardTitle>
@@ -97,12 +97,12 @@ export default function CoursesAndTraining() {
                             </CardContent>
 
                             <CardFooter>
-                                <button
+                                <Button
                                     onClick={() => abrirDialog(course.title)}
-                                    className="w-full cursor-pointer rounded-lg bg-[#F4C430] py-2 text-sm font-semibold text-black transition duration-200 ease-in-out hover:bg-[#e0b52a] active:bg-[#cda627]"
+                                    className="w-full cursor-pointer rounded-lg bg-yellow-secondary py-2 text-sm font-semibold text-black transition duration-200 ease-in-out hover:bg-yellow-secondary-dark active:bg-yellow-primary-dark"
                                 >
                                     INSCREVA-SE
-                                </button>
+                                </Button>
                             </CardFooter>
                         </Card>
                     ))}
@@ -111,7 +111,7 @@ export default function CoursesAndTraining() {
                 <div className="flex justify-center pt-20">
                     <Link
                         href="/courses"
-                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black hover:text-white 2xl:h-12 2xl:w-80"
+                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black hover:text-white 2xl:h-12 2xl:w-80 transition-all"
                     >
                         Ver todos os Cursos
                     </Link>
