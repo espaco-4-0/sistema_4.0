@@ -111,7 +111,7 @@ export default function CoursesAndTraining() {
                 <div className="flex justify-center pt-20">
                     <Link
                         href="/courses"
-                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black hover:text-white 2xl:h-12 2xl:w-80 transition-all"
+                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black duration-250 hover:text-white 2xl:text-[16px] 2xl:h-12 2xl:w-80 transition-all"
                     >
                         Ver todos os Cursos
                     </Link>

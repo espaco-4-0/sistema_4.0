@@ -78,7 +78,7 @@ export function UpcomingEvents() {
 
             <Link
                 href="/calendar"
-                className="flex justify-center items-center mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-bold text-black cursor-pointer 2xl:text-[16px] hover:bg-black hover:text-white hover:cursor-pointer transition-all"
+                className="flex justify-center items-center mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-bold text-black duration-250 cursor-pointer 2xl:text-[16px] hover:bg-black hover:text-white hover:cursor-pointer transition-all"
             >
                 Ver todos os Eventos
             </Link>
