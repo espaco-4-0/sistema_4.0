@@ -115,8 +115,8 @@ export default function Footer() {
             <FooterItem
               icon={Mail}
               title="Email"
-              desc="espaco4.0@ifal.edu.br"
-              href="mailto:espaco4.0@ifal.edu.br"
+              desc="espaco4.0.arapiraca@ifal.edu.br"
+              href="mailto:espaco4.0.arapiraca@ifal.edu.br"
             />
 
             <FooterItem
