@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 const noticias = [
     {
@@ -101,13 +101,12 @@ export default function Blog() {
                 </div>
 
                 <div className="flex justify-center mt-14">
-                    <Button
-                        variant="outline"
-						
+                    <Link
+					href="/slow-page"
                         className="border-2 cursor-pointer border-gray-description-light px-8 py-3 rounded-md font-medium transition hover:bg-black hover:text-white"
                     >
                         Mais Notícias
-                    </Button>
+                    </Link>
                 </div>
             </div>
         </section>
