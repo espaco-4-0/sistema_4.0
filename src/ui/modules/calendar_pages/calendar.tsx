@@ -10,14 +10,15 @@ import {
     CheckCircle2,
     ChevronRight,
     Clock,
+    Cog,
     Home,
-    Loader2,
     MapPin,
     Phone,
     Plus,
     School,
     User,
     Users,
+    XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -147,7 +148,9 @@ export default function AllCalendar() {
 
     const [viewDate, setViewDate] = useState<Date>(initialState.date);
     const [selectedDate, setSelectedDate] = useState<Date>(initialState.date);
-    const [step, setStep] = useState<"idle" | "list" | "form" | "detail" | "loading" | "success">(initialState.step);
+    const [step, setStep] = useState<"idle" | "list" | "form" | "detail" | "loading" | "success" | "error">(
+        initialState.step
+    );
 
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
     const [events, setEvents] = useState<IEvent[]>(initialEvents);
@@ -167,29 +170,39 @@ export default function AllCalendar() {
 
     const handleFormSubmit = (data: IFormInput) => {
         setStep("loading");
+
         setTimeout(() => {
             const [sh, sm] = data.hora.split(":").map(Number);
             const [eh, em] = data.horaSaida.split(":").map(Number);
             const start = setMinutes(setHours(new Date(selectedDate), sh), sm);
             let end = setMinutes(setHours(new Date(selectedDate), eh), em);
-            if (end < start) end = start;
 
-            const newEvent: IEvent = {
-                id: Date.now(),
-                title: `Visita: ${data.instituicao}`,
-                start,
-                end,
-                type: "aprovado",
-                description: data.mensagem || "Solicitação de visita.",
-                time: `${data.hora} - ${data.horaSaida}`,
-                local: "Espaço 4.0",
-                professor: data.professor,
-                whatsapp: data.whatsapp,
-                quantidade: data.quantidade,
-            };
-            setEvents([...events, newEvent]);
-            setStep("success");
-            formMethods.reset();
+            if (end <= start) end = setMinutes(setHours(new Date(selectedDate), eh + 1), em);
+
+            const hasConflict = events.some((event) => {
+                return isSameDay(event.start, start) && start < event.end && end > event.start;
+            });
+
+            if (hasConflict) {
+                setStep("error");
+            } else {
+                const newEvent: IEvent = {
+                    id: Date.now(),
+                    title: `Visita: ${data.instituicao}`,
+                    start,
+                    end,
+                    type: "aprovado",
+                    description: data.mensagem || "Solicitação de visita.",
+                    time: `${data.hora} - ${data.horaSaida}`,
+                    local: "Espaço 4.0",
+                    professor: data.professor,
+                    whatsapp: data.whatsapp,
+                    quantidade: data.quantidade,
+                };
+                setEvents([...events, newEvent]);
+                setStep("success");
+                formMethods.reset();
+            }
         }, 1500);
     };
 
@@ -290,6 +303,13 @@ export default function AllCalendar() {
                                     }}
                                 />
                             )}
+                            {step === "error" && (
+                                <ErrorState
+                                    onBack={() => {
+                                        setStep("form");
+                                    }}
+                                />
+                            )}
                         </PanelWrapper>
                     </aside>
                 </div>
@@ -315,7 +335,7 @@ const IdleState = () => (
 
 const LoadingState = () => (
     <>
-        <Loader2 className="w-8 h-8 text-yellow-primary animate-spin" />
+        <Cog className="w-8 h-8 text-yellow-primary animate-spin" />
         <p className="text-[11px] font-bold text-gray-400 uppercase mt-2">Processando...</p>
     </>
 );
@@ -331,6 +351,21 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
             className="mt-6 text-[10px] font-bold text-black border-b-2 border-yellow-400 uppercase"
         >
             Voltar
+        </button>
+    </>
+);
+
+const ErrorState = ({ onBack }: { onBack: () => void }) => (
+    <>
+        <div className="bg-red-50 p-3 rounded-full mb-3">
+            <XCircle size={32} className="text-red-500" />
+        </div>
+        <h3 className="text-red-600 font-bold text-sm uppercase">Horário Indisponível!</h3>
+        <p className="text-gray-400 text-xs text-center mt-2 px-4">
+            Já existe um evento agendado neste intervalo. Por favor, escolha outro horário.
+        </p>
+        <button onClick={onBack} className="mt-6 text-[10px] font-bold text-black border-b-2 border-red-400 uppercase">
+            Tentar Outro
         </button>
     </>
 );

@@ -1,8 +1,10 @@
-"use client"
-import { useEffect, useState } from "react"
-import LoadingCat from "../loading"
+"use client";
 
-export default function SlowPage(){
+import { useEffect, useState } from "react";
+
+import LoadingCat from "../loading";
+
+export default function SlowPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -10,11 +12,11 @@ export default function SlowPage(){
         return () => clearTimeout(timer);
     }, []);
 
-    if(loading) return <LoadingCat />
+    if (loading) return <LoadingCat />;
 
-    return(
+    return (
         <div>
-            <h1>Página Pronta</h1>
+            <h1 className="text-2xl flex">Página Pronta</h1>
         </div>
-    )
+    );
 }
