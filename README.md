@@ -5,7 +5,7 @@ Este projeto utiliza uma adaptação da Arquitetura Hexagonal (Ports & Adapters)
 ## Estrutura de Diretórios
 
 Todo o código fonte reside na pasta `src/`. Abaixo está a descrição da responsabilidade de cada diretório.
-
+```
 src/
 ├── domain/                      # O CÉREBRO (Regras de Negócio puras)
 │   ├── entities/                # Definição de Tipos e Interfaces (ex: User, Course)
@@ -37,7 +37,7 @@ src/
     ├── (auth)/                  # Rotas públicas/auth
     ├── courses/                 # Rota /courses
     └── layout.tsx               # Entrypoint (Providers são injetados aqui)
-
+```
 ---
 
 ## Guia de Migração (De -> Para)
