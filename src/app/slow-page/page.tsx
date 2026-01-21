@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import LoadingCat from "../loading";
+import Loading from "../loading";
 
 export default function SlowPage() {
     const [loading, setLoading] = useState(true);
@@ -12,7 +12,7 @@ export default function SlowPage() {
         return () => clearTimeout(timer);
     }, []);
 
-    if (loading) return <LoadingCat />;
+    if (loading) return <Loading />;
 
     return (
         <div>
