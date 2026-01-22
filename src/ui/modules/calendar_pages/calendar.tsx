@@ -263,7 +263,7 @@ export default function AllCalendar() {
                         />
                     </div>
 
-                    <aside className="lg:col-span-4 min-h-[520px]">
+                    <aside className="lg:col-span-4 min-h-130">
                         <PanelWrapper
                             align={step === "list" || step === "form" || step === "detail" ? "start" : "center"}
                         >
@@ -312,6 +312,29 @@ export default function AllCalendar() {
                             )}
                         </PanelWrapper>
                     </aside>
+
+                    <div className="col-span-1 lg:col-span-12 flex flex-wrap items-center justify-start gap-6  border-gray-200">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-primary ring-2 ring-yellow-100" />
+                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">
+                                Solicitação Concluída
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500 ring-2 ring-green-100" />
+                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">
+                                Solicitação Em Análise
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500 ring-2 ring-red-100" />
+                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">
+                                Solicitação Recusada
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -320,7 +343,7 @@ export default function AllCalendar() {
 
 const PanelWrapper = ({ children, align }: { children: React.ReactNode; align: "center" | "start" }) => (
     <div
-        className={`h-full min-h-[520px] bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col ${align === "center" ? "items-center justify-center" : "items-start"}`}
+        className={`h-full min-h-130 bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col ${align === "center" ? "items-center justify-center" : "items-start"}`}
     >
         {children}
     </div>
