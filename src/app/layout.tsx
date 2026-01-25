@@ -36,13 +36,12 @@ export default function RootLayout({
           {children}
         </main>
 
-        {/* TOASTS / SONNER */}
         <Toaster
           richColors
           position="top-right"
           closeButton
         />
-       
+
       </body>
     </html>
   );
