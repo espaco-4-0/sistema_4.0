@@ -12,11 +12,11 @@ export default function Professor() {
     const renderContent = () => {
         switch (currentView) {
             case "visao-geral":
-                return VisaoGeral();
+                return <VisaoGeral />;
             case "gerenciar-projetos":
                 return <div className="p-4 bg-white rounded-lg border">Projects List Here</div>;
             case "gerenciar-usuarios":
-                return GerenciarUsuarios();
+                return <GerenciarUsuarios />;
             case "recursos":
                 return <div className="p-4 bg-white rounded-lg border">Equipment Inventory</div>;
             case "relatorios":
@@ -27,12 +27,12 @@ export default function Professor() {
                 return <div></div>;
             case "certificacao":
                 return <div></div>;
-			case "analises":
-				return <div></div>
-			case "controle-presenca":
-				return <div></div>
-			case "certificados":
-				return <div></div>
+            case "analises":
+                return <div></div>
+            case "controle-presenca":
+                return <div></div>
+            case "certificados":
+                return <div></div>
 
             default:
                 return (
