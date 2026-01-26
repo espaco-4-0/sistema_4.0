@@ -5,6 +5,7 @@ import GerenciarUsuarios from "@/src/ui/modules/professor_pages/gerenciar_usuari
 import { Header } from "@/src/ui/modules/professor_pages/header";
 import { Sidebar } from "@/src/ui/modules/professor_pages/sidebar";
 import { VisaoGeral } from "@/src/ui/modules/professor_pages/visao_geral";
+import Recursos from "@/src/ui/modules/professor_pages/recursos";
 
 export default function Professor() {
     const [currentView, setCurrentView] = useState("visao-geral");
@@ -18,7 +19,7 @@ export default function Professor() {
             case "gerenciar-usuarios":
                 return <GerenciarUsuarios />;
             case "recursos":
-                return <div className="p-4 bg-white rounded-lg border">Equipment Inventory</div>;
+                return <Recursos />;
             case "relatorios":
                 return <div className="p-4 bg-white rounded-lg border">Relatorios de projetos</div>;
             case "configuracoes":

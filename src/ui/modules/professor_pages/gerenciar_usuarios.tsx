@@ -1,11 +1,23 @@
-
 import { useState } from "react";
 import { getTypeStyle, stats, userData } from "@/src/infra/modules/professor/manage-users-mock";
-import { Filter, MoreVertical, Search, Upload, UserPlus } from "lucide-react";
 import { ImportCSVModal } from "@/src/ui/components/modals/import-csv-modal";
+import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus } from "lucide-react";
 
 export default function GerenciarUsuarios() {
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(userData.length / itemsPerPage);
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    const currentUsers = userData.slice(startIndex, endIndex);
+
+    const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    const goToPreviousPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
 
     return (
         <div className="space-y-6 p-6">
@@ -18,9 +30,7 @@ export default function GerenciarUsuarios() {
                     >
                         <Upload size={18} /> Importar CSV
                     </button>
-                    <button
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium"
-                    >
+                    <button className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium">
                         <UserPlus size={18} /> Novo Usuário
                     </button>
                 </div>
@@ -64,51 +74,89 @@ export default function GerenciarUsuarios() {
                 </button>
             </div>
 
-            <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100 mt-10 ">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-100 border-b  border-gray-100">
-                        <tr>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">E-mail</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Tipo</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Data</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {userData.map((user) => (
-                            <tr key={user.name} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                                <td className="px-6 py-4 text-sm">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeStyle(user.type)}`}>
-                                        {user.type}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-sm">
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
-                                        {user.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-600">{user.date}</td>
-                                <td className="px-6 py-4 text-sm text-right">
-                                    <button className="text-gray-400 hover:text-gray-600">
-                                        <MoreVertical size={18} />
-                                    </button>
-                                </td>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-10 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Nome
+                                </th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    E-mail
+                                </th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Tipo
+                                </th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Data
+                                </th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">
+                                    Ações
+                                </th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {currentUsers.map((user, index) => (
+                                <tr key={user.email + index} className="hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeStyle(user.type)}`}
+                                        >
+                                            {user.type}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                                            {user.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">{user.date}</td>
+                                    <td className="px-6 py-4 text-sm text-right">
+                                        <button className="text-gray-400 hover:text-gray-600">
+                                            <MoreVertical size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 bg-gray-50/50">
+                    <p className="text-sm text-gray-600">
+                        Mostrando <span className="font-medium">{userData.length > 0 ? startIndex + 1 : 0}</span> a{" "}
+                        <span className="font-medium">{Math.min(endIndex, userData.length)}</span> de{" "}
+                        <span className="font-medium">{userData.length}</span> usuários
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={goToPreviousPage}
+                            disabled={currentPage === 1}
+                            className="p-2 border border-gray-300 rounded-lg bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                        <div className="flex items-center px-4 text-sm font-medium text-gray-700">
+                            Página {currentPage} de {totalPages || 1}
+                        </div>
+                        <button
+                            onClick={goToNextPage}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            className="p-2 border border-gray-300 rounded-lg bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <ImportCSVModal
-                isOpen={isCSVModalOpen}
-                onClose={() => setIsCSVModalOpen(false)}
-            />
-
-
+            <ImportCSVModal isOpen={isCSVModalOpen} onClose={() => setIsCSVModalOpen(false)} />
         </div>
     );
 }

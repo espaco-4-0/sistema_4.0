@@ -58,7 +58,8 @@ export const userData = [
 		email: "ana.costa@ifal.edu.br",
 		type: "Professor",
 		status: "Ativo",
-		date: "09/01/2024" },
+		date: "09/01/2024"
+	},
 ];
 
 export const getTypeStyle = (type: string) => {
