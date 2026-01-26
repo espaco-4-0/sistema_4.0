@@ -19,14 +19,26 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Função para baixar o arquivo da pasta public/templates
     const handleDownloadTemplate = () => {
+        const headers = ["Nome", "E-mail", "Tipo", "Status"];
+        const exampleRow = ["Maria Silva", "maria@exemplo.com", "Aluno", "Ativo"];
+
+        const csvContent = [
+            headers.join(","),
+            exampleRow.join(",")
+        ].join("\n");
+
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = '/templates/teste.csv';
-        link.download = 'teste.csv';
+        link.href = url;
+        link.setAttribute('download', 'modelo_importacao_usuarios.csv');
         document.body.appendChild(link);
         link.click();
+
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -37,7 +49,7 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
     };
 
     const handleFile = (selectedFile: File) => {
-        if (selectedFile.type === "text/csv" || selectedFile.name.endsWith(".csv")) {
+        if (selectedFile.type === "text/csv" || selectedFile.name.endsWith(".csv") || selectedFile.type === "application/vnd.ms-excel") {
             setFile(selectedFile);
         } else {
             alert("Por favor, selecione apenas arquivos CSV.");
@@ -46,13 +58,19 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
 
     const handleDragOver = (e: DragEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         setIsDragging(true);
     };
 
-    const handleDragLeave = () => setIsDragging(false);
+    const handleDragLeave = (e: DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
 
     const handleDrop = (e: DragEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         setIsDragging(false);
         const droppedFile = e.dataTransfer.files?.[0];
         if (droppedFile) handleFile(droppedFile);
@@ -65,7 +83,7 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-125 p-0 overflow-hidden border-none shadow-2xl">
+            <DialogContent className="sm:max-w-125 p-0 overflow-hidden border-none shadow-2xl bg-white">
                 <DialogHeader className="p-6 pb-0">
                     <DialogTitle className="text-xl text-gray-800">Importar Usuários em Massa</DialogTitle>
                     <DialogDescription className="text-gray-500">
@@ -118,13 +136,14 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
                                 <div className="bg-green-100 p-3 rounded-full text-green-600 mb-2">
                                     <FileText size={32} />
                                 </div>
-                                <p className="text-gray-900 font-semibold text-sm truncate max-w-62.5">{file.name}</p>
+                                <p className="text-gray-900 font-semibold text-sm truncate max-w-60">{file.name}</p>
                                 <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
                                 <button
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setFile(null);
+                                        if (fileInputRef.current) fileInputRef.current.value = "";
                                     }}
                                     className="flex items-center gap-1 text-red-500 text-xs mt-3 font-medium hover:bg-red-50 px-2 py-1 rounded-md transition"
                                 >
@@ -142,7 +161,7 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
                                 </div>
                                 <button
                                     type="button"
-                                    className="mt-2 bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-bold text-xs hover:bg-yellow-500 transition shadow-md active:scale-95"
+                                    className="mt-2 bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-bold text-xs hover:bg-yellow-500 transition shadow-md active:scale-95 pointer-events-none"
                                 >
                                     Selecionar Arquivo
                                 </button>
@@ -162,13 +181,14 @@ export function ImportCSVModal({ isOpen, onClose }: ImportCSVModalProps) {
                     <button
                         type="button"
                         onClick={() => {
-                            if (file) console.log("Enviando:", file.name);
-                            onClose();
+                            if (file) {
+                                onClose();
+                            }
                         }}
                         disabled={!file}
                         className={`flex-1 sm:flex-none px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg
                             ${file
-                                ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95"
+                                ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95 cursor-pointer"
                                 : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"}
                         `}
                     >
