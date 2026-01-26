@@ -40,10 +40,6 @@ export default function RecoveryPasswordForm({ token }: RecoveryPasswordFormProp
     setMessage("Senha alterada com sucesso!");
     setMessageType("success");
     
-    // Conexao com o backend no futuro
-    console.log("Token recebido da URL:", token);
-    console.log("Nova senha:", newPassword);
-    console.log("Confirmar senha:", confirmPassword);
   };
 
   return (
