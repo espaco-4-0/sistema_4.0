@@ -2,8 +2,10 @@ import { useState } from "react";
 import { getTypeStyle, stats, userData } from "@/src/infra/modules/professor/manage-users-mock";
 import { ImportCSVModal } from "@/src/ui/components/modals/import-csv-modal";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus } from "lucide-react";
+import NewUserModal from "../../components/modals/new-user-modal";
 
 export default function GerenciarUsuarios() {
+	const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -30,7 +32,9 @@ export default function GerenciarUsuarios() {
                     >
                         <Upload size={18} /> Importar CSV
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium">
+                    <button
+					onClick={() => setIsNewUserModalOpen(true)}
+					className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium">
                         <UserPlus size={18} /> Novo Usuário
                     </button>
                 </div>
@@ -157,6 +161,7 @@ export default function GerenciarUsuarios() {
                 </div>
             </div>
 
+			<NewUserModal isOpen={isNewUserModalOpen} handleOpenChange={setIsNewUserModalOpen} onClose={() => setIsNewUserModalOpen(false)}/>
             <ImportCSVModal isOpen={isCSVModalOpen} onClose={() => setIsCSVModalOpen(false)} />
         </div>
     );

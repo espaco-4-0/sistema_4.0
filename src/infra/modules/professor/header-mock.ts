@@ -19,6 +19,26 @@ export const viewTitles: Record<string, { title: string; subtitle: string }> = {
         title: "Relatórios",
         subtitle: "Análises e estatísticas detalhadas",
     },
+    "controle-presenca": {
+        title: "Controle de Presença",
+        subtitle: "Gerencie a frequência dos estudantes",
+    },
+    certificados: {
+        title: "Certificados",
+        subtitle: "Emita e gerencie certificados",
+    },
+    certificacao: {
+        title: "Certificados",
+        subtitle: "Emita e gerencie certificados",
+    },
+    gamificacao: {
+        title: "Gamificação & Prêmios",
+        subtitle: "Sistema de pontuação e recompensas",
+    },
+    analises: {
+        title: "Análise de Dados",
+        subtitle: "Insights e métricas do Espaço 4.0",
+    },
     configuracoes: {
         title: "Configurações",
         subtitle: "Personalize o sistema",

@@ -1,11 +1,11 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { viewTitles } from "@/src/infra/modules/professor/header-mock";
 
-
-interface HeaderProps {
-    currentView: string;
-}
-
-export function Header({ currentView }: HeaderProps) {
+export function Header() {
+    const pathname = usePathname();
+    const currentView = pathname.split("/").pop() || "visao-geral";
     const { title, subtitle } = viewTitles[currentView] || viewTitles["visao-geral"];
 
     return (
@@ -17,8 +17,6 @@ export function Header({ currentView }: HeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-3">
-
-
                     <div className="flex items-center gap-2 ml-2">
                         <img
                             src="/renata.jpeg"

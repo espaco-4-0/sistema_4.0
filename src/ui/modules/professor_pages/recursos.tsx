@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Filter, Search, PlusCircle,  ChevronLeft, ChevronRight,MoreVertical } from "lucide-react";
+import { Filter, Search, PlusCircle,  ChevronLeft, ChevronRight,MoreVertical, Plus } from "lucide-react";
 import { inventoryData, statsEstoque } from "@/src/infra/modules/professor/recursos-mock";
+import { getStatusStyle } from "@/src/infra/modules/professor/manage-users-mock";
 
 export default function Recursos() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -15,21 +16,14 @@ export default function Recursos() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentItems = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
-    const getStatusStyle = (status) => {
-        switch (status) {
-            case "Disponível": return "bg-green-100 text-green-700 border-green-200";
-            case "Estoque Baixo": return "bg-yellow-100 text-yellow-700 border-yellow-200";
-            case "Esgotado": return "bg-red-100 text-red-700 border-red-200";
-            default: return "bg-gray-100 text-gray-700";
-        }
-    };
-
-
     return (
         <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h2 className="text-xl font-semibold text-gray-800">Visão Geral de Recursos</h2>
-                <button className="flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium">
+            <div className="flex flex-col sm:flex-row sm:items-center  gap-4">
+                <h2 className="text-xl justify-between font-semibold text-gray-800">Visão Geral de Recursos</h2>
+				<button className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg transition shadow-sm border hover:cursor-pointer hover:bg-gray-50 text-sm font-medium">
+                    <Plus size={18} /> Adicionar Recurso
+                </button>
+                <button className="flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 hover:cursor-pointer transition shadow-sm text-sm font-medium">
                     <PlusCircle size={18} /> Importar Recursos
                 </button>
             </div>
