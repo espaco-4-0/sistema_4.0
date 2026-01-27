@@ -324,7 +324,7 @@ export function GerenciarProjetos() {
           const totalTarefas = projeto.tarefas.length;
 
           return (
-            <div
+            <button
               key={projeto.id}
               className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer"
               onClick={() => setSelectedProjeto(projeto)}
@@ -400,7 +400,7 @@ export function GerenciarProjetos() {
                 </div>
                 <span className="text-xs text-gray-500">Prazo: {projeto.prazo}</span>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

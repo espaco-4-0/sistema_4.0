@@ -37,7 +37,7 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVMo
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    }; 
+    };
 
     const handleImportSubmit = () => {
         if (!file) return;

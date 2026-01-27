@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, Upload, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { toast } from "sonner";
 
 interface ImportarRecursosModalProps {
     open: boolean;
@@ -9,13 +10,16 @@ interface ImportarRecursosModalProps {
 }
 
 export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalProps) {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null); 	
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file && file.type === "text/csv") {
+        if (file && (file.type === "text/csv" || file.name.endsWith(".csv"))) {
             setSelectedFile(file);
+            toast.info(`Arquivo "${file.name}" pronto para importação.`);
+        } else if (file) {
+            toast.error("Formato inválido. Por favor, envie um arquivo .CSV");
         }
     };
 
@@ -33,12 +37,17 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
         setIsDragging(false);
 
         const file = event.dataTransfer.files?.[0];
-        if (file && file.type === "text/csv") {
+        if (file && (file.type === "text/csv" || file.name.endsWith(".csv"))) {
             setSelectedFile(file);
+            toast.info(`Arquivo "${file.name}" pronto para importação.`);
+        } else if (file) {
+            toast.error("Formato inválido. Por favor, envie um arquivo .CSV");
         }
     };
 
     const handleDownloadTemplate = () => {
+        toast.success("Download do modelo iniciado!");
+
         const csvContent =
             "nome,categoria,qtd_total,localizacao\nArduino Uno R3,Microcontroladores,25,Prateleira A1\nRaspberry Pi 4,Computadores,10,Prateleira A2";
         const blob = new Blob([csvContent], { type: "text/csv" });
@@ -51,9 +60,45 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
     };
 
     const handleFinalize = () => {
-        console.log("Importing file:", selectedFile);
+        if (!selectedFile) return;
+
+        const fileName = selectedFile.name;
         onClose();
-        setSelectedFile(null);
+        const toastId = toast.loading("Iniciando processamento...");
+
+        let progress = 0;
+
+        const interval = setInterval(() => {
+            progress += Math.floor(Math.random() * 15) + 5;
+
+            if (progress >= 100) {
+                clearInterval(interval);
+
+                toast.success("Importação concluída!", {
+                    id: toastId,
+                    description: `Todos os recursos de "${fileName}" foram processados.`,
+                });
+
+                setSelectedFile(null);
+            } else {
+                toast.loading(
+                    <div className="flex flex-col gap-2 w-full pr-4">
+                        <div className="flex justify-between items-center">
+                            <span className="font-medium text-sm text-gray-800">Processando arquivo...</span>
+                            <span className="text-xs font-bold text-yellow-600">{progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                            <div
+                                className="bg-yellow-400 h-full transition-all duration-300 ease-out"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                        <span className="text-[10px] text-gray-500 truncate">{fileName}</span>
+                    </div>,
+                    { id: toastId }
+                );
+            }
+        }, 400);
     };
 
     const handleCancel = () => {
@@ -63,7 +108,7 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-125 p-0">
+            <DialogContent className="sm:max-w-125 p-0 overflow-hidden border-none shadow-2xl bg-white">
                 <div className="relative">
                     <button
                         onClick={onClose}
@@ -75,63 +120,62 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
 
                     <div className="p-6">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-semibold">Importar Recursos em Massa</DialogTitle>
+                            <DialogTitle className="text-xl text-gray-800">Importar Recursos em Massa</DialogTitle>
                             <p className="text-sm text-gray-500 mt-1">
                                 Adicione múltiplos recursos de uma vez através de um arquivo estruturado.
                             </p>
                         </DialogHeader>
 
                         <div className="mt-6 space-y-6">
-                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                                <div className="flex items-start gap-3">
-                                    <div className="bg-blue-100 rounded-full p-2 mt-0.5">
-                                        <Download className="h-5 w-5 text-blue-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-medium text-sm text-gray-900">Baixe o Template</h3>
-                                        <p className="text-xs text-gray-600 mt-1">
-                                            Utilize nosso modelo CSV para garantir o formato correto.
-                                        </p>
-                                        <Button
-                                            variant="ghost"
-                                            className="mt-3 h-auto p-0 text-blue-600 hover:text-blue-700 hover:bg-transparent font-medium text-sm"
-                                            onClick={handleDownloadTemplate}
-                                        >
-                                            <Download className="h-4 w-4 mr-1" />
-                                            Baixar Template CSV
-                                        </Button>
-                                    </div>
+                            <div className="flex items-start gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100 transition-all hover:bg-blue-50">
+                                <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                                    <Download className="h-5 w-5" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-semibold text-blue-900">Baixe o Template</p>
+                                    <p className="text-xs text-blue-700/80 mb-3">
+                                        Utilize nosso modelo CSV para garantir o formato correto.
+                                    </p>
+                                    <Button
+                                        variant="ghost"
+                                        className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                        onClick={handleDownloadTemplate}
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        Baixar Template CSV
+                                    </Button>
                                 </div>
                             </div>
 
                             <button
-                                className={`border-2 border-dashed rounded-lg p-8 transition-colors ${
-                                    isDragging ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-gray-50"
-                                }`}
+                                className={`
+                                    relative border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer
+                                    flex flex-col items-center justify-center gap-3 w-full
+                                    ${isDragging ? "border-yellow-400 bg-yellow-50/50" : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"}
+                                    ${selectedFile ? "border-green-200 bg-green-50/30" : ""}
+                                `}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
+                                onClick={() => document.getElementById("file-upload")?.click()}
                             >
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="bg-gray-100 rounded-full p-3 mb-4">
-                                        <Upload className="h-6 w-6 text-gray-400" />
+                                    <div className="bg-gray-100 p-3 rounded-full text-gray-400">
+                                        <Upload className="h-6 w-6" />
                                     </div>
-                                    <h3 className="font-medium text-gray-900 mb-1">Faça Upload do Arquivo CSV</h3>
-                                    <p className="text-sm text-gray-500 mb-4">Arraste aqui ou clique para selecionar</p>
+                                    <div className="text-center">
+                                        <p className="text-sm font-semibold text-gray-700">Faça Upload do Arquivo CSV</p>
+                                        <p className="text-xs text-gray-400 mt-1">Arraste aqui ou clique para selecionar</p>
+                                    </div>
                                     {selectedFile ? (
-                                        <div className="text-sm text-green-600 font-medium mb-4">
+                                        <div className="text-sm text-green-600 font-medium mt-2">
                                             ✓ {selectedFile.name}
                                         </div>
-                                    ) : null}
-                                    <label htmlFor="file-upload">
-                                        <Button
-                                            type="button"
-                                            className="bg-[#FFC107] hover:bg-[#FFB300] text-gray-900 font-medium"
-                                            onClick={() => document.getElementById("file-upload")?.click()}
-                                        >
+                                    ) : (
+                                        <div className="mt-2 bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-bold text-xs shadow-md">
                                             Selecionar Arquivo
-                                        </Button>
-                                    </label>
+                                        </div>
+                                    )}
                                     <input
                                         id="file-upload"
                                         type="file"
@@ -151,7 +195,13 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
                         <Button
                             onClick={handleFinalize}
                             disabled={!selectedFile}
-                            className="bg-gray-300 hover:bg-gray-400 text-gray-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg
+                                ${
+                                    selectedFile
+                                        ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95"
+                                        : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                                }
+                            `}
                         >
                             Finalizar Importação
                         </Button>
