@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Blog from "../ui/modules/landing_page/blog";
 import ComeAndDiscover from "../ui/modules/landing_page/come_and_discover";
@@ -9,18 +9,17 @@ import { UpcomingEvents } from "../ui/modules/landing_page/upcoming_events";
 import { Welcome } from "../ui/modules/landing_page/welcome";
 import WhatIsSpace from "../ui/modules/landing_page/what_is";
 
-
 export default function Home() {
     return (
         <div>
-            <NavBar/>
-            <Welcome/>
-            <Blog/>
-            <WhatIsSpace/>
-            <CoursesAndTraining/>
-            <UpcomingEvents/>
-            <ComeAndDiscover/>
-            <Footer/>
+            <NavBar />
+            <Welcome />
+            <Blog />
+            <WhatIsSpace />
+            <CoursesAndTraining />
+            <UpcomingEvents />
+            <ComeAndDiscover />
+            <Footer />
         </div>
     );
 }
