@@ -1,12 +1,10 @@
 "use client";
 
-import {
-    LogOut,
-} from "lucide-react";
+import { navItems } from "@/src/infra/modules/professor/sidebar-mock";
+import { LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navItems } from "@/src/infra/modules/professor/sidebar-mock";
 
 function getLinkClasses(isActive: boolean) {
     return [
@@ -34,11 +32,7 @@ export function Sidebar() {
                     {navItems.map((item) => {
                         const isActive = pathname === `/professor/${item.id}`;
                         return (
-                            <Link
-                                key={item.id}
-                                href={`/professor/${item.id}`}
-                                className={getLinkClasses(isActive)}
-                            >
+                            <Link key={item.id} href={`/professor/${item.id}`} className={getLinkClasses(isActive)}>
                                 <item.icon
                                     size={20}
                                     strokeWidth={isActive ? 2.5 : 2}

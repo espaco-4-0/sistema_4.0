@@ -9,7 +9,8 @@ const metricsData = [
         trend: "up",
         subtitle: "Desde o último mês",
         icon: Users,
-        color: "bg-yellow-400",
+        color: "bg-blue-100",
+        iconColor: "text-blue-700",
     },
     {
         title: "Projetos Ativos",
@@ -18,7 +19,8 @@ const metricsData = [
         trend: "up",
         subtitle: "Em desenvolvimento",
         icon: FolderKanban,
-        color: "bg-yellow-400",
+        color: "bg-yellow-100",
+        iconColor: "text-yellow-700",
     },
     {
         title: "Taxa de Conclusão",
@@ -27,7 +29,8 @@ const metricsData = [
         trend: "up",
         subtitle: "Últimos 3 meses",
         icon: TrendingUp,
-        color: "bg-yellow-400",
+        color: "bg-green-100",
+        iconColor: "text-green-700",
     },
     {
         title: "Pendências",
@@ -36,7 +39,8 @@ const metricsData = [
         trend: "down",
         subtitle: "Requerem atenção",
         icon: AlertCircle,
-        color: "bg-yellow-400",
+        color: "bg-red-100",
+        iconColor: "text-red-700",
     },
 ];
 
@@ -91,6 +95,7 @@ export function VisaoGeral() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {metricsData.map((metric) => {
                     const Icon = metric.icon;
+
                     return (
                         <div key={metric.title} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-start justify-between mb-4">
@@ -98,17 +103,10 @@ export function VisaoGeral() {
                                     <p className="text-sm text-gray-600 mb-1">{metric.title}</p>
                                     <h3 className="text-3xl font-bold">{metric.value}</h3>
                                 </div>
+
                                 <div className={`${metric.color} p-3 rounded-lg`}>
-                                    <Icon className="w-6 h-6" />
+                                    <Icon className={`w-6 h-6 ${metric.iconColor}`} />
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span
-                                    className={`text-sm font-medium ${metric.trend === "up" ? "text-green-600" : "text-red-600"}`}
-                                >
-                                    {metric.change}
-                                </span>
-                                <span className="text-xs text-gray-500">{metric.subtitle}</span>
                             </div>
                         </div>
                     );
@@ -121,6 +119,7 @@ export function VisaoGeral() {
                         <h3 className="text-lg font-semibold mb-1">Atividade do Espaço 4.0</h3>
                         <p className="text-sm text-gray-500">Projetos e estudantes ativos por mês</p>
                     </div>
+
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -139,15 +138,18 @@ export function VisaoGeral() {
                         <h3 className="text-lg font-semibold mb-1">Alertas e Notificações</h3>
                         <p className="text-sm text-gray-500">Itens que requerem atenção</p>
                     </div>
+
                     <div className="space-y-4">
                         {alerts.map((alert) => {
                             const Icon = alert.icon;
+
                             return (
                                 <div key={alert.id} className="border border-gray-100 rounded-lg p-4">
                                     <div className="flex gap-3">
                                         <div className={`${alert.iconBg} p-2 rounded-lg h-fit`}>
                                             <Icon className={`w-5 h-5 ${alert.iconColor}`} />
                                         </div>
+
                                         <div className="flex-1">
                                             <div className="flex items-start justify-between mb-1">
                                                 <h4 className="font-medium text-sm">{alert.title}</h4>

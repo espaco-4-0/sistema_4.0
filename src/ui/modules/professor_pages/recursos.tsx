@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { getStatusStyle } from "@/src/infra/modules/professor/manage-users-mock";
 import { inventoryData, statsEstoque } from "@/src/infra/modules/professor/recursos-mock";
-import { ImportarRecurso } from "@/src/ui/components/modals/import-recurso-modal";
+import { ImportarRecurso } from "@/src/ui/components/modals/professor/recursos/import-recurso-modal";
+import { ImportarRecursosModal } from "@/src/ui/components/modals/professor/recursos/import-recursos-modal";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Plus, PlusCircle, Search } from "lucide-react";
-import { ImportarRecursosModal } from "../../components/modals/import-recursos-modal";
 
 export default function Recursos() {
     const [openImportar, setOpenImportar] = useState(false);
@@ -80,7 +80,6 @@ export default function Recursos() {
                     </button>
                 </div>
 
-                {/* Tabela */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
@@ -170,9 +169,8 @@ export default function Recursos() {
                 </div>
             </div>
 
-			<ImportarRecursosModal open={openRecursos} onClose={() => setOpenRecursos(false)}/>
+            <ImportarRecursosModal open={openRecursos} onClose={() => setOpenRecursos(false)} />
             <ImportarRecurso open={openImportar} onClose={() => setOpenImportar(false)} />
-
         </>
     );
 }

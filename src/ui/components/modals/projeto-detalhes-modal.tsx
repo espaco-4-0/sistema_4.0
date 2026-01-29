@@ -335,7 +335,14 @@ export function ProjetoDetalhesModal({
                 <div className="bg-linear-to-r from-yellow-400 to-yellow-500 p-6 text-gray-900">
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                            <h2 className="text-2xl font-bold mb-2">{projeto.nome}</h2>
+                            <div className="flex flex-wrap items-center gap-3 mb-2">
+                                <h2 className="text-2xl font-bold">{projeto.nome}</h2>
+                                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-black text-yellow-400">
+                                    {projeto.categoria.toLowerCase().includes("pesquisa")
+                                        ? "Projeto de Pesquisa"
+                                        : "Projeto de Extensão"}
+                                </span>
+                            </div>
                             <p className="text-gray-800 mb-3">{projeto.descricao}</p>
                             <div className="flex flex-wrap gap-2">
                                 <span className="text-xs px-3 py-1 bg-white bg-opacity-30 rounded-full">
@@ -348,12 +355,6 @@ export function ProjetoDetalhesModal({
                                 </span>
                             </div>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
                     </div>
 
                     <div className="flex gap-2">

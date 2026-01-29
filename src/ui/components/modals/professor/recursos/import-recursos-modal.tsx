@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Download, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../../../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog";
 
 interface ImportarRecursosModalProps {
     open: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { viewTitles } from "@/src/infra/modules/professor/header-mock";
+import { usePathname } from "next/navigation";
 
 export function Header() {
     const pathname = usePathname();

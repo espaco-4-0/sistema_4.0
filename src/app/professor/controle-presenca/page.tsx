@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
+import { AttendanceTable } from "@/src/ui/modules/professor_pages/controle-de-presenca";
+
 export default function ControlePresencaPage() {
+    const [date, setDate] = useState("");
+    const [classId, setClassId] = useState("");
+    const [search, setSearch] = useState("");
+
     return (
         <div className="space-y-6">
-            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Controle de Presença</h2>
-                <p className="text-gray-600">Página de controle de presença em desenvolvimento...</p>
-            </div>
+            <AttendanceTable selectedDate={date} selectedClass={classId} searchTerm={search} />
         </div>
     );
 }
