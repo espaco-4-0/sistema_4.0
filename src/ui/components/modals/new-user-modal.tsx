@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/src/ui/components/ui/button";
-import {Dialog,DialogContent,DialogDescription,DialogFooter,DialogHeader,DialogTitle,} from "@/src/ui/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/src/ui/components/ui/dialog";
 import { Input } from "@/src/ui/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { Lock, Mail, User, UserPlus } from "lucide-react";
@@ -50,8 +57,8 @@ export default function NewUserModal({ isOpen, handleOpenChange, onClose }: NewU
                                 <SelectValue placeholder="Selecione o tipo de usuário" />
                             </SelectTrigger>
                             <SelectContent>
-								<SelectItem value="administrador">Administrador</SelectItem>
-								<SelectItem value="professor">Professor</SelectItem>
+                                <SelectItem value="administrador">Administrador</SelectItem>
+                                <SelectItem value="professor">Professor</SelectItem>
                                 <SelectItem value="monitor">Monitor</SelectItem>
                                 <SelectItem value="visitante">Visitante</SelectItem>
                                 <SelectItem value="aluno">Aluno</SelectItem>

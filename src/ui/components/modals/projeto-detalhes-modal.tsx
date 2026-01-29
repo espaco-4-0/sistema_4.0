@@ -1,7 +1,10 @@
+import { statusConfig } from "@/src/infra/modules/professor/gerenciar-projetos-mock";
+import { ProjetoDetalhesModalProps, ProjetoResumo } from "@/src/ui/components/props/professor/props";
 import {
     Archive,
     Calendar,
     CheckCircle,
+    Clock,
     DollarSign,
     Edit,
     FileText,
@@ -12,16 +15,13 @@ import {
     Share2,
     Target,
     TrendingUp,
-    Users,
-    Zap,
-    Clock,
     User,
+    Users,
     X,
+    Zap,
 } from "lucide-react";
 
 import { Dialog, DialogContent } from "../ui/dialog";
-import { ProjetoDetalhesModalProps, ProjetoResumo } from "@/src/ui/components/props/professor/props";
-import { statusConfig } from "@/src/infra/modules/professor/gerenciar-projetos-mock";
 
 const tabs = [
     { id: "visao-geral", label: "Visão Geral", icon: Target },
@@ -146,7 +146,10 @@ function VisaoGeralTab({
                         </div>
                         <div className="flex-1 mx-4">
                             <div className="h-2 bg-gray-200 rounded-full">
-                                <div className="h-2 bg-yellow-400 rounded-full" style={{ width: `${projeto.progresso}%` }} />
+                                <div
+                                    className="h-2 bg-yellow-400 rounded-full"
+                                    style={{ width: `${projeto.progresso}%` }}
+                                />
                             </div>
                         </div>
                         <div>
@@ -180,10 +183,7 @@ function VisaoGeralTab({
     );
 }
 
-function TarefasTab({
-    projeto,
-    tarefasConcluidas,
-}: Readonly<{ projeto: ProjetoResumo; tarefasConcluidas: number }>) {
+function TarefasTab({ projeto, tarefasConcluidas }: Readonly<{ projeto: ProjetoResumo; tarefasConcluidas: number }>) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
@@ -200,13 +200,17 @@ function TarefasTab({
                     <div key={tarefa.id} className="bg-gray-50 rounded-lg p-4 hover:shadow-sm transition-shadow">
                         <div className="flex items-start justify-between">
                             <div className="flex items-start gap-3 flex-1">
-                                <div className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center ${statusMeta.dot}`}>
+                                <div
+                                    className={`mt-1 w-5 h-5 rounded-full flex items-center justify-center ${statusMeta.dot}`}
+                                >
                                     {StatusIcon ? <StatusIcon className="w-4 h-4 text-current" /> : null}
                                 </div>
                                 <div className="flex-1">
                                     <h4
                                         className={`font-medium mb-1 ${
-                                            tarefa.status === "concluida" ? "line-through text-gray-500" : "text-gray-900"
+                                            tarefa.status === "concluida"
+                                                ? "line-through text-gray-500"
+                                                : "text-gray-900"
                                         }`}
                                     >
                                         {tarefa.titulo}
@@ -223,7 +227,9 @@ function TarefasTab({
                                     </div>
                                 </div>
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${statusMeta.chip}`}>{statusMeta.label}</span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${statusMeta.chip}`}>
+                                {statusMeta.label}
+                            </span>
                         </div>
                     </div>
                 );
@@ -259,7 +265,10 @@ function EquipeTab({ projeto }: Readonly<{ projeto: ProjetoResumo }>) {
                     <h3 className="font-semibold text-gray-900 mb-4 mt-6">Orientador</h3>
                     <div className="bg-yellow-50 rounded-lg p-4 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center font-semibold text-gray-900">
-                            {projeto.orientador.split(" ").map((n) => n[0]).join("")}
+                            {projeto.orientador
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                         </div>
                         <div className="flex-1">
                             <h4 className="font-medium text-gray-900">{projeto.orientador}</h4>
@@ -332,7 +341,9 @@ export function ProjetoDetalhesModal({
                                 <span className="text-xs px-3 py-1 bg-white bg-opacity-30 rounded-full">
                                     {projeto.categoria}
                                 </span>
-                                <span className={`text-xs px-3 py-1 rounded-full ${statusConfig[projeto.status].color}`}>
+                                <span
+                                    className={`text-xs px-3 py-1 rounded-full ${statusConfig[projeto.status].color}`}
+                                >
                                     {statusConfig[projeto.status].label}
                                 </span>
                             </div>
@@ -384,7 +395,9 @@ export function ProjetoDetalhesModal({
                 </div>
 
                 <div className="p-6 overflow-y-auto max-h-[calc(90vh-300px)]">
-                    {activeTab === "visao-geral" && <VisaoGeralTab projeto={projeto} tarefasConcluidas={tarefasConcluidas} />}
+                    {activeTab === "visao-geral" && (
+                        <VisaoGeralTab projeto={projeto} tarefasConcluidas={tarefasConcluidas} />
+                    )}
                     {activeTab === "tarefas" && <TarefasTab projeto={projeto} tarefasConcluidas={tarefasConcluidas} />}
                     {activeTab === "equipe" && <EquipeTab projeto={projeto} />}
                     {activeTab === "anexos" && <AnexosTab projeto={projeto} />}

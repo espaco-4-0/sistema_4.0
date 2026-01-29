@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Download, Upload, X } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { toast } from "sonner";
 
 interface ImportarRecursosModalProps {
     open: boolean;
@@ -164,8 +165,12 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
                                         <Upload className="h-6 w-6" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-sm font-semibold text-gray-700">Faça Upload do Arquivo CSV</p>
-                                        <p className="text-xs text-gray-400 mt-1">Arraste aqui ou clique para selecionar</p>
+                                        <p className="text-sm font-semibold text-gray-700">
+                                            Faça Upload do Arquivo CSV
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            Arraste aqui ou clique para selecionar
+                                        </p>
                                     </div>
                                     {selectedFile ? (
                                         <div className="text-sm text-green-600 font-medium mt-2">
