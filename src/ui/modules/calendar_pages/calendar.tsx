@@ -52,8 +52,8 @@ interface IFormInput {
     mensagem: string;
 }
 
-const locales = { "pt-BR": ptBR };
-const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
+export const locales = { "pt-BR": ptBR };
+export const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 const monthMap: { [key: string]: number } = {
     jan: 0,
@@ -210,9 +210,9 @@ export default function AllCalendar() {
     const dayEvents = events.filter((e) => isSameDay(e.start, selectedDate));
 
     return (
-        <section className="bg-gray-50 min-h-screen py-8 px-4 md:px-20 font-sans">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-yellow-muted p-2 pb-4 flex items-center gap-1 text-xs font-medium">
+        <section className="bg-gray-50 min-h-screen py-4 lg:py-6 2xl:py-8 px-2 lg:px-8 2xl:px-20 font-sans">
+            <div className="max-w-full lg:max-w-6xl 2xl:max-w-7xl mx-auto">
+                <div className="text-yellow-muted p-1 lg:p-2 pb-3 lg:pb-4 flex items-center gap-1 text-xs font-medium">
                     <Link href="/" className="text-gray-400 hover:underline flex gap-1">
                         <Home className="h-3 w-3" />
                         Home
@@ -220,14 +220,14 @@ export default function AllCalendar() {
                     <ChevronRight size={12} className="text-gray-400" /> <span>Calendário Espaço 4.0</span>
                 </div>
 
-                <header className="mb-6">
-                    <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 tracking-tight">
+                <header className="mb-3 lg:mb-4 2xl:mb-6 px-1 lg:px-0">
+                    <h2 className="text-lg lg:text-2xl 2xl:text-3xl font-semibold text-gray-800 tracking-tight">
                         Programação do <span className="text-yellow-muted">Espaço 4.0</span>
                     </h2>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    <div className="lg:col-span-8 bg-white border rounded-xl p-4 shadow-sm">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 2xl:gap-6 items-start">
+                    <div className="lg:col-span-7 2xl:col-span-8 bg-white border rounded-lg lg:rounded-xl p-2 lg:p-3 2xl:p-4 shadow-sm">
                         <Calendar
                             localizer={localizer}
                             events={events}
@@ -242,7 +242,8 @@ export default function AllCalendar() {
                                 setSelectedDate(ev.start);
                                 setStep("list");
                             }}
-                            style={{ height: 480 }}
+                            style={{ height: 360 }}
+                            className="calendar-mobile"
                             culture="pt-BR"
                             views={["month"]}
                             dayPropGetter={(date) => {

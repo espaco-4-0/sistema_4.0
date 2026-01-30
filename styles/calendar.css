@@ -1,0 +1,103 @@
+.presence-calendar {
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.presence-calendar .rbc-header {
+    padding: 12px;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+    text-transform: capitalize;
+    background-color: #fcfcfc;
+    border-radius: none;
+    font-style: capitalize;
+    color: #374151;
+}
+
+/* Centralizar headers em mobile */
+@media (max-width: 768px) {
+    .presence-calendar .rbc-header {
+        text-align: center;
+        font-size: 12px;
+        padding: 10px 6px;
+    }
+}
+
+.presence-calendar .rbc-month-view {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    margin-bottom: 0 !important;
+}
+
+.presence-calendar .rbc-day-bg {
+    border-left: 1px solid #e5e7eb;
+}
+
+.presence-calendar .rbc-month-row {
+    border-top: 1px solid #e5e7eb;
+}
+
+.presence-calendar .rbc-date-cell {
+    font-size: 15px; /* aumenta o número */
+    font-weight: 500;
+    padding: 8px 10px;
+    color: #374151;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.presence-calendar .rbc-date-cell > a {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.presence-calendar .rbc-off-range-bg {
+    background-color: #fcfcfc;
+}
+
+.presence-calendar .rbc-off-range {
+    color: #9b9a9a;
+}
+
+.presence-calendar .rbc-event {
+    margin-top: 4px;
+    box-shadow: none;
+    font-size: 20px;
+    margin-bottom: 0 !important;
+}
+
+.presence-calendar .rbc-today {
+    box-shadow: inset 0 0 0 2px #facc15 !important;
+    background-color: transparent !important;
+}
+
+/* Remover espaço em branco embaixo do calendário */
+.presence-calendar .rbc-calendar {
+    margin: 0;
+    padding: 0;
+}
+
+.presence-calendar {
+    margin-bottom: 0;
+}
+
+/* Aumentar altura do calendário em telas maiores */
+@media (min-width: 1024px) {
+    .presence-calendar {
+        min-height: 600px;
+    }
+}
+
+@media (min-width: 1536px) {
+    .presence-calendar {
+        min-height: 690px;
+    }
+}
