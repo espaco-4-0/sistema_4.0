@@ -1,0 +1,262 @@
+"use client";
+
+import { useState } from "react";
+import { CatalogModal } from "@/src/ui/components/modals/professor/gamificacao/catalog-modal";
+import { CreateCampaignModal } from "@/src/ui/components/modals/professor/gamificacao/create-campaign-modal";
+import { NewMissionModal } from "@/src/ui/components/modals/professor/gamificacao/new-mission-modal";
+import { Button } from "@/src/ui/components/ui/button";
+import {
+    Card,
+    CardAction,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/src/ui/components/ui/card";
+import { Crown, Flame, Gift, Medal, Star, Target, Trophy, Users } from "lucide-react";
+
+const highlights = [
+    {
+        title: "Alunos engajados",
+        value: "1.248",
+        detail: "+12% na última semana",
+        icon: Users,
+        color: "text-blue-600",
+    },
+    {
+        title: "Prêmios resgatados",
+        value: "312",
+        detail: "Taxa de resgate 78%",
+        icon: Gift,
+        color: "text-green-600",
+    },
+    {
+        title: "Pontuação média",
+        value: "865 pts",
+        detail: "Meta 900 pts",
+        icon: Star,
+        color: "text-yellow-500",
+    },
+];
+
+const rewards = [
+    {
+        title: "Kit Maker Lab",
+        points: "1.200 pts",
+        detail: "Ideal para projetos IoT",
+        icon: Trophy,
+    },
+    {
+        title: "Curso Premium",
+        points: "900 pts",
+        detail: "Acesso por 6 meses",
+        icon: Medal,
+    },
+    {
+        title: "Mentoria Individual",
+        points: "700 pts",
+        detail: "Sessão de 1h",
+        icon: Crown,
+    },
+];
+
+const missions = [
+    {
+        title: "Projeto colaborativo",
+        progress: "8/10 tarefas",
+        detail: "Liberar badge Equipe",
+        icon: Target,
+    },
+    {
+        title: "Trilha de pesquisa",
+        progress: "3/5 entregas",
+        detail: "Libera 150 pts",
+        icon: Flame,
+    },
+    {
+        title: "Desafio semanal",
+        progress: "Concluído",
+        detail: "Bônus 80 pts",
+        icon: Star,
+    },
+];
+
+const leaderboard = [
+    { name: "Larissa Mendes", points: "1.540 pts", badge: "Top 1" },
+    { name: "Pedro Alves", points: "1.430 pts", badge: "Top 2" },
+    { name: "Camila Rocha", points: "1.380 pts", badge: "Top 3" },
+    { name: "Tiago Luz", points: "1.240 pts", badge: "Top 4" },
+];
+
+export default function Gamificacao() {
+    const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
+    const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+    const [isNewMissionOpen, setIsNewMissionOpen] = useState(false);
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-linear-to-r bg-yellow-primary rounded-2xl p-8 text-white shadow-md">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <div>
+                        <p className="text-sm uppercase tracking-wide text-black">Gamificação & Prêmios</p>
+                        <h1 className="text-3xl font-bold mt-2 text-black">Recompensas para engajar alunos</h1>
+                        <p className="text-sm text-black/90 mt-2 max-w-xl">
+                            Incentive participação, pesquisas e projetos com trilhas de pontos e prêmios reais.
+                        </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                            className="bg-white hover:cursor-pointer text-black hover:bg-yellow-50"
+                            onClick={() => setIsCreateCampaignOpen(true)}
+                        >
+                            Criar campanha
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            className="bg-white/20 hover:cursor-pointer text-black hover:bg-white/30"
+                            onClick={() => setIsCatalogOpen(true)}
+                        >
+                            Ver catálogo
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {highlights.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                        <Card key={item.title} className="border border-gray-100">
+                            <CardHeader>
+                                <CardTitle className="text-sm text-gray-500">{item.title}</CardTitle>
+                                <CardAction>
+                                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                                        <Icon className={`w-5 h-5 ${item.color}`} />
+                                    </div>
+                                </CardAction>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+                                <p className="text-xs text-gray-500 mt-1">{item.detail}</p>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <Card className="lg:col-span-2 border border-gray-100">
+                    <CardHeader>
+                        <CardTitle>Catálogo de Prêmios</CardTitle>
+                        <CardDescription>Itens mais desejados pelos alunos</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {rewards.map((reward) => {
+                            const Icon = reward.icon;
+                            return (
+                                <div
+                                    key={reward.title}
+                                    className="flex items-center justify-between gap-4 border rounded-xl p-4"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
+                                            <Icon className="w-5 h-5 text-yellow-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900">{reward.title}</p>
+                                            <p className="text-xs text-gray-500">{reward.detail}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-900">{reward.points}</span>
+                                </div>
+                            );
+                        })}
+                    </CardContent>
+                    <CardFooter className="justify-end">
+                        <Button
+                            variant="secondary"
+                            className="hover:cursor-pointer"
+                            onClick={() => setIsCatalogOpen(true)}
+                        >
+                            Gerenciar prêmios
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                <Card className="border border-gray-100">
+                    <CardHeader>
+                        <CardTitle>Ranking Semanal</CardTitle>
+                        <CardDescription>Top alunos por pontuação</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {leaderboard.map((student, index) => (
+                            <div key={student.name} className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {index + 1}. {student.name}
+                                    </p>
+                                    <p className="text-xs text-gray-500">{student.badge}</p>
+                                </div>
+                                <span className="text-xs font-semibold text-yellow-600">{student.points}</span>
+                            </div>
+                        ))}
+                    </CardContent>
+                    <CardFooter className="justify-end">
+                        <Button variant="secondary">Ver ranking completo</Button>
+                    </CardFooter>
+                </Card>
+            </div>
+
+            <Card className="border border-gray-100">
+                <CardHeader>
+                    <CardTitle>Missões e Desafios</CardTitle>
+                    <CardDescription>Defina metas para cursos, monitores e pesquisadores</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {missions.map((mission) => {
+                        const Icon = mission.icon;
+                        return (
+                            <div key={mission.title} className="border rounded-xl p-4 space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                                        <Icon className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-900">{mission.title}</p>
+                                </div>
+                                <p className="text-xs text-gray-500">{mission.detail}</p>
+                                <p className="text-sm font-semibold text-gray-900">{mission.progress}</p>
+                            </div>
+                        );
+                    })}
+                </CardContent>
+                <CardFooter className="justify-end">
+                    <Button
+                        className="bg-yellow-primary text-black hover:bg-yellow-secondary hover:cursor-pointer"
+                        onClick={() => setIsNewMissionOpen(true)}
+                    >
+                        Nova missão
+                    </Button>
+                </CardFooter>
+            </Card>
+
+            <CreateCampaignModal
+                isOpen={isCreateCampaignOpen}
+                onOpenChange={setIsCreateCampaignOpen}
+                onClose={() => setIsCreateCampaignOpen(false)}
+            />
+
+            <CatalogModal
+                isOpen={isCatalogOpen}
+                onOpenChange={setIsCatalogOpen}
+                onClose={() => setIsCatalogOpen(false)}
+            />
+
+            <NewMissionModal
+                isOpen={isNewMissionOpen}
+                onOpenChange={setIsNewMissionOpen}
+                onClose={() => setIsNewMissionOpen(false)}
+            />
+        </div>
+    );
+}
