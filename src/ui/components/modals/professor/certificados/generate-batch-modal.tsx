@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { FileText } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/src/ui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/ui/components/ui/dialog";
 import { Input } from "@/src/ui/components/ui/input";
@@ -14,7 +18,19 @@ interface GenerateBatchModalProps {
   templates: Array<{ name: string }>;
 }
 
-export function GenerateBatchModal({ isOpen, onOpenChange, onClose, templates }: GenerateBatchModalProps) {
+export function GenerateBatchModal({ isOpen, onOpenChange, onClose, templates }: Readonly<GenerateBatchModalProps>) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleGenerateBatch = () => {
+    if (!selectedFile) {
+      toast.error("Selecione um arquivo CSV para continuar.");
+      return;
+    }
+
+    toast.success("Certificados em lote gerados com sucesso!");
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="border border-gray-200">
@@ -41,13 +57,26 @@ export function GenerateBatchModal({ isOpen, onOpenChange, onClose, templates }:
             </div>
             <div className="space-y-1">
               <Label>Arquivo CSV</Label>
-              <Input type="file" accept=".csv" />
+              <Input
+                type="file"
+                accept=".csv"
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  setSelectedFile(file);
+                }}
+              />
+              {selectedFile ? (
+                <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+                  <FileText className="h-4 w-4" />
+                  <span className="truncate max-w-64">{selectedFile.name}</span>
+                </div>
+              ) : null}
             </div>
           </div>
 
           <div className="space-y-1">
             <Label>Mensagem do certificado</Label>
-            <Textarea placeholder="Ex.: Certificamos que {{nome}} concluiu {{curso}}" />
+            <Textarea placeholder="Ex.: Certificamos que nome concluiu o curso com a qunatidade de horas x" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -68,15 +97,20 @@ export function GenerateBatchModal({ isOpen, onOpenChange, onClose, templates }:
           <div className="pt-4 border-t flex gap-3">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="flex-1 border-gray-300 hover:cursor-pointer text-gray-700 hover:bg-gray-50"
               onClick={onClose}
             >
               Cancelar
             </Button>
-            <Button variant="secondary" className="flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button variant="secondary" className="flex-1 hover:cursor-pointer bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
               Baixar template CSV
             </Button>
-            <Button className="flex-1 bg-yellow-400 text-gray-900 hover:bg-yellow-500">Gerar lote</Button>
+            <Button
+              className="flex-1 bg-yellow-400 text-gray-900 hover:bg-yellow-500 hover:cursor-pointer"
+              onClick={handleGenerateBatch}
+            >
+              Gerar lote
+            </Button>
           </div>
         </div>
       </DialogContent>

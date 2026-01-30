@@ -11,7 +11,7 @@ interface ChangePasswordModalProps {
     onClose: () => void;
 }
 
-export function ChangePasswordModal({ isOpen, onOpenChange, onClose }: ChangePasswordModalProps) {
+export function ChangePasswordModal({ isOpen, onOpenChange, onClose }: Readonly<ChangePasswordModalProps>) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -46,10 +46,10 @@ export function ChangePasswordModal({ isOpen, onOpenChange, onClose }: ChangePas
                     </div>
 
                     <div className="pt-4 border-t flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={onClose}>
+                        <Button variant="outline" className="flex-1 hover:cursor-pointer" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Alterar Senha</Button>
+                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 hover:cusror-pointer">Alterar Senha</Button>
                     </div>
                 </div>
             </DialogContent>

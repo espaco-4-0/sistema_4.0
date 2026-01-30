@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Award, FileUp, PenLine, ShieldCheck, Star, Users } from "lucide-react";
+import { toast } from "sonner";
 import { GenerateBatchModal } from "@/src/ui/components/modals/professor/certificados/generate-batch-modal";
 import { GenerateSingleModal } from "@/src/ui/components/modals/professor/certificados/generate-single-modal";
 import { TemplateBuilderModal } from "@/src/ui/components/modals/professor/certificados/template-builder-modal";
@@ -24,24 +25,32 @@ const stats = [
 		value: "1.248",
 		detail: "Últimos 30 dias",
 		icon: Award,
+		color: "bg-green-100",
+		iconColor: "text-green-700",
 	},
 	{
 		title: "Participação",
 		value: "845",
 		detail: "Certificados emitidos",
 		icon: Users,
+		color: "bg-yellow-100",
+		iconColor: "text-yellow-700",
 	},
 	{
 		title: "Conclusão",
 		value: "312",
 		detail: "Cursos finalizados",
 		icon: ShieldCheck,
+		color: "bg-purple-100",
+		iconColor: "text-purple-700",
 	},
 	{
 		title: "Excelência",
 		value: "91",
 		detail: "Destaques acadêmicos",
 		icon: Star,
+		color: "bg-red-100",
+		iconColor: "text-red-700",
 	},
 ];
 
@@ -63,22 +72,24 @@ export default function Certificados() {
 	const [isSingleModalOpen, setIsSingleModalOpen] = useState(false);
 	const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
+	const handleSaveSignature = () => {
+		toast.success("Assinatura salva com sucesso!");
+	};
+
 	return (
 		<div className="space-y-6 p-6">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
-					<h2 className="text-xl font-semibold text-gray-800">Certificados</h2>
-					<p className="text-sm text-gray-500">Geração individual e em lote</p>
 				</div>
 				<div className="flex gap-3">
 					<button
-						className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition shadow-sm text-sm font-medium"
+						className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:cursor-pointer transition shadow-sm text-sm font-medium"
 						onClick={() => setIsBatchModalOpen(true)}
 					>
 						<FileUp size={18} /> Gerar em lote
 					</button>
 					<button
-						className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium"
+						className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm hover:cursor-pointer font-medium"
 						onClick={() => setIsSingleModalOpen(true)}
 					>
 						<Award size={18} /> Gerar único
@@ -94,8 +105,8 @@ export default function Certificados() {
 							<CardHeader>
 								<CardTitle className="text-sm text-gray-500">{item.title}</CardTitle>
 								<CardAction>
-									<div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center border border-yellow-200">
-										<Icon className="w-5 h-5 text-black" />
+									<div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-gray-200 ${item.color}`}>
+										<Icon className={`w-5 h-5 ${item.iconColor}`} />
 									</div>
 								</CardAction>
 							</CardHeader>
@@ -136,7 +147,7 @@ export default function Certificados() {
 						))}
 					</CardContent>
 					<CardFooter className="justify-end">
-						<Button className="bg-yellow-400 text-gray-900 hover:bg-yellow-500" onClick={() => setIsTemplateModalOpen(true)}>
+						<Button className="bg-yellow-400 text-gray-900 hover:cursor-pointer hover:bg-yellow-500" onClick={() => setIsTemplateModalOpen(true)}>
 							Novo template
 						</Button>
 					</CardFooter>
@@ -152,7 +163,7 @@ export default function Certificados() {
 							<div className="w-14 h-14 rounded-xl bg-yellow-100 flex items-center justify-center border border-yellow-200">
 								<PenLine className="w-6 h-6 text-black" />
 							</div>
-							<Button variant="secondary" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+							<Button variant="secondary" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:cursor-pointer">
 								Alterar assinatura
 							</Button>
 						</div>
@@ -166,7 +177,12 @@ export default function Certificados() {
 						</div>
 					</CardContent>
 					<CardFooter className="justify-end">
-						<Button className="bg-yellow-400 text-gray-900 hover:bg-yellow-500">Salvar assinatura</Button>
+						<Button
+							className="bg-yellow-400 text-gray-900 hover:cursor-pointer hover:bg-yellow-500"
+							onClick={handleSaveSignature}
+						>
+							Salvar assinatura
+						</Button>
 					</CardFooter>
 				</Card>
 			</div>
@@ -205,7 +221,7 @@ export default function Certificados() {
 									</td>
 									<td className="px-6 py-4 text-sm text-gray-600">Participação Geral</td>
 									<td className="px-6 py-4 text-sm text-right">
-										<Button variant="secondary" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+										<Button variant="secondary" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:cursor-pointer">
 											Emitir
 										</Button>
 									</td>

@@ -1,11 +1,8 @@
-export type ID = number;
-export type ISODate = string;
-
 export type StatusProjeto = 'em-andamento' | 'concluido' | 'atrasado' | 'pendente' | 'cancelado';
 export type StatusTarefa = 'concluida' | 'em-andamento' | 'pendente' | 'bloqueada';
 
 export interface Membro {
-  id: ID;
+  id: number;
   nome: string;
   email: string;
   papel: 'admin' | 'estudante' | 'orientador' | 'observador';
@@ -13,44 +10,44 @@ export interface Membro {
 }
 
 export interface Anexo {
-  id: ID;
+  id: number;
   nome: string;
   tipo: string;
   tamanhoBytes: number;
   url: string;
-  dataUpload: ISODate;
+  dataUpload: string;
 }
 
 export interface Comentario {
-  id: ID;
-  autorId: ID;
+  id: number;
+  autorId: number;
   autorNome?: string;
   texto: string;
-  data: ISODate;
+  data: string;
 }
 
 export interface Tarefa {
-  id: ID;
+  id: number;
   titulo: string;
   descricao?: string;
-  responsavelId?: ID;
+  responsavelId?: number;
   status: StatusTarefa;
   prioridade: 'baixa' | 'media' | 'alta';
-  prazo: ISODate;
-  dataConclusao?: ISODate;
+  prazo: string;
+  dataConclusao?: string;
 }
 
 export interface Projeto {
-  id: ID;
+  id: number;
   nome: string;
   descricao: string;
 
-  estudanteId: ID;
-  orientadorId?: ID | null;
+  estudanteId: number;
+  orientadorId?: number | null;
 
-  dataInicio: ISODate;
-  prazo: ISODate;
-  dataConclusao?: ISODate;
+  dataInicio: string;
+  prazo: string;
+  dataConclusao?: string;
 
   status: StatusProjeto;
   progresso: number;
@@ -68,8 +65,8 @@ export interface Projeto {
   comentarios: Comentario[];
   anexos: Anexo[];
 
-  criadoEm: ISODate;
-  atualizadoEm: ISODate;
+  criadoEm: string;
+  atualizadoEm: string;
 }
 
 export type StatusProjetoResumo = "em-andamento" | "concluido" | "atrasado" | "pendente";

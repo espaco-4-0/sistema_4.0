@@ -19,7 +19,7 @@ interface NewUserModalProps {
     onClose: () => void;
 }
 
-export default function NewUserModal({ isOpen, handleOpenChange, onClose }: NewUserModalProps) {
+export default function NewUserModal({ isOpen, handleOpenChange, onClose }: Readonly<NewUserModalProps>) {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-160 p-0 overflow-hidden rounded-2xl border border-gray-200 shadow-xl">
@@ -57,8 +57,8 @@ export default function NewUserModal({ isOpen, handleOpenChange, onClose }: NewU
                                 <SelectValue placeholder="Selecione o tipo de usuário" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="administrador">Administrador</SelectItem>
                                 <SelectItem value="professor">Professor</SelectItem>
+								<SelectItem value="pesquisador">Pesquisador</SelectItem>
                                 <SelectItem value="monitor">Monitor</SelectItem>
                                 <SelectItem value="visitante">Visitante</SelectItem>
                                 <SelectItem value="aluno">Aluno</SelectItem>
@@ -85,12 +85,12 @@ export default function NewUserModal({ isOpen, handleOpenChange, onClose }: NewU
                     </div>
                 </div>
 
-                <DialogFooter className="px-8 py-5 bg-gray-50 border-t flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
-                    <Button variant="ghost" onClick={onClose} className="h-11 px-6 text-gray-600">
+                <DialogFooter className="px-8 py-5 hover:cursor-pointer border bg-gray-50 border-t flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                    <Button variant="ghost" onClick={onClose} className="h-11 px-6 hover:cursor-pointer text-gray-600">
                         Cancelar
                     </Button>
 
-                    <Button className="h-11 px-8 gap-2 rounded-xl bg-yellow-400 text-black hover:bg-yellow-500 shadow">
+                    <Button className="h-11 px-8 gap-2 rounded-xl bg-yellow-400 text-black hover:bg-yellow-500 shadow hover:cursor-pointer">
                         <UserPlus className="h-4 w-4" />
                         Criar Usuário
                     </Button>

@@ -11,7 +11,7 @@ interface ImportarRecursoProps {
     onClose: () => void;
 }
 
-export function ImportarRecurso({ open, onClose }: ImportarRecursoProps) {
+export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps>) {
     const [formData, setFormData] = useState({
         nome: "",
         categoria: "",
@@ -162,14 +162,14 @@ export function ImportarRecurso({ open, onClose }: ImportarRecursoProps) {
                             type="button"
                             variant="ghost"
                             onClick={handleCancel}
-                            className="text-gray-700 hover:bg-gray-100"
+                            className="text-gray-700 hover:cursor-pointer hover:bg-gray-100"
                         >
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             onClick={handleSubmit}
-                            className="bg-[#FFC107] hover:bg-[#FFB300] text-gray-900 font-medium"
+                            className="bg-[#FFC107] hover:bg-[#FFB300] hover:cursor-pointer text-gray-900 font-medium"
                         >
                             Adicionar Recurso
                         </Button>

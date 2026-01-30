@@ -18,7 +18,6 @@ import {
     Bar,
     BarChart,
     CartesianGrid,
-    Cell,
     Legend,
     Line,
     LineChart,
@@ -36,22 +35,22 @@ interface ChartCardProps {
     children: React.ReactNode;
 }
 
-export default function RelatoriosState() {
-    const ChartCard = ({ title, subtitle, children }: ChartCardProps) => (
-        <Card className="flex flex-col h-120 shadow-sm border-gray-100 overflow-hidden">
-            <CardHeader className="flex flex-row items-start justify-between p-6 pb-2">
-                <div className="space-y-1">
-                    <CardTitle className="text-lg font-semibold text-gray-800">{title}</CardTitle>
-                    <CardDescription className="text-sm text-gray-500">{subtitle}</CardDescription>
-                </div>
-                <Button variant="ghost" size="icon" className="text-gray-400">
-                    <Download className="w-5 h-5" />
-                </Button>
-            </CardHeader>
-            <CardContent className="flex-1 p-6 pt-4">{children}</CardContent>
-        </Card>
-    );
+const ChartCard = ({ title, subtitle, children }: Readonly<ChartCardProps>) => (
+    <Card className="flex flex-col h-120 shadow-sm border-gray-100 overflow-hidden">
+        <CardHeader className="flex flex-row items-start justify-between p-6 pb-2">
+            <div className="space-y-1">
+                <CardTitle className="text-lg font-semibold text-gray-800">{title}</CardTitle>
+                <CardDescription className="text-sm text-gray-500">{subtitle}</CardDescription>
+            </div>
+            <Button variant="ghost" size="icon" className="text-gray-400">
+                <Download className="w-5 h-5" />
+            </Button>
+        </CardHeader>
+        <CardContent className="flex-1 p-6 pt-4">{children}</CardContent>
+    </Card>
+);
 
+export default function RelatoriosState() {
     return (
         <div className="p-8 space-y-8 bg-[#F9FAFB] min-h-screen">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -110,18 +109,14 @@ export default function RelatoriosState() {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
-                                data={statusProjetos}
+                                data={statusProjetos.map((entry: any) => ({ ...entry, fill: entry.color }))}
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={0}
                                 outerRadius={120}
                                 dataKey="value"
                                 stroke="none"
-                            >
-                                {statusProjetos.map((entry: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
+                            />
                             <Tooltip />
                             <Legend layout="vertical" align="right" verticalAlign="middle" iconType="circle" />
                         </PieChart>

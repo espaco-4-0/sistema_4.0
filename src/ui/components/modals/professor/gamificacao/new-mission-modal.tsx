@@ -13,7 +13,7 @@ interface NewMissionModalProps {
     onClose: () => void;
 }
 
-export function NewMissionModal({ isOpen, onOpenChange, onClose }: NewMissionModalProps) {
+export function NewMissionModal({ isOpen, onOpenChange, onClose }: Readonly<NewMissionModalProps>) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="border border-yellow-200">

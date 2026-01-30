@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Upload, X } from "lucide-react";
+import { Download, FileText, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../../../ui/button";
@@ -10,7 +10,7 @@ interface ImportarRecursosModalProps {
     onClose: () => void;
 }
 
-export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalProps) {
+export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecursosModalProps>) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -121,7 +121,7 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
 
                     <div className="p-6">
                         <DialogHeader>
-                            <DialogTitle className="text-xl text-gray-800">Importar Recursos em Massa</DialogTitle>
+                            <DialogTitle className="text-xl text-gray-800 ">Importar Recursos em Massa</DialogTitle>
                             <p className="text-sm text-gray-500 mt-1">
                                 Adicione múltiplos recursos de uma vez através de um arquivo estruturado.
                             </p>
@@ -139,7 +139,7 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
                                     </p>
                                     <Button
                                         variant="ghost"
-                                        className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                        className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white hover:cursor-pointer transition-all shadow-sm"
                                         onClick={handleDownloadTemplate}
                                     >
                                         <Download className="h-4 w-4" />
@@ -160,10 +160,16 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
                                 onDrop={handleDrop}
                                 onClick={() => document.getElementById("file-upload")?.click()}
                             >
+                                <div
+                                    className={`p-3 rounded-full mb-2 transition-colors ${
+                                        selectedFile ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"
+                                    }`}
+                                >
+                                    <FileText className="h-8 w-8" />
+                                </div>
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="bg-gray-100 p-3 rounded-full text-gray-400">
-                                        <Upload className="h-6 w-6" />
-                                    </div>
+
+
                                     <div className="text-center">
                                         <p className="text-sm font-semibold text-gray-700">
                                             Faça Upload do Arquivo CSV
@@ -194,13 +200,13 @@ export function ImportarRecursosModal({ open, onClose }: ImportarRecursosModalPr
                     </div>
 
                     <div className="border-t px-6 py-4 flex justify-between items-center bg-gray-50">
-                        <Button variant="ghost" onClick={handleCancel} className="text-gray-700 hover:bg-gray-100">
+                        <Button variant="ghost" onClick={handleCancel} className="text-gray-700 hover:bg-gray-100 hover:cursor-pointer">
                             Cancelar
                         </Button>
                         <Button
                             onClick={handleFinalize}
                             disabled={!selectedFile}
-                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg
+                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all hover:cursor-pointer shadow-lg
                                 ${
                                     selectedFile
                                         ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95"

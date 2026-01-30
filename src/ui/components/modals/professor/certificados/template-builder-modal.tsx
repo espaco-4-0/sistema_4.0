@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { Button } from "@/src/ui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/ui/components/ui/dialog";
 import { Input } from "@/src/ui/components/ui/input";
@@ -13,7 +15,12 @@ interface TemplateBuilderModalProps {
   onClose: () => void;
 }
 
-export function TemplateBuilderModal({ isOpen, onOpenChange, onClose }: TemplateBuilderModalProps) {
+export function TemplateBuilderModal({ isOpen, onOpenChange, onClose }: Readonly<TemplateBuilderModalProps>) {
+  const handleSaveTemplate = () => {
+    toast.success("Template salvo com sucesso!");
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="border border-gray-200">
@@ -62,7 +69,7 @@ export function TemplateBuilderModal({ isOpen, onOpenChange, onClose }: Template
 
           <div className="space-y-3">
             <Label>Pré-visualização</Label>
-            <div className="border rounded-xl p-4 bg-yellow-50 border-yellow-200 h-full min-h-[260px]">
+            <div className="border rounded-xl p-4 bg-yellow-50 border-yellow-200 h-full min-h-65">
               <div className="border border-dashed border-yellow-300 rounded-lg h-full flex items-center justify-center text-sm text-gray-600">
                 Prévia do template
               </div>
@@ -74,12 +81,17 @@ export function TemplateBuilderModal({ isOpen, onOpenChange, onClose }: Template
           <div className="pt-4 border-t flex gap-3">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="flex-1 border-gray-300 hover:cursor-pointer text-gray-700 hover:bg-gray-50"
               onClick={onClose}
             >
               Cancelar
             </Button>
-            <Button className="flex-1 bg-yellow-400 text-gray-900 hover:bg-yellow-500">Salvar template</Button>
+            <Button
+              className="flex-1 bg-yellow-400 hover:cursor-pointer text-gray-900 hover:bg-yellow-500"
+              onClick={handleSaveTemplate}
+            >
+              Salvar template
+            </Button>
           </div>
         </div>
       </DialogContent>

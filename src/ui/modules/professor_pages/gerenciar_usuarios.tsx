@@ -28,14 +28,14 @@ export default function GerenciarUsuarios() {
                 <h2 className="text-xl font-semibold text-gray-800">Visão Geral</h2>
                 <div className="flex gap-3">
                     <button
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition shadow-sm text-sm font-medium"
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:cursor-pointer transition shadow-sm text-sm font-medium"
                         onClick={() => setIsCSVModalOpen(true)}
                     >
                         <Upload size={18} /> Importar CSV
                     </button>
                     <button
                         onClick={() => setIsNewUserModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium"
+                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition hover:cursor-pointer shadow-sm text-sm font-medium"
                     >
                         <UserPlus size={18} /> Novo Usuário
                     </button>
@@ -108,7 +108,14 @@ export default function GerenciarUsuarios() {
                         <tbody className="divide-y divide-gray-100">
                             {currentUsers.map((user, index) => (
                                 <tr key={user.email + index} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-yellow-400 text-black text-xs font-semibold flex items-center justify-center">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <span>{user.name}</span>
+                                        </div>
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                                     <td className="px-6 py-4 text-sm">
                                         <span

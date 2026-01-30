@@ -73,11 +73,15 @@ export const getTypeStyle = (type: string) => {
     return styles[type] || "bg-gray-50 text-gray-700";
 };
 
-export const getStatusStyle = (status) => {
-        switch (status) {
-            case "Disponível": return "bg-green-100 text-green-700 border-green-200";
-            case "Estoque Baixo": return "bg-yellow-100 text-yellow-700 border-yellow-200";
-            case "Esgotado": return "bg-red-100 text-red-700 border-red-200";
-            default: return "bg-gray-100 text-gray-700";
-        }
-    };
+export const getStatusStyle = (status: string) => {
+	switch (status) {
+		case "Disponível":
+			return "bg-green-100 text-green-700 border-green-200";
+		case "Estoque Baixo":
+			return "bg-yellow-100 text-yellow-700 border-yellow-200";
+		case "Esgotado":
+			return "bg-red-100 text-red-700 border-red-200";
+		default:
+			return "bg-gray-100 text-gray-700";
+	}
+};

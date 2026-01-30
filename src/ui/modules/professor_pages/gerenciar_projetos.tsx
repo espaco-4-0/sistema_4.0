@@ -34,7 +34,7 @@ export function GerenciarProjetos() {
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 hover:cursor-pointer "
                 >
                     <option value="todos">Todos os Status</option>
                     <option value="em-andamento">Em Andamento</option>

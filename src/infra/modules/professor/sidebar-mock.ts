@@ -1,6 +1,5 @@
 import {
     BarChart3,
-    ChartNoAxesColumnIncreasing,
     ClipboardCheck,
     FolderKanban,
     House,

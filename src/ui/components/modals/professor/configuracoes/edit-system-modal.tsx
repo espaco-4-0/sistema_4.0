@@ -18,7 +18,7 @@ interface EditSystemModalProps {
   onClose: () => void;
 }
 
-export function EditSystemModal({ isOpen, onOpenChange, onClose }: EditSystemModalProps) {
+export function EditSystemModal({ isOpen, onOpenChange, onClose }: Readonly<EditSystemModalProps>) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -28,19 +28,19 @@ export function EditSystemModal({ isOpen, onOpenChange, onClose }: EditSystemMod
 
         <div className="p-6 space-y-5">
           <div>
-            <Label>Nome do Sistema</Label>
-            <Input defaultValue="Sistema Acadêmico EduTech" />
+            <Label>Sistema Do Espaco 4.0</Label>
+            <Input defaultValue="Sistema Do Espaco 4.0" />
           </div>
 
           <div>
-            <Label>Instituição</Label>
-            <Input defaultValue="Universidade Federal" />
+            <Label>Instituto Federal de Alagoas</Label>
+            <Input defaultValue="Instituto Federal de Alagoas" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Sigla</Label>
-              <Input defaultValue="UFED" />
+              <Input defaultValue="IFAL" />
             </div>
             <div>
               <Label>Ambiente</Label>
@@ -59,14 +59,14 @@ export function EditSystemModal({ isOpen, onOpenChange, onClose }: EditSystemMod
 
           <div>
             <Label>URL do Sistema</Label>
-            <Input type="url" defaultValue="https://edutech.com.br" />
+            <Input type="url" defaultValue="https://ifal.edu.com.br" />
           </div>
 
           <div className="pt-4 border-t flex gap-3">
-            <Button variant="outline" className="flex-1" onClick={onClose}>
+            <Button variant="outline" className="flex-1 hover:cursor-pointer" onClick={onClose}>
               Cancelar
             </Button>
-            <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Salvar</Button>
+            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 hover:cursor-pointer">Salvar</Button>
           </div>
         </div>
       </DialogContent>

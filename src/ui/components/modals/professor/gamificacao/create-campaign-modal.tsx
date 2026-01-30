@@ -13,7 +13,7 @@ interface CreateCampaignModalProps {
     onClose: () => void;
 }
 
-export function CreateCampaignModal({ isOpen, onOpenChange, onClose }: CreateCampaignModalProps) {
+export function CreateCampaignModal({ isOpen, onOpenChange, onClose }: Readonly<CreateCampaignModalProps>) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="border border-yellow-200">

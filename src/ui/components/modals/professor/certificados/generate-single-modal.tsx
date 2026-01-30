@@ -20,7 +20,7 @@ export function GenerateSingleModal({
   onClose,
   templates,
   students,
-}: GenerateSingleModalProps) {
+}: Readonly<GenerateSingleModalProps>) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="border border-gray-200">
@@ -77,12 +77,12 @@ export function GenerateSingleModal({
           <div className="pt-4 border-t flex gap-3">
             <Button
               variant="outline"
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="flex-1 border-gray-300 hover:cursor-pointer text-gray-700 hover:bg-gray-50"
               onClick={onClose}
             >
               Cancelar
             </Button>
-            <Button className="flex-1 bg-yellow-400 text-gray-900 hover:bg-yellow-500">Gerar certificado</Button>
+            <Button className="flex-1 bg-yellow-400 text-gray-900 hover:cursor-pointer hover:bg-yellow-500">Gerar certificado</Button>
           </div>
         </div>
       </DialogContent>

@@ -30,14 +30,14 @@ export default function Recursos() {
                     <div className="flex gap-3">
                         <button
                             onClick={() => setOpenImportar(true)}
-                            className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg transition shadow-sm border hover:bg-gray-50 text-sm font-medium"
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg transition shadow-sm border hover:cursor-pointer hover:bg-gray-50 text-sm font-medium"
                         >
                             <Plus size={18} /> Adicionar Recurso
                         </button>
 
                         <button
                             onClick={() => setOpenRecursos(true)}
-                            className="flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-medium"
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 hover:cursor-pointer transition shadow-sm text-sm font-medium"
                         >
                             <PlusCircle size={18} /> Importar Recursos
                         </button>

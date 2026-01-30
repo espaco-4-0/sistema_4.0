@@ -12,7 +12,7 @@ interface EditProfileModalProps {
     onClose: () => void;
 }
 
-export function EditProfileModal({ isOpen, onOpenChange, onClose }: EditProfileModalProps) {
+export function EditProfileModal({ isOpen, onOpenChange, onClose }: Readonly<EditProfileModalProps>) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -33,17 +33,17 @@ export function EditProfileModal({ isOpen, onOpenChange, onClose }: EditProfileM
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>Nome</Label>
-                            <Input defaultValue="Admin" />
+                            <Input defaultValue="Renata" />
                         </div>
                         <div>
                             <Label>Sobrenome</Label>
-                            <Input defaultValue="Sistema" />
+                            <Input defaultValue="Imaculada" />
                         </div>
                     </div>
 
                     <div>
                         <Label>E-mail</Label>
-                        <Input type="email" defaultValue="admin@edutech.com.br" />
+                        <Input type="email" defaultValue="Renata@ifal.edu.com.br" />
                     </div>
 
                     <div>
@@ -52,10 +52,10 @@ export function EditProfileModal({ isOpen, onOpenChange, onClose }: EditProfileM
                     </div>
 
                     <div className="pt-4 border-t flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={onClose}>
+                        <Button variant="outline" className="flex-1 hover:cursor-pointer" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700">Salvar</Button>
+                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 hover:cursor-pointer">Salvar</Button>
                     </div>
                 </div>
             </DialogContent>

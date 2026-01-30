@@ -4,9 +4,9 @@ import { useState } from "react";
 import { AttendanceTable } from "@/src/ui/modules/professor_pages/controle-de-presenca";
 
 export default function ControlePresencaPage() {
-    const [date, setDate] = useState("");
-    const [classId, setClassId] = useState("");
-    const [search, setSearch] = useState("");
+    const [date] = useState("");
+    const [classId] = useState("");
+    const [search] = useState("");
 
     return (
         <div className="space-y-6">

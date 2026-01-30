@@ -7,7 +7,7 @@ import {
 } from "@/src/infra/modules/professor/controle-presenca-mock";
 import { Check, ChevronLeft, ChevronRight, Clock, Filter, Search, X } from "lucide-react";
 
-export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: AttendanceTableProps) {
+export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Readonly<AttendanceTableProps>) {
     const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
@@ -20,6 +20,8 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Att
             late: students.filter((s) => s.status === "late").length,
         };
     }, [students]);
+
+    const statValues = [statsCalculated.total, statsCalculated.present, statsCalculated.absent, statsCalculated.late];
 
     const filteredStudents = useMemo(() => {
         const safeSearch = (searchTerm || "").toLowerCase();
@@ -60,14 +62,7 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Att
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {Valores.map((item, index) => {
                     const Icon = item.icon;
-                    const value =
-                        index === 0
-                            ? statsCalculated.total
-                            : index === 1
-                              ? statsCalculated.present
-                              : index === 2
-                                ? statsCalculated.absent
-                                : statsCalculated.late;
+                    const value = statValues[index] ?? 0;
 
                     return (
                         <div
@@ -133,8 +128,8 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Att
                                 <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                                {student.name.charAt(0)}
+                                            <div className="w-8 h-8 rounded-full bg-yellow-400 text-black text-xs font-semibold flex items-center justify-center">
+                                                {student.name.charAt(0).toUpperCase()}
                                             </div>
                                             {student.name}
                                         </div>
@@ -143,13 +138,12 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Att
                                     <td className="px-6 py-4 text-sm">
                                         <span
                                             className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                                                student.status === "present"
-                                                    ? "bg-green-50 text-green-700 border-green-100"
-                                                    : student.status === "absent"
-                                                      ? "bg-red-50 text-red-700 border-red-100"
-                                                      : student.status === "late"
-                                                        ? "bg-yellow-50 text-yellow-700 border-yellow-100"
-                                                        : "bg-gray-50 text-gray-600 border-gray-100"
+                                                {
+                                                    present: "bg-green-50 text-green-700 border-green-100",
+                                                    absent: "bg-red-50 text-red-700 border-red-100",
+                                                    late: "bg-yellow-50 text-yellow-700 border-yellow-100",
+                                                    pending: "bg-gray-50 text-gray-600 border-gray-100",
+                                                }[student.status] ?? "bg-gray-50 text-gray-600 border-gray-100"
                                             }`}
                                         >
                                             {student.status.charAt(0).toUpperCase() + student.status.slice(1)}

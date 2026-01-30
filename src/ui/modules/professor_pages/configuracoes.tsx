@@ -30,8 +30,8 @@ export default function Configuracoes() {
                                 <User className="w-8 h-8 text-yellow-500" />
                             </div>
                             <div className="text-black">
-                                <h2 className="text-xl font-bold">Admin Sistema</h2>
-                                <p className="text-sm opacity-90">admin@edutech.com.br</p>
+                                <h2 className="text-xl font-bold">Renata Imaculada</h2>
+                                <p className="text-sm opacity-90">Renata@ifal.edu.com.br</p>
                             </div>
                         </div>
                         <Button
@@ -81,7 +81,7 @@ export default function Configuracoes() {
                             <div className="flex justify-between items-center py-3 border-b">
                                 <div>
                                     <p className="text-xs text-gray-500 uppercase font-medium">Nome do Sistema</p>
-                                    <p className="text-gray-900 font-medium mt-1">Sistema Acadêmico EduTech</p>
+                                    <p className="text-gray-900 font-medium mt-1">Sistema do Espaco 4.0</p>
                                 </div>
                                 <Button variant="ghost" size="sm" onClick={() => setActiveModal("editSystem")}>
                                     Editar
@@ -91,7 +91,7 @@ export default function Configuracoes() {
                             <div className="flex justify-between items-center py-3 border-b">
                                 <div>
                                     <p className="text-xs text-gray-500 uppercase font-medium">Instituição</p>
-                                    <p className="text-gray-900 font-medium mt-1">Universidade Federal</p>
+                                    <p className="text-gray-900 font-medium mt-1">Instituto Federal de Alagoas Campus Arapiraca</p>
                                 </div>
                                 <Button variant="ghost" size="sm" onClick={() => setActiveModal("editSystem")}>
                                     Editar

@@ -451,7 +451,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                         <div className="mt-10 flex justify-end gap-3">
                             <Button
                                 type="button"
-                                className="cursor-pointer"
+                                className="hover:cursor-pointer"
                                 variant="outline"
                                 onClick={() => setOpen(false)}
                                 disabled={isSubmitting}
@@ -461,7 +461,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="cursor-pointer bg-yellow-primary px-8 font-bold text-black hover:bg-yellow-primary/90"
+                                className="hover:cursor-pointer bg-yellow-primary px-8 font-bold text-black hover:bg-yellow-primary/90"
                             >
                                 {isSubmitting ? (
                                     <div className="flex items-center gap-2">

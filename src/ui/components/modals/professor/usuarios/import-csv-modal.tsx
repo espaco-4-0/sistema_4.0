@@ -16,7 +16,7 @@ interface ImportCSVModalProps {
     onImportSuccess?: () => void;
 }
 
-export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVModalProps) {
+export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: Readonly<ImportCSVModalProps>) {
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +35,7 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVMo
         link.setAttribute("download", "modelo_importacao_usuarios.csv");
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        link.remove();
         URL.revokeObjectURL(url);
     };
 
@@ -136,7 +136,7 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVMo
                             <button
                                 type="button"
                                 onClick={handleDownloadTemplate}
-                                className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:cursor-pointer"
                             >
                                 <FileText size={14} /> Baixar Template CSV
                             </button>
@@ -181,7 +181,7 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVMo
                                         if (fileInputRef.current) fileInputRef.current.value = "";
                                         toast.info("Arquivo removido.");
                                     }}
-                                    className="flex items-center gap-1 text-red-500 text-xs mt-3 font-medium hover:bg-red-50 px-2 py-1 rounded-md transition"
+                                    className="flex items-center gap-1 text-red-500 text-xs mt-3 font-medium hover:bg-red-50 px-2 py-1 hover:cursor-pointer rounded-md transition"
                                 >
                                     <X size={14} /> Remover arquivo
                                 </button>
@@ -207,7 +207,7 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVMo
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 sm:flex-none px-6 py-2.5 text-gray-600 font-semibold text-sm hover:text-gray-800 transition"
+                        className="flex-1 sm:flex-none px-6 py-2.5 text-gray-600 font-semibold text-sm hover:text-gray-800 transition hover:cursor-pointer border-black"
                     >
                         Cancelar
                     </button>
@@ -215,7 +215,7 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: ImportCSVMo
                         type="button"
                         onClick={handleImportSubmit}
                         disabled={!file}
-                        className={`flex-1 sm:flex-none px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg
+                        className={`flex-1 sm:flex-none px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg hover:cursor-pointer
                             ${
                                 file
                                     ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95 cursor-pointer"

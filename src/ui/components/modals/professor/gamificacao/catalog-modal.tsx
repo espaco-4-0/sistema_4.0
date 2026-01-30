@@ -13,7 +13,7 @@ interface CatalogModalProps {
     onClose: () => void;
 }
 
-export function CatalogModal({ isOpen, onOpenChange, onClose }: CatalogModalProps) {
+export function CatalogModal({ isOpen, onOpenChange, onClose }: Readonly<CatalogModalProps>) {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="border border-yellow-200">
