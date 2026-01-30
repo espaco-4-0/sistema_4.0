@@ -1,3 +1,5 @@
+import type { CourseRegisterType } from "@/src/ui/forms/schemas/course-registration-schema";
+
 export interface ProfileCardProps {
     name: string;
     role: string;
@@ -34,26 +36,37 @@ export interface ProfileData {
     role: string;
 }
 
-export const profileDataMock: ProfileData = {
-    nome: "João",
-    sobrenome: "Silva Santos",
-    cpf: "123.456.789-00",
-    rg: "12.345.678-9",
-    dataNascimento: "15/03/2000",
-    idade: "26 anos",
+export const profileDataMock: CourseRegisterType & { matricula: string } = {
+    name: "João Pedro Silva",
     email: "joao.silva@estudante.ifal.edu.br",
-    senha: "******",
-    telefone: "(82) 3221-4567",
-    celular: "(82) 99876-5432",
-    rua: "Rua das Flores",
-    numero: "123",
-    complemento: "Apto 45",
-    bairro: "Centro",
-    cidade: "Maceió",
-    estado: "Alagoas",
-    cep: "57000-000",
-    instituicao: "IFAL - Instituto Federal de Alagoas",
-    curso: "Análise e Desenvolvimento de Sistemas",
+    birthDate: new Date("2000-03-15"),
+    race: "parda",
+    phone: "11987654321",
+    deficiency: "Nenhuma",
+    deficiencyDetail: undefined,
+    cpfFront: undefined as any,
+    cpfBack: undefined as any,
+    rgFront: undefined as any,
+    rgBack: undefined as any,
+    cpf: "52998224725",
+    rg: "123456789",
+    consignorOrgan: "SSP/SP",
+    consignorDate: new Date("2016-06-20"),
+    cep: "57000000",
+    houseNumber: 123,
+    road: "Rua das Flores",
+    neighborhood: "Centro",
+    city: "Maceió",
+    state: "AL",
+    education: "superior completo",
+    affiliation: "aluno",
     matricula: "20231234567",
-    role: "Estudante",
+};
+
+export const createMockFileList = () => {
+    if (globalThis.window === undefined) return undefined;
+    const file = new File(["placeholder"], "documento.pdf", { type: "application/pdf" });
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    return dataTransfer.files;
 };
