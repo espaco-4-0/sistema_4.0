@@ -66,7 +66,7 @@ export function CertificateCard(certificated: Readonly<CertificateCardProps>) {
                 <div className="flex items-center gap-4 lg:gap-5 2xl:gap-6 mb-4 lg:mb-5 2xl:mb-6 pb-4 lg:pb-5 2xl:pb-6 border-b border-slate-100">
                     {infoItems.map((item) => (
                         <div key={item.id} className="flex items-center gap-2 lg:gap-2.5">
-                            <item.icon className={`${style.text} rounded-lg p-2 lg:p-2.5 ${style.bg}`} size={32} />
+                            <item.icon className={`${style.text} rounded-lg p-2 lg:p-2 ${style.bg}`} size={32} />
                             <div>
                                 <p className="text-xs text-gray-600 mb-0.5">{item.label}</p>
                                 <p className="text-xs lg:text-sm font-semibold">{item.value}</p>

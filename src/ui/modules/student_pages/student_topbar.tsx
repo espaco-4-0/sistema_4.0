@@ -53,13 +53,13 @@ export default function StudentTopbar() {
                     </h1>
                     <p className="text-sm text-gray-600 lg:text-base">{current.description}</p>
                 </div>
-                <div className="hidden lg:flex absolute right-10 top-1/2 -translate-y-1/2  items-center gap-3">
-                    <span className="text-sm font-medium text-gray-900">
-                        {profileDataMock.nome} {profileDataMock.sobrenome}
-                    </span>
+                <div className="hidden lg:flex absolute right-10 top-1/2 -translate-y-1/2  items-center gap-2.5">
                     <div className="size-10 rounded-full bg-linear-to-br from-yellow-100 to-yellow-50 flex items-center justify-center ring-2 ring-yellow-200">
                         <User className="size-5 text-yellow-primary" strokeWidth={2.5} />
                     </div>
+                    <span className="text-sm font-medium text-gray-900">
+                        {profileDataMock.nome} {profileDataMock.sobrenome}
+                    </span>
                 </div>
             </div>
         </div>
