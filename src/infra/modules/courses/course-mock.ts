@@ -41,7 +41,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Este curso apresenta os fundamentos do React de forma prática e progressiva. Você aprenderá a pensar em componentes, entenderá como o Virtual DOM funciona e dominará a criação de interfaces dinâmicas utilizando JSX. Ao longo das aulas, construiremos uma aplicação real, passando pelo gerenciamento de estado com useState e a comunicação entre componentes via props, estabelecendo uma base sólida para sua carreira no ecossistema JavaScript.",
         durationWeeks: 4,
-        subscribes: 120,
+        subscribes: 24,
         maxSubscribes: 150,
         level: "Iniciante",
         category: "progamacao",
@@ -90,7 +90,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Curso focado em aprofundar conhecimentos no ecossistema React para quem já domina o básico. Exploramos o uso avançado de Hooks (useMemo, useCallback, useReducer) para otimização de performance e controle de efeitos colaterais. Você aprenderá padrões de design de componentes (Design Patterns), gerenciamento de estado complexo com Context API e Redux, além de técnicas de memoização para evitar renderizações desnecessárias em aplicações de grande escala.",
         durationWeeks: 6,
-        subscribes: 95,
+        subscribes: 18,
         maxSubscribes: 120,
         level: "Avançado",
         category: "progamacao",
@@ -141,7 +141,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Este curso ensina TypeScript de forma aplicada, focando em como a tipagem estática pode reduzir bugs e melhorar a produtividade do desenvolvedor. Aprenda a definir interfaces, tipos customizados, enums e a poderosa utilização de Generics para criar códigos reutilizáveis e seguros. Veremos como configurar o ambiente de desenvolvimento, integrar o TS em projetos JavaScript existentes e como extrair o máximo de inteligência do VS Code durante o desenvolvimento.",
         durationWeeks: 5,
-        subscribes: 180,
+        subscribes: 30,
         maxSubscribes: 200,
         level: "Iniciante",
         category: "progamacao",
@@ -190,7 +190,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Descubra por que o Next.js é o framework React favorito das empresas. Neste curso, abordamos a fundo o novo App Router, as estratégias de renderização como Server Side Rendering (SSR) e Static Site Generation (SSG), e como otimizar imagens e fontes nativamente. Você aprenderá a criar rotas dinâmicas, layouts reaproveitáveis e entenderá como o Next.js lida com SEO de forma automática para colocar seu site no topo dos mecanismos de busca.",
         durationWeeks: 4,
-        subscribes: 210,
+        subscribes: 26,
         maxSubscribes: 250,
         level: "Intermediário",
         category: "progamacao",
@@ -239,7 +239,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Leve suas aplicações Next.js para o nível profissional. Este curso foca em funcionalidades críticas para produção: implementação de Middlewares para proteção de rotas, estratégias complexas de cache e revalidação de dados (ISR), e otimização extrema de performance com Server Components. Discutiremos arquitetura de software para aplicações escaláveis e como gerenciar variáveis de ambiente de forma segura em diferentes ambientes de deploy.",
         durationWeeks: 6,
-        subscribes: 130,
+        subscribes: 21,
         maxSubscribes: 160,
         level: "Avançado",
         category: "progamacao",
@@ -289,7 +289,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Mergulhe no desenvolvimento backend com Node.js. Neste curso, você aprenderá a construir APIs REST robustas e escaláveis utilizando Express. Abordaremos desde o ciclo de vida de uma requisição HTTP até o tratamento centralizado de erros, passando por middlewares de autenticação, validação de dados e integração com bancos de dados. O foco é ensinar as convenções de mercado e como estruturar pastas de um projeto para que ele seja sustentável a longo prazo.",
         durationWeeks: 5,
-        subscribes: 160,
+        subscribes: 28,
         maxSubscribes: 180,
         level: "Intermediário",
         category: "progamacao",
@@ -338,7 +338,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Aprenda a manipular bancos de dados com a facilidade do TypeScript usando o Prisma ORM. Este curso prático ensina como modelar dados através do Prisma Schema, realizar migrações de forma segura e executar consultas complexas com máxima segurança de tipos. Veremos relacionamentos um-para-um, um-para-muitos e muitos-para-muitos, além de técnicas de 'eager loading' e 'lazy loading' para otimizar suas queries no backend.",
         durationWeeks: 3,
-        subscribes: 90,
+        subscribes: 12,
         maxSubscribes: 100,
         level: "Intermediário",
         category: "dados",
@@ -386,7 +386,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Um desenvolvedor completo precisa dominar os dados. Este curso vai além do básico do SQL e ensina como o PostgreSQL funciona 'sob o capô'. Você aprenderá a criar esquemas eficientes, utilizar índices para acelerar consultas lentas, entenderá planos de execução (EXPLAIN ANALYZE) e como garantir a integridade dos dados com constraints e transações ACID. Essencial para quem deseja construir sistemas que suportam milhares de acessos.",
         durationWeeks: 4,
-        subscribes: 140,
+        subscribes: 16,
         maxSubscribes: 170,
         level: "Iniciante",
         category: "dados",
@@ -435,7 +435,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Aprenda a implementar o padrão de segurança mais moderno para Next.js. Este curso foca totalmente no NextAuth.js (Auth.js), cobrindo desde o login social (Google, GitHub) até a autenticação customizada com e-mail e senha. Veremos como gerenciar sessões no cliente e no servidor, como trabalhar com JSON Web Tokens (JWT) e como proteger páginas e rotas de API de forma simples e segura.",
         durationWeeks: 3,
-        subscribes: 110,
+        subscribes: 27,
         maxSubscribes: 130,
         level: "Intermediário",
         category: "progamacao",
@@ -483,7 +483,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "A segurança não deve ser um 'detalhe' no seu projeto, mas a fundação. Neste curso, abordamos as principais vulnerabilidades listadas pela OWASP, como Injeção de SQL, Cross-Site Scripting (XSS) e IDOR. Você aprenderá como hackers exploram falhas comuns e, mais importante, como se defender utilizando cabeçalhos HTTP de segurança, validação rigorosa de dados e políticas de autorização robustas.",
         durationWeeks: 4,
-        subscribes: 175,
+        subscribes: 22,
         maxSubscribes: 200,
         level: "Iniciante",
         category: "progamacao",
@@ -531,7 +531,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Escrever código que funciona é fácil; difícil é escrever código que outros seres humanos consigam entender e manter. Este curso explora os princípios de Robert C. Martin (Uncle Bob), ensinando como dar nomes significativos a variáveis, criar funções pequenas e coesas, e como evitar comentários desnecessários através de um código autoexplicativo. Você aprenderá a identificar 'code smells' e a refatorar sistemas legados sem medo.",
         durationWeeks: 3,
-        subscribes: 220,
+        subscribes: 15,
         maxSubscribes: 250,
         level: "Iniciante",
         category: "progamacao",
@@ -579,7 +579,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Quando uma aplicação frontend cresce, a organização de arquivos e o fluxo de dados se tornam o maior desafio. Este curso ensina como estruturar grandes projetos React/Next.js, separando lógica de negócio de componentes visuais. Discutiremos padrões como Clean Architecture aplicada ao front, Modularização, uso inteligente de serviços e como escolher a melhor estratégia de gerenciamento de estado para cada cenário.",
         durationWeeks: 5,
-        subscribes: 80,
+        subscribes: 9,
         maxSubscribes: 100,
         level: "Iniciante",
         category: "design",
@@ -628,7 +628,7 @@ export const courses: CourseDetails[] = [
         longDescription:
             "Durma tranquilo sabendo que seu código funciona. Este curso ensina a cultura de testes automatizados utilizando Jest e React Testing Library. Aprenderemos a criar testes unitários para funções lógicas, testes de integração para componentes e como fazer 'mocks' de chamadas de API. Você entenderá o que é cobertura de código e como o TDD (Test Driven Development) pode mudar sua forma de programar para melhor.",
         durationWeeks: 4,
-        subscribes: 105,
+        subscribes: 19,
         maxSubscribes: 120,
         level: "Intermediário",
         category: "progamacao",

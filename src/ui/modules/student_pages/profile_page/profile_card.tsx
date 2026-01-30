@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ProfileCardFunctionProps } from "@/src/infra/modules/student/profile-card";
+import { ProfileCardFunctionProps } from "@/src/infra/modules/student/profile-card-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { Edit, FileText, Loader2, User } from "lucide-react";
 
@@ -21,62 +21,48 @@ export function ProfileCard({
     }
 
     return (
-        <div className="relative bg-linear-to-br from-yellow-primary to-yellow-secondary rounded-2xl p-8 shadow-xl overflow-hidden mt-6">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-                <div
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-                        backgroundSize: "40px 40px",
-                    }}
-                />
-            </div>
+        <div className="relative bg-linear-to-br from-yellow-primary to-yellow-secondary rounded-xl lg:rounded-2xl 2xl:rounded-2xl p-5 lg:p-6 2xl:p-8 shadow-lg overflow-hidden">
+            {/* Decorative gradient orb */}
+            <div className="absolute -top-16 -right-16 w-32 h-32 lg:-top-20 lg:-right-20 lg:w-48 lg:h-48 2xl:w-60 2xl:h-60 bg-white/10 rounded-full blur-3xl transition-all" />
 
-            <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div className="relative flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:gap-5 2xl:gap-6">
                 {/* Avatar */}
-                <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ring-4 ring-white/30">
-                        <User className="w-12 h-12 text-white" strokeWidth={2} />
-                    </div>
-                    <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                        <Edit className="w-4 h-4 text-gray-700" />
-                    </button>
+                <div className="size-20 lg:size-22 2xl:size-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ring-4 ring-white/30 transition-all">
+                    <User className="size-10 lg:size-11 2xl:size-12 text-white" strokeWidth={2} />
                 </div>
 
                 {/* User Info */}
-                <div className="flex-1 text-center md:text-left">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{name}</h1>
-                    <p className="text-gray-800 mb-1 flex items-center justify-center md:justify-start gap-2">
-                        <span className="font-medium">{role}</span>
-                        <span className="text-gray-700">•</span>
+                <div className="flex-1 flex flex-col gap-2 lg:gap-2 2xl:gap-2.5 text-center lg:text-left">
+                    <h1 className="text-2xl lg:text-2xl 2xl:text-3xl font-bold text-gray-900 transition-all">{name}</h1>
+                    <p className="text-sm lg:text-base 2xl:text-base font-medium text-gray-800 flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2">
+                        <span>{role}</span>
+                        <span className="hidden lg:inline">•</span>
                         <span>{course}</span>
                     </p>
-                    <p className="text-sm text-gray-700 flex items-center justify-center md:justify-start gap-1.5">
-                        <FileText className="w-3.5 h-3.5" />
+                    <p className="text-xs lg:text-sm 2xl:text-sm text-gray-700 flex items-center justify-center lg:justify-start gap-1.5">
+                        <FileText className="size-3 lg:size-3.5 2xl:size-3.5" />
                         Matrícula: {matricula}
                     </p>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="flex gap-2">
-                    <Button
-                        onClick={() => editProfile()}
-                        disabled={isLoadingToEdit || isEditing}
-                        className="cursor-pointer px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-50 transition-colors shadow-md font-medium flex items-center gap-2"
-                    >
-                        {isLoadingToEdit ? (
-                            <>
-                                <Loader2 className="animate-spin" /> Carregando...
-                            </>
-                        ) : (
-                            <>
-                                <Edit className="w-4 h-4" />
-                                Editar Perfil
-                            </>
-                        )}
-                    </Button>
-                </div>
+                {/* Edit Button - Below on mobile, absolute on desktop */}
+                <Button
+                    onClick={() => editProfile()}
+                    disabled={isLoadingToEdit || isEditing}
+                    className="w-full lg:w-auto lg:absolute lg:top-0 lg:right-0 cursor-pointer px-4 py-2.5 lg:py-2 2xl:py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-50 transition-all shadow-md hover:shadow-lg font-medium flex items-center justify-center gap-2 text-sm lg:text-base disabled:opacity-60"
+                >
+                    {isLoadingToEdit ? (
+                        <>
+                            <Loader2 className="animate-spin size-4 2xl:size-4" />
+                            <span>Carregando...</span>
+                        </>
+                    ) : (
+                        <>
+                            <Edit className="size-4 2xl:size-4" />
+                            <span>Editar Perfil</span>
+                        </>
+                    )}
+                </Button>
             </div>
         </div>
     );

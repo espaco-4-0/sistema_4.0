@@ -1,44 +1,66 @@
-import { Calendar, Clock, MapPin, User } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar, Clock, Info, MapPin, User } from "lucide-react";
 
-const event_informatons = [
-    {
-        id: 1,
-        icon: Calendar,
-        tittle: "Data",
-        description: "segunda-feira, 22/06/2026",
-    },
-    {
-        id: 2,
-        icon: Clock,
-        tittle: "Horário",
-        description: "14:00 - 18:00",
-    },
-    {
-        id: 3,
-        icon: User,
-        tittle: "Instrutor",
-        description: "Prof. João Oliveira",
-    },
-    {
-        id: 4,
-        icon: MapPin,
-        tittle: "Local",
-        description: "IFAL Arapiraca",
-    },
-];
+interface EventInformatonsProps {
+    date: string;
+    start?: Date;
+    instructor: string;
+    location: string;
+    observation: string;
+}
 
-export default function EventInformatons() {
+export default function EventInformatons({
+    date,
+    start,
+    instructor,
+    location,
+    observation,
+}: Readonly<EventInformatonsProps>) {
+    const time = start ? format(start, "HH:mm") : "—";
+    const informations = [
+        {
+            id: 1,
+            icon: Calendar,
+            title: "Data",
+            description: date || "—",
+        },
+        {
+            id: 2,
+            icon: Clock,
+            title: "Horário",
+            description: time,
+        },
+        {
+            id: 3,
+            icon: User,
+            title: "Instrutor",
+            description: instructor || "—",
+        },
+        {
+            id: 4,
+            icon: MapPin,
+            title: "Local",
+            description: location || "—",
+        },
+        {
+            id: 5,
+            icon: Info,
+            title: "Observação",
+            description: observation || "—",
+        },
+    ];
+
     return (
         <div className="grid grid-cols-2 gap-4">
-            {event_informatons.map(({ icon: IconComponent, id, tittle, description }) => (
+            {informations.map(({ icon: IconComponent, id, title, description }) => (
                 <div
                     key={id}
-                    className="flex items-center flex-row gap-4 items p-4 w-full h-auto bg-gray-description-light/25 text-black rounded-lg"
+                    className={`flex items-center flex-row gap-4 items p-4 w-full h-auto bg-gray-description-light/10 border-gray-description-light/60 border text-black rounded-xl ${title === "Observação" && "col-span-2"}`}
                 >
-                    <IconComponent className="text-yellow-primary" size={20} />
+                    <IconComponent className="text-yellow-primary bg-yellow-back-icon p-1 rounded-md" size={30} />
                     <div className="flex flex-col gap-1">
-                        <span className="text-xs text-gray-600">{tittle}</span>
-                        <span className="text-sm font-medium capitalize">{description}</span>
+                        <span className="text-xs text-gray-600">{title}</span>
+                        <span className="text-sm font-medium">{description}</span>
                     </div>
                 </div>
             ))}

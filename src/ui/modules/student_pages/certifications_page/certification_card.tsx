@@ -6,16 +6,25 @@ import { toast } from "sonner";
 
 export function CertificateCard(certificated: Readonly<CertificateCardProps>) {
     const [isDownloading, setIsDownloading] = useState(false);
-    const gradient = "from-yellow-primary to-yellow-secondary";
-    const bg = "bg-yellow-back-icon";
-    const text = "text-yellow-icon";
-    const border = "border-slate-200";
+
+    const style = {
+        gradient: "from-yellow-primary to-yellow-secondary",
+        bg: "bg-yellow-back-icon",
+        text: "text-yellow-icon",
+        border: "border-slate-200",
+    };
 
     const handleDownload = async () => {
         setIsDownloading(true);
 
-        // Pra parecer que ta baixando (delayzinho)
         await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const url = URL.createObjectURL(new Blob([], { type: "application/pdf" }));
+        Object.assign(document.createElement("a"), {
+            href: url,
+            download: `certificado-${certificated.title.replaceAll(/\s+/g, "-").toLowerCase()}.pdf`,
+        }).click();
+        URL.revokeObjectURL(url);
 
         setIsDownloading(false);
         toast.success("Certificado baixado com sucesso!", {
@@ -26,81 +35,67 @@ export function CertificateCard(certificated: Readonly<CertificateCardProps>) {
     const infoItems = [
         {
             id: 1,
-            icon: <Calendar className={`w-4 h-4 ${text}`} />,
+            icon: Calendar,
             label: "Conclusão",
             value: certificated.completionDate,
         },
         {
             id: 2,
-            icon: <Clock className={`w-4 h-4 ${text}`} />,
+            icon: Clock,
             label: "Carga",
             value: `${certificated.hours}h`,
         },
     ];
 
     return (
-        <div className="group relative">
+        <div className="relative bg-white/90 rounded-2xl lg:rounded-3xl border border-slate-200/50 p-5 lg:p-6 2xl:p-7 hover:border-slate-300/50 transition-all duration-300 overflow-hidden shadow-xs hover:shadow-xl hover:shadow-yellow-primary-dark/10">
             <div
-                className={`absolute  -inset-1 bg-linear-to-r ${gradient} rounded-3xl opacity-0 group-hover:opacity-10 blur-2xl transition-all duration-500`}
+                className={`absolute -top-8 -right-8 w-32 h-32 lg:-top-10 lg:-right-10 lg:w-40 lg:h-40 2xl:-top-12 2xl:-right-12 2xl:w-48 2xl:h-48 bg-linear-to-br ${style.gradient} opacity-[0.08] rounded-full blur-2xl`}
             />
 
-            <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-slate-200/50 p-7 hover:border-slate-300/50 transition-all duration-300 overflow-hidden shadow-xs hover:shadow-xl hover:shadow-black/5">
+            <div className="relative">
                 <div
-                    className={`absolute -top-12 -right-12 w-32 h-32 bg-linear-to-br ${gradient} opacity-[0.07] rounded-full blur-2xl`}
+                    className={`absolute top-1 right-1 w-2 h-2 rounded-full ${style.bg} border-yellow-primary/25 border-2`}
                 />
 
-                <div className="relative">
-                    <div className="mb-6">
-                        <div className="flex items-start justify-between gap-4 mb-3">
-                            <h3 className="text-black font-semibold text-xl leading-snug flex-1">
-                                {certificated.title}
-                            </h3>
-                            <div className={`w-2 h-2 rounded-full ${bg} ${border} border-2 shrink-0 mt-1.5`} />
-                        </div>
-                        <p className="text-sm text-gray-600 font-medium">{certificated.institution}</p>
-                    </div>
+                <h3 className="mb-1 lg:mb-1.5 text-black font-semibold text-lg lg:text-xl">{certificated.title}</h3>
+                <p className="mb-4 lg:mb-5 2xl:mb-6 text-xs lg:text-sm text-gray-600 font-medium">
+                    {certificated.institution}
+                </p>
 
-                    <div className="flex items-center gap-6 mb-6 pb-6 border-b border-slate-100">
-                        {infoItems.map((item) => (
-                            <div key={item.id} className="flex items-center gap-2.5">
-                                <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center`}>
-                                    {item.icon}
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-600 mb-0.5">{item.label}</p>
-                                    <p className="text-sm text-black font-semibold">{item.value}</p>
-                                </div>
+                <div className="flex items-center gap-4 lg:gap-5 2xl:gap-6 mb-4 lg:mb-5 2xl:mb-6 pb-4 lg:pb-5 2xl:pb-6 border-b border-slate-100">
+                    {infoItems.map((item) => (
+                        <div key={item.id} className="flex items-center gap-2 lg:gap-2.5">
+                            <item.icon className={`${style.text} rounded-lg p-2 lg:p-2.5 ${style.bg}`} size={32} />
+                            <div>
+                                <p className="text-xs text-gray-600 mb-0.5">{item.label}</p>
+                                <p className="text-xs lg:text-sm font-semibold">{item.value}</p>
                             </div>
-                        ))}
-                    </div>
-
-                    <Button
-                        onClick={handleDownload}
-                        disabled={isDownloading}
-                        className={`
-            w-full bg-linear-to-r ${gradient} hover:brightness-90
-            hover:shadow-lg
-            text-black py-3.5 rounded-xl
-            transition-all duration-300 
-            flex items-center justify-center gap-2.5
-			h-12 cursor-pointer 
-            disabled:opacity-70 disabled:cursor-not-allowed
-			text-md font-normal
-          `}
-                    >
-                        {isDownloading ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span>Baixando...</span>
-                            </>
-                        ) : (
-                            <>
-                                <Download className="w-4 h-4" />
-                                <span>Baixar Certificado</span>
-                            </>
-                        )}
-                    </Button>
+                        </div>
+                    ))}
                 </div>
+
+                <Button
+                    onClick={handleDownload}
+                    disabled={isDownloading}
+                    className={`
+          					  w-full bg-linear-to-r ${style.gradient} hover:brightness-90 text-black py-3 lg:py-3.5 rounded-lg lg:rounded-xl
+          					  hover:shadow-lg transition-all duration-250 h-10 lg:h-11 2xl:h-12 cursor-pointer text-sm lg:text-md font-normal
+          					  disabled:opacity-70 disabled:cursor-not-allowed
+          					`}
+                >
+                    {isDownloading ? (
+                        <>
+                            <Loader2 className="size-4 animate-spin" />
+                            <span>Baixando...</span>
+                        </>
+                    ) : (
+                        <>
+                            <Download className="size-4" />
+                            <span>Baixar Certificado</span>
+                        </>
+                    )}
+                </Button>
             </div>
         </div>
     );
