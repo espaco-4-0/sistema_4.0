@@ -67,7 +67,7 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Rea
                     return (
                         <div
                             key={item.title}
-                            className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"
+                            className="bg-white rounded-xl p-6 border border-gray-100 border-b-4 border-b-transparent transition-all duration-300 hover:border-gray-200 hover:border-b-yellow-primary"
                         >
                             <div className="flex items-start justify-between">
                                 <div>
@@ -75,7 +75,7 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Rea
                                     <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
                                 </div>
                                 <div className={`${item.bgColor} p-3 rounded-lg`}>
-                                    <Icon className={`w-6 h-6 ${item.bgIconColor}`} />
+                                    <Icon className={`w-7 h-7 ${item.bgIconColor}`} />
                                 </div>
                             </div>
                         </div>

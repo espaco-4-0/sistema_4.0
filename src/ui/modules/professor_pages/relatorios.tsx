@@ -59,7 +59,7 @@ export default function RelatoriosState() {
                     return (
                         <div
                             key={item.title}
-                            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-start justify-between"
+                            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-b-4 border-b-transparent hover:border-b-yellow-primary hover:border-gray-200 transition-all duration-300 flex items-start justify-between"
                         >
                             <div>
                                 <p className="text-sm font-medium text-gray-500 mb-1">{item.title}</p>

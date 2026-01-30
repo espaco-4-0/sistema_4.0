@@ -48,7 +48,7 @@ export default function GerenciarUsuarios() {
                     return (
                         <div
                             key={stat.title}
-                            className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition"
+                            className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 border-b-4 border-b-transparent hover:border-b-yellow-primary hover:border-gray-200 transition-all duration-300"
                         >
                             <div className="flex items-start justify-between">
                                 <div>

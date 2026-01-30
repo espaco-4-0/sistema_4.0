@@ -5,15 +5,6 @@ import { CatalogModal } from "@/src/ui/components/modals/professor/gamificacao/c
 import { CreateCampaignModal } from "@/src/ui/components/modals/professor/gamificacao/create-campaign-modal";
 import { NewMissionModal } from "@/src/ui/components/modals/professor/gamificacao/new-mission-modal";
 import { Button } from "@/src/ui/components/ui/button";
-import {
-    Card,
-    CardAction,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/src/ui/components/ui/card";
 import { Crown, Flame, Gift, Medal, Star, Target, Trophy, Users } from "lucide-react";
 
 const highlights = [
@@ -22,21 +13,24 @@ const highlights = [
         value: "1.248",
         detail: "+12% na última semana",
         icon: Users,
-        color: "text-blue-600",
+        color: "text-blue-700",
+        bgColor: "bg-blue-100",
     },
     {
         title: "Prêmios resgatados",
         value: "312",
         detail: "Taxa de resgate 78%",
         icon: Gift,
-        color: "text-green-600",
+        color: "text-green-700",
+        bgColor: "bg-green-100",
     },
     {
         title: "Pontuação média",
         value: "865 pts",
         detail: "Meta 900 pts",
         icon: Star,
-        color: "text-yellow-500",
+        color: "text-yellow-700",
+        bgColor: "bg-yellow-100",
     },
 ];
 
@@ -127,31 +121,34 @@ export default function Gamificacao() {
                 {highlights.map((item) => {
                     const Icon = item.icon;
                     return (
-                        <Card key={item.title} className="border border-gray-100">
-                            <CardHeader>
-                                <CardTitle className="text-sm text-gray-500">{item.title}</CardTitle>
-                                <CardAction>
-                                    <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                                        <Icon className={`w-5 h-5 ${item.color}`} />
-                                    </div>
-                                </CardAction>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-2xl font-bold text-gray-900">{item.value}</p>
-                                <p className="text-xs text-gray-500 mt-1">{item.detail}</p>
-                            </CardContent>
-                        </Card>
+                        <div
+                            key={item.title}
+                            className="bg-white rounded-xl border border-gray-100 p-6 hover:border-gray-200 border-b-4 border-b-transparent hover:border-b-yellow-primary transition-all duration-300"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500 mb-1">{item.title}</p>
+                                    <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{item.detail}</p>
+                                </div>
+                                <div
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.bgColor}`}
+                                >
+                                    <Icon className={`w-6 h-6 ${item.color}`} />
+                                </div>
+                            </div>
+                        </div>
                     );
                 })}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <Card className="lg:col-span-2 border border-gray-100">
-                    <CardHeader>
-                        <CardTitle>Catálogo de Prêmios</CardTitle>
-                        <CardDescription>Itens mais desejados pelos alunos</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+                    <div>
+                        <h3 className="text-lg font-semibold">Catálogo de Prêmios</h3>
+                        <p className="text-gray-500 text-sm">Itens mais desejados pelos alunos</p>
+                    </div>
+                    <div className="space-y-4">
                         {rewards.map((reward) => {
                             const Icon = reward.icon;
                             return (
@@ -172,8 +169,8 @@ export default function Gamificacao() {
                                 </div>
                             );
                         })}
-                    </CardContent>
-                    <CardFooter className="justify-end">
+                    </div>
+                    <div className="flex items-center justify-end">
                         <Button
                             variant="secondary"
                             className="hover:cursor-pointer"
@@ -181,15 +178,15 @@ export default function Gamificacao() {
                         >
                             Gerenciar prêmios
                         </Button>
-                    </CardFooter>
-                </Card>
+                    </div>
+                </div>
 
-                <Card className="border border-gray-100">
-                    <CardHeader>
-                        <CardTitle>Ranking Semanal</CardTitle>
-                        <CardDescription>Top alunos por pontuação</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
+                <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+                    <div>
+                        <h3 className="text-lg font-semibold">Ranking Semanal</h3>
+                        <p className="text-gray-500 text-sm">Top alunos por pontuação</p>
+                    </div>
+                    <div className="space-y-3">
                         {leaderboard.map((student, index) => (
                             <div key={student.name} className="flex items-center justify-between">
                                 <div>
@@ -201,19 +198,19 @@ export default function Gamificacao() {
                                 <span className="text-xs font-semibold text-yellow-600">{student.points}</span>
                             </div>
                         ))}
-                    </CardContent>
-                    <CardFooter className="justify-end">
+                    </div>
+                    <div className="flex items-center justify-end">
                         <Button variant="secondary">Ver ranking completo</Button>
-                    </CardFooter>
-                </Card>
+                    </div>
+                </div>
             </div>
 
-            <Card className="border border-gray-100">
-                <CardHeader>
-                    <CardTitle>Missões e Desafios</CardTitle>
-                    <CardDescription>Defina metas para cursos, monitores e pesquisadores</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
+                <div>
+                    <h3 className="text-lg font-semibold">Missões e Desafios</h3>
+                    <p className="text-gray-500 text-sm">Defina metas para cursos, monitores e pesquisadores</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {missions.map((mission) => {
                         const Icon = mission.icon;
                         return (
@@ -229,16 +226,16 @@ export default function Gamificacao() {
                             </div>
                         );
                     })}
-                </CardContent>
-                <CardFooter className="justify-end">
+                </div>
+                <div className="flex items-center justify-end">
                     <Button
                         className="bg-yellow-primary text-black hover:bg-yellow-secondary hover:cursor-pointer"
                         onClick={() => setIsNewMissionOpen(true)}
                     >
                         Nova missão
                     </Button>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
 
             <CreateCampaignModal
                 isOpen={isCreateCampaignOpen}

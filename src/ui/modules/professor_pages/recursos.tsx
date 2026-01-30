@@ -48,14 +48,17 @@ export default function Recursos() {
                     {statsEstoque.map((item) => {
                         const Icon = item.icon;
                         return (
-                            <div key={item.title} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div
+                                key={item.title}
+                                className="bg-white rounded-xl p-6 border border-gray-100 border-b-4 border-b-transparent transition-all duration-300 hover:border-gray-200 hover:border-b-yellow-primary"
+                            >
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <p className="text-sm text-gray-500 mb-1">{item.title}</p>
                                         <h3 className="text-3xl font-bold text-gray-900">{item.value}</h3>
                                     </div>
                                     <div className={`${item.color} p-3 rounded-lg`}>
-                                        <Icon className={`w-6 h-6 ${item.iconColor}`} />
+                                        <Icon className={`w-7 h-7 ${item.iconColor}`} />
                                     </div>
                                 </div>
                             </div>

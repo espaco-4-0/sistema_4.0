@@ -97,15 +97,18 @@ export function VisaoGeral() {
                     const Icon = metric.icon;
 
                     return (
-                        <div key={metric.title} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <div className="flex items-start justify-between mb-4">
+                        <div
+                            key={metric.title}
+                            className="bg-white rounded-xl p-6 border border-gray-100 border-b-4 border-b-transparent transition-all duration-300 hover:border-gray-200 hover:border-b-yellow-primary"
+                        >
+                            <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">{metric.title}</p>
                                     <h3 className="text-3xl font-bold">{metric.value}</h3>
                                 </div>
 
                                 <div className={`${metric.color} p-3 rounded-lg`}>
-                                    <Icon className={`w-6 h-6 ${metric.iconColor}`} />
+                                    <Icon className={`w-7 h-7 ${metric.iconColor}`} />
                                 </div>
                             </div>
                         </div>
