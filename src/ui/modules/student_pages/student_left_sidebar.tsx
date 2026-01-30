@@ -103,10 +103,12 @@ export default function StudentLeftSidebar() {
                     </div>
                 </div>
                 <SidebarMenuItem className="flex items-center gap-2 lg:gap-3 2xl:gap-3">
-                    <SidebarMenuButton className="w-auto transition-all py-3.5 lg:py-5 2xl:py-5 px-3 lg:px-3 2xl:px-3 text-red-600 text-sm lg:text-sm 2xl:text-base font-semibold hover:bg-red-100 hover:text-red-500 cursor-pointer">
-                        <LogOut className="size-5 lg:size-5 2xl:size-5" />
-                        <span className="text-sm lg:text-sm 2xl:text-base">Sair</span>
-                    </SidebarMenuButton>
+                    <Link href="/">
+                        <SidebarMenuButton className="w-auto transition-all py-3.5 lg:py-5 2xl:py-5 px-3 lg:px-3 2xl:px-3 text-red-600 text-sm lg:text-sm 2xl:text-base font-semibold hover:bg-red-100 hover:text-red-500 cursor-pointer">
+                            <LogOut className="size-5 lg:size-5 2xl:size-5" />
+                            <span className="text-sm lg:text-sm 2xl:text-base">Sair</span>
+                        </SidebarMenuButton>
+                    </Link>
                 </SidebarMenuItem>
             </SidebarFooter>
         </Sidebar>

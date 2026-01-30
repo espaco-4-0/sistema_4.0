@@ -13,7 +13,7 @@ import {affiliationIfalOptions,consignorOrganOptions,
 import { useCep } from "@/src/ui/hooks/useCep";
 import { useIsMounted } from "@/src/ui/hooks/useIsMounted";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Loader2 } from "lucide-react";
+import { Cog } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
@@ -31,7 +31,7 @@ const LoadingState = ({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) 
         ref={ref}
         className="mx-auto flex h-auto w-full max-w-4xl flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white px-6 py-10 text-center shadow-lg transition-all hover:shadow-xl md:p-12 lg:h-170 2xl:p-16"
     >
-        <Loader2 className="animate-spin text-yellow-primary" size={50} />
+        <Cog className="h-16 w-16 animate-spin text-yellow-primary" />
         <span className="mt-4 text-sm font-semibold text-gray-400 uppercase">Enviando inscrição...</span>
     </div>
 );
