@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/src/ui/components/ui/button";
-import { Checkbox } from "@/src/ui/components/ui/checkbox";
+import { DatePicker } from "@/src/ui/components/ui/date-picker";
 import { Input } from "@/src/ui/components/ui/input";
-import { Label } from "@/src/ui/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
-import {affiliationIfalOptions,consignorOrganOptions,
+import {
+    DEFICIENCY_OPTIONS,
+    RG_ISSUER_OPTIONS,
+    UF_OPTIONS,
+    affiliationIfalOptions,
     courseRegisterSchema,
     educationOptions,
     raceOptions,
@@ -54,14 +57,15 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
         resolver: valibotResolver(courseRegisterSchema),
         mode: "onBlur",
         defaultValues: {
-            deficiency: "Nenhuma",
             name: "",
             email: "",
-            number: "",
+            phone: "",
             road: "",
             city: "",
             neighborhood: "",
-            state: "",
+            state: undefined,
+            deficiency: undefined,
+            deficiencyDetail: "",
         },
     });
 
@@ -74,7 +78,7 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
     } = form;
 
     const deficiencyValue = useWatch({ control, name: "deficiency" });
-    const pcd = deficiencyValue !== "Nenhuma";
+    const isOtherDeficiency = deficiencyValue === "Outro";
 
     const handleCepBlur = useCep(setValue);
 
@@ -136,26 +140,34 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                             />
                         </FormField>
 
-                        <FormField label="Idade" error={errors.age}>
-                            <Input
-                                {...register("age", { valueAsNumber: true })}
-                                type="number"
-                                className={inputClass}
-                                placeholder="Ex: 25"
+                        <FormField label="Data de Nascimento" error={errors.birthDate}>
+                            <Controller
+                                name="birthDate"
+                                control={control}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        date={field.value instanceof Date ? field.value : undefined}
+                                        onDateChange={field.onChange}
+                                        placeholder="Selecione sua data de nascimento"
+                                        onBlur={field.onBlur}
+                                    />
+                                )}
                             />
                         </FormField>
 
-                        <FormField label="WhatsApp" error={errors.number}>
+                        <FormField label="WhatsApp" error={errors.phone}>
                             <Controller
-                                name="number"
+                                name="phone"
                                 control={control}
                                 render={({ field }) => (
                                     <IMaskInput
                                         {...field}
                                         mask="(00) 00000-0000"
+                                        unmask={true}
                                         className={maskInputClass}
                                         placeholder="(00) 00000-0000"
                                         onAccept={field.onChange}
+                                        onBlur={field.onBlur}
                                     />
                                 )}
                             />
@@ -166,7 +178,11 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                                 name="race"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        onOpenChange={(o) => !o && field.onBlur()}
+                                    >
                                         <SelectTrigger className="mt-1 cursor-pointer">
                                             <SelectValue placeholder="Selecione sua raça" />
                                         </SelectTrigger>
@@ -182,31 +198,39 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                             />
                         </FormField>
 
-                        <div className="flex items-end pb-2">
-                            <div className="flex h-10 items-center gap-2">
-                                <Checkbox
-                                    id="pcd"
-                                    checked={pcd}
-                                    onCheckedChange={(v) =>
-                                        setValue("deficiency", v ? "" : "Nenhuma", { shouldValidate: true })
-                                    }
-                                />
-                                <Label htmlFor="pcd" className="cursor-pointer text-sm">
-                                    Pessoa com deficiência
-                                </Label>
-                            </div>
-                        </div>
+                        <FormField label="Deficiência" error={errors.deficiency}>
+                            <Controller
+                                name="deficiency"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || ""}
+                                        onOpenChange={(o) => !o && field.onBlur()}
+                                    >
+                                        <SelectTrigger className="mt-1 cursor-pointer">
+                                            <SelectValue placeholder="Selecione a deficiência" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {DEFICIENCY_OPTIONS.map((option) => (
+                                                <SelectItem key={option} value={option} className="cursor-pointer">
+                                                    {option}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </FormField>
 
-                        {pcd && (
-                            <div className="md:col-span-2">
-                                <FormField label="Qual deficiência?" error={errors.deficiency}>
-                                    <Input
-                                        {...register("deficiency")}
-                                        className={inputClass}
-                                        placeholder="Ex: Deficiência visual parcial"
-                                    />
-                                </FormField>
-                            </div>
+                        {isOtherDeficiency && (
+                            <FormField label="Qual deficiência?" error={errors.deficiencyDetail}>
+                                <Input
+                                    {...register("deficiencyDetail")}
+                                    className={inputClass}
+                                    placeholder="Ex: Deficiência visual parcial"
+                                />
+                            </FormField>
                         )}
                     </FormSection>
 
@@ -246,13 +270,29 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                                         className={maskInputClass}
                                         placeholder="000.000.000-00"
                                         onAccept={field.onChange}
+                                        onBlur={field.onBlur}
                                     />
                                 )}
                             />
                         </FormField>
 
                         <FormField label="RG (Número)" error={errors.rg}>
-                            <Input {...register("rg")} className={inputClass} placeholder="Ex: 1234567-8" />
+                            <Controller
+                                name="rg"
+                                control={control}
+                                render={({ field }) => (
+                                    <IMaskInput
+                                        {...field}
+                                        mask="00000000000000"
+                                        unmask={true}
+                                        lazy={true}
+                                        className={maskInputClass}
+                                        placeholder="Ex: 1234567"
+                                        onAccept={field.onChange}
+                                        onBlur={field.onBlur}
+                                    />
+                                )}
+                            />
                         </FormField>
 
                         <FormField label="Órgão Expedidor" error={errors.consignorOrgan}>
@@ -260,12 +300,16 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                                 name="consignorOrgan"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        onOpenChange={(o) => !o && field.onBlur()}
+                                    >
                                         <SelectTrigger className="mt-1 cursor-pointer">
                                             <SelectValue placeholder="Selecione o órgão" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {consignorOrganOptions.map((o) => (
+                                            {RG_ISSUER_OPTIONS.map((o) => (
                                                 <SelectItem className="cursor-pointer" key={o} value={o}>
                                                     {o}
                                                 </SelectItem>
@@ -277,10 +321,17 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                         </FormField>
 
                         <FormField label="Data de Expedição" error={errors.consignorDate}>
-                            <Input
-                                {...register("consignorDate", { valueAsDate: true })}
-                                type="date"
-                                className={inputClass}
+                            <Controller
+                                name="consignorDate"
+                                control={control}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        date={field.value instanceof Date ? field.value : undefined}
+                                        onDateChange={field.onChange}
+                                        placeholder="Selecione a data de expedição"
+                                        onBlur={field.onBlur}
+                                    />
+                                )}
                             />
                         </FormField>
                     </FormSection>
@@ -336,7 +387,28 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                                 </FormField>
                             </div>
                             <FormField label="UF" error={errors.state}>
-                                <Input {...register("state")} className={inputClass} placeholder="AL" maxLength={2} />
+                                <Controller
+                                    name="state"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                            onOpenChange={(o) => !o && field.onBlur()}
+                                        >
+                                            <SelectTrigger className="mt-1 cursor-pointer">
+                                                <SelectValue placeholder="UF" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {UF_OPTIONS.map((uf) => (
+                                                    <SelectItem key={uf} value={uf} className="cursor-pointer">
+                                                        {uf}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                             </FormField>
                         </div>
                     </FormSection>
@@ -347,7 +419,11 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                                 name="education"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        onOpenChange={(o) => !o && field.onBlur()}
+                                    >
                                         <SelectTrigger className="mt-1 cursor-pointer">
                                             <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
@@ -368,7 +444,11 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                                 name="affiliation"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        onOpenChange={(o) => !o && field.onBlur()}
+                                    >
                                         <SelectTrigger className="mt-1 cursor-pointer">
                                             <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>

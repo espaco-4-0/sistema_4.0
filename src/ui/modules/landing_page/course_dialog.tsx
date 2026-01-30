@@ -3,15 +3,17 @@
 import { useSyncExternalStore } from "react";
 import { Alert, AlertDescription } from "@/src/ui/components/ui/alert";
 import { Button } from "@/src/ui/components/ui/button";
-import { Checkbox } from "@/src/ui/components/ui/checkbox";
+import { DatePicker } from "@/src/ui/components/ui/date-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/src/ui/components/ui/dialog";
 import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { Separator } from "@/src/ui/components/ui/separator";
 import {
+    DEFICIENCY_OPTIONS,
+    RG_ISSUER_OPTIONS,
+    UF_OPTIONS,
     affiliationIfalOptions,
-    consignorOrganOptions,
     courseRegisterSchema,
     educationOptions,
     raceOptions,
@@ -48,6 +50,10 @@ interface CourseDialogProps {
     readonly curso: string;
 }
 
+export const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-primary-light outline-none";
+export const maskInputClass =
+    inputClass + " flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+
 export const FormField = ({ label, error, children }: FormFieldProps) => (
     <div className="space-y-1">
         <Label className="text-sm font-medium">{label}</Label>
@@ -71,14 +77,15 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         resolver: valibotResolver(courseRegisterSchema),
         mode: "onBlur",
         defaultValues: {
-            deficiency: "Nenhuma",
+            deficiency: undefined,
+            deficiencyDetail: "",
             name: "",
             email: "",
-            number: "",
+            phone: "",
             road: "",
             city: "",
             neighborhood: "",
-            state: "",
+            state: undefined,
         },
     });
 
@@ -95,7 +102,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         name: "deficiency",
     });
 
-    const pcd = deficiencyValue !== "Nenhuma";
+    const isOtherDeficiency = deficiencyValue === "Outro";
 
     const handleCepBlur = async (cep: string) => {
         const cleanCep = cep.replaceAll(/\D/g, "");
@@ -114,10 +121,6 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
             toast.error("Falha ao buscar CEP");
         }
     };
-
-    const inputClass = "focus-visible:ring-2 focus-visible:ring-yellow-primary-light outline-none";
-    const maskInputClass =
-        inputClass + " flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
     if (!isMounted) return null;
 
@@ -180,18 +183,24 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 />
                             </FormField>
 
-                            <FormField label="Idade" error={errors.age}>
-                                <Input
-                                    {...register("age", { valueAsNumber: true })}
-                                    type="number"
-                                    className={inputClass}
-                                    placeholder="Ex: 25"
+                            <FormField label="Data de Nascimento" error={errors.birthDate}>
+                                <Controller
+                                    name="birthDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            date={field.value instanceof Date ? field.value : undefined}
+                                            onDateChange={field.onChange}
+                                            placeholder="Selecione sua data de nascimento"
+                                            onBlur={field.onBlur}
+                                        />
+                                    )}
                                 />
                             </FormField>
 
-                            <FormField label="WhatsApp" error={errors.number}>
+                            <FormField label="WhatsApp" error={errors.phone}>
                                 <Controller
-                                    name="number"
+                                    name="phone"
                                     control={control}
                                     render={({ field }) => (
                                         <IMaskInput
@@ -201,6 +210,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                             className={maskInputClass}
                                             placeholder="(00) 00000-0000"
                                             onAccept={field.onChange}
+                                            onBlur={field.onBlur}
                                         />
                                     )}
                                 />
@@ -231,26 +241,35 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                 />
                             </FormField>
 
-                            <div className="flex items-end pb-2">
-                                <div className="flex items-center gap-2">
-                                    <Checkbox
-                                        className="cursor-pointer rounded-sm"
-                                        id="pcd"
-                                        checked={pcd}
-                                        onCheckedChange={(v) =>
-                                            setValue("deficiency", v ? "" : "Nenhuma", { shouldValidate: true })
-                                        }
-                                    />
-                                    <Label htmlFor="pcd" className="cursor-pointer">
-                                        Pessoa com deficiência
-                                    </Label>
-                                </div>
-                            </div>
+                            <FormField label="Deficiência" error={errors.deficiency}>
+                                <Controller
+                                    name="deficiency"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                            onOpenChange={(o) => !o && field.onBlur()}
+                                        >
+                                            <SelectTrigger className="cursor-pointer">
+                                                <SelectValue placeholder="Selecione a deficiência" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {DEFICIENCY_OPTIONS.map((option) => (
+                                                    <SelectItem key={option} value={option} className="cursor-pointer">
+                                                        {option}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </FormField>
 
-                            {pcd && (
-                                <FormField label="Qual deficiência?" error={errors.deficiency}>
+                            {isOtherDeficiency && (
+                                <FormField label="Qual deficiência?" error={errors.deficiencyDetail}>
                                     <Input
-                                        {...register("deficiency")}
+                                        {...register("deficiencyDetail")}
                                         className={inputClass}
                                         placeholder="Ex: Deficiência visual parcial"
                                     />
@@ -316,7 +335,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                                 <SelectValue placeholder="Selecione o órgão" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {consignorOrganOptions.map((o) => (
+                                                {RG_ISSUER_OPTIONS.map((o) => (
                                                     <SelectItem key={o} value={o} className="cursor-pointer">
                                                         {o}
                                                     </SelectItem>
@@ -328,10 +347,17 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                             </FormField>
 
                             <FormField label="Data de Expedição" error={errors.consignorDate}>
-                                <Input
-                                    {...register("consignorDate", { valueAsDate: true })}
-                                    type="date"
-                                    className={inputClass}
+                                <Controller
+                                    name="consignorDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            date={field.value instanceof Date ? field.value : undefined}
+                                            onDateChange={field.onChange}
+                                            placeholder="Selecione a data de expedição"
+                                            onBlur={field.onBlur}
+                                        />
+                                    )}
                                 />
                             </FormField>
                         </FormSection>
@@ -384,11 +410,27 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                             </FormField>
 
                             <FormField label="Estado (UF)" error={errors.state}>
-                                <Input
-                                    {...register("state")}
-                                    className={inputClass}
-                                    placeholder="Ex: AL"
-                                    maxLength={2}
+                                <Controller
+                                    name="state"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                            onOpenChange={(o) => !o && field.onBlur()}
+                                        >
+                                            <SelectTrigger className="cursor-pointer">
+                                                <SelectValue placeholder="Selecione o estado" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {UF_OPTIONS.map((uf) => (
+                                                    <SelectItem key={uf} value={uf} className="cursor-pointer">
+                                                        {uf}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
                                 />
                             </FormField>
                         </FormSection>
@@ -435,10 +477,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                             <SelectContent>
                                                 {affiliationIfalOptions.map((a) => (
                                                     <SelectItem key={a} value={a} className="cursor-pointer">
-                                                        {(a.charAt(0).toUpperCase() + a.slice(1)).replace(
-                                                            "Nao",
-                                                            "Não"
-                                                        )}
+                                                        {(a.charAt(0).toUpperCase() + a.slice(1)).replace("Nao", "Não")}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
