@@ -20,7 +20,7 @@ export default function RecoveryPassword() {
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
                         <Link href="/login-page" className="flex gap-2 text-center items-center">
                             <ArrowLeft />
-                            Voltar para login
+                            Voltar para o login
                         </Link>
                     </Button>
                 </div>
@@ -42,7 +42,7 @@ export default function RecoveryPassword() {
                         </p>
 
                         <Link href="/login-page" className="w-full max-w-md">
-                            <Button className="mb-6 w-full rounded-lg cursor-pointer text-yellow-primary">
+                            <Button className="mb-6 w-full rounded-lg bg-yellow-primary hover:cursor-pointer hover:bg-yellow-secondary text-black">
                                 VOLTAR PARA LOGIN
                             </Button>
                         </Link>
@@ -54,7 +54,7 @@ export default function RecoveryPassword() {
                                     setSent(false);
                                     setEmail("");
                                 }}
-                                className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-muted/50"
+                                className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-primary"
                             >
                                 Tente novamente
                             </Button>
@@ -62,7 +62,7 @@ export default function RecoveryPassword() {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-8 w-10/12 max-w-md lg:w-full">
-                        <h2 className="text-[16px] text-gray-900">Esqueceu sua senha?</h2>
+                        <h2 className="text-[16px] text-gray-900">Esqueceu sua senha ?</h2>
 
                         <p className="-mt-6 text-center text-sm text-gray-600">
                             Não se preocupe! Digite seu e-mail e enviaremos instruções para redefinir sua senha.
@@ -82,7 +82,7 @@ export default function RecoveryPassword() {
                         <Button
                             onClick={() => setSent(true)}
                             disabled={!email}
-                            className="w-full h-10 lg:h-9 cursor-pointer text-yellow-primary -mt-2"
+                            className="w-full h-10 lg:h-9 bg-yellow-primary text-black mt-2 hover:cursor-pointer hover:bg-yellow-secondary"
                         >
                             ENVIAR LINK DE REDEFINIÇÃO
                         </Button>

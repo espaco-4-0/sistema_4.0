@@ -19,29 +19,29 @@ export default function RecoveryPasswordForm() {
   const [passwordChanged, setPasswordChanged] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
-    
+    e.preventDefault();
+
     setMessage("");
-    
+
     if (newPassword.length < 6) {
       setMessage("A senha deve ter no mínimo 6 caracteres");
       setMessageType("error");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       setMessage("As senhas não coincidem");
       setMessageType("error");
       return;
     }
-    
+
     setPasswordChanged(true);
   };
 
   return (
     <div className="lg:grid lg:grid-cols-2 min-h-screen">
       <LeftSpaceDecoration />
-      
+
       <div className="relative flex items-center justify-center px-6">
         {/* Botão para voltar ao login */}
         {!passwordChanged && (
@@ -68,7 +68,7 @@ export default function RecoveryPasswordForm() {
               </p>
 
               <Link href="/login-page" className="w-full max-w-md">
-                <Button className="mb-6 w-full rounded-lg cursor-pointer text-yellow-primary h-12">
+                <Button className="mb-6 w-full rounded-lg hover:cursor-pointer hover:bg-yellow-secondary bg-yellow-primary text-black h-12">
                   VOLTAR PARA LOGIN
                 </Button>
               </Link>
@@ -131,7 +131,7 @@ export default function RecoveryPasswordForm() {
                     {/* mostra ou esconde a senha de confirmação */}
                     <Button
                       type="button"
-                      variant="ghost" 
+                      variant="ghost"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
@@ -143,8 +143,8 @@ export default function RecoveryPasswordForm() {
                 {/* mostra erro ou sucesso */}
                 {message && (
                   <div className={`p-3 rounded text-sm ${
-                    messageType === "success" 
-                      ? "bg-green-50 text-green-800 border border-green-200" 
+                    messageType === "success"
+                      ? "bg-green-50 text-green-800 border border-green-200"
                       : "bg-red-50 text-red-800 border border-red-200"
                   }`}>
                     {message}
