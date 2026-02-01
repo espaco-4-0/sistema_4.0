@@ -58,7 +58,7 @@ export default function NewUserModal({ isOpen, handleOpenChange, onClose }: Read
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="professor">Professor</SelectItem>
-								<SelectItem value="pesquisador">Pesquisador</SelectItem>
+                                <SelectItem value="pesquisador">Pesquisador</SelectItem>
                                 <SelectItem value="monitor">Monitor</SelectItem>
                                 <SelectItem value="visitante">Visitante</SelectItem>
                                 <SelectItem value="aluno">Aluno</SelectItem>

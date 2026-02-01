@@ -1,6 +1,6 @@
+import type { CourseRegisterType } from "@/src/ui/forms/schemas/course-registration-schema";
 import { UseFormSetValue } from "react-hook-form";
 import { toast } from "sonner";
-import type { CourseRegisterType } from "@/src/ui/forms/schemas/course-registration-schema";
 
 export function useCep(setValue: UseFormSetValue<CourseRegisterType>) {
     return async (cep: string) => {

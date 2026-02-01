@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CourseDetails, courses } from "@/src/infra/modules/courses/course-mock";
 import { Book, Calendar, ChevronRight, Clock, Home, LucideIcon, SquareCheck, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,7 +7,7 @@ import Link from "next/link";
 import CourseCard from "./course_card";
 import CourseForm from "./course_form";
 import { CourseHero } from "./course_hero";
-import { CourseDetails, courses } from "@/src/infra/modules/courses/course-mock";
+import { number } from "valibot";
 
 type RightInformation = {
     id: number;

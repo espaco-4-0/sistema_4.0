@@ -91,7 +91,9 @@ export default function Configuracoes() {
                             <div className="flex justify-between items-center py-3 border-b">
                                 <div>
                                     <p className="text-xs text-gray-500 uppercase font-medium">Instituição</p>
-                                    <p className="text-gray-900 font-medium mt-1">Instituto Federal de Alagoas Campus Arapiraca</p>
+                                    <p className="text-gray-900 font-medium mt-1">
+                                        Instituto Federal de Alagoas Campus Arapiraca
+                                    </p>
                                 </div>
                                 <Button variant="ghost" size="sm" onClick={() => setActiveModal("editSystem")}>
                                     Editar

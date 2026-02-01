@@ -7,6 +7,7 @@ import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { Textarea } from "@/src/ui/components/ui/textarea";
+
 import { DatePicker } from "../../../ui/date-picker";
 
 interface CreateCampaignModalProps {
@@ -53,11 +54,19 @@ export function CreateCampaignModal({ isOpen, onOpenChange, onClose }: Readonly<
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label>Data de início</Label>
-                            <DatePicker date={startDate} onDateChange={setStartDate} placeholder="Selecione a data de início"/>
+                            <DatePicker
+                                date={startDate}
+                                onDateChange={setStartDate}
+                                placeholder="Selecione a data de início"
+                            />
                         </div>
                         <div className="space-y-1">
                             <Label>Data de término</Label>
-                            <DatePicker date={endDate} onDateChange={setEndDate} placeholder="Selecione a data de término"/>
+                            <DatePicker
+                                date={endDate}
+                                onDateChange={setEndDate}
+                                placeholder="Selecione a data de término"
+                            />
                         </div>
                     </div>
 
