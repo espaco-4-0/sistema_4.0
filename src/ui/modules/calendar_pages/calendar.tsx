@@ -1,60 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
+import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
+import { calendarEventsMock } from "@/src/infra/modules/calendar/calendar-mock";
+import { EventDetail } from "@/src/ui/modules/calendar_pages/components/event-detail";
+import { EventList } from "@/src/ui/modules/calendar_pages/components/event-list";
+import { PanelWrapper } from "@/src/ui/modules/calendar_pages/components/panel-wrapper";
+import { ErrorState, IdleState, LoadingState, SuccessState } from "@/src/ui/modules/calendar_pages/components/states";
+import { BookingForm, CalendarFormInput } from "@/src/ui/modules/calendar_pages/forms/booking-form";
 import { format, getDay, isSameDay, parse, setHours, setMinutes, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import {
-    ArrowLeft,
-    Calendar as CalendarIcon,
-    CheckCircle2,
-    ChevronRight,
-    Clock,
-    Cog,
-    Home,
-    MapPin,
-    Phone,
-    Plus,
-    School,
-    User,
-    Users,
-    XCircle,
-} from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { Control, Controller, UseFormRegisterReturn, UseFormReturn, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-interface IEvent {
-    id: number;
-    title: string;
-    start: Date;
-    end: Date;
-    type: "agendado" | "aprovado";
-    description: string;
-    time: string;
-    local: string;
-    whatsapp?: string;
-    quantidade?: string | number;
-    professor?: string;
-}
-
-interface IFormInput {
-    instituicao: string;
-    professor: string;
-    email: string;
-    whatsapp: string;
-    quantidade: string;
-    hora: string;
-    horaSaida: string;
-    mensagem: string;
-}
-
 export const locales = { "pt-BR": ptBR };
 export const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
-const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+
 const monthMap: { [key: string]: number } = {
     jan: 0,
     fev: 1,
@@ -70,66 +36,8 @@ const monthMap: { [key: string]: number } = {
     dez: 11,
 };
 
-const formatPhoneNumber = (value: string) => {
-    if (!value) return "";
-    const cleaned = value.replaceAll(/\D/g, "");
-    const regex = /^(\d{0,2})(\d{0,5})(\d{0,4})$/;
-    const match = regex.exec(cleaned);
-    if (!match) return value;
-
-    const [_, ddd, prefixo, sufixo] = match;
-
-    if (!prefixo) return ddd;
-    const base = `${ddd} ${prefixo}`;
-    return sufixo ? ` ${base}-${sufixo}` : base;
-};
-
-const initialEvents: IEvent[] = [
-    {
-        id: 1,
-        title: "Workshop de Impressão 3D",
-        start: new Date(2026, 5, 15, 14, 0),
-        end: new Date(2026, 5, 15, 16, 0),
-        type: "agendado",
-        description: "Aprenda os fundamentos e tecnologias da impressão 3D.",
-        time: "14:00 - 16:00",
-        local: "Espaço 4.0",
-        quantidade: "20",
-    },
-    {
-        id: 2,
-        title: "Introdução à Robótica Educacional",
-        start: new Date(2026, 5, 18, 15, 0),
-        end: new Date(2026, 5, 18, 17, 0),
-        type: "agendado",
-        description: "Explore conceitos básicos de robótica com atividades práticas.",
-        time: "15:00 - 17:00",
-        local: "Espaço 4.0",
-        quantidade: "15",
-    },
-    {
-        id: 3,
-        title: "Curso Básico de Programação",
-        start: new Date(2026, 5, 22, 14, 0),
-        end: new Date(2026, 5, 22, 16, 0),
-        type: "agendado",
-        description: "Aprenda lógica de programação e desenvolvimento de software.",
-        time: "14:00 - 16:00",
-        local: "Espaço 4.0",
-        quantidade: "20",
-    },
-    {
-        id: 4,
-        title: "Oficina de Tecnologia e Criatividade",
-        start: new Date(2026, 5, 28, 16, 0),
-        end: new Date(2026, 5, 28, 18, 0),
-        type: "agendado",
-        description: "Desenvolva projetos criativos utilizando tecnologia.",
-        time: "16:00 - 18:00",
-        local: "Espaço 4.0",
-        quantidade: "25",
-    },
-];
+const MAX_STUDENTS = 30;
+const MIN_EVENT_GAP_MINUTES = 30;
 
 export default function AllCalendar() {
     const searchParams = useSearchParams();
@@ -153,9 +61,10 @@ export default function AllCalendar() {
     );
 
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
-    const [events, setEvents] = useState<IEvent[]>(initialEvents);
+    const [events, setEvents] = useState<CalendarEvent[]>(calendarEventsMock);
+    const [errorMessage, setErrorMessage] = useState<string>("");
 
-    const formMethods = useForm<IFormInput>({
+    const formMethods = useForm<CalendarFormInput>({
         defaultValues: {
             instituicao: "",
             professor: "",
@@ -168,10 +77,24 @@ export default function AllCalendar() {
         },
     });
 
-    const handleFormSubmit = (data: IFormInput) => {
+    const handleFormSubmit = (data: CalendarFormInput) => {
+        setErrorMessage("");
         setStep("loading");
 
         setTimeout(() => {
+            const quantidade = Number.parseInt(data.quantidade, 10);
+            if (!Number.isFinite(quantidade) || quantidade <= 0) {
+                setErrorMessage("Informe a quantidade de alunos.");
+                setStep("error");
+                return;
+            }
+
+            if (quantidade > MAX_STUDENTS) {
+                setErrorMessage(`Máximo de ${MAX_STUDENTS} alunos.`);
+                setStep("error");
+                return;
+            }
+
             const [sh, sm] = data.hora.split(":").map(Number);
             const [eh, em] = data.horaSaida.split(":").map(Number);
             const start = setMinutes(setHours(new Date(selectedDate), sh), sm);
@@ -179,14 +102,19 @@ export default function AllCalendar() {
 
             if (end <= start) end = setMinutes(setHours(new Date(selectedDate), eh + 1), em);
 
+            const gapMs = MIN_EVENT_GAP_MINUTES * 60 * 1000;
             const hasConflict = events.some((event) => {
-                return isSameDay(event.start, start) && start < event.end && end > event.start;
+                if (!isSameDay(event.start, start)) return false;
+                const startBoundary = new Date(event.start.getTime() - gapMs);
+                const endBoundary = new Date(event.end.getTime() + gapMs);
+                return start < endBoundary && end > startBoundary;
             });
 
             if (hasConflict) {
+                setErrorMessage(`Intervalo mínimo de ${MIN_EVENT_GAP_MINUTES} minutos entre eventos.`);
                 setStep("error");
             } else {
-                const newEvent: IEvent = {
+                const newEvent: CalendarEvent = {
                     id: Date.now(),
                     title: `Visita: ${data.instituicao}`,
                     start,
@@ -222,7 +150,7 @@ export default function AllCalendar() {
 
                 <header className="mb-3 lg:mb-4 2xl:mb-6 px-1 lg:px-0">
                     <h2 className="text-lg lg:text-2xl 2xl:text-3xl font-semibold text-gray-800 tracking-tight">
-                        Programação do <span className="text-yellow-muted">Espaço 4.0</span>
+                        Programação do <span className="text-yellow-primary">Espaço 4.0</span>
                     </h2>
                 </header>
 
@@ -242,13 +170,13 @@ export default function AllCalendar() {
                                 setSelectedDate(ev.start);
                                 setStep("list");
                             }}
-                            style={{ height: 360 }}
+                            style={{ height: 520 }}
                             className="calendar-mobile"
                             culture="pt-BR"
                             views={["month"]}
                             dayPropGetter={(date) => {
                                 const hasEv = events.filter((e) => isSameDay(e.start, date));
-                                let cls = "transition-all ";
+                                let cls = "transition-all cursor-pointer hover:opacity-80 ";
                                 if (hasEv.some((e) => e.type === "aprovado")) cls += "!bg-green-50";
                                 else if (isSameDay(selectedDate, date)) cls += "!bg-blue-50";
                                 else if (hasEv.some((e) => e.type === "agendado")) cls += "!bg-amber-50";
@@ -286,6 +214,7 @@ export default function AllCalendar() {
                                     methods={formMethods}
                                     onSubmit={handleFormSubmit}
                                     onCancel={() => setStep("idle")}
+                                    maxStudents={MAX_STUDENTS}
                                 />
                             )}
                             {step === "detail" && activeEvent && (
@@ -306,7 +235,9 @@ export default function AllCalendar() {
                             )}
                             {step === "error" && (
                                 <ErrorState
+                                    message={errorMessage}
                                     onBack={() => {
+                                        setErrorMessage("");
                                         setStep("form");
                                     }}
                                 />
@@ -341,279 +272,3 @@ export default function AllCalendar() {
         </section>
     );
 }
-
-const PanelWrapper = ({ children, align }: { children: React.ReactNode; align: "center" | "start" }) => (
-    <div
-        className={`h-full min-h-130 bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col ${align === "center" ? "items-center justify-center" : "items-start"}`}
-    >
-        {children}
-    </div>
-);
-
-const IdleState = () => (
-    <>
-        <CalendarIcon className="w-12 h-12 text-gray-200 mb-3" />
-        <p className="text-gray-400 text-sm text-center">Selecione uma data para interagir</p>
-    </>
-);
-
-const LoadingState = () => (
-    <>
-        <Cog className="w-8 h-8 text-yellow-primary animate-spin" />
-        <p className="text-[11px] font-bold text-gray-400 uppercase mt-2">Processando...</p>
-    </>
-);
-
-const SuccessState = ({ onBack }: { onBack: () => void }) => (
-    <>
-        <div className="bg-green-50 p-3 rounded-full mb-3">
-            <CheckCircle2 size={32} className="text-green-500" />
-        </div>
-        <h3 className="text-green-600 font-bold text-sm uppercase">Agendado!</h3>
-        <button
-            onClick={onBack}
-            className="mt-6 text-[10px] font-bold text-black border-b-2 border-yellow-400 uppercase"
-        >
-            Voltar
-        </button>
-    </>
-);
-
-const ErrorState = ({ onBack }: { onBack: () => void }) => (
-    <>
-        <div className="bg-red-50 p-3 rounded-full mb-3">
-            <XCircle size={32} className="text-red-500" />
-        </div>
-        <h3 className="text-red-600 font-bold text-sm uppercase">Horário Indisponível!</h3>
-        <p className="text-gray-400 text-xs text-center mt-2 px-4">
-            Já existe um evento agendado neste intervalo. Por favor, escolha outro horário.
-        </p>
-        <button onClick={onBack} className="mt-6 text-[10px] font-bold text-black border-b-2 border-red-400 uppercase">
-            Tentar Outro
-        </button>
-    </>
-);
-
-const EventList = ({
-    date,
-    events,
-    onAdd,
-    onSelect,
-    onClose,
-}: {
-    date: Date;
-    events: IEvent[];
-    onAdd: () => void;
-    onSelect: (id: number) => void;
-    onClose: () => void;
-}) => (
-    <>
-        <div className="flex items-center justify-between w-full mb-4 border-b pb-2">
-            <h3 className="text-sm font-bold text-gray-700 uppercase">{format(date, "dd/MM/yyyy")}</h3>
-            <button onClick={onAdd} className="p-1.5 bg-yellow-secondary hover:bg-yellow-secondary-dark rounded-full">
-                <Plus size={16} className="text-black" />
-            </button>
-        </div>
-        <div className="w-full space-y-2 overflow-y-auto max-h-75 pr-1">
-            {events.length > 0 ? (
-                events.map((e) => (
-                    <button
-                        key={e.id}
-                        type="button"
-                        onClick={() => onSelect(e.id)}
-                        className="w-full text-left p-2.5 border border-gray-100 rounded-lg hover:border-yellow-primary cursor-pointer bg-white flex items-center gap-3 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-yellow-primary"
-                    >
-                        <div
-                            className={`w-1 h-6 rounded-full ${e.type === "agendado" ? "bg-yellow-secondary" : "bg-green-500"}`}
-                        ></div>
-                        <div className="flex-1 overflow-hidden">
-                            <p className="text-[11px] font-bold text-gray-800 uppercase truncate">{e.title}</p>
-                            <p className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
-                                <Clock size={10} /> {e.time}
-                            </p>
-                        </div>
-                    </button>
-                ))
-            ) : (
-                <p className="text-xs text-gray-400 text-center py-4">Nenhum evento neste dia.</p>
-            )}
-        </div>
-        <button
-            onClick={onClose}
-            className="mt-auto w-full py-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-gray-600"
-        >
-            Fechar Painel
-        </button>
-    </>
-);
-
-const EventDetail = ({ event, onBack, onClose }: { event: IEvent; onBack: () => void; onClose: () => void }) => (
-    <>
-        <button
-            onClick={onBack}
-            className="text-[10px] font-bold text-gray-400 mb-4 flex items-center gap-1 uppercase hover:text-black"
-        >
-            <ArrowLeft size={12} /> Voltar
-        </button>
-        <div className="w-full">
-            <span
-                className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${event.type === "agendado" ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}
-            >
-                {event.type === "agendado" ? "Workshop" : "Visita Técnica"}
-            </span>
-            <h3 className="text-base font-bold text-gray-800 mt-2 mb-1">{event.title}</h3>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-4">{event.description}</p>
-            <div className="space-y-2.5 border-t pt-4">
-                <InfoRow icon={<Clock size={14} />} text={event.time} />
-                <InfoRow icon={<MapPin size={14} />} text={event.local} />
-                {event.quantidade && <InfoRow icon={<Users size={14} />} text={`${event.quantidade} pessoas`} />}
-                {event.whatsapp && <InfoRow icon={<Phone size={14} />} text={event.whatsapp} />}
-            </div>
-        </div>
-        <button
-            onClick={onClose}
-            className="mt-auto w-full bg-gray-50 text-gray-400 font-bold py-2 rounded-md text-[10px] uppercase hover:bg-gray-100"
-        >
-            Fechar
-        </button>
-    </>
-);
-
-const InfoRow = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
-    <div className="flex items-center gap-2 text-xs text-gray-600 font-medium">
-        <span className="text-yellow-icon">{icon}</span> {text}
-    </div>
-);
-
-const BookingForm = ({
-    methods,
-    onSubmit,
-    onCancel,
-}: {
-    methods: UseFormReturn<IFormInput>;
-    onSubmit: (d: IFormInput) => void;
-    onCancel: () => void;
-}) => (
-    <>
-        <div className="flex items-center gap-2 mb-4">
-            <button onClick={onCancel} className="text-gray-400 hover:text-black">
-                <ArrowLeft size={16} />
-            </button>
-            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Nova Solicitação</span>
-        </div>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-3">
-            <div className="grid gap-2.5">
-                <InputWithIcon
-                    icon={<School size={14} />}
-                    register={methods.register("instituicao", { required: true })}
-                    placeholder="Instituição"
-                />
-                <InputWithIcon
-                    icon={<User size={14} />}
-                    register={methods.register("professor", { required: true })}
-                    placeholder="Professor Responsável"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                    <div className="relative">
-                        <div className="absolute left-2.5 top-2.5 text-gray-400">
-                            <Phone size={14} />
-                        </div>
-                        <Controller
-                            name="whatsapp"
-                            control={methods.control}
-                            rules={{ required: true }}
-                            render={({ field: { onChange, value } }) => (
-                                <input
-                                    value={value}
-                                    onChange={(e) => {
-                                        onChange(formatPhoneNumber(e.target.value));
-                                    }}
-                                    className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary"
-                                    placeholder="Whatsapp"
-                                    maxLength={15}
-                                />
-                            )}
-                        />
-                    </div>
-                    <InputWithIcon
-                        icon={<Users size={14} />}
-                        register={methods.register("quantidade", { required: true })}
-                        type="number"
-                        placeholder="Pessoas"
-                    />
-                </div>
-                <input
-                    {...methods.register("email", { required: true })}
-                    type="email"
-                    className="w-full border border-gray-200 rounded-md py-2 px-3 text-xs outline-none focus:border-yellow-primary"
-                    placeholder="Email"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                    <TimeSelect label="Início" name="hora" control={methods.control} />
-                    <TimeSelect label="Fim" name="horaSaida" control={methods.control} />
-                </div>
-                <textarea
-                    {...methods.register("mensagem")}
-                    className="w-full border border-gray-200 rounded-md p-2 text-xs outline-none focus:border-yellow-primary resize-none"
-                    placeholder="Objetivo (opcional)"
-                    rows={2}
-                />
-            </div>
-            <button
-                type="submit"
-                className="w-full bg-black text-white hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
-            >
-                Confirmar
-            </button>
-        </form>
-    </>
-);
-
-interface InputWithIconProps {
-    icon: React.ReactNode;
-    register: UseFormRegisterReturn;
-    type?: string;
-    placeholder: string;
-}
-
-const InputWithIcon = ({ icon, register, type = "text", placeholder }: InputWithIconProps) => (
-    <div className="relative">
-        <div className="absolute left-2.5 top-2.5 text-gray-400">{icon}</div>
-        <input
-            {...register}
-            type={type}
-            className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary"
-            placeholder={placeholder}
-        />
-    </div>
-);
-
-interface TimeSelectProps {
-    label: string;
-    name: keyof IFormInput;
-    control: Control<IFormInput>;
-}
-
-const TimeSelect = ({ label, name, control }: TimeSelectProps) => (
-    <div className="space-y-1">
-        <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">{label}</span>
-        <Controller
-            name={name}
-            control={control}
-            render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full h-9 border-gray-200 text-xs bg-white">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white max-h-40">
-                        {timeOptions.map((t) => (
-                            <SelectItem key={t} value={t} className="text-xs">
-                                {t}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            )}
-        />
-    </div>
-);

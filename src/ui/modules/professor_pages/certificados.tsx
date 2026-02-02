@@ -100,9 +100,7 @@ export default function Certificados() {
                                     <p className="text-sm text-gray-500 mb-1">{item.title}</p>
                                     <p className="text-2xl font-bold text-gray-900">{item.value}</p>
                                 </div>
-                                <div
-                                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.color}`}
-                                >
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.color}`}>
                                     <Icon className={`w-6 h-6 ${item.iconColor}`} />
                                 </div>
                             </div>

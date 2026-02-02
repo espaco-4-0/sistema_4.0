@@ -49,7 +49,9 @@ export function ChangePasswordModal({ isOpen, onOpenChange, onClose }: Readonly<
                         <Button variant="outline" className="flex-1 hover:cursor-pointer" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 hover:cusror-pointer">Alterar Senha</Button>
+                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 hover:cusror-pointer">
+                            Alterar Senha
+                        </Button>
                     </div>
                 </div>
             </DialogContent>

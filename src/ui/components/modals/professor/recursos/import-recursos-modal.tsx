@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, FileText, Upload, X } from "lucide-react";
+import { Download, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../../../ui/button";
@@ -168,8 +168,6 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                                     <FileText className="h-8 w-8" />
                                 </div>
                                 <div className="flex flex-col items-center text-center">
-
-
                                     <div className="text-center">
                                         <p className="text-sm font-semibold text-gray-700">
                                             Faça Upload do Arquivo CSV
@@ -200,7 +198,11 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                     </div>
 
                     <div className="border-t px-6 py-4 flex justify-between items-center bg-gray-50">
-                        <Button variant="ghost" onClick={handleCancel} className="text-gray-700 hover:bg-gray-100 hover:cursor-pointer">
+                        <Button
+                            variant="ghost"
+                            onClick={handleCancel}
+                            className="text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
+                        >
                             Cancelar
                         </Button>
                         <Button

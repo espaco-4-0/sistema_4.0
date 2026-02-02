@@ -3,8 +3,6 @@ import { Button } from "@/src/ui/components/ui/button";
 import { ArrowRight, Calendar, Clock, Users } from "lucide-react";
 import Image from "next/image";
 
-
-
 interface CourseCardProps extends CourseDetails {
     onAction: () => void;
 }
