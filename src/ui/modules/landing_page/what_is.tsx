@@ -70,8 +70,8 @@ export default function WhatIsSpace() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div className="group relative h-105 rounded-xl overflow-hidden shadow-lg">
                         <Image
-                            src="/image4.png"
-                            alt=""
+                            src="/espaco-interior.jpeg"
+                            alt="Imagem do interior do Espaço 4.0"
                             fill
                             priority
                             className="object-cover transition-transform duration-10000 group-hover:scale-110"

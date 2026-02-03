@@ -116,7 +116,7 @@ function FooterItem({ icon: Icon, title, desc, href, external = false }: FooterI
                 </div>
                 <div>
                     <p className="font-medium text-base leading-tight">{title}</p>
-                    <p className="text-sm text-gray-400 mt-1 max-w-50 wrap-break-word">{desc}</p>
+                    <p className="text-sm text-gray-400 mt-1 max-w-55 wrap-break-word">{desc}</p>
                 </div>
             </Link>
         </li>
