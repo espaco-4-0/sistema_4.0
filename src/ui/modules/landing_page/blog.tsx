@@ -21,7 +21,7 @@ const noticias = [
         id: 3,
         titulo: "CSBC",
         descricao: "O Instituto Federal de Alagoas Campus Arapiraca chegou forte no CSBC",
-        imagem: "/noticia-3.jpg",
+        imagem: "/noticia-terciaria.jpg",
     },
     {
         id: 4,
@@ -52,7 +52,7 @@ export default function Blog() {
 
                 return novaLista;
             });
-        }, 1000);
+        }, 60000);
 
         return () => clearInterval(interval);
     }, []);
