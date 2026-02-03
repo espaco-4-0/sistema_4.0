@@ -77,7 +77,7 @@ export default function CoursesAndTraining() {
                     {courses.map((course) => (
                         <Card
                             key={course.id}
-                            className="rounded-2xl border border-gray-200 shadow-sm transition hover:shadow-md"
+                            className="rounded-2xl border border-gray-200 shadow-sm transition duration-250 hover:shadow-md"
                         >
                             <CardHeader>
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-back-icon">
@@ -99,7 +99,7 @@ export default function CoursesAndTraining() {
                             <CardFooter>
                                 <Button
                                     onClick={() => abrirDialog(course.title)}
-                                    className="w-full cursor-pointer rounded-lg bg-yellow-secondary py-2 text-sm font-semibold text-black transition duration-200 ease-in-out hover:bg-yellow-secondary-dark active:bg-yellow-primary-dark"
+                                    className="w-full cursor-pointer rounded-lg bg-yellow-primary py-2 text-sm font-semibold text-black transition duration-250 ease-in-out hover:bg-yellow-primary-dark active:bg-yellow-primary-dark"
                                 >
                                     INSCREVA-SE
                                 </Button>

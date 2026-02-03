@@ -15,25 +15,25 @@ const noticias = [
         id: 2,
         titulo: "Projeto de modelagem 3D",
         descricao: "Impressora 3D juntamente a IA faz com que o estudo do corpo humano seja revolucionado",
-        imagem: "/noticia-secundaria.png",
+        imagem: "/noticia-secundaria.jpg",
     },
     {
         id: 3,
         titulo: "CSBC",
         descricao: "O Instituto Federal de Alagoas Campus Arapiraca chegou forte no CSBC",
-        imagem: "/noticia-terciaria.png",
+        imagem: "/noticia-terciaria.jpg",
     },
     {
         id: 4,
         titulo: "Sustentabilidade",
         descricao: "Alunos do IFAL Campus Arapiraca envolvidos na área de sustentabilidade",
-        imagem: "/noticia-quartenaria.png",
+        imagem: "/noticia-quartenaria.jpg",
     },
     {
         id: 5,
         titulo: "Robótica",
         descricao: "Projetos de robótica ganham destaque no Espaço 4.0",
-        imagem: "/noticia-quinta.png",
+        imagem: "/noticia-quinta.jpg",
     },
 ];
 
@@ -103,7 +103,7 @@ export default function Blog() {
                 <div className="flex justify-center mt-14">
                     <Link
                         href="/slow-page"
-                        className="border-2 cursor-pointer border-gray-description-light px-8 py-3 rounded-md font-medium transition hover:bg-black hover:text-white"
+                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black hover:text-white 2xl:text-[16px] 2xl:h-12 2xl:w-80 transition-all duration-250"
                     >
                         Mais Notícias
                     </Link>

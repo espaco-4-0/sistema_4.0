@@ -38,7 +38,7 @@ export function UpcomingEvents() {
     ];
 
     return (
-        <section id="upcoming-events" className="flex flex-col items-center mt-20 mb-20">
+        <section id="upcoming-events" className="flex flex-col bg-[#F9FAFB] items-center py-20">
             <h2 className="text-4xl font-semibold text-center">
                 Próximos <span className="text-yellow-muted">Eventos</span>
             </h2>
@@ -51,10 +51,10 @@ export function UpcomingEvents() {
                 {dados.map((dado) => (
                     <div key={dado.id}>
                         <Link href={`/calendar?day=${dado.day}&month=${dado.mounth}`} className="block w-full h-full">
-                            <Card className="flex flex-col sm:flex-row w-full sm:w-150 sm:max-w-215 lg:w-160 2xl:w-215 mx-auto gap-4 sm:gap-0 items-start sm:items-center p-4 sm:p-8 transition-all duration-200 ease-out will-change-transform hover:scale-[1.01] hover:shadow-xl hover:border-yellow-primary cursor-pointer">
-                                <CardContent className="flex items-center justify-center w-65 h-2 sm:w-28 sm:h-38 shrink-0 gap-2 sm:gap-0 p-0 rounded-2xl bg-yellow-primary-light sm:flex-col sm:mr-6 sm:mb-0">
-                                    <p className="2xl:text-4xl leading-none sm:text-[42px]">{dado.day}</p>
-                                    <p className="mt-1 2xl:text-xl uppercase sm:mt-2">{dado.mounth}</p>
+                            <Card className="flex flex-col sm:flex-row w-full sm:w-150 sm:max-w-215 lg:w-160 2xl:w-190 mx-auto gap-4 sm:gap-0 items-start sm:items-center p-4 sm:p-8 transition-all duration-200 ease-out will-change-transform hover:scale-[1.01] hover:shadow-xl hover:border-yellow-primary cursor-pointer">
+                                <CardContent className="flex items-center justify-center w-65 h-15 sm:w-28 sm:h-38 shrink-0 gap-1.5 sm:gap-0 p-0 rounded-lg  md:rounded-2xl bg-yellow-primary sm:flex-col sm:mr-6 sm:mb-0">
+                                    <p className="2xl:text-4xl leading-none text-xl sm:text-[42px]">{dado.day}</p>
+                                    <p className="2xl:text-xl uppercase text-xl sm:mt-2">{dado.mounth}</p>
                                 </CardContent>
 
                                 <div className="flex flex-col flex-1 w-full gap-2.5">

@@ -23,7 +23,7 @@ export function Welcome() {
             </div>
 
             <Image
-                src="/espaco.png"
+                src="/espaco-externo.png"
                 width={730}
                 height={487}
                 alt="Imagem do Espaço Maker 4.0 do IFAL Arapiraca"
