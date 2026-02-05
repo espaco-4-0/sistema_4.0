@@ -48,7 +48,7 @@ export const BookingForm = ({
             </button>
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Nova Solicitação</span>
         </div>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-3">
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-3 ">
             <div className="grid gap-2.5">
                 <InputWithIcon
                     icon={<School size={14} />}
@@ -110,7 +110,7 @@ export const BookingForm = ({
             </div>
             <button
                 type="submit"
-                className="w-full bg-black text-white hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
+                className="w-full bg-black text-yellow-primary hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
             >
                 Confirmar
             </button>

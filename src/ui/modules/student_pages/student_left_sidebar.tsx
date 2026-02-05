@@ -97,9 +97,9 @@ export default function StudentLeftSidebar() {
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">
-                            {profileDataMock.nome} {profileDataMock.sobrenome}
+                            {profileDataMock.name}
                         </p>
-                        <p className="text-xs text-gray-600 truncate">{profileDataMock.role}</p>
+                        <p className="text-xs text-gray-600 truncate">{profileDataMock.affiliation}</p>
                     </div>
                 </div>
                 <SidebarMenuItem className="flex items-center gap-2 lg:gap-3 2xl:gap-3">

@@ -58,7 +58,7 @@ export default function StudentTopbar() {
                         <User className="size-5 text-yellow-primary" strokeWidth={2.5} />
                     </div>
                     <span className="text-sm font-medium text-gray-900">
-                        {profileDataMock.nome} {profileDataMock.sobrenome}
+                        {profileDataMock.name}
                     </span>
                 </div>
             </div>

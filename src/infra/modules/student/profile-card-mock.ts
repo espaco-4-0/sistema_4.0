@@ -56,7 +56,7 @@ export const profileDataMock: CourseRegisterType & { matricula: string } = {
     houseNumber: 123,
     road: "Rua das Flores",
     neighborhood: "Centro",
-    city: "Maceió",
+    city: "Maceio",
     state: "AL",
     education: "superior completo",
     affiliation: "aluno",

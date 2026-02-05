@@ -1,10 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getStatusStyle } from "@/src/infra/modules/professor/manage-users-mock";
 import { inventoryData, statsEstoque } from "@/src/infra/modules/professor/recursos-mock";
 import { ImportarRecurso } from "@/src/ui/components/modals/professor/recursos/import-recurso-modal";
 import { ImportarRecursosModal } from "@/src/ui/components/modals/professor/recursos/import-recursos-modal";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/src/ui/components/ui/dropdown-menu";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Plus, PlusCircle, Search } from "lucide-react";
 
 export default function Recursos() {
@@ -12,14 +21,23 @@ export default function Recursos() {
     const [openRecursos, setOpenRecursos] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("Todos");
 
     const itemsPerPage = 10;
 
-    const filteredData = inventoryData.filter((item) => item.nome.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredData = inventoryData.filter((item) => {
+        const matchesSearch = item.nome.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === "Todos" || item.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentItems = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     return (
         <>
@@ -78,9 +96,24 @@ export default function Recursos() {
                         />
                     </div>
 
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
-                        <Filter size={18} /> Filtros
-                    </button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
+                                <Filter size={18} /> Filtros
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>Status do recurso</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                                {["Todos", "Disponível", "Estoque Baixo", "Esgotado"].map((status) => (
+                                    <DropdownMenuRadioItem key={status} value={status}>
+                                        {status}
+                                    </DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

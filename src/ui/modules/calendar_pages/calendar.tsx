@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { calendarEventsMock } from "@/src/infra/modules/calendar/calendar-mock";
+import { Button } from "@/src/ui/components/ui/button";
 import { EventDetail } from "@/src/ui/modules/calendar_pages/components/event-detail";
 import { EventList } from "@/src/ui/modules/calendar_pages/components/event-list";
 import { PanelWrapper } from "@/src/ui/modules/calendar_pages/components/panel-wrapper";
@@ -10,7 +11,7 @@ import { ErrorState, IdleState, LoadingState, SuccessState } from "@/src/ui/modu
 import { BookingForm, CalendarFormInput } from "@/src/ui/modules/calendar_pages/forms/booking-form";
 import { format, getDay, isSameDay, parse, setHours, setMinutes, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
@@ -38,6 +39,69 @@ const monthMap: { [key: string]: number } = {
 
 const MAX_STUDENTS = 30;
 const MIN_EVENT_GAP_MINUTES = 30;
+
+interface ToolbarProps {
+    date: Date;
+    onNavigate: (action: "PREV" | "TODAY" | "NEXT") => void;
+}
+
+const Toolbar = ({ date, onNavigate }: ToolbarProps) => {
+    const month = format(date, "MMMM", { locale: ptBR });
+    const year = format(date, "yyyy");
+
+    const handlePrev = useCallback(() => {
+        onNavigate("PREV");
+    }, [onNavigate]);
+
+    const handleToday = useCallback(() => {
+        onNavigate("TODAY");
+    }, [onNavigate]);
+
+    const handleNext = useCallback(() => {
+        onNavigate("NEXT");
+    }, [onNavigate]);
+
+    return (
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center px-2 pb-4 lg:pb-6 pt-1 gap-3 lg:gap-0">
+            <div className="flex gap-2 lg:gap-4 items-center">
+                <div>
+                    <div className="flex gap-1 items-center font-medium text-sm lg:text-base">
+                        <span className="capitalize">
+                            {month}, {year}
+                        </span>
+                    </div>
+                    <span className="text-xs lg:text-sm text-gray-600">Calendário de Atividades</span>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2 lg:gap-3 w-full lg:w-auto">
+                <Button
+                    onClick={handlePrev}
+                    variant="outline"
+                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
+                    type="button"
+                >
+                    <ChevronLeft className="size-4 lg:size-5" />
+                </Button>
+                <Button
+                    onClick={handleToday}
+                    className="bg-yellow-primary hover:bg-yellow-primary-dark border-none text-black h-9 lg:h-10 cursor-pointer text-sm lg:text-base flex-1 lg:flex-none"
+                    type="button"
+                >
+                    Hoje
+                </Button>
+                <Button
+                    onClick={handleNext}
+                    variant="outline"
+                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
+                    type="button"
+                >
+                    <ChevronRight className="size-4 lg:size-5" />
+                </Button>
+            </div>
+        </div>
+    );
+};
 
 export default function AllCalendar() {
     const searchParams = useSearchParams();
@@ -155,7 +219,7 @@ export default function AllCalendar() {
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 2xl:gap-6 items-start">
-                    <div className="lg:col-span-7 2xl:col-span-8 bg-white border rounded-lg lg:rounded-xl p-2 lg:p-3 2xl:p-4 shadow-sm">
+                    <div className="lg:col-span-7 2xl:col-span-8 bg-white rounded-lg lg:rounded-xl 2xl:rounded-lg shadow-lg p-4 lg:p-5 2xl:p-4 hover:shadow-xl transition-shadow duration-300">
                         <Calendar
                             localizer={localizer}
                             events={events}
@@ -174,19 +238,22 @@ export default function AllCalendar() {
                             className="calendar-mobile"
                             culture="pt-BR"
                             views={["month"]}
+                            components={{ toolbar: Toolbar }}
                             dayPropGetter={(date) => {
                                 const hasEv = events.filter((e) => isSameDay(e.start, date));
+                                const isToday = isSameDay(date, new Date());
                                 let cls = "transition-all cursor-pointer hover:opacity-80 ";
-                                if (hasEv.some((e) => e.type === "aprovado")) cls += "!bg-green-50";
-                                else if (isSameDay(selectedDate, date)) cls += "!bg-blue-50";
+                                if (isSameDay(selectedDate, date)) cls += "!bg-blue-50";
+                                else if (hasEv.some((e) => e.type === "aprovado")) cls += "!bg-green-50";
                                 else if (hasEv.some((e) => e.type === "agendado")) cls += "!bg-amber-50";
+                                if (isToday) cls += " !border-2 !border-yellow-primary";
                                 return { className: cls };
                             }}
                             eventPropGetter={(ev) => ({
                                 className:
                                     ev.type === "agendado"
                                         ? "!bg-yellow-primary !text-black !text-[10px] font-bold border-none"
-                                        : "!bg-green-500 !text-white !text-[10px] font-bold border-none",
+                                        : "!bg-green-500 !text-white !text-[10px] font-bold border-rounded-xl",
                             })}
                             messages={{ next: ">", previous: "<", today: "Hoje" }}
                         />
@@ -245,26 +312,31 @@ export default function AllCalendar() {
                         </PanelWrapper>
                     </aside>
 
-                    <div className="col-span-1 lg:col-span-12 flex flex-wrap items-center justify-start gap-6  border-gray-200">
+                    <div className="col-span-1 lg:col-span-12 flex flex-col lg:flex-row flex-wrap items-start lg:items-center gap-4 lg:gap-6 2xl:gap-7 mt-6 lg:mt-7 2xl:mt-8 mb-3 px-2 py-2 rounded-lg">
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-yellow-primary ring-2 ring-yellow-100" />
-                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">
-                                Solicitação Concluída
+                            <div className="bg-yellow-primary size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
+                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
+                                Evento agendado
                             </span>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-green-500 ring-2 ring-green-100" />
-                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">
-                                Solicitação Em Análise
+                            <div className="bg-red-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
+                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
+                                Evento recusado
                             </span>
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-red-500 ring-2 ring-red-100" />
-                            <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wide">
-                                Solicitação Recusada
+                            <div className="bg-green-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
+                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
+                                Evento aprovado
                             </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <div className="bg-white border-yellow-primary border-2 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
+                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">Hoje</span>
                         </div>
                     </div>
                 </div>

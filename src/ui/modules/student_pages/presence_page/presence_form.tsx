@@ -42,7 +42,7 @@ export default function PresenceForm({
                             <Button
                                 onClick={onSubmit}
                                 disabled={isLoading || !absenceReason.trim()}
-                                className="bg-red-500 hover:bg-red-600 cursor-pointer"
+                                className="bg-red-400 transition-all hover:bg-red-500 text-black cursor-pointer"
                             >
                                 {isLoading ? <Loader2 className="animate-spin" /> : <CalendarX2 />}
                                 Confirmar ausência
@@ -64,8 +64,18 @@ export default function PresenceForm({
 
             <div className="mt-4 space-y-3">
                 {[
-                    { id: "present", label: "Sim, estarei presente", color: "green", icon: Check },
-                    { id: "absent", label: "Não poderei comparecer", color: "red", icon: X },
+                    {
+						id: "present",
+						label: "Sim, estarei presente",
+						color: "green",
+						icon: Check
+					},
+                    {
+						id: "absent",
+						label: "Não poderei comparecer",
+						color: "red",
+						icon: X
+					},
                 ].map(({ id, label, color, icon: Icon }) => (
                     <label
                         key={id}
@@ -79,14 +89,14 @@ export default function PresenceForm({
                             value={id}
                             checked={value === id}
                             onChange={() => onChangeValue(id as "present" | "absent")}
-                            className="sr-only"
+                            className="sr-only border-none"
                         />
                         <div
                             className={`w-10 h-10 flex items-center justify-center border-2 rounded-md ${
-                                value === id ? `bg-${color}-500 border-${color}-500` : ""
+                                value === id ? `bg-${color}-500 border-none` : ""
                             }`}
                         >
-                            {value === id && <Icon className="text-white" />}
+                            {value === id && <Icon className="text-black" />}
                         </div>
 
                         <span className="flex-1">{label}</span>
@@ -108,7 +118,7 @@ export default function PresenceForm({
             )}
 
             <Button
-                className="w-full h-12 mt-6 bg-yellow-primary cursor-pointer"
+                className="w-full h-12 mt-6 bg-yellow-primary text-black cursor-pointer"
                 disabled={!value || (value === "absent" && !absenceReason.trim()) || isLoading}
                 onClick={onSubmit}
             >

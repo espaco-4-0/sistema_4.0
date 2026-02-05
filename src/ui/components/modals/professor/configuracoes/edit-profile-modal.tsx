@@ -55,7 +55,7 @@ export function EditProfileModal({ isOpen, onOpenChange, onClose }: Readonly<Edi
                         <Button variant="outline" className="flex-1 hover:cursor-pointer" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 hover:cursor-pointer">Salvar</Button>
+                        <Button className="flex-1 bg-yellow-primary hover:bg-yellow-secondary text-black hover:cursor-pointer">Salvar</Button>
                     </div>
                 </div>
             </DialogContent>

@@ -72,7 +72,7 @@ export default function Configuracoes() {
                     <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex items-center gap-3 mb-5">
                             <div className="w-9 h-9 bg-yellow-400 rounded-lg flex items-center justify-center">
-                                <Settings className="w-5 h-5 text-white" />
+                                <Settings className="w-5 h-5 text-black" />
                             </div>
                             <h3 className="font-bold text-gray-900">Sistema</h3>
                         </div>
@@ -121,7 +121,7 @@ export default function Configuracoes() {
                     <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex items-center gap-3 mb-5">
                             <div className="w-9 h-9 bg-yellow-400 rounded-lg flex items-center justify-center">
-                                <Shield className="w-5 h-5 text-white" />
+                                <Shield className="w-5 h-5 text-black" />
                             </div>
                             <h3 className="font-bold text-gray-900">Segurança</h3>
                         </div>

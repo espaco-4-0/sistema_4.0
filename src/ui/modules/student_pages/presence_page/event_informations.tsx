@@ -57,7 +57,7 @@ export default function EventInformatons({
                     key={id}
                     className={`flex items-center flex-row gap-4 items p-4 w-full h-auto bg-gray-description-light/10 border-gray-description-light/60 border text-black rounded-xl ${title === "Observação" && "col-span-2"}`}
                 >
-                    <IconComponent className="text-yellow-primary bg-yellow-back-icon p-1 rounded-md" size={30} />
+                    <IconComponent className="text-yellow-600 bg-yellow-back-icon p-1 rounded-md" size={30} />
                     <div className="flex flex-col gap-1">
                         <span className="text-xs text-gray-600">{title}</span>
                         <span className="text-sm font-medium">{description}</span>

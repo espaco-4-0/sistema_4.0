@@ -26,7 +26,7 @@ export function ProfileCard({
 
             <div className="relative flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:gap-5 2xl:gap-6">
                 <div className="size-20 lg:size-22 2xl:size-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ring-4 ring-white/30 transition-all">
-                    <User className="size-10 lg:size-11 2xl:size-12 text-white" strokeWidth={2} />
+                    <User className="size-10 lg:size-11 2xl:size-12 text-black" strokeWidth={2} />
                 </div>
 
                 <div className="flex-1 flex flex-col gap-2 lg:gap-2 2xl:gap-2.5 text-center lg:text-left">

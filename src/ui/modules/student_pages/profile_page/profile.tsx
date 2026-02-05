@@ -253,7 +253,7 @@ function Section({ title, icon: Icon, children }: SectionProps) {
         <div className="mt-6 lg:mt-8 2xl:mt-8 w-full p-5 lg:p-6 2xl:p-6 bg-white shadow-sm hover:shadow-md rounded-xl lg:rounded-2xl transition-all duration-300 border border-gray-100">
             <div className="flex items-center gap-1 text-lg lg:text-xl 2xl:text-lg font-semibold text-gray-800">
                 <div className="flex justify-center items-center rounded-lg lg:rounded-xl size-9 lg:size-10 2xl:size-10 bg-linear-to-br from-yellow-primary to-yellow-secondary mr-2.5 lg:mr-3 2xl:mr-3 shadow-sm">
-                    <Icon className="text-white size-4 lg:size-5 2xl:size-5" />
+                    <Icon className="text-black size-4 lg:size-5 2xl:size-5" />
                 </div>
                 {title}
             </div>
