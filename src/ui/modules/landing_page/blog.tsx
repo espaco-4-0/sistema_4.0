@@ -102,7 +102,7 @@ export default function Blog() {
 
                 <div className="flex justify-center mt-14">
                     <Link
-                        href="/slow-page"
+                        href="/blog"
                         className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black hover:text-white 2xl:text-[16px] 2xl:h-12 2xl:w-80 transition-all duration-250"
                     >
                         Mais Notícias

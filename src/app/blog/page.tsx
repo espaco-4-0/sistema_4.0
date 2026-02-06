@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import BlogNews from "@/src/ui/modules/blog_pages/blog_news";
 
 import Loading from "../loading";
 
-export default function SlowPage() {
+export default function Blog() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,7 +17,7 @@ export default function SlowPage() {
 
     return (
         <div>
-            <h1 className="text-2xl flex">Página Pronta</h1>
+            <BlogNews />
         </div>
     );
 }
