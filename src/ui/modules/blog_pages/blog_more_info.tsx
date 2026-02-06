@@ -194,7 +194,7 @@ export default function BlogMoreInfo() {
                             }`}
                         >
                             <ThumbsUp className={`w-5 h-5 ${hasLiked ? "fill-current" : ""}`} />
-                            <span>{likes} Curtidas</span>
+                            <span className="hover:cursor-pointer">{likes} Curtidas</span>
                         </button>
 
                         <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors font-bold">
@@ -231,7 +231,7 @@ export default function BlogMoreInfo() {
                             </div>
                             <button
                                 type="submit"
-                                className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-bold"
+                                className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-bold hover:cursor-pointer"
                             >
                                 <Send className="w-4 h-4" />
                                 Enviar Comentário
