@@ -177,9 +177,7 @@ export default function BlogMoreInfo() {
                         <div>
                             <h3 className="text-xl font-bold text-black mb-2">Sobre {news.author}</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Jornalista especializado em tecnologia com mais de 10 anos de experiência cobrindo
-                                inovação, inteligência artificial e transformação digital. Colaborador regular do
-                                TechNews.
+                                {news.about}
                             </p>
                         </div>
                     </div>

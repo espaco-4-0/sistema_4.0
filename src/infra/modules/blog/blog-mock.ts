@@ -5,6 +5,7 @@ export interface News {
     image: string;
     date: string;
     author: string;
+    about: string;
     content: string[];
     tags: string[];
 }
@@ -16,7 +17,8 @@ export const newsData: News[] = [
         title: "Máquina que reutiliza garrafa PET como filamento para impressão 3D ganha prêmio no CSBC",
         image: "/noticia-principal.png",
         date: "28 de Janeiro, 2026",
-        author: "Gustavo Henrique",
+        author: "Ernany",
+        about: "Ernany é pesquisador do Espaço 4.0 e escreve sobre inovação aplicada, com foco em sustentabilidade, impressão 3D e impacto social no campus.",
         content: [
             "O projeto desenvolvido no Espaço 4.0 do IFAL Campus Arapiraca conquistou o primeiro lugar na categoria de Inovação Sustentável durante o Congresso da Sociedade Brasileira de Computação (CSBC).",
             "A máquina transforma garrafas PET descartadas em filamento de alta qualidade para impressoras 3D, criando uma cadeia de reaproveitamento com rastreabilidade do material coletado.",
@@ -33,7 +35,8 @@ export const newsData: News[] = [
         title: "Impressora 3D juntamente a IA faz com que estudo do corpo humano seja mais preciso",
         image: "/noticia-secundaria.jpg",
         date: "25 de Janeiro, 2026",
-        author: "Albhert Barbosa",
+        author: "Marina Mitsue",
+        about: "Marina Mitsue atua como pesquisadora, acompanhando projetos que unem IA, impressão 3D e educação clínica.",
         content: [
             "Uma parceria entre o Espaço 4.0 e o curso de Enfermagem resultou em um projeto que combina inteligência artificial e impressão 3D para criar modelos anatômicos ultra-realistas.",
             "O sistema analisa imagens médicas (como tomografias e ressonâncias) por meio de algoritmos de IA e gera automaticamente modelos 3D personalizados de órgãos e estruturas com precisão milimétrica.",
@@ -51,6 +54,7 @@ export const newsData: News[] = [
         image: "/noticia-quartenaria.jpg",
         date: "20 de Janeiro, 2026",
         author: "Renata Imaculada",
+        about: "Renata Imaculada é professora do Espaço 4.0, especializada em eventos acadêmicos e premiações de inovação tecnológica.",
         content: [
             "O IFAL Campus Arapiraca conquistou três prêmios importantes durante o Congresso da Sociedade Brasileira de Computação (CSBC), realizado em São Paulo.",
             "Os projetos do Espaço 4.0 se destacaram em Inovação Tecnológica, Sustentabilidade e Impacto Social, competindo com instituições de referência de todo o país.",
@@ -67,7 +71,8 @@ export const newsData: News[] = [
         title: "Alunos do IFAL Campus Arapiraca envolvidos na área de sustentabilidade desenvolvem projeto inovador",
         image: "/noticia-quinta.jpg",
         date: "18 de Janeiro, 2026",
-        author: "Karol Marina",
+        author: "Karol ",
+        about: "Karol é pesquisadora e acompanha iniciativas de sustentabilidade e projetos de impacto ambiental, com ênfase em IoT e políticas de resíduos.",
         content: [
             "Um grupo de estudantes do Espaço 4.0 desenvolveu um sistema integrado de gestão de resíduos utilizando tecnologias de IoT e análise de dados.",
             "O projeto inclui lixeiras inteligentes equipadas com sensores que identificam o tipo de resíduo, monitoram o nível de preenchimento e indicam o melhor momento para coleta.",
@@ -85,6 +90,7 @@ export const newsData: News[] = [
         image: "/robotica-meme.jpeg",
         date: "15 de Janeiro, 2026",
         author: "Felipe Costa",
+        about: "Felipe Costa professor de robótica educacional e competições técnicas, destacando aplicações práticas desenvolvidas por estudantes.",
         content: [
             "A equipe de robótica do Espaço 4.0 conquistou o primeiro lugar na Olimpíada Regional de Robótica, superando times de 20 instituições de ensino.",
             "O robô desenvolvido pelos alunos demonstrou navegação autônoma, manipulação de objetos e colaboração com outros robôs em desafios de precisão e tempo.",
@@ -101,7 +107,8 @@ export const newsData: News[] = [
         title: "Dispositivos IoT desenvolvidos no Espaço 4.0 otimizam automação residencial",
         image: "/robotica-noticia.jpeg",
         date: "12 de Janeiro, 2026",
-        author: "Marina Souza",
+        author: "Marina",
+        about: "Marina escreve sobre IoT e automação residencial, com foco em soluções acessíveis e eficiência energética.",
         content: [
             "Estudantes do Espaço 4.0 desenvolveram uma linha completa de dispositivos IoT de baixo custo para automação residencial inteligente.",
             "O sistema inclui sensores de presença, temperatura, umidade e qualidade do ar, todos conectados a uma central com controle via aplicativo móvel.",
@@ -119,6 +126,7 @@ export const newsData: News[] = [
         image: "/pibic.jpeg",
         date: "10 de Janeiro, 2026",
         author: "Karina Lopes",
+        about: "Karina Lopes é entusiasta de XR e educação, acompanhando projetos de realidade virtual aplicados ao ensino.",
         content: [
             "Uma plataforma de realidade virtual desenvolvida no Espaço 4.0 está transformando a forma como os alunos aprendem conceitos complexos de física, química e matemática.",
             "O ambiente virtual permite interagir com moléculas, explorar estruturas atômicas e visualizar fenômenos físicos de forma imersiva e intuitiva.",
@@ -136,6 +144,7 @@ export const newsData: News[] = [
         image: "/inauguracao.jpeg",
         date: "8 de Janeiro, 2026",
         author: "Gustavo Henrique",
+        about: "Gustavo Henrique monitor voluntario do espaco 4.0 , analisa o impacto de soluções de IA na produtividade local, alem de novas idealizacoes ",
         content: [
             "O laboratório de inteligência artificial do Espaço 4.0 firmou parceria com indústrias locais para desenvolver soluções customizadas de otimização de processos.",
             "Com técnicas de machine learning e visão computacional, a equipe criou sistemas de controle de qualidade automatizado que identificam defeitos com 98% de precisão.",
@@ -153,6 +162,7 @@ export const newsData: News[] = [
         image: "/importante.jpeg",
         date: "5 de Janeiro, 2026",
         author: "Renata Imaculada",
+        about: "Renata Imaculada acompanha iniciativas de inovação e formação tecnológica, incluindo workshops e programas de capacitação.",
         content: [
             "O Espaço 4.0 realizou uma série de workshops intensivos sobre tecnologias emergentes, capacitando mais de 100 estudantes em áreas como blockchain, computação quântica e edge computing.",
             "Os eventos contaram com especialistas do mercado e pesquisadores de universidades renomadas, ampliando networking, mentoria e troca de experiências.",
@@ -170,6 +180,7 @@ export const newsData: News[] = [
         image: "https://images.unsplash.com/photo-1703221561813-cdaa308cf9e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHwzRCUyMHByaW50aW5nJTIwdGVjaG5vbG9neXxlbnwxfHx8fDE3NzAwNTI1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
         date: "3 de Janeiro, 2026",
         author: "Albhert Barbosa",
+        about: "Albhert Barbosa pesquisa materiais avançados e divulgação científica, com foco em impressão 3D sustentável.",
         content: [
             "Pesquisadores do Espaço 4.0 estão experimentando novos materiais biodegradáveis para impressão 3D, buscando alternativas mais sustentáveis ao plástico convencional.",
             "Os testes incluem filamentos feitos a partir de resíduos agrícolas, fibras naturais e polímeros biocompatíveis, com bons resultados de resistência e durabilidade.",
@@ -187,6 +198,7 @@ export const newsData: News[] = [
         image: "https://images.unsplash.com/photo-1712599609774-172848255a9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxJb1QlMjBhdXRvbWF0aW9uJTIwZGV2aWNlc3xlbnwxfHx8fDE3NzAxNDU5MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
         date: "1 de Janeiro, 2026",
         author: "Karol ",
+        about: "Karol acompanha projetos de automação e eficiência operacional, destacando aplicações reais em logística e estoque.",
         content: [
             "O Espaço 4.0 desenvolveu e implementou um sistema completo de automação de estoque que está sendo utilizado no próprio campus e em empresas parceiras.",
             "Com RFID, visão computacional e algoritmos de previsão de demanda, o sistema monitora níveis em tempo real e automatiza pedidos de reposição.",
@@ -204,6 +216,7 @@ export const newsData: News[] = [
         image: "https://images.unsplash.com/photo-1758270704534-fd9715bffc0e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWNobm9sb2d5JTIwY2FtcHVzJTIwc3R1ZGVudHN8ZW58MXx8fHwxNzcwMTQ1OTIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
         date: "29 de Dezembro, 2025",
         author: "Felipe Costa",
+        about: "Felipe Costa escreve sobre tecnologia educacional, com foco em metodologias ativas e aprendizado apoiado por IA.",
         content: [
             "Uma plataforma interativa de ensino de programação desenvolvida no Espaço 4.0 está transformando a forma como os alunos aprendem a programar.",
             "O sistema utiliza gamificação, desafios progressivos e feedback em tempo real para tornar o aprendizado mais engajante e efetivo.",
