@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const noticias = [
     {
@@ -38,6 +39,7 @@ const noticias = [
 ];
 
 export default function Blog() {
+    const router = useRouter();
     const [lista, setLista] = useState(noticias);
 
     useEffect(() => {
@@ -67,7 +69,10 @@ export default function Blog() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pt-20">
-                    <div className="group relative lg:col-span-3 h-90 hover:cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                    <button
+                        className="group relative lg:col-span-3 h-90 hover:cursor-pointer rounded-xl overflow-hidden shadow-lg text-start"
+                        onClick={() => router.push("/blog")}
+                    >
                         <Image
                             src={lista[0].imagem}
                             alt={lista[0].titulo}
@@ -82,9 +87,12 @@ export default function Blog() {
                                 <h3 className="text-2xl font-bold leading-tight">{lista[0].descricao}</h3>
                             </div>
                         </div>
-                    </div>
+                    </button>
 
-                    <div className="lg:col-span-2 grid grid-cols-2 gap-6 hover:cursor-pointer">
+                    <button
+                        className="lg:col-span-2 grid grid-cols-2 gap-6 hover:cursor-pointer text-start"
+                        onClick={() => router.push("/blog")}
+                    >
                         {lista.slice(1, 5).map((noticia) => (
                             <div key={noticia.id} className="relative h-41.25 rounded-xl overflow-hidden shadow-md">
                                 <Image src={noticia.imagem} alt={noticia.titulo} fill className="object-cover" />
@@ -97,7 +105,7 @@ export default function Blog() {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </button>
                 </div>
 
                 <div className="flex justify-center mt-14">
