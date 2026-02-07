@@ -5,6 +5,7 @@ import { newsData } from "@/src/infra/modules/blog/blog-mock";
 import { Clock, Filter, Home, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "../../components/ui/button";
 
 export default function BlogNews() {
     const [selectedCategory, setSelectedCategory] = useState("Todas");
@@ -45,17 +46,17 @@ export default function BlogNews() {
 
                     <div className="flex gap-2 flex-wrap">
                         {categories.map((category) => (
-                            <button
+                            <Button
                                 key={category}
                                 onClick={() => setSelectedCategory(category)}
-                                className={`px-5 py-2 rounded-xl transition-colors whitespace-nowrap font-medium hover:cursor-pointer ${
+                                className={`px-5 py-2 rounded-xl h-max w-max transition-colors whitespace-nowrap font-medium hover:cursor-pointer ${
                                     selectedCategory === category
                                         ? "bg-yellow-400 text-black"
                                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                 }`}
                             >
                                 {category}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>

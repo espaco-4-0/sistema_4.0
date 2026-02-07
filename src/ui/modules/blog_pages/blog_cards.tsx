@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "../../components/ui/button";
 
 interface BlogCardsProps {
     id: number;
@@ -15,7 +16,7 @@ export default function BlogCards({ id, category, title, image, size = "small" }
     const isLarge = size == "large";
 
     return (
-        <button
+        <Button
             onClick={() => router.push(`/blog/${id}`)}
             className={`relative rounded-2xl overflow-hidden group cursor-pointer ${isLarge ? "h-117.5" : "h-55"}`}
         >
@@ -29,6 +30,6 @@ export default function BlogCards({ id, category, title, image, size = "small" }
                 <p className="text-sm uppercase tracking-wider mb-2 opacity-90">{category}</p>
                 <h3 className={`${isLarge ? "text-3xl" : "text-lg"}`}>{title}</h3>
             </div>
-        </button>
+        </Button>
     );
 }
