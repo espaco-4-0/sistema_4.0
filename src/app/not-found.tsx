@@ -37,7 +37,7 @@ export default function NotFound() {
             'leading-none',
             'text-transparent',
             'bg-clip-text',
-            'bg-gradient-to-b',
+            'bg-linear-to-b',
             'from-[#FFC107]/30',
             'to-white',
             'text-[16rem]',
@@ -60,7 +60,7 @@ export default function NotFound() {
               'h-auto',
               'w-56',
               'md:w-80',
-              'lg:w-[500px]',
+              'lg:w-125',
               'rounded-full',
             )}
           />
