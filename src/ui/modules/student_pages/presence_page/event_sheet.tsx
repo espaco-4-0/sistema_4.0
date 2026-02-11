@@ -16,10 +16,6 @@ import PresenceForm from "./presence_form";
 import SheetBadge from "./sheet_badge";
 import StatusCard from "./status_card";
 
-/* -------------------------------------------------------------------------- */
-/*                                Event Sheet                                 */
-/* -------------------------------------------------------------------------- */
-
 interface EventSheetProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;

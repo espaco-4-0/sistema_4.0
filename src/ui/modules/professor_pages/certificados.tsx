@@ -5,9 +5,18 @@ import { GenerateBatchModal } from "@/src/ui/components/modals/professor/certifi
 import { GenerateSingleModal } from "@/src/ui/components/modals/professor/certificados/generate-single-modal";
 import { TemplateBuilderModal } from "@/src/ui/components/modals/professor/certificados/template-builder-modal";
 import { Button } from "@/src/ui/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/src/ui/components/ui/dropdown-menu";
 import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
-import { Award, FileUp, PenLine, ShieldCheck, Star, Users } from "lucide-react";
+import { Award, FileUp, Filter, PenLine, ShieldCheck, Star, Users } from "lucide-react";
 import { toast } from "sonner";
 
 const stats = [
@@ -50,6 +59,7 @@ const students = [
     { name: "Pedro Alves", course: "Pesquisa Aplicada", status: "Em andamento" },
     { name: "Camila Rocha", course: "Projeto Integrador", status: "Concluído" },
     { name: "Tiago Luz", course: "Monitoria de Sistemas", status: "Concluído" },
+    { name: "Ana Pereira", course: "Design de Serviços", status: "Em espera" },
 ];
 
 const templates = [
@@ -62,10 +72,26 @@ export default function Certificados() {
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [isSingleModalOpen, setIsSingleModalOpen] = useState(false);
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState("Todos");
 
     const handleSaveSignature = () => {
         toast.success("Assinatura salva com sucesso!");
     };
+
+    const statusStyles: Record<string, string> = {
+        Concluído: "bg-green-50 text-green-700 border-green-200",
+        "Em andamento": "bg-blue-50 text-blue-700 border-blue-200",
+        "Em espera": "bg-yellow-50 text-yellow-700 border-yellow-200",
+    };
+
+    const filteredStudents = students.filter((student) => {
+        const matchesSearch =
+            student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            student.course.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === "Todos" || student.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <div className="space-y-6 p-6">
@@ -197,14 +223,37 @@ export default function Certificados() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-2 overflow-hidden">
                 <div className="p-4 flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-gray-100">
                     <div className="relative w-full max-w-md">
-                        <Input placeholder="Buscar alunos ou certificados..." className="bg-gray-50" />
+                        <Input
+                            placeholder="Buscar alunos ou certificados..."
+                            className="bg-gray-50"
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                        />
                     </div>
-                    <Button
-                        variant="secondary"
-                        className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    >
-                        Filtros
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                type="button"
+                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
+                            >
+                                <Filter size={18} /> Filtros
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>Status do certificado</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup
+                                value={statusFilter}
+                                onValueChange={(value) => setStatusFilter(value)}
+                            >
+                                {["Todos", "Concluído", "Em andamento", "Em espera"].map((status) => (
+                                    <DropdownMenuRadioItem key={status} value={status}>
+                                        {status}
+                                    </DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -228,12 +277,17 @@ export default function Certificados() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {students.map((student) => (
+                            {filteredStudents.map((student) => (
                                 <tr key={student.name} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{student.name}</td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{student.course}</td>
                                     <td className="px-6 py-4 text-sm">
-                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-50 text-gray-700 border border-yellow-100">
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                                                statusStyles[student.status] ??
+                                                "bg-gray-50 text-gray-700 border-gray-200"
+                                            }`}
+                                        >
                                             {student.status}
                                         </span>
                                     </td>

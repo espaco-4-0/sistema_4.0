@@ -1,6 +1,15 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getTypeStyle, stats, userData } from "@/src/infra/modules/professor/manage-users-mock";
 import { ImportCSVModal } from "@/src/ui/components/modals/professor/usuarios/import-csv-modal";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/src/ui/components/ui/dropdown-menu";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus } from "lucide-react";
 
 import NewUserModal from "../../components/modals/professor/usuarios/new-user-modal";
@@ -8,19 +17,31 @@ import NewUserModal from "../../components/modals/professor/usuarios/new-user-mo
 export default function GerenciarUsuarios() {
     const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
+    const [typeFilter, setTypeFilter] = useState("Todos");
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const totalPages = Math.ceil(userData.length / itemsPerPage);
+    const filteredUsers = useMemo(() => {
+        if (typeFilter === "Todos") {
+            return userData;
+        }
+        return userData.filter((user) => user.type === typeFilter);
+    }, [typeFilter]);
+
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
 
-    const currentUsers = userData.slice(startIndex, endIndex);
+    const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
     const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
     const goToPreviousPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [typeFilter]);
 
     return (
         <div className="space-y-6 p-6">
@@ -75,9 +96,24 @@ export default function GerenciarUsuarios() {
                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
-                    <Filter size={18} /> Filtros
-                </button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
+                            <Filter size={18} /> Filtros
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>Tipo de usuário</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup value={typeFilter} onValueChange={setTypeFilter}>
+                            {["Todos", "Estudante", "Monitor", "Pesquisador", "Professor"].map((type) => (
+                                <DropdownMenuRadioItem key={type} value={type}>
+                                    {type}
+                                </DropdownMenuRadioItem>
+                            ))}
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-10 overflow-hidden">
@@ -143,9 +179,9 @@ export default function GerenciarUsuarios() {
 
                 <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 bg-gray-50/50">
                     <p className="text-sm text-gray-600">
-                        Mostrando <span className="font-medium">{userData.length > 0 ? startIndex + 1 : 0}</span> a{" "}
-                        <span className="font-medium">{Math.min(endIndex, userData.length)}</span> de{" "}
-                        <span className="font-medium">{userData.length}</span> usuários
+                        Mostrando <span className="font-medium">{filteredUsers.length > 0 ? startIndex + 1 : 0}</span> a{" "}
+                        <span className="font-medium">{Math.min(endIndex, filteredUsers.length)}</span> de{" "}
+                        <span className="font-medium">{filteredUsers.length}</span> usuários
                     </p>
                     <div className="flex gap-2">
                         <button

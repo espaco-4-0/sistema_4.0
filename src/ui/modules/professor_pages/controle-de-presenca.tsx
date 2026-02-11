@@ -5,11 +5,21 @@ import {
     Student,
     Valores,
 } from "@/src/infra/modules/professor/controle-presenca-mock";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/src/ui/components/ui/dropdown-menu";
 import { Check, ChevronLeft, ChevronRight, Clock, Filter, Search, X } from "lucide-react";
 
 export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Readonly<AttendanceTableProps>) {
     const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
     const [currentPage, setCurrentPage] = useState(1);
+    const [statusFilter, setStatusFilter] = useState("all");
     const itemsPerPage = 10;
 
     const statsCalculated = useMemo(() => {
@@ -28,9 +38,10 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Rea
         return students.filter((student) => {
             const matchesSearch = student.name.toLowerCase().includes(safeSearch);
             const matchesClass = !selectedClass || selectedClass === "all" || student.class === selectedClass;
-            return matchesSearch && matchesClass;
+            const matchesStatus = statusFilter === "all" || student.status === statusFilter;
+            return matchesSearch && matchesClass && matchesStatus;
         });
-    }, [students, searchTerm, selectedClass]);
+    }, [students, searchTerm, selectedClass, statusFilter]);
 
     const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -38,7 +49,7 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Rea
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, selectedClass]);
+    }, [searchTerm, selectedClass, statusFilter]);
 
     const updateStatus = (id: string, status: "present" | "absent" | "late") => {
         setStudents((prev) =>
@@ -96,9 +107,24 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Rea
                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
                     />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
-                    <Filter size={18} /> Filtros
-                </button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-medium">
+                            <Filter size={18} /> Filtros
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>Status de presença</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                            <DropdownMenuRadioItem value="all">Todos</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="present">Presente</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="late">Atraso</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="absent">Ausente</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="pending">Pendente</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

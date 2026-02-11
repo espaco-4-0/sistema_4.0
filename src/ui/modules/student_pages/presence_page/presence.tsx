@@ -80,7 +80,7 @@ const Toolbar = ({ date, onNavigate }: ToolbarProps) => {
 };
 
 const MonthEvent = ({ event }: any) => {
-    return <div className="px-2 py-0.5 rounded-md text-xs font-medium text-white">{event.title}</div>;
+    return <div className="px-2 py-0.5 rounded-md text-xs font-medium text-black">{event.title}</div>;
 };
 
 const eventPropGetter = (event: any) => {
@@ -88,11 +88,11 @@ const eventPropGetter = (event: any) => {
     const eventDate = new Date(event.end);
     const isPast = eventDate < now;
 
-    let backgroundColor = "#9ca3af";
+    let backgroundColor = "#d1d5db";
     if (event.situation === "confirmed") {
-        backgroundColor = isPast ? "#16a34a" : "#eab308";
+        backgroundColor = isPast ? "#22c55e" : "#eab308";
     } else if (event.situation === "absent") {
-        backgroundColor = "#dc2626";
+        backgroundColor = "#ef4444";
     }
 
     return {
@@ -139,7 +139,7 @@ export default function PresencePage() {
                     views={["month"]}
                     eventPropGetter={eventPropGetter}
                     culture="pt-BR"
-                    className="presence-calendar h-170 border-b"
+                    className="presence-calendar text-he h-170 border-b"
                     style={{ height: "clamp(450px, 60vh, 710px)", width: "100%" }}
                     components={{ toolbar: Toolbar, event: MonthEvent }}
                     formats={{
@@ -152,7 +152,7 @@ export default function PresencePage() {
 
                 <div className="flex flex-col lg:flex-row flex-wrap justify-center items-start lg:items-center gap-4 lg:gap-6 2xl:gap-7 mt-6 lg:mt-7 2xl:mt-8 mb-3 px-2 py-2  rounded-lg ">
                     <div className="flex items-center gap-2.5">
-                        <div className="bg-green-600 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
+                        <div className="bg-green-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                         <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
                             Presença confirmada (evento passado)
                         </span>
@@ -164,7 +164,7 @@ export default function PresencePage() {
                         </span>
                     </div>
                     <div className="flex items-center gap-2.5">
-                        <div className="bg-red-600 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
+                        <div className="bg-red-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                         <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
                             Ausência registrada
                         </span>
