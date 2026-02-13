@@ -81,7 +81,6 @@ export function CourseHero({ title, description, level, instructor, students, ga
                     <ChevronRightIcon className="size-5" />
                 </button>
             </div>
-
             <div className="absolute inset-0 flex items-center">
                 <div className="mx-auto w-full max-w-7xl px-6 lg:px-12">
                     <div className="max-w-2xl 2xl:max-w-3xl">
@@ -109,7 +108,7 @@ export function CourseHero({ title, description, level, instructor, students, ga
                     </div>
                 </div>
             </div>
-
+            teste
             <div className="absolute right-0 bottom-0 left-0 bg-black/20 px-6 py-3 backdrop-blur-sm">
                 <div className="mx-auto flex max-w-7xl items-center gap-4">
                     <div className="flex gap-1.5">
