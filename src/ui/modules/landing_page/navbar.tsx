@@ -58,12 +58,15 @@ export default function NavBar() {
                     ))}
                 </NavigationMenuList>
 
-                <Link href="#3D" className="flex text-[14px] gap-4">
-                    <Play /> Ver em 3D
+                <Link href="#3D" className="flex text-[14px] p-3 font-semibold border-none gap-2">
+                    <Play className=" h-5 w-5" /> Ver em 3D
                 </Link>
                 <div className="p-3 gap-2">
-                    <Link href="" className="gap-2 flex bg-amber-400 p-1 text-[14px] border rounded-xl">
-                        <Calendar className="text-14px" /> Agendar Visita
+                    <Link
+                        href=""
+                        className="gap-2 flex pl-3 pr-3 pt-2 pb-2 bg-yellow-400 border-none text-center items-center text-[14px] font-semibold rounded-sm"
+                    >
+                        <Calendar className="h-5 w-5 items-center" /> Agendar Visita
                     </Link>
                 </div>
                 <p className="p-4 text-gray-500 ">|</p>
