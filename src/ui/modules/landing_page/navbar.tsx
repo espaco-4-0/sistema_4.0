@@ -110,15 +110,15 @@ export default function NavBar() {
                                     <Play className="h-5 w-5" /> Ver em 3D
                                 </Link>
                                 <Link
-                                    href=""
-                                    className="flex h-9 items-center gap-2 rounded-sm bg-yellow-400 px-3 text-[13px] font-semibold text-black hover:bg-yellow-300 whitespace-nowrap"
+                                    href="/calendar"
+                                    className="flex h-9 items-center gap-2 rounded-sm bg-yellow-400 px-3 text-[13px] font-semibold text-black hover:bg-yellow-500 transition-colors duration-300 ease-in-out whitespace-nowrap"
                                 >
                                     <Calendar className="h-5 w-5" /> Agendar Visita
                                 </Link>
                                 <div className="h-6 w-px bg-gray-300" />
                                 <Link
                                     href="/login-page"
-                                    className="flex h-9 items-center justify-center gap-2 rounded-sm border-2 border-gray-300 px-3 text-[13px] font-semibold text-black whitespace-nowrap"
+                                    className="flex h-9 items-center justify-center gap-2 rounded-sm border-2 border-gray-300 px-3 text-[13px] font-semibold text-black whitespace-nowrap hover:border-black hover:bg-gray-50 transition-all duration-300 ease-in-out"
                                 >
                                     <User className="h-5 w-5" /> Entrar
                                 </Link>
