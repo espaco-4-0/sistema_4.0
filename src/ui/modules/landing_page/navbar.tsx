@@ -32,23 +32,27 @@ export default function NavBar() {
     ];
 
     return (
-        <NavigationMenu className="fixed top-0 z-4 w-full bg-white">
-            <div className="relative flex h-20 items-center justify-center px-3 lg:px-12">
-                <Button variant="ghost" className="flex cursor-pointer" onClick={() => automaticScroll("welcome")}>
+        <NavigationMenu className="fixed top-0 z-20 w-full bg-white">
+            <div className="relative mx-auto flex h-20 max-w-6xl items-center gap-6 px-4 lg:px-8">
+                <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 p-0 cursor-pointer shrink-0"
+                    onClick={() => automaticScroll("welcome")}
+                >
                     <Image src="/Icone-Espaco4.0.svg" alt="Logo do Espaço 4.0" width={48} height={48} />
-                    <div className="items-start flex flex-col">
-                        <h1 className="text-black font-bold items-start">Espaco 4.0</h1>
-                        <p className="text-gray-400 font-semibold items-center">Tecnologia & Educação</p>
+                    <div className="flex flex-col items-start leading-tight">
+                        <span className="text-base font-bold text-black leading-none">Espaco 4.0</span>
+                        <span className="text-xs font-semibold text-gray-400 leading-none">Tecnologia & Educação</span>
                     </div>
                 </Button>
 
-                <NavigationMenuList className="hidden lg:flex gap-3">
+                <NavigationMenuList className="mx-auto hidden lg:flex flex-1 items-center justify-center gap-4 min-w-0">
                     {menuItems.map((item) => (
                         <NavigationMenuItem key={item.id}>
                             <NavigationMenuLink asChild>
                                 <Button
                                     variant="ghost"
-                                    className="cursor-pointer text-base font-normal hover:text-black/70 active:bg-gray-200/70 active:text-black"
+                                    className="h-9 cursor-pointer px-2 text-[13px] font-medium text-black/70 hover:text-black active:bg-gray-200/70 active:text-black whitespace-nowrap"
                                     onClick={() => automaticScroll(item.id)}
                                 >
                                     {item.label}
@@ -58,24 +62,27 @@ export default function NavBar() {
                     ))}
                 </NavigationMenuList>
 
-                <Link href="#3D" className="flex text-[14px] p-3 font-semibold border-none gap-2">
-                    <Play className=" h-5 w-5" /> Ver em 3D
-                </Link>
-                <div className="p-3 gap-2">
+                <div className="ml-auto hidden lg:flex shrink-0 items-center gap-4">
+                    <Link
+                        href="#3D"
+                        className="flex items-center gap-2 text-[13px] font-semibold text-black/70 hover:text-black whitespace-nowrap"
+                    >
+                        <Play className="h-5 w-5" /> Ver em 3D
+                    </Link>
                     <Link
                         href=""
-                        className="gap-2 flex pl-3 pr-3 pt-2 pb-2 bg-yellow-400 border-none text-center items-center text-[14px] font-semibold rounded-sm"
+                        className="flex h-9 items-center gap-2 rounded-sm bg-yellow-400 px-3 text-[13px] font-semibold text-black hover:bg-yellow-300 whitespace-nowrap"
                     >
-                        <Calendar className="h-5 w-5 items-center" /> Agendar Visita
+                        <Calendar className="h-5 w-5" /> Agendar Visita
+                    </Link>
+                    <div className="h-6 w-px bg-gray-300" />
+                    <Link
+                        href="/login-page"
+                        className="flex h-9 items-center justify-center gap-2 rounded-sm border-2 border-gray-300 px-3 text-[13px] font-semibold text-black whitespace-nowrap"
+                    >
+                        <User className="h-5 w-5" /> Entrar
                     </Link>
                 </div>
-                <p className="p-4 text-gray-500 ">|</p>
-                <Link
-                    href="/login-page"
-                    className="flex lg:flex h-9 w-22 items-center justify-center rounded text-black border-2"
-                >
-                    <User className="gap-2" /> Entrar
-                </Link>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -98,7 +105,7 @@ export default function NavBar() {
                             <NavigationMenuLink asChild>
                                 <Button
                                     variant="ghost"
-                                    className="w-full justify-start text-base text-center cursor-pointer hover:text-black/70 active:bg-gray-200/70 active:text-black"
+                                    className="h-10 w-full justify-start text-base text-center cursor-pointer text-black/70 hover:text-black active:bg-gray-200/70 active:text-black"
                                     onClick={() => automaticScroll(item.id)}
                                 >
                                     {item.label}
@@ -107,12 +114,26 @@ export default function NavBar() {
                         </NavigationMenuItem>
                     ))}
 
-                    <Link
-                        href="/login-page"
-                        className="mt-4 flex h-10 items-center justify-center rounded bg-black text-white hover:bg-black/80"
-                    >
-                        Entrar
-                    </Link>
+                    <div className="mt-4 flex flex-col gap-2">
+                        <Link
+                            href="#3D"
+                            className="flex h-10 items-center justify-center gap-2 rounded-sm border border-gray-300 text-sm font-semibold text-black"
+                        >
+                            <Play className="h-5 w-5" /> Ver em 3D
+                        </Link>
+                        <Link
+                            href=""
+                            className="flex h-10 items-center justify-center gap-2 rounded-sm bg-yellow-400 text-sm font-semibold text-black"
+                        >
+                            <Calendar className="h-5 w-5" /> Agendar Visita
+                        </Link>
+                        <Link
+                            href="/login-page"
+                            className="flex h-10 items-center justify-center gap-2 rounded-sm border border-gray-300 text-sm font-semibold text-black"
+                        >
+                            <User className="h-5 w-5" /> Entrar
+                        </Link>
+                    </div>
                 </NavigationMenuList>
             </div>
         </NavigationMenu>
