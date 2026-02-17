@@ -1,33 +1,8 @@
+import { images } from "@/src/infra/modules/galery/gallery_mock";
 import { Minimize } from "lucide-react";
 import Image from "next/image";
 
 export default function SpaceGallery() {
-    const images = [
-        {
-            src: "/espaco-externo.png",
-            title: "Impressão 3D",
-        },
-        {
-            src: "/espaco-externo.png",
-            title: "Realidade Virtual",
-        },
-        {
-            src: "/espaco-externo.png",
-            title: "Robótica",
-        },
-        {
-            src: "/espaco-externo.png",
-            title: "Eletrônica",
-        },
-        {
-            src: "/espaco-externo.png",
-            title: "Aprendizado",
-        },
-        {
-            src: "/espaco-externo.png",
-            title: "Workshop",
-        },
-    ];
     return (
         <section id="space_gallery" className="bg-[#F9FAFB] py-20">
             <div className="mx-auto max-w-7xl px-6">
