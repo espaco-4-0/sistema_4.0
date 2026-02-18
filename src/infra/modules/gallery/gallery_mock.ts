@@ -4,19 +4,19 @@ export const images = [
         title: "Impressão 3D",
     },
     {
-        src: "/espaco-externo.png",
+        src: "/espaco-interior.jpeg",
         title: "Realidade Virtual",
     },
     {
-        src: "/espaco-externo.png",
+        src: "/pibic.jpeg",
         title: "Robótica",
     },
     {
-        src: "/espaco-externo.png",
+        src: "/noticia-principal.png",
         title: "Eletrônica",
     },
     {
-        src: "/espaco-externo.png",
+        src: "/noticia-quinta.jpg",
         title: "Aprendizado",
     },
     {

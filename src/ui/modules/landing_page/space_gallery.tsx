@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import { images } from "@/src/infra/modules/gallery/gallery_mock";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Minimize, X } from "lucide-react";
 import Image from "next/image";
 
+import { Button } from "../../components/ui/button";
+
 export default function SpaceGallery() {
     const [selectedImage, setSelectedImage] = useState<number | null>(null);
+    const [direction, setDirection] = useState(0);
 
     useEffect(() => {
         if (selectedImage === null) return;
 
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                setSelectedImage(null);
-            }
+            if (event.key === "Escape") setSelectedImage(null);
+            if (event.key === "ArrowLeft") navigateImage(-1);
+            if (event.key === "ArrowRight") navigateImage(1);
         };
 
         globalThis.addEventListener("keydown", handleKeyDown);
@@ -22,12 +26,17 @@ export default function SpaceGallery() {
         };
     }, [selectedImage]);
 
-    const navigateImage = (direction: number) => {
+    const navigateImage = (dir: number) => {
         if (selectedImage === null) return;
-
-        const newIndex = (selectedImage + direction + images.length) % images.length;
-
+        setDirection(dir);
+        const newIndex = (selectedImage + dir + images.length) % images.length;
         setSelectedImage(newIndex);
+    };
+
+    const slideVariants = {
+        enter: (dir: number) => ({ x: dir > 0 ? "60%" : "-60%", opacity: 0, scale: 0.96 }),
+        center: { x: 0, opacity: 1, scale: 1 },
+        exit: (dir: number) => ({ x: dir > 0 ? "-60%" : "60%", opacity: 0, scale: 0.96 }),
     };
 
     return (
@@ -75,46 +84,72 @@ export default function SpaceGallery() {
             {selectedImage !== null && (
                 <div className="fixed inset-0 z-25 flex items-center justify-center ">
                     <button
-                        type="button"
                         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                         aria-label="Fechar galeria"
                         onClick={() => setSelectedImage(null)}
                     />
-                    <button
-                        className="absolute top-6 right-6 w-12 h-12 hover:cursor-pointer hover:text-yellow-600 flex items-center hover:transition-all ease-out justify-center text-yellow-500 shadow-lg"
+                    <Button
+                        variant="ghost"
+                        size="icon-lg"
+                        aria-label="Fechar galeria"
+                        className="group absolute top-4 right-4 z-10 rounded-full text-yellow-primary transition-all duration-300 ease-out hover:scale-110 hover:bg-yellow-primary/10 hover:text-yellow-muted active:scale-95 md:top-6 md:right-6"
                         onClick={() => setSelectedImage(null)}
                     >
-                        <X />
-                    </button>
+                        <span className="inline-flex transition-transform duration-500 ease-out group-hover:rotate-360">
+                            <X className="size-5 md:size-6" />
+                        </span>
+                    </Button>
 
-                    <button
-                        className="absolute left-6 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-linear-to-r from-yellow-primary to-yellow-icon text-slate-900 shadow-lg transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-black hover:shadow-xl"
+                    <Button
+                        variant="default"
+                        size="icon-lg"
+                        aria-label="Imagem anterior"
+                        className="group absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-linear-to-br from-yellow-primary to-yellow-icon text-slate-900 shadow-md transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-white hover:shadow-xl active:scale-95 md:left-6 md:size-12"
                         onClick={(e) => {
                             e.stopPropagation();
                             navigateImage(-1);
                         }}
                     >
-                        <ChevronLeft />
-                    </button>
+                        <span className="inline-flex transition-transform duration-500 ease-out group-hover:rotate-360">
+                            <ChevronLeft className="size-5 md:size-6" />
+                        </span>
+                    </Button>
 
-                    <button
-                        className="absolute right-6 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-linear-to-r from-yellow-primary to-yellow-icon text-slate-900 shadow-lg transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-black hover:shadow-xl"
+                    <Button
+                        variant="default"
+                        size="icon-lg"
+                        aria-label="Próxima imagem"
+                        className="group absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-linear-to-bl from-yellow-primary to-yellow-icon text-slate-900 shadow-md transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-white hover:shadow-xl active:scale-95 md:right-6 md:size-12"
                         onClick={(e) => {
                             e.stopPropagation();
                             navigateImage(1);
                         }}
                     >
-                        <ChevronRight />
-                    </button>
+                        <span className="inline-flex transition-transform duration-500 ease-out group-hover:rotate-360">
+                            <ChevronRight className="size-5 md:size-6" />
+                        </span>
+                    </Button>
 
-                    <div className="relative max-w-5xl w-full">
-                        <Image
-                            src={images[selectedImage].src}
-                            width={1400}
-                            height={1000}
-                            alt={images[selectedImage].title}
-                            className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
-                        />
+                    <div className="relative max-w-5xl w-full overflow-hidden">
+                        <AnimatePresence mode="wait" custom={direction}>
+                            <motion.div
+                                key={images[selectedImage].src}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                            >
+                                <Image
+                                    src={images[selectedImage].src}
+                                    width={1400}
+                                    height={1000}
+                                    alt={images[selectedImage].title}
+                                    className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+                                />
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
 
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-linear-to-r hover:cursor-pointer from-yellow-400 to-orange-500 px-6 py-3 rounded-xl shadow-lg">
