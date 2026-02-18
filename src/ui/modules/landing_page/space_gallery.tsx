@@ -92,7 +92,7 @@ export default function SpaceGallery() {
                         variant="ghost"
                         size="icon-lg"
                         aria-label="Fechar galeria"
-                        className="group absolute top-4 right-4 z-10 rounded-full text-yellow-primary transition-all duration-300 ease-out hover:scale-110 hover:bg-yellow-primary/10 hover:text-yellow-muted active:scale-95 md:top-6 md:right-6"
+                        className="group absolute top-4 right-4 z-10 rounded-full text-yellow-primary transition-all duration-300 ease-out hover:scale-110 hover:bg-yellow-primary/10 hover:text-yellow-muted active:scale-95 md:top-6 md:right-6 hover:cursor-pointer"
                         onClick={() => setSelectedImage(null)}
                     >
                         <span className="inline-flex transition-transform duration-500 ease-out group-hover:rotate-360">
@@ -104,7 +104,7 @@ export default function SpaceGallery() {
                         variant="default"
                         size="icon-lg"
                         aria-label="Imagem anterior"
-                        className="group absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-linear-to-br from-yellow-primary to-yellow-icon text-slate-900 shadow-md transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-white hover:shadow-xl active:scale-95 md:left-6 md:size-12"
+                        className="group absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-linear-to-br from-yellow-primary to-yellow-icon text-slate-900 shadow-md transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-white hover:shadow-xl active:scale-95 md:left-6 md:size-12 hover:cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation();
                             navigateImage(-1);
@@ -119,7 +119,7 @@ export default function SpaceGallery() {
                         variant="default"
                         size="icon-lg"
                         aria-label="Próxima imagem"
-                        className="group absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-linear-to-bl from-yellow-primary to-yellow-icon text-slate-900 shadow-md transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-white hover:shadow-xl active:scale-95 md:right-6 md:size-12"
+                        className="group absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-linear-to-bl from-yellow-primary to-yellow-icon text-slate-900 shadow-md transition-all duration-300 ease-out hover:scale-110 hover:from-yellow-muted hover:to-yellow-icon-dark hover:text-white hover:shadow-xl active:scale-95 md:right-6 md:size-12 hover:cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation();
                             navigateImage(1);
