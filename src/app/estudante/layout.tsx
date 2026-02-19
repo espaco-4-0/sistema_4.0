@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/src/ui/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/src/ui/components/ui/sidebar";
 import StudentLeftSidebar from "@/src/ui/modules/student_pages/student_left_sidebar";
 import StudentTopbar from "@/src/ui/modules/student_pages/student_topbar";
 
