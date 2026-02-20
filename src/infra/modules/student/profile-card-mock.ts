@@ -9,7 +9,9 @@ export interface ProfileCardProps {
 
 export interface ProfileCardFunctionProps extends ProfileCardProps {
     editorModeFunction: () => void;
+    editorBlurFunction: () => void;
     isEditing: boolean;
+    isBlur: boolean;
 }
 
 export interface ProfileData {

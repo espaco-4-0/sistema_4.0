@@ -6,6 +6,7 @@ import CoursesAndTraining from "../ui/modules/landing_page/courses_and_training"
 import Footer from "../ui/modules/landing_page/footer";
 import { Hero } from "../ui/modules/landing_page/hero";
 import NavBar from "../ui/modules/landing_page/navbar";
+import SpaceGallery from "../ui/modules/landing_page/space_gallery";
 import { UpcomingEvents } from "../ui/modules/landing_page/upcoming_events";
 import WhatIsSpace from "../ui/modules/landing_page/what_is";
 
@@ -19,7 +20,9 @@ export default function Home() {
             <CoursesAndTraining />
             <UpcomingEvents />
             <ComeAndDiscover />
+            <SpaceGallery />
             <Footer />
+            <Viewer3dSection />
         </div>
     );
 }
