@@ -15,6 +15,7 @@ import {
 } from "@/src/ui/forms/schemas/course-registration-schema";
 import { useCep } from "@/src/ui/hooks/useCep";
 import { valibotResolver } from "@hookform/resolvers/valibot";
+import { motion } from "framer-motion";
 import { GraduationCap, Mail, MapPin, User } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { IMaskInput } from "react-imask";
@@ -25,6 +26,7 @@ import {
     inputClass as baseInputClass,
     maskInputClass as baseMaskInputClass,
 } from "../../landing_page/course_dialog";
+import { BlurCard } from "./blur_card";
 import { EditModeBar } from "./edit_card";
 import { ProfileCard } from "./profile_card";
 
@@ -291,6 +293,7 @@ const sections = [
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isBlur, setIsBlur] = useState(true);
     const [savedData, setSavedData] = useState<CourseRegisterType>(profileDataMock);
     const [matricula, setMatricula] = useState(profileDataMock.matricula);
     const [savedMatricula, setSavedMatricula] = useState(profileDataMock.matricula);
@@ -364,7 +367,9 @@ export default function Profile() {
                 course={formDataValues.education}
                 matricula={matricula}
                 editorModeFunction={() => setIsEditing(true)}
+                editorBlurFunction={() => setIsBlur((prev) => !prev)}
                 isEditing={isEditing}
+                isBlur={isBlur}
             />
 
             {isEditing && <EditModeBar onCancel={handleCancel} onSave={handleSave} isSaving={isSaving} />}
@@ -448,13 +453,26 @@ export default function Profile() {
                 </form>
             ) : (
                 <div className="space-y-2">
-                    {sections.map((s) => (
-                        <Section key={s.title} title={s.title} icon={s.icon}>
-                            {fieldConfigs[s.fields].map((f: any) => (
-                                <DisplayField key={f.name} label={f.label} value={getDisplayValue(f, formDataValues)} />
-                            ))}
-                            {s.extra?.(formDataValues, matricula)}
-                        </Section>
+                    {sections.map((s, i) => (
+                        <motion.div
+                            key={s.title}
+                            initial={{ opacity: 0, y: 18 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: i * 0.07, ease: "easeOut" }}
+                        >
+                            <BlurCard isBlur={isBlur} onToggle={() => setIsBlur((prev) => !prev)}>
+                                <Section title={s.title} icon={s.icon}>
+                                    {fieldConfigs[s.fields].map((f: any) => (
+                                        <DisplayField
+                                            key={f.name}
+                                            label={f.label}
+                                            value={getDisplayValue(f, formDataValues)}
+                                        />
+                                    ))}
+                                    {s.extra?.(formDataValues, matricula)}
+                                </Section>
+                            </BlurCard>
+                        </motion.div>
                     ))}
                 </div>
             )}
