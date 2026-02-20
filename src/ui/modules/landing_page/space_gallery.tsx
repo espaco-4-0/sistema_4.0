@@ -146,7 +146,7 @@ export default function SpaceGallery() {
                                     width={1400}
                                     height={1000}
                                     alt={images[selectedImage].title}
-                                    className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+                                    className="w-full h-auto max-h-[80vh] object-cover rounded-2xl shadow-2xl"
                                 />
                             </motion.div>
                         </AnimatePresence>
