@@ -12,8 +12,8 @@ import WhatIsSpace from "../ui/modules/landing_page/what_is";
 export default function Home() {
     return (
         <div>
-            <NavBar />
             <Welcome />
+            <NavBar />
             <Blog />
             <WhatIsSpace />
             <CoursesAndTraining />
