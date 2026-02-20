@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -62,59 +64,53 @@ export default function Blog() {
     return (
         <section id="blog" className="bg-white py-28">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="flex justify-center">
-                    <h2 className="font-medium text-4xl text-center">
-                        Novidades do <span className="text-yellow-muted font-bold"> Espaço 4.0 :</span>
-                    </h2>
-                </div>
+                <h2 className="font-medium text-4xl text-center mb-17">
+                    Novidades do <span className="text-yellow-muted font-bold">Espaço 4.0</span>
+                </h2>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 pt-20">
-                    <button
-                        className="group relative lg:col-span-3 h-90 hover:cursor-pointer rounded-xl overflow-hidden shadow-lg text-start"
-                        onClick={() => router.push("/blog")}
-                    >
-                        <Image
-                            src={lista[0].imagem}
-                            alt={lista[0].titulo}
-                            fill
-                            priority
-                            className="object-cover transition-transform duration-10000 group-hover:scale-110"
-                        />
-
-                        <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/80 flex items-end p-6">
-                            <div className="text-white transition-all duration-700">
-                                <p className="text-sm text-gray-300 mb-2 uppercase tracking-wide">{lista[0].titulo}</p>
-                                <h3 className="text-2xl font-bold leading-tight">{lista[0].descricao}</h3>
-                            </div>
+                <div className="grid grid-cols-6 grid-rows-2 gap-4">
+                    <div className="bg-red-100 col-span-4 row-span-2 h-125 rounded-3xl mr-2 relative group overflow-hidden">
+                        <div className="gap-5 absolute z-20 p-10 size-full flex flex-col justify-end items-start">
+                            <span className="bg-yellow-primary py-1.5 px-5 rounded-2xl text-xs font-bold">
+                                IOT E AUTOMAÇÃO
+                            </span>
+                            <h3 className="text-3xl font-bold text-white">{noticias[0].titulo}</h3>
+                            <p className="text-white/80">{noticias[0].descricao}</p>
+                            <Link className="flex font-bold gap-2 text-yellow-primary" href={"/"}>
+                                Ler mais{" "}
+                                <ArrowRight className="group-hover:translate-x-1 transition-transform duration-700" />
+                            </Link>
                         </div>
-                    </button>
-
-                    <button
-                        className="lg:col-span-2 grid grid-cols-2 gap-6 hover:cursor-pointer text-start"
-                        onClick={() => router.push("/blog")}
-                    >
-                        {lista.slice(1, 5).map((noticia) => (
-                            <div key={noticia.id} className="relative h-41.25 rounded-xl overflow-hidden shadow-md">
-                                <Image src={noticia.imagem} alt={noticia.titulo} fill className="object-cover" />
-
-                                <div className="absolute inset-0 bg-black/60 hover:bg-black/40 transition-all duration-300 flex items-end p-4">
-                                    <div className="text-white">
-                                        <h4 className="text-sm font-semibold leading-snug">{noticia.titulo}</h4>
-                                        <p className="text-xs text-gray-300 line-clamp-2">{noticia.descricao}</p>
-                                    </div>
-                                </div>
+                        <div className="absolute size-full z-10 inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent"></div>
+                        <Image
+                            src={noticias[0].imagem}
+                            fill
+                            alt={noticias[0].titulo}
+                            className="rounded-3xl z-0 object-cover group-hover:scale-110 transition-all duration-700 brightness-70 group-hover:brightness-80"
+                        />
+                    </div>
+                    {noticias.slice(1).map((noticia, index) => (
+                        <motion.article
+                            key={index}
+                            initial={{ opacity: 0.6, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            className="group relative bg-slate-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-60 cursor-pointer"
+                        >
+                            <div className="absolute size-full z-10 inset-0 bg-linear-to-t from-slate-900 via-slate-900/60 to-transparent" />
+                            <Image
+                                src={noticia.imagem}
+                                alt={noticia.titulo}
+                                fill
+                                className=" z-0 object-cover group-hover:scale-110 transition-all duration-700 brightness-70 group-hover:brightness-80"
+                            />
+                            <div className="relative size-full flex flex-col gap-1 justify-end p-5 z-10">
+                                <h3 className="text-md text-white font-bold">{noticia.titulo}</h3>
+                                <p className="text-white/80 text-xs">{noticia.descricao}</p>
                             </div>
-                        ))}
-                    </button>
-                </div>
-
-                <div className="flex justify-center mt-14">
-                    <Link
-                        href="/blog"
-                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black hover:text-white 2xl:text-[16px] 2xl:h-12 2xl:w-80 transition-all duration-250"
-                    >
-                        Mais Notícias
-                    </Link>
+                        </motion.article>
+                    ))}
                 </div>
             </div>
         </section>
