@@ -5,9 +5,9 @@ import Link from "next/link";
 
 export default function Footer() {
     const mapLink = "https://www.google.com/maps/search/?api=1&query=IFAL+Campus+Arapiraca";
-
-    const whatsappLink =
-        "https://wa.me/558597947611?text=Ol%C3%A1%2C%20professora%20Renata.%20Vim%20pelo%20site%20do%20espa%C3%A7o+4.0!!";
+    // Mudar futuramente por .env dados sensiveis
+    const WhatsappNumber = "558597947611";
+    const WhatsappLink = `https://wa.me/${WhatsappNumber}?text=Ol%C3%A1%2C%20professora%20Renata.%20Vim%20pelo%20site%20do%20espa%C3%A7o+4.0!!`;
 
     return (
         <footer id="footer" className="bg-black text-white px-6 py-20">
@@ -74,7 +74,7 @@ export default function Footer() {
                             href="mailto:espaco4.0.arapiraca@ifal.edu.br"
                         />
 
-                        <FooterItem icon={Phone} title="WhatsApp" desc="(85) 9794-7611" href={whatsappLink} external />
+                        <FooterItem icon={Phone} title="WhatsApp" desc="(85) 9794-7611" href={WhatsappLink} external />
 
                         <FooterItem
                             icon={MapPin}

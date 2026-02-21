@@ -1,6 +1,7 @@
 import { Button } from "@/src/ui/components/ui/button";
 import { motion, type Variants } from "framer-motion";
 import { Calendar, FolderOpen, MouseIcon, Play } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const buttonVariants: Variants = { hover: { scale: 1.05 } };
 const iconVariants: Variants = { hover: { rotate: 360 } };
@@ -15,6 +16,8 @@ const fadeUp = (delay: number): Variants => ({
 });
 
 export function Hero() {
+    const router = useRouter();
+
     return (
         <section
             id="welcome"
@@ -72,6 +75,8 @@ export function Hero() {
                         <Button
                             size="lg"
                             className="bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer text-base px-6"
+                            /* Mudança para a pagina quando for criada do espaco em 3d */
+                            onClick={() => router.push("#viewer_3d_section")}
                         >
                             <motion.span
                                 variants={iconVariants}
@@ -87,6 +92,7 @@ export function Hero() {
                         <Button
                             size="lg"
                             className="bg-white text-black hover:bg-gray-50 cursor-pointer text-base px-6"
+                            onClick={() => router.push("/calendar")}
                         >
                             <motion.span
                                 variants={iconVariants}
@@ -102,6 +108,7 @@ export function Hero() {
                         <Button
                             size="lg"
                             className="border-white border bg-white/10 hover:bg-white/20 backdrop-blur-sm cursor-pointer text-white text-base px-6"
+                            onClick={() => router.push("#space_gallery")}
                         >
                             <motion.span
                                 variants={iconVariants}
