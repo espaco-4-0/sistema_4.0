@@ -18,50 +18,58 @@ export default function WhatIsSpace() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 hover:cursor-default gap-6 mb-24">
-                    <Card className="flex flex-col items-center text-center transition-all duration-300">
-                        <CardTitle className="bg-yellow-back-icon h-15 w-15 flex justify-center rounded-full items-center">
-                            <Shell className="text-yellow-icon h-max w-max" />
+                    <Card className="flex flex-col items-start p-4 gap-3 text-start transition-all duration-300">
+                        <CardTitle className="bg-yellow-500 h-15 w-15 flex justify-center shadow-lg rounded-xl items-center">
+                            <Shell className="h-max w-max text-black" />
                         </CardTitle>
 
-                        <CardContent className="font-semibold text-[18px]">Gestão de Projetos</CardContent>
+                        <CardContent className="font-semibold text-[18px] items-start text-start justify-around flex p-1">
+                            Gestão de Projetos
+                        </CardContent>
 
-                        <CardDescription className="px-3 text-[13px]">
+                        <CardDescription className="px-1 py-1text-[15px] items-start text-start flex">
                             Acompanhe e gerencie todos os projetos em desenvolvimento no espaço maker
                         </CardDescription>
                     </Card>
 
-                    <Card className="flex flex-col items-center text-center transition-all duration-300">
-                        <CardTitle className="bg-yellow-back-icon h-15 w-15 flex justify-center rounded-full items-center">
-                            <Users className="h-max w-max text-yellow-icon" />
+                    <Card className="flex flex-col items-start p-4 gap-3 text-start transition-all duration-300">
+                        <CardTitle className="bg-yellow-500 h-15 w-15 flex justify-center shadow-lg rounded-xl items-center">
+                            <Users className="h-max w-max text-black" />
                         </CardTitle>
 
-                        <CardContent className="font-semibold text-[18px]">Controle de Acesso</CardContent>
+                        <CardContent className="font-semibold text-[18px] items-start text-start justify-around flex p-1">
+                            Controle de Acesso
+                        </CardContent>
 
-                        <CardDescription className="px-3 text-[13px]">
+                        <CardDescription className="px-1 py-1 text-[15px] items-start text-start flex">
                             Sistema integrado para gerenciar usuários e permissões de acesso
                         </CardDescription>
                     </Card>
 
-                    <Card className="flex flex-col items-center text-center transition-all duration-300">
-                        <CardTitle className="bg-yellow-back-icon h-15 w-15 flex justify-center rounded-full items-center">
-                            <BookOpen className="h-max w-max text-yellow-icon" />
+                    <Card className="flex flex-col items-start p-4 gap-3 text-start transition-all duration-300">
+                        <CardTitle className="bg-yellow-500 h-15 w-15 flex justify-center shadow-lg rounded-xl items-center">
+                            <BookOpen className="h-max w-max text-black" />
                         </CardTitle>
 
-                        <CardContent className="font-semibold text-[18px]">Reserva de Equipamento</CardContent>
+                        <CardContent className="font-semibold text-[18px] items-start text-start justify-around flex p-1">
+                            Reserva de Equipamento
+                        </CardContent>
 
-                        <CardDescription className="px-3 text-[13px]">
+                        <CardDescription className="px-1 py-1 text-[15px] items-start text-start flex">
                             Reserve impressoras 3D, ferramentas e equipamentos de forma simples
                         </CardDescription>
                     </Card>
 
-                    <Card className="flex flex-col items-center text-center transition-all duration-300">
-                        <CardTitle className="bg-yellow-back-icon h-15 w-15 flex justify-center rounded-full items-center">
-                            <Medal className="h-max w-max text-yellow-icon" />
+                    <Card className="flex flex-col items-start p-4 gap-3 text-start transition-all duration-300">
+                        <CardTitle className="bg-yellow-500 h-15 w-15 flex justify-center shadow-lg rounded-xl border items-center">
+                            <Medal className="h-max w-max text-black" />
                         </CardTitle>
 
-                        <CardContent className="font-semibold text-[18px]">Gestão de Projetos</CardContent>
+                        <CardContent className="font-semibold text-[18px] items-start text-start justify-around flex p-1">
+                            Gestão de Projetos
+                        </CardContent>
 
-                        <CardDescription className="px-3 text-[13px]">
+                        <CardDescription className="px-1 py-1 text-[15px] items-start text-start flex">
                             Acesso a treinamentos e cursos sobre tecnologias da indústria 4.0
                         </CardDescription>
                     </Card>
