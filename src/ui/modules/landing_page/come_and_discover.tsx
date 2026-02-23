@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { BookOpen, Calendar, CheckCircle2, Eye, PhoneCall } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // retirar e colocar no .env
 const WHATSAPP_NUMBER = "558597947611";
+const MotionLink = motion(Link);
 
 export default function ComeAndDiscover() {
-    const router = useRouter();
     const steps = [
         {
             number: "01",
@@ -142,14 +142,18 @@ export default function ComeAndDiscover() {
                     className="text-center flex flex-col items-center gap-4"
                 >
                     {/* Botão Agendar: calendário gira e seta avança no hover, escala no click */}
-                    <motion.button
-                        variants={{ rest: { scale: 1 }, hover: { scale: 1.04 } }}
+                    <MotionLink
+                        href="/calendar"
+                        variants={{
+                            rest: { scale: 1 },
+                            hover: { scale: 1.04 },
+                        }}
                         initial="rest"
+                        animate="rest"
                         whileHover="hover"
                         whileTap={{ scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        onClick={() => router.push("/calendar")}
-                        className="px-12 py-6 bg-slate-900 text-white font-bold text-lg rounded-2xl shadow-2xl inline-flex items-center gap-3 cursor-pointer"
+                        className="px-12 py-6 bg-slate-900 text-white font-bold text-lg rounded-2xl shadow-2xl inline-flex items-center gap-3"
                     >
                         <motion.span
                             variants={{
@@ -166,18 +170,24 @@ export default function ComeAndDiscover() {
                         >
                             →
                         </motion.span>
-                    </motion.button>
+                    </MotionLink>
 
                     <p className="text-xl font-semibold text-black/60">Ou</p>
 
-                    <motion.button
-                        variants={{ rest: { scale: 1 }, hover: { scale: 1.04 } }}
+                    <motion.a
+                        href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variants={{
+                            rest: { scale: 1 },
+                            hover: { scale: 1.04 },
+                        }}
                         initial="rest"
+                        animate="rest"
                         whileHover="hover"
                         whileTap={{ scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, "_blank")}
-                        className="px-12 py-6 bg-slate-900 text-white font-bold text-lg rounded-2xl shadow-2xl inline-flex items-center gap-3 cursor-pointer"
+                        className="px-12 py-6 bg-slate-900 text-white font-bold text-lg rounded-2xl shadow-2xl inline-flex items-center gap-3"
                     >
                         <motion.span
                             variants={{
@@ -191,7 +201,7 @@ export default function ComeAndDiscover() {
                             <PhoneCall className="w-6 h-6" />
                         </motion.span>
                         Entre Em Contato Conosco
-                    </motion.button>
+                    </motion.a>
                 </motion.div>
             </div>
         </section>
