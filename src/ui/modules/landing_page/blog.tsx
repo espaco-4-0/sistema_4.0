@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { newsData } from "@/src/infra/modules/blog/blog-mock";
 import { useIsMobile } from "@/src/ui/hooks/use-mobile";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Newspaper } from "lucide-react";
 import { Transition, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+
+const MotionLink = motion(Link);
 
 const noticias = newsData.slice(0, 5);
 
@@ -48,7 +50,7 @@ export default function Blog() {
         });
 
     useEffect(() => {
-        const interval = setInterval(rotateCards, 60000);
+        const interval = setInterval(rotateCards, 40000);
 
         return () => clearInterval(interval);
     }, [isMobile]);
@@ -71,7 +73,7 @@ export default function Blog() {
                     Novidades do <span className="text-yellow-muted font-bold">Espaço 4.0</span>
                 </motion.h2>
 
-                <ul className="grid grid-cols-2 grid-rows-4 gap-4 md:grid-cols-6 md:grid-rows-2">
+                <ul className="grid grid-cols-2 grid-rows-4 gap-3 lg:gap-2 px-2 lg:px-4 py-2 lg:py-4 md:grid-cols-6 md:grid-rows-2">
                     {noticias.map((noticia, index) => {
                         const isFeatured = noticia.id === layoutState.featuredId;
                         const smallIndex = slotIndexMap.get(noticia.id) ?? -1;
@@ -162,12 +164,33 @@ export default function Blog() {
                             transition: { duration: 0.1 },
                         }}
                     >
-                        <Link
+                        <MotionLink
                             href="/blog"
-                            className="border-slate-900 border-2 bg-transparent text-md text-slate-900 font-semibold hover:bg-slate-50 transition-all rounded-md px-7 py-3.5 cursor-pointer hover:shadow-md"
+                            initial="rest"
+                            whileHover="hover"
+                            className="border-slate-900 border-2 bg-transparent text-md text-slate-900 font-semibold hover:bg-slate-950 hover:text-slate-50 transition-all rounded-md px-7 py-3.5 flex gap-2 items-center"
                         >
+                            <motion.div
+                                variants={{
+                                    rest: {
+                                        scale: 1,
+                                        rotate: 0,
+                                    },
+                                    hover: {
+                                        scale: [1, 1.15, 1],
+                                        rotate: [0, 6, -6, 0],
+                                        transition: {
+                                            duration: 0.8,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        },
+                                    },
+                                }}
+                            >
+                                <Newspaper size={20} />
+                            </motion.div>
                             Mais notícias
-                        </Link>
+                        </MotionLink>
                     </motion.div>
                 </div>
             </div>
