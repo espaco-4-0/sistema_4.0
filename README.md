@@ -78,3 +78,19 @@ Utilize esta tabela como referência para mover arquivos da estrutura antiga par
 * **O que é:** O roteador do Next.js (App Router).
 * **Regra:** Serve apenas para definir rotas e realizar a Injeção de Dependência (conectar a Infraestrutura à UI).
 * **Contém:** Arquivos page.tsx, layout.tsx, loading.tsx e error.tsx.
+
+
+##
+## como rodar no docker
+* **build da imagem:** cole esse comando para fazer o build
+```bash
+docker build -t sistema4-front .
+```
+* **rodar o container:** cole esse comando para rodar o container
+```bash
+docker run -p 3000:3000 sistema4-front
+```
+* **hot reload:** se quiser rodar com alteração de codigo em tempo real, sem reiniciar o container
+```bash
+docker run -p 3000:3000 -v $(pwd):/app -v /app/node_modules sistema4-front
+```

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+	//futuro teste pra ci/cd
+	output: "standalone",
     //Dps apagar issae quando pegar as images dos cursos via API
     images: {
         remotePatterns: [
