@@ -18,12 +18,12 @@ export default function Home() {
             <Hero />
             <Blog />
             <WhatIsSpace />
+            <Viewer3dSection />
             <CoursesAndTraining />
             <UpcomingEvents />
             <ComeAndDiscover />
             <SpaceGallery />
             <Footer />
-            <Viewer3dSection />
         </div>
     );
 }
