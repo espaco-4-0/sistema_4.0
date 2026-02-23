@@ -1,7 +1,7 @@
 import { Button } from "@/src/ui/components/ui/button";
 import { motion, type Variants } from "framer-motion";
 import { Calendar, FolderOpen, MouseIcon, Play } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const buttonVariants: Variants = { hover: { scale: 1.05 } };
 const iconVariants: Variants = { hover: { rotate: 360 } };
@@ -16,8 +16,6 @@ const fadeUp = (delay: number): Variants => ({
 });
 
 export function Hero() {
-    const router = useRouter();
-
     const scrollToSection = (id: string) => {
         const section = document.getElementById(id);
         section?.scrollIntoView({ behavior: "smooth" });
@@ -87,27 +85,28 @@ export function Hero() {
                                 transition={{ duration: 0.5, ease: "easeInOut" }}
                                 className="inline-flex"
                             >
-                                <Play className="h-5 w-5 " />
+                                <Play className="h-5 w-5" />
                             </motion.span>
                             Ver o Espaço em 3D
                         </Button>
                     </motion.div>
 
                     <motion.div whileHover="hover" whileTap={{ scale: 0.97 }} variants={buttonVariants}>
-                        <Button
-                            size="lg"
-                            className="bg-white text-black hover:bg-gray-100 cursor-pointer text-base px-6 gap-2"
-                            onClick={() => router.push("/calendar")}
-                        >
-                            <motion.span
-                                variants={iconVariants}
-                                transition={{ duration: 0.5, ease: "easeInOut" }}
-                                className="inline-flex"
+                        <Link href="/calendar">
+                            <Button
+                                size="lg"
+                                className="bg-white text-black hover:bg-gray-100 cursor-pointer text-base px-6 gap-2"
                             >
-                                <Calendar className="h-5 w-5" />
-                            </motion.span>
-                            Agendar Visita
-                        </Button>
+                                <motion.span
+                                    variants={iconVariants}
+                                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                                    className="inline-flex"
+                                >
+                                    <Calendar className="h-5 w-5" />
+                                </motion.span>
+                                Agendar Visita
+                            </Button>
+                        </Link>
                     </motion.div>
 
                     <motion.div whileHover="hover" whileTap={{ scale: 0.97 }} variants={buttonVariants}>
