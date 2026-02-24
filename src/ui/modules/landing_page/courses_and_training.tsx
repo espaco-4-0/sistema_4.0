@@ -2,13 +2,14 @@ import { useState } from "react";
 import { courses } from "@/src/infra/modules/courses/course-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
-import CourseDialog from "@/src/ui/modules/landing_page/course_dialog";
 import { motion } from "framer-motion";
 import { ArrowRight, Clock4Icon, LoaderCircle, Users } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { getHoursOfPeriod } from "../../lib/date";
 
+const CourseDialog = dynamic(() => import("@/src/ui/modules/landing_page/course_dialog"), { ssr: false });
 const MotionButton = motion(Button);
 const MotionLink = motion(Link);
 const MotionCard = motion(Card);
@@ -60,21 +61,21 @@ export default function CoursesAndTraining() {
                         className="group rounded-2xl border-gray-200 border-[0.5px] shadow-lg transition-all duration-250 hover:shadow-xl p-0"
                         whileHover="hover"
                         layout
-                        initial={{ opacity: 0.75, y: ((index + 0.5) / 2) * 30, x: ((index + 0.5) / 2) * 5 }}
+                        initial={{ opacity: 0.75, y: 40, x: 5 }}
                         whileInView={{
                             opacity: 1,
                             x: 0,
                             y: 0,
-                            transition: { duration: (0.5 * index) / 4, delay: 0.15 },
+                            transition: { duration: index / 6, delay: 0.15 },
                         }}
                         viewport={{ once: true }}
                     >
-                        <CardHeader className="group bg-yellow-primary rounded-t-2xl h-20 pb-22 px-6 pt-6">
+                        <CardHeader className="group bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-300 rounded-t-2xl h-20 pb-22 px-6 pt-6">
                             <span className="text-xs font-semibold text-white bg-white/20 border-[0.5px] border-white/10 backdrop-blur-sm w-fit px-3 py-1 mb-1 rounded-xl shadow-xs">
                                 {course.level}
                             </span>
 
-                            <CardTitle className="text-xl font-bold text-white">{course.title}</CardTitle>
+                            <CardTitle className="text-xl font-bold text-black">{course.title}</CardTitle>
                         </CardHeader>
 
                         <CardContent>
@@ -104,7 +105,7 @@ export default function CoursesAndTraining() {
                                 }}
                                 whileTap={{ scale: 0.97 }}
                                 transition={{ duration: 0.02 }}
-                                className="bg-yellow-primary text-white hover:bg-yellow-secondary cursor-pointer text-base w-full py-5.5 font-semibold"
+                                className="bg-yellow-primary text-black hover:bg-yellow-secondary cursor-pointer text-base w-full py-5.5 font-semibold"
                             >
                                 {openingCourse === course.title ? (
                                     <span className="flex items-center gap-2">
@@ -151,7 +152,7 @@ export default function CoursesAndTraining() {
                                 rotate: [0, 10, 0],
                                 transition: {
                                     duration: 0.6,
-                                    repeat: Infinity,
+                                    repeat: 3,
                                     ease: "easeInOut",
                                 },
                             },
