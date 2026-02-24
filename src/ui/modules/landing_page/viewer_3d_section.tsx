@@ -32,7 +32,10 @@ const fadeItem = {
 
 export default function Viewer3dSection() {
     return (
-        <section className="py-32 bg-linear-to-r from-black via-slate-900 to-slate-800 relative overflow-hidden">
+        <section
+            id="viewer_3d_section"
+            className="py-32 bg-linear-to-r from-black via-slate-900 to-slate-800 relative overflow-hidden"
+        >
             <motion.div
                 className="absolute top-1/4 left-10 w-96 h-96 bg-yellow-400/5 rounded-full blur-3xl"
                 animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
