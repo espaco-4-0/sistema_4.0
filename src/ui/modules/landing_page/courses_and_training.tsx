@@ -1,121 +1,169 @@
-"use client";
-
 import { useState } from "react";
+import { courses } from "@/src/infra/modules/courses/course-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
-import CourseDialog from "@/src/ui/modules/landing_page/course_dialog";
-import { Bot, Box, Clock4Icon, Cpu, KanbanSquare, Layers, Zap } from "lucide-react";
+import { ArrowRight, Clock4Icon, LoaderCircle, Users } from "lucide-react";
+import { motion } from "motion/react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+
+import { getHoursOfPeriod } from "../../lib/date";
+
+const CourseDialog = dynamic(() => import("@/src/ui/modules/landing_page/course_dialog"), { ssr: false });
+const MotionButton = motion.create(Button);
 
 export default function CoursesAndTraining() {
     const [open, setOpen] = useState(false);
     const [cursoSelecionado, setCursoSelecionado] = useState("");
+    const [openingCourse, setOpeningCourse] = useState<string | null>(null);
 
     function abrirDialog(curso: string) {
+        if (openingCourse !== null) return;
+
+        setOpeningCourse(curso);
         setCursoSelecionado(curso);
-        setOpen(true);
+
+        globalThis.requestAnimationFrame(() => {
+            setOpen(true);
+            setOpeningCourse(null);
+        });
     }
 
-    const courses = [
-        {
-            id: 1,
-            title: "Modelagem e Impressão 3D",
-            desc: "Aprenda a criar modelos 3D e utilize impressoras para materializar suas ideias",
-            hours: "40 horas",
-            icon: Box,
-        },
-        {
-            id: 2,
-            title: "Arduino e IoT",
-            desc: "Desenvolva projetos de automação e Internet das Coisas com Arduino",
-            hours: "60 horas",
-            icon: Cpu,
-        },
-        {
-            id: 3,
-            title: "Robótica Educacional",
-            desc: "Construa e programe robôs utilizando kits educacionais",
-            hours: "50 horas",
-            icon: Bot,
-        },
-        {
-            id: 4,
-            title: "Eletrônica Básica",
-            desc: "Fundamentos de eletrônica e montagem de circuitos",
-            hours: "45 horas",
-            icon: Zap,
-        },
-        {
-            id: 5,
-            title: "Prototipagem Rápida",
-            desc: "Técnicas para transformar ideias em protótipos funcionais",
-            hours: "30 horas",
-            icon: Layers,
-        },
-        {
-            id: 6,
-            title: "Gestão de Projetos Maker",
-            desc: "Metodologias ágeis aplicadas ao desenvolvimento de projetos",
-            hours: "20 horas",
-            icon: KanbanSquare,
-        },
-    ];
-
     return (
-        <section id="courses" className="bg-white py-28">
-            <div className="mx-auto max-w-7xl px-6">
-                <div className="text-center">
-                    <h2 className="text-4xl font-medium">
-                        Cursos e <span className="font-bold text-yellow-muted">Capacitações</span>
-                    </h2>
-                    <p className="mt-4 text-gray-600">
-                        Desenvolva suas habilidades com nossos cursos práticos em tecnologias da indústria 4.0
-                    </p>
-                </div>
+        <section id="courses" className="bg-white py-28 mx-auto max-w-7xl px-10">
+            <div className="text-center">
+                <motion.h2
+                    initial={{ opacity: 0.6, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.55, delay: 0.25 }}
+                    className="text-4xl font-medium"
+                >
+                    Cursos <span className="font-bold text-yellow-muted">Abertos</span>
+                </motion.h2>
+                <motion.p
+                    initial={{ opacity: 0.7, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="mt-4 text-gray-600"
+                >
+                    Aprenda com especialistas e desenvolva habilidades práticas em tecnologia
+                </motion.p>
+            </div>
 
-                <div className="grid grid-cols-1 gap-8 pt-20 md:grid-cols-2 lg:grid-cols-3">
-                    {courses.map((course) => (
-                        <Card
-                            key={course.id}
-                            className="rounded-2xl border border-gray-200 shadow-sm transition duration-250 hover:shadow-md"
-                        >
-                            <CardHeader>
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-back-icon">
-                                    <course.icon className="h-6 w-6 text-yellow-icon" />
-                                </div>
+            <div className="grid grid-cols-1 gap-8 pt-18 md:grid-cols-2 lg:grid-cols-3">
+                {courses.slice(0, 6).map((course, index) => (
+                    <motion.div
+                        key={course.id}
+                        whileHover="hover"
+                        layout
+                        initial={{ opacity: 0.75, y: 40, x: 5 }}
+                        whileInView={{
+                            opacity: 1,
+                            x: 0,
+                            y: 0,
+                            transition: { duration: 0.45, delay: index * 0.12 },
+                        }}
+                        viewport={{ once: true }}
+                    >
+                        <Card className="group rounded-2xl border-gray-200 border-[0.5px] shadow-lg transition-all duration-250 hover:shadow-xl p-0">
+                            <CardHeader className="group bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-300 rounded-t-2xl h-20 pb-22 px-6 pt-6">
+                                <span className="text-xs font-semibold text-black bg-white/20 border-[0.5px] border-white/10 backdrop-blur-sm w-fit px-3 py-1 mb-1 rounded-xl shadow-xs">
+                                    {course.level}
+                                </span>
 
-                                <CardTitle className="text-lg font-semibold">{course.title}</CardTitle>
+                                <CardTitle className="text-xl font-bold text-black">{course.title}</CardTitle>
                             </CardHeader>
 
                             <CardContent>
-                                <p className="text-sm text-gray-600">{course.desc}</p>
+                                <p className="text-md text-gray-700">{course.description}</p>
 
-                                <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-                                    <Clock4Icon className="h-4 w-4" />
-                                    {course.hours}
+                                <div className="flex justify-between w-7/10 my-2">
+                                    <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
+                                        <Clock4Icon className="h-4 w-4 text-yellow-600" />
+                                        {getHoursOfPeriod(course.weekDays, course.schedule, course.durationWeeks)} horas
+                                    </div>
+
+                                    <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
+                                        <Users className="h-4 w-4 text-yellow-600" />
+                                        {course.maxSubscribes - course.subscribes} vagas
+                                    </div>
                                 </div>
                             </CardContent>
 
-                            <CardFooter>
-                                <Button
+                            <CardFooter className="pb-6 pt-6">
+                                <MotionButton
                                     onClick={() => abrirDialog(course.title)}
-                                    className="w-full cursor-pointer rounded-lg bg-yellow-primary py-2 text-sm font-semibold text-black transition duration-250 ease-in-out hover:bg-yellow-primary-dark active:bg-yellow-primary-dark"
+                                    disabled={openingCourse !== null || openingCourse != null}
+                                    size="lg"
+                                    variants={{
+                                        rest: { scale: 1 },
+                                        hover: { scale: 1.02 },
+                                    }}
+                                    whileTap={{ scale: 0.97 }}
+                                    transition={{ duration: 0.02 }}
+                                    className="bg-yellow-primary text-black hover:bg-yellow-secondary cursor-pointer text-base w-full py-5.5 font-semibold"
                                 >
-                                    INSCREVA-SE
-                                </Button>
+                                    {openingCourse === course.title ? (
+                                        <span className="flex items-center gap-2">
+                                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                                            Carregando...
+                                        </span>
+                                    ) : (
+                                        "Inscrever-se agora"
+                                    )}
+                                </MotionButton>
                             </CardFooter>
                         </Card>
-                    ))}
-                </div>
+                    </motion.div>
+                ))}
+            </div>
 
-                <div className="flex justify-center pt-20">
+            <div className="flex justify-center mt-20">
+                <motion.div
+                    initial={{ opacity: 0.6, y: 30 }}
+                    whileInView={{
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.6, delay: 0.2 },
+                    }}
+                    viewport={{ once: true }}
+                    whileHover="hover"
+                    whileTap={{ scale: 0.97 }}
+                    variants={{
+                        rest: { scale: 1 },
+                        hover: { scale: 1.04 },
+                    }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                >
                     <Link
                         href="/courses"
-                        className="mt-11 flex h-10 w-60 items-center justify-center rounded-xl border-2 border-black bg-white text-sm text-black hover:bg-black duration-250 hover:text-white 2xl:text-[16px] 2xl:h-12 2xl:w-80 transition-all"
+                        className="flex items-center justify-center font-semibold rounded-xl text-sm text-white bg-slate-900 2xl:text-[16px] px-8 py-4 gap-2"
                     >
                         Ver todos os Cursos
+                        <motion.span
+                            variants={{
+                                rest: {
+                                    x: 0,
+                                    rotate: 0,
+                                },
+                                hover: {
+                                    x: [0, 3, 0],
+                                    rotate: [0, 10, 0],
+                                    transition: {
+                                        duration: 0.6,
+                                        repeat: 3,
+                                        ease: "easeInOut",
+                                    },
+                                },
+                            }}
+                            className="inline-flex"
+                        >
+                            <ArrowRight />
+                        </motion.span>
                     </Link>
-                </div>
+                </motion.div>
             </div>
 
             <CourseDialog open={open} setOpen={setOpen} curso={cursoSelecionado} />
