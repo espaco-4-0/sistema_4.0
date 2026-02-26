@@ -23,7 +23,7 @@ export function UpcomingEvents() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
-                    Próximos Eventos
+                    Próximos <span className="text-yellow-400">Eventos</span>
                 </motion.h2>
 
                 <motion.p
@@ -101,18 +101,55 @@ export function UpcomingEvents() {
                 </div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial="hidden"
+                    whileInView="visible"
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
+                    whileHover="hover"
+                    whileTap={{ scale: 0.97 }}
+                    variants={{
+                        hidden: { opacity: 0, y: 24, scale: 1 },
+                        visible: {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                            transition: {
+                                opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
+                                y: { duration: 0.6, ease: "easeOut", delay: 0.2 },
+                                scale: { duration: 0.2, ease: "easeOut" },
+                            },
+                        },
+                        hover: {
+                            scale: 1.04,
+                            transition: { duration: 0.2, ease: "easeOut" },
+                        },
+                    }}
                 >
                     <Link
                         href="/calendar"
                         className="border-white border-2 bg-transparent text-md text-white font-semibold hover:bg-white hover:text-slate-800 transition-all rounded-md px-7 py-3.5 flex gap-2 items-center"
                     >
                         Ver todos os Eventos
+                        <motion.span
+                            variants={{
+                                hidden: { x: 0, rotate: 0 },
+                                visible: {
+                                    x: 0,
+                                    rotate: 0,
+                                },
+                                hover: {
+                                    x: [0, 3, 0],
+                                    rotate: [0, 10, 0],
+                                    transition: {
+                                        duration: 0.6,
+                                        repeat: 3,
+                                        ease: "easeInOut",
+                                    },
+                                },
+                            }}
+                            className="inline-flex"
+                        >
+                            <ArrowRight />
+                        </motion.span>
                     </Link>
                 </motion.div>
             </div>
