@@ -12,8 +12,6 @@ export const DEFICIENCY_OPTIONS = [
     "Outro",
 ] as const;
 
-export const COMPANION_OPTIONS = ["sim", "nao"] as const;
-
 export const RG_ISSUER_OPTIONS = [
     "SSP/AC",
     "SSP/AL",
@@ -184,7 +182,7 @@ export const courseRegisterSchema = v.pipe(
 
         deficiency: v.picklist(DEFICIENCY_OPTIONS, "Selecione uma opção"),
         deficiencyDetail: v.optional(v.pipe(v.string(), v.trim())),
-        companionNeeded: v.picklist(COMPANION_OPTIONS, "Selecione uma opção"),
+        companionNeeded: v.optional(v.pipe(v.string(), v.trim())),
         companionDetail: v.optional(v.pipe(v.string(), v.trim())),
 
         cpfFront: fileSchema("Anexe a frente do CPF"),
@@ -232,16 +230,12 @@ export const courseRegisterSchema = v.pipe(
         affiliation: v.picklist(affiliationIfalOptions, "Selecione uma opção"),
     }),
     v.check(
-        (data) =>
-            data.deficiency !== "Outro" ||
-            (Boolean((data.deficiencyDetail ?? "").trim()) && (data.deficiencyDetail ?? "").trim().length >= 2),
+        (data) => data.deficiency !== "Outro" || (data.deficiencyDetail ?? "").trim().length >= 2,
         "Informe qual é a deficiência (mínimo 2 caracteres)"
     ),
     v.check(
-        (data) =>
-            data.companionNeeded !== "sim" ||
-            (Boolean((data.companionDetail ?? "").trim()) && (data.companionDetail ?? "").trim().length >= 2),
-        "Informe a necessidade do acompanhante (mínimo 2 caracteres)"
+        (data) => data.deficiency === "Nenhuma" || !data.deficiency || (data.companionNeeded ?? "").trim().length >= 2,
+        "Informe a sua necessidade (mínimo 2 caracteres)"
     )
 );
 
