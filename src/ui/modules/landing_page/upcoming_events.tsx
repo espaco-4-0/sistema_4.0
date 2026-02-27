@@ -1,6 +1,6 @@
 import { calendarEventsMock } from "@/src/infra/modules/calendar/calendar-mock";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
-import { ArrowRight, Calendar, Clock, MapPin } from "lucide-react";
+import { ArrowRight, Clock, MapPin, Users } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -72,7 +72,7 @@ export function UpcomingEvents() {
                                     </div>
 
                                     <div className="text-xs font-semibold bg-yellow-primary rounded-md text-black flex gap-1.5 w-fit py-1.5 px-3 items-center pt-1">
-                                        <Calendar size={15} /> {event.quantidade} vagas restantes
+                                        <Users size={15} /> {event.quantidade} vagas restantes
                                     </div>
                                 </CardContent>
 
