@@ -4,7 +4,6 @@ import { DatePicker } from "@/src/ui/components/ui/date-picker";
 import { Input } from "@/src/ui/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import {
-    COMPANION_OPTIONS,
     DEFICIENCY_OPTIONS,
     RG_ISSUER_OPTIONS,
     UF_OPTIONS,
@@ -67,8 +66,7 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
             state: undefined,
             deficiency: undefined,
             deficiencyDetail: "",
-            companionNeeded: "nao",
-            companionDetail: "",
+            companionNeeded: "",
         },
     });
 
@@ -83,7 +81,6 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
     const deficiencyValue = useWatch({ control, name: "deficiency" });
     const isOtherDeficiency = deficiencyValue === "Outro";
     const needsCompanionInfo = Boolean(deficiencyValue && deficiencyValue !== "Nenhuma");
-    const companionNeededValue = useWatch({ control, name: "companionNeeded" });
 
     const handleCepBlur = useCep(setValue);
 
@@ -239,46 +236,13 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                         )}
 
                         {needsCompanionInfo && (
-                            <>
-                                <FormField label="Precisa de acompanhante?" error={errors.companionNeeded}>
-                                    <Controller
-                                        name="companionNeeded"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                value={field.value || ""}
-                                                onOpenChange={(o) => !o && field.onBlur()}
-                                            >
-                                                <SelectTrigger className="mt-1 cursor-pointer">
-                                                    <SelectValue placeholder="Selecione" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {COMPANION_OPTIONS.map((option) => (
-                                                        <SelectItem
-                                                            key={option}
-                                                            value={option}
-                                                            className="cursor-pointer"
-                                                        >
-                                                            {option === "sim" ? "Sim" : "Não"}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </FormField>
-
-                                {companionNeededValue === "sim" && (
-                                    <FormField label="O que o acompanhante precisa?" error={errors.companionDetail}>
-                                        <Input
-                                            {...register("companionDetail")}
-                                            className={inputClass}
-                                            placeholder="Ex: Apoio para locomoção"
-                                        />
-                                    </FormField>
-                                )}
-                            </>
+                            <FormField label="Qual a sua necessidade?" error={errors.companionNeeded}>
+                                <Input
+                                    {...register("companionNeeded")}
+                                    className={inputClass}
+                                    placeholder="Ex: Acompanhante, tradutor de libras"
+                                />
+                            </FormField>
                         )}
                     </FormSection>
 

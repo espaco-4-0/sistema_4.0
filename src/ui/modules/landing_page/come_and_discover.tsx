@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BookOpen, Calendar, CheckCircle2, Eye, PhoneCall } from "lucide-react";
+import { BookOpen, Calendar, CheckCircle2, Eye, Mail } from "lucide-react";
 import Link from "next/link";
 
 // retirar e colocar no .env
@@ -166,7 +166,7 @@ export default function ComeAndDiscover() {
                         Agendar Visita para Minha Turma
                         <motion.span
                             animate={{ x: [0, 6, 0] }}
-                            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                            transition={{ duration: 1.4, repeat: 3, ease: "easeInOut" }}
                         >
                             →
                         </motion.span>
@@ -175,7 +175,8 @@ export default function ComeAndDiscover() {
                     <p className="text-xl font-semibold text-black/60">Ou</p>
 
                     <motion.a
-                        href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                        title="Email"
+                        href={"mailto:espaco4.0.arapiraca@ifal.edu.br"}
                         target="_blank"
                         rel="noopener noreferrer"
                         variants={{
@@ -198,7 +199,7 @@ export default function ComeAndDiscover() {
                                 },
                             }}
                         >
-                            <PhoneCall className="w-6 h-6" />
+                            <Mail className="w-6 h-6" />
                         </motion.span>
                         Entre Em Contato Conosco
                     </motion.a>
