@@ -24,3 +24,8 @@ export function getHoursOfPeriod(weekDays: string[], schedule: string, durationW
 
     return courseHours;
 }
+
+export function formatMonthShort(date: Date) {
+    const months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+    return months[date.getMonth()];
+}

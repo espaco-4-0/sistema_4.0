@@ -1,87 +1,158 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
+import { calendarEventsMock } from "@/src/infra/modules/calendar/calendar-mock";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
+import { ArrowRight, Clock, MapPin, Users } from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 
+import { formatMonthShort } from "../../lib/date";
+
+const events = calendarEventsMock.slice(0, 3);
+
 export function UpcomingEvents() {
-    const dados = [
-        {
-            id: 1,
-            title: "Workshop de Impressão 3D",
-            descriptions: "Aprenda os fundamentos e tecnologias da impressão 3D com aplicações práticas.",
-            day: 15,
-            mounth: "jun",
-            time: 14,
-        },
-        {
-            id: 2,
-            title: "Introdução à Robótica Educacional",
-            descriptions: "Explore conceitos básicos de robótica com atividades práticas e interativas.",
-            day: 18,
-            mounth: "jun",
-            time: 15,
-        },
-        {
-            id: 3,
-            title: "Curso Básico de Programação",
-            descriptions: "Aprenda lógica de programação e dê os primeiros passos no desenvolvimento de software.",
-            day: 22,
-            mounth: "jun",
-            time: 14,
-        },
-        {
-            id: 4,
-            title: "Oficina de Tecnologia e Criatividade",
-            descriptions: "Desenvolva projetos criativos utilizando tecnologia de forma prática e colaborativa.",
-            day: 28,
-            mounth: "jun",
-            time: 16,
-        },
-    ];
-
     return (
-        <section id="upcoming-events" className="flex flex-col bg-[#F9FAFB] items-center py-20">
-            <h2 className="text-4xl font-semibold text-center">
-                Próximos <span className="text-yellow-muted">Eventos</span>
-            </h2>
+        <section
+            id="upcoming-events"
+            className="flex flex-col bg-slate-900 items-center py-12 sm:py-16 lg:py-20 px-6 sm:px-10"
+        >
+            <div className="flex flex-col items-center w-full max-w-7xl mx-auto">
+                <motion.h2
+                    className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-white"
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                >
+                    Próximos <span className="text-yellow-400">Eventos</span>
+                </motion.h2>
 
-            <p className="mt-5 mb-17 text-xl text-center text-gray-600">
-                Participe de workshops, hackathons e eventos de inovação
-            </p>
+                <motion.p
+                    className="mt-4 mb-10 sm:mb-14 lg:mb-17 text-base sm:text-lg text-center text-gray-400"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+                >
+                    Participe de experiências práticas e aprenda com especialistas
+                </motion.p>
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                {dados.map((dado) => (
-                    <div key={dado.id}>
-                        <Link href={`/calendar?day=${dado.day}&month=${dado.mounth}`} className="block w-full h-full">
-                            <Card className="flex flex-col sm:flex-row w-full sm:w-150 sm:max-w-215 lg:w-160 2xl:w-190 mx-auto gap-4 sm:gap-0 items-start sm:items-center p-4 sm:p-8 transition-all duration-200 ease-out will-change-transform hover:scale-[1.01] hover:shadow-xl hover:border-yellow-primary cursor-pointer">
-                                <CardContent className="flex items-center justify-center w-65 h-15 sm:w-28 sm:h-38 shrink-0 gap-1.5 sm:gap-0 p-0 rounded-lg  md:rounded-2xl bg-yellow-primary sm:flex-col sm:mr-6 sm:mb-0">
-                                    <p className="2xl:text-4xl leading-none text-xl sm:text-[42px]">{dado.day}</p>
-                                    <p className="2xl:text-xl uppercase text-xl sm:mt-2">{dado.mounth}</p>
+                <div className="grid grid-cols-1 gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 w-full mb-12 sm:mb-16 lg:mb-20">
+                    {events.map((event, index) => (
+                        <motion.div
+                            key={event.id}
+                            initial={{ opacity: 0, y: 32 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.15 }}
+                        >
+                            <Card className="group p-0 h-full w-full gap-0 overflow-hidden border-none">
+                                <div className="relative w-full h-48 overflow-hidden">
+                                    <Image
+                                        src={event.image}
+                                        alt={event.title}
+                                        fill
+                                        className="object-cover scale-[1.02] transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="shadow-xl absolute top-4 right-4 bg-white rounded-xl flex flex-col justify-center items-center text-slate-500 text-xs font-semibold py-1.5 px-2.5 uppercase">
+                                        <span className="text-2xl text-slate-800 font-semibold">
+                                            {event.start.getDate()}
+                                        </span>
+                                        {formatMonthShort(event.start)}
+                                    </div>
+                                </div>
+                                <CardHeader className="text-xl font-bold text-slate-900 mt-6 mb-2">
+                                    <CardTitle>{event.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex gap-2 text-sm items-center text-slate-600/90 mb-1.5">
+                                        <Clock size={15} className="text-yellow-secondary" /> {event.time}
+                                    </div>
+                                    <div className="flex gap-2 text-sm items-center text-slate-600/90 pb-4">
+                                        <MapPin size={15} className="text-yellow-secondary" /> {event.local}
+                                    </div>
+
+                                    <div className="text-xs font-semibold bg-yellow-primary rounded-md text-black flex gap-1.5 w-fit py-1.5 px-3 items-center pt-1">
+                                        <Users size={15} /> {event.quantidade} vagas restantes
+                                    </div>
                                 </CardContent>
 
-                                <div className="flex flex-col flex-1 w-full gap-2.5">
-                                    <CardHeader className="flex flex-col w-full gap-2.5 p-0 sm:max-w-158">
-                                        <CardTitle className="text-xl 2xl:text-2xl">{dado.title}</CardTitle>
-
-                                        <CardDescription className="text-base text-gray-600 lg:text-md 2xl:text-xl 2xl:leading-8">
-                                            {dado.descriptions}
-                                        </CardDescription>
-                                    </CardHeader>
-
-                                    <CardFooter className="p-0 text-base text-gray-600 2xl:text-xl">
-                                        {dado.time}h • Espaço 4.0
-                                    </CardFooter>
-                                </div>
+                                <CardFooter className="px-6 pb-6 pt-5">
+                                    <motion.div
+                                        className="w-full"
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                    >
+                                        <Link
+                                            href={`/calendar?day=${event.start.getDate()}&month=${formatMonthShort(event.start)}`}
+                                            className="gap-2 w-full rounded-xl py-3 text-md bg-slate-900 cursor-pointer flex justify-center items-center text-white group/btn"
+                                        >
+                                            Inscrever-se
+                                            <ArrowRight
+                                                size={20}
+                                                className="transition-transform duration-400 group-hover/btn:translate-x-1"
+                                            />
+                                        </Link>
+                                    </motion.div>
+                                </CardFooter>
                             </Card>
-                        </Link>
-                    </div>
-                ))}
-            </div>
+                        </motion.div>
+                    ))}
+                </div>
 
-            <Link
-                href="/calendar"
-                className="flex justify-center items-center mt-11 w-60 h-10 2xl:w-80 2xl:h-12 rounded-xl border-2 border-black bg-white text-bold text-black duration-250 cursor-pointer 2xl:text-[16px] hover:bg-black hover:text-white hover:cursor-pointer transition-all"
-            >
-                Ver todos os Eventos
-            </Link>
+                <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    whileHover="hover"
+                    whileTap={{ scale: 0.97 }}
+                    variants={{
+                        hidden: { opacity: 0, y: 24, scale: 1 },
+                        visible: {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                            transition: {
+                                opacity: { duration: 0.6, ease: "easeOut", delay: 0.2 },
+                                y: { duration: 0.6, ease: "easeOut", delay: 0.2 },
+                                scale: { duration: 0.2, ease: "easeOut" },
+                            },
+                        },
+                        hover: {
+                            scale: 1.04,
+                            transition: { duration: 0.2, ease: "easeOut" },
+                        },
+                    }}
+                >
+                    <Link
+                        href="/calendar"
+                        className="border-white border-2 bg-transparent text-md text-white font-semibold hover:bg-white hover:text-slate-800 transition-all rounded-md px-7 py-3.5 flex gap-2 items-center"
+                    >
+                        Ver todos os Eventos
+                        <motion.span
+                            variants={{
+                                hidden: { x: 0, rotate: 0 },
+                                visible: {
+                                    x: 0,
+                                    rotate: 0,
+                                },
+                                hover: {
+                                    x: [0, 3, 0],
+                                    rotate: [0, 10, 0],
+                                    transition: {
+                                        duration: 0.6,
+                                        repeat: 3,
+                                        ease: "easeInOut",
+                                    },
+                                },
+                            }}
+                            className="inline-flex"
+                        >
+                            <ArrowRight />
+                        </motion.span>
+                    </Link>
+                </motion.div>
+            </div>
         </section>
     );
 }

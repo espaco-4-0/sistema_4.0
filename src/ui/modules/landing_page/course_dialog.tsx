@@ -10,7 +10,6 @@ import { Label } from "@/src/ui/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { Separator } from "@/src/ui/components/ui/separator";
 import {
-    COMPANION_OPTIONS,
     DEFICIENCY_OPTIONS,
     RG_ISSUER_OPTIONS,
     UF_OPTIONS,
@@ -80,8 +79,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
         defaultValues: {
             deficiency: undefined,
             deficiencyDetail: "",
-            companionNeeded: "nao",
-            companionDetail: "",
+            companionNeeded: "",
             name: "",
             email: "",
             phone: "",
@@ -103,11 +101,6 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
     const deficiencyValue = useWatch({
         control,
         name: "deficiency",
-    });
-
-    const companionNeededValue = useWatch({
-        control,
-        name: "companionNeeded",
     });
 
     const isOtherDeficiency = deficiencyValue === "Outro";
@@ -257,7 +250,7 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                                     render={({ field }) => (
                                         <Select
                                             onValueChange={field.onChange}
-                                            value={field.value}
+                                            value={field.value || ""}
                                             onOpenChange={(o) => !o && field.onBlur()}
                                         >
                                             <SelectTrigger className="cursor-pointer">
@@ -286,46 +279,13 @@ export default function CourseDialog({ open, setOpen, curso }: CourseDialogProps
                             )}
 
                             {needsCompanionInfo && (
-                                <>
-                                    <FormField label="Precisa de acompanhante?" error={errors.companionNeeded}>
-                                        <Controller
-                                            name="companionNeeded"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <Select
-                                                    onValueChange={field.onChange}
-                                                    value={field.value}
-                                                    onOpenChange={(o) => !o && field.onBlur()}
-                                                >
-                                                    <SelectTrigger className="cursor-pointer">
-                                                        <SelectValue placeholder="Selecione" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {COMPANION_OPTIONS.map((option) => (
-                                                            <SelectItem
-                                                                key={option}
-                                                                value={option}
-                                                                className="cursor-pointer"
-                                                            >
-                                                                {option === "sim" ? "Sim" : "Não"}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            )}
-                                        />
-                                    </FormField>
-
-                                    {companionNeededValue === "sim" && (
-                                        <FormField label="O que o acompanhante precisa?" error={errors.companionDetail}>
-                                            <Input
-                                                {...register("companionDetail")}
-                                                className={inputClass}
-                                                placeholder="Ex: Apoio para locomoção"
-                                            />
-                                        </FormField>
-                                    )}
-                                </>
+                                <FormField label="Qual a sua necessidade?" error={errors.companionNeeded}>
+                                    <Input
+                                        {...register("companionNeeded")}
+                                        className={inputClass}
+                                        placeholder="Ex: Acompanhante, tradutor de libras"
+                                    />
+                                </FormField>
                             )}
                         </FormSection>
 
