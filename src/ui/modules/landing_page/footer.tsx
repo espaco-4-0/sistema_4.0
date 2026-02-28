@@ -1,6 +1,4 @@
-"use client";
-
-import { BookOpen, Calendar, Home, Lightbulb, Mail, MapPin, Phone, Users } from "lucide-react";
+import { BookOpen, Calendar, Home, Lightbulb, Mail, MapPin, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -8,9 +6,6 @@ import Link from "next/link";
 
 export default function Footer() {
     const mapLink = "https://www.google.com/maps/search/?api=1&query=IFAL+Campus+Arapiraca";
-    // Mudar futuramente por .env dados sensiveis
-    const WhatsappNumber = "558597947611";
-    const WhatsappLink = `https://wa.me/${WhatsappNumber}?text=Ol%C3%A1%2C%20professora%20Renata.%20Vim%20pelo%20site%20do%20espa%C3%A7o+4.0!!`;
 
     return (
         <footer id="footer" className="bg-black text-white px-6 py-20">
@@ -96,7 +91,6 @@ export default function Footer() {
                             desc="espaco4.0.arapiraca@ifal.edu.br"
                             href="mailto:espaco4.0.arapiraca@ifal.edu.br"
                         />
-                        <FooterItem icon={Phone} title="WhatsApp" desc="(85) 9794-7611" href={WhatsappLink} external />
                         <FooterItem
                             icon={MapPin}
                             title="Como Chegar"
