@@ -1,4 +1,15 @@
-import { BookOpen, Calendar, Home, Lightbulb, Mail, MapPin, Users } from "lucide-react";
+import {
+    BookOpen,
+    CalendarDays,
+    GraduationCap,
+    Home,
+    Info,
+    LayoutGrid,
+    Lightbulb,
+    Mail,
+    MapPin,
+    Users,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -9,9 +20,9 @@ export default function Footer() {
 
     return (
         <footer id="footer" className="bg-black text-white px-6 py-20">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 gap-16 lg:grid-cols-4">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 gap-16 lg:grid-cols-2 xl:grid-cols-4">
                 <motion.div
-                    className="space-y-10"
+                    className="space-y-10 xl:col-span-1"
                     initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -58,8 +69,9 @@ export default function Footer() {
                 >
                     <h4 className="text-yellow-primary font-semibold mb-8 text-lg">Navegação</h4>
                     <ul className="space-y-6">
-                        <FooterItem icon={Home} title="Sobre" desc="Conheça nossa história" href="/#what-is" />
-                        <FooterItem icon={Users} title="Equipe" desc="Nossos colaboradores" href="/#blog" />
+                        <FooterItem icon={Home} title="Início" desc="Página inicial" href="/#welcome" />
+                        <FooterItem icon={Info} title="Sobre" desc="Conheça o espaço" href="/#what-is" />
+                        <FooterItem icon={Users} title="Blog" desc="Novidades e publicações" href="/#blog" />
                         <FooterItem icon={BookOpen} title="Cursos" desc="Capacitações oferecidas" href="/#courses" />
                     </ul>
                 </motion.div>
@@ -72,8 +84,25 @@ export default function Footer() {
                 >
                     <h4 className="text-yellow-primary font-semibold mb-8 text-lg">Recursos</h4>
                     <ul className="space-y-6">
-                        <FooterItem icon={Lightbulb} title="Projetos" desc="Conheça novidades" href="/#blog" />
-                        <FooterItem icon={Calendar} title="Eventos" desc="Participe de atividades" href="/calendar" />
+                        <FooterItem
+                            icon={Lightbulb}
+                            title="Inovação 3D"
+                            desc="Explore o espaço virtual"
+                            href="/#viewer_3d_section"
+                        />
+                        <FooterItem
+                            icon={CalendarDays}
+                            title="Eventos"
+                            desc="Próximas atividades"
+                            href="/#upcoming-events"
+                        />
+                        <FooterItem
+                            icon={GraduationCap}
+                            title="Sou Professor"
+                            desc="Como levar minha turma?"
+                            href="/#come-and-discover"
+                        />
+                        <FooterItem icon={LayoutGrid} title="Galeria" desc="Fotos do espaço" href="/#space_gallery" />
                     </ul>
                 </motion.div>
 
