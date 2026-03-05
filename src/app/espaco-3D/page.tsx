@@ -292,7 +292,7 @@ export default function Espaco3D() {
                     <h2 className="text-white font-semibold text-sm md:text-base">Controles</h2>
 
                     <div>
-                        <h3 className="text-slate-200/60 text-xs mb-2">Vistas Predefinidas</h3>
+                        <h3 className="text-slate-200/60 text-xs mb-1.5">Vistas Predefinidas</h3>
                         <div className="flex flex-col gap-2">
                             <motion.div className="w-full" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                                 <Button
@@ -376,28 +376,28 @@ export default function Espaco3D() {
                         >
                             <motion.div className="w-full" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                                 <ToggleGroupItem
-                                    className="w-full flex justify-between cursor-pointer bg-slate-800 hover:bg-slate-700 text-xs data-[state=on]:bg-slate-600"
+                                    className="w-full flex justify-between cursor-pointer bg-slate-800 hover:bg-slate-700 text-xs data-[state=on]:bg-yellow-primary"
                                     value="rotate"
                                 >
                                     <span
-                                        className={`flex gap-2 items-center ${isRotate ? "text-white" : "text-slate-400"}`}
+                                        className={`flex gap-2 items-center ${isRotate ? "text-black" : "text-slate-400"}`}
                                     >
                                         <RotateCw size={16} /> Auto-Rotação
                                     </span>
-                                    <span className={isRotate ? "text-white" : "text-slate-400"}>(R)</span>
+                                    <span className={isRotate ? "text-black" : "text-slate-400"}>(R)</span>
                                 </ToggleGroupItem>
                             </motion.div>
                             <motion.div className="w-full" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                                 <ToggleGroupItem
-                                    className="w-full flex justify-between cursor-pointer bg-slate-800 hover:bg-slate-700 text-xs data-[state=on]:bg-slate-600"
+                                    className="w-full flex justify-between cursor-pointer bg-slate-800 hover:bg-slate-700 text-xs data-[state=on]:bg-yellow-primary"
                                     value="info"
                                 >
                                     <span
-                                        className={`flex gap-2 items-center ${isInfo ? "text-white" : "text-slate-400"}`}
+                                        className={`flex gap-2 items-center ${isInfo ? "text-black" : "text-slate-400"}`}
                                     >
                                         <Info size={16} /> Informações
                                     </span>
-                                    <span className={isInfo ? "text-white" : "text-slate-400"}>(I)</span>
+                                    <span className={isInfo ? "text-black" : "text-slate-400"}>(I)</span>
                                 </ToggleGroupItem>
                             </motion.div>
                         </ToggleGroup>
@@ -425,28 +425,161 @@ export default function Espaco3D() {
                         </div>
                     </div>
                 </div>
+
+                <div className="hidden md:grid absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 w-fit max-w-[calc(100vw-2rem)] grid-cols-4 gap-3 sm:gap-4 rounded-xl border-[1.5] border-slate-800 bg-slate-900/50 backdrop-blur-md px-6 md:px-8 py-3 sm:py-4">
+                    <div className="flex flex-col justify-center items-center">
+                        <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">
+                            40m<sup>2</sup>
+                        </span>
+                        <p className="text-slate-300/50 text-xs">Área Total</p>
+                    </div>
+                    <div className="flex flex-col justify-center items-center">
+                        <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">30+</span>
+                        <p className="text-slate-300/50 text-xs">Equipamentos</p>
+                    </div>
+                    <div className="flex flex-col justify-center items-center">
+                        <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">4</span>
+                        <p className="text-slate-300/50 text-xs">Áreas</p>
+                    </div>
+                    <div className="flex flex-col justify-center items-center">
+                        <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">30</span>
+                        <p className="text-slate-300/50 text-xs">Pessoas</p>
+                    </div>
+                </div>
                 {isInfo && (
-                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 w-fit max-w-[calc(100vw-2rem)] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 rounded border-[1.5] border-slate-800 bg-slate-900/50 backdrop-blur-md px-6 md:px-8 py-3 sm:py-4">
-                        <div className="flex flex-col justify-center items-center">
-                            <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">
+                    <div className="hidden md:flex absolute w-60 p-4 bg-slate-900/80 backdrop-blur-md border-[1.5] rounded-2xl border-slate-800 right-4 md:right-6 top-24 bottom-6 z-40 flex-col gap-5 overflow-y-auto">
+                        <h3 className="text-white font-semibold text-xs md:text-sm">Informações do Container</h3>
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Dimensão Externas</h4>
+                            <p className="text-white text-[10px] md:text-xs">12m x 8m x 2.5m</p>
+                        </div>
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Área Útil</h4>
+                            <p className="text-white text-[10px] md:text-xs">
                                 40m<sup>2</sup>
-                            </span>
-                            <p className="text-slate-300/50 text-xs">Área Total</p>
+                            </p>
                         </div>
-                        <div className="flex flex-col justify-center items-center">
-                            <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">30+</span>
-                            <p className="text-slate-300/50 text-xs">Equipamentos</p>
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Capacidade</h4>
+                            <p className="text-white text-[10px] md:text-xs">30 pessoas</p>
                         </div>
-                        <div className="flex flex-col justify-center items-center">
-                            <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">4</span>
-                            <p className="text-slate-300/50 text-xs">Áreas</p>
+
+                        <Separator className="bg-slate-600" />
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Equipamentos Internos</h4>
+                            <ul className="flex flex-col gap-1.5 list-disc list-inside marker:text-yellow-primary">
+                                <li className="text-white text-[10px] md:text-xs">5 Impressoras 3D profissionais</li>
+                                <li className="text-white text-[10px] md:text-xs">10 Headsets VR/AR</li>
+                                <li className="text-white text-[10px] md:text-xs">15 Kits de robótica</li>
+                                <li className="text-white text-[10px] md:text-xs">Lab de eletrônica completo</li>
+                                <li className="text-white text-[10px] md:text-xs">
+                                    20 Computadores de alta performance
+                                </li>
+                            </ul>
                         </div>
-                        <div className="flex flex-col justify-center items-center">
-                            <span className="text-yellow-primary font-bold text-lg sm:text-xl md:text-2xl">30</span>
-                            <p className="text-slate-300/50 text-xs">Pessoas</p>
+
+                        <Separator className="bg-slate-600" />
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Características</h4>
+                            <ul className="flex flex-col gap-1.5 list-disc list-inside marker:text-yellow-primary">
+                                <li className="text-white text-[10px] md:text-xs">Climatização completa</li>
+                                <li className="text-white text-[10px] md:text-xs">Iluminação LED inteligente</li>
+                                <li className="text-white text-[10px] md:text-xs">Internet de alta velocidade</li>
+                            </ul>
                         </div>
                     </div>
                 )}
+
+                {isInfo && (
+                    <div className="flex md:hidden flex-col absolute inset-x-3 top-24 bottom-20 z-40 p-4 bg-slate-900/90 backdrop-blur-md border-[1.5] rounded-2xl border-slate-800 gap-5 overflow-y-auto">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-white font-semibold text-sm">Informações do Container</h3>
+                        </div>
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Dimensão Externas</h4>
+                            <p className="text-white text-xs">12m x 8m x 2.5m</p>
+                        </div>
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Área Útil</h4>
+                            <p className="text-white text-xs">
+                                40m<sup>2</sup>
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Capacidade</h4>
+                            <p className="text-white text-xs">30 pessoas</p>
+                        </div>
+
+                        <Separator className="bg-slate-600" />
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Equipamentos Internos</h4>
+                            <ul className="flex flex-col gap-1.5 list-disc list-inside marker:text-yellow-primary">
+                                <li className="text-white text-xs">5 Impressoras 3D profissionais</li>
+                                <li className="text-white text-xs">10 Headsets VR/AR</li>
+                                <li className="text-white text-xs">15 Kits de robótica</li>
+                                <li className="text-white text-xs">Lab de eletrônica completo</li>
+                                <li className="text-white text-xs">20 Computadores de alta performance</li>
+                            </ul>
+                        </div>
+
+                        <Separator className="bg-slate-600" />
+
+                        <div>
+                            <h4 className="text-slate-200/60 text-[10px] mb-1.5">Características</h4>
+                            <ul className="flex flex-col gap-1.5 list-disc list-inside marker:text-yellow-primary">
+                                <li className="text-white text-xs">Climatização completa</li>
+                                <li className="text-white text-xs">Iluminação LED inteligente</li>
+                                <li className="text-white text-xs">Internet de alta velocidade</li>
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex md:hidden absolute bottom-4 left-3 right-3 z-40 rounded-2xl border-[1.5] border-slate-800 bg-slate-900/80 backdrop-blur-md px-3 py-2 gap-2">
+                    <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                        <Button
+                            onClick={() => setIsRotate((p) => !p)}
+                            className={`w-full flex items-center justify-center gap-1.5 text-xs cursor-pointer ${
+                                isRotate
+                                    ? "bg-yellow-primary text-black hover:bg-yellow-primary/90"
+                                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                            }`}
+                        >
+                            <RotateCw size={14} />
+                            <span>Rotação</span>
+                        </Button>
+                    </motion.div>
+
+                    <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                        <Button
+                            onClick={resetZoom}
+                            className="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs cursor-pointer"
+                        >
+                            {zoomLevel}%
+                        </Button>
+                    </motion.div>
+
+                    <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                        <Button
+                            onClick={() => setIsInfo((p) => !p)}
+                            className={`w-full flex items-center justify-center gap-1.5 text-xs cursor-pointer ${
+                                isInfo
+                                    ? "bg-yellow-primary text-black hover:bg-yellow-primary/90"
+                                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                            }`}
+                        >
+                            <Info size={14} />
+                            <span>Info</span>
+                        </Button>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );
