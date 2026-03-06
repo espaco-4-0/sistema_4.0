@@ -27,6 +27,8 @@ model Projeto {
   fotos      ProjetoFoto[]
   relatorios RelatorioProj[]
   inventario InventarioItem[]
+
+  @@index([liderId])
 }
 
 model ProjetoMembro {
@@ -41,6 +43,7 @@ model ProjetoMembro {
   userId String
 
   @@unique([projetoId, userId])
+  @@index([userId])
 }
 
 
@@ -53,6 +56,8 @@ model ProjetoFoto {
 
   projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
   projetoId String
+
+  @@index([projetoId])
 }
 
 
@@ -67,4 +72,6 @@ model RelatorioProj {
 
   projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
   projetoId String
+
+  @@index([projetoId])
 }

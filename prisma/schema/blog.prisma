@@ -16,6 +16,8 @@ model Post {
   fotos       PostFoto[]
   comentarios Comentario[]
   curtidas    Curtida[]
+
+  @@index([autorId])
 }
 
 model PostFoto {
@@ -27,6 +29,8 @@ model PostFoto {
 
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String
+
+  @@index([postId])
 }
 
 model Comentario {
@@ -45,6 +49,10 @@ model Comentario {
   parentId  String?
   parent    Comentario?  @relation("ComentarioRespostas", fields: [parentId], references: [id])
   respostas Comentario[] @relation("ComentarioRespostas")
+
+  @@index([autorId])
+  @@index([postId])
+  @@index([parentId])
 }
 
 model Curtida {
@@ -58,4 +66,5 @@ model Curtida {
   postId String
 
   @@unique([userId, postId])
+  @@index([postId])
 }

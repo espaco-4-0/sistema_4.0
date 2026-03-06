@@ -22,4 +22,7 @@ model InventarioItem {
 
   projeto   Projeto? @relation(fields: [projetoId], references: [id])
   projetoId String?
+
+  @@index([responsavelId])
+  @@index([projetoId])
 }
