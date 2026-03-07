@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Header() {
     return (
-        <div className="flex justify-between items-center px-6 h-20 mb-20 bg-slate-900/50 backdrop-blur-md border-b-[1.5] border-slate-800">
+        <header className="flex justify-between items-center px-6 h-20 mb-20 bg-slate-900/50 backdrop-blur-md border-b-[1.5px] border-slate-800">
             <div className="flex gap-3">
                 <Image
                     src="/Icone-Espaco4.0.svg"
@@ -11,6 +11,7 @@ export default function Header() {
                     width={48}
                     height={48}
                     className="shadow-2xl"
+                    priority
                 />
                 <div className="flex flex-col">
                     <h1 className="text-white font-bold text-lg">Visualizador 3D</h1>
@@ -20,6 +21,6 @@ export default function Header() {
             <Link href="/" className="text-white font-medium bg-slate-800 px-4 py-2 rounded-lg shadow">
                 Voltar para o início
             </Link>
-        </div>
+        </header>
     );
 }
