@@ -68,15 +68,23 @@ export function createRenderer(): THREE.WebGLRenderer {
     const nativeReleasePointerCapture = renderer.domElement.releasePointerCapture.bind(renderer.domElement);
 
     renderer.domElement.setPointerCapture = ((pointerId: number) => {
-        nativeSetPointerCapture(pointerId);
+        try {
+            nativeSetPointerCapture(pointerId);
+        } catch {
+            // Aqui ignora as inconsistências na captura de ponteiros em movimento a partir do OrbitControls
+        }
     }) as typeof renderer.domElement.setPointerCapture;
 
     renderer.domElement.releasePointerCapture = ((pointerId: number) => {
-        if (!renderer.domElement.hasPointerCapture(pointerId)) {
-            return;
-        }
+        try {
+            if (!renderer.domElement.hasPointerCapture(pointerId)) {
+                return;
+            }
 
-        nativeReleasePointerCapture(pointerId);
+            nativeReleasePointerCapture(pointerId);
+        } catch {
+            // Aqui ignora as inconsistências na captura de ponteiros em movimento a partir do OrbitControls
+        }
     }) as typeof renderer.domElement.releasePointerCapture;
 
     return renderer;

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function Header() {
     return (
@@ -18,8 +19,13 @@ export default function Header() {
                     <p className="text-slate-200/60 text-xs">Conteiner Espaço 4.0</p>
                 </div>
             </div>
-            <Link href="/" className="text-white font-medium bg-slate-800 px-4 py-2 rounded-lg shadow">
-                Voltar para o início
+            <Link
+                href="/"
+                aria-label="Voltar para o início"
+                className="text-white font-medium bg-slate-800 px-3 md:px-4 py-2 rounded-lg shadow flex items-center justify-center"
+            >
+                <ArrowLeft className="size-5 md:hidden" />
+                <span className="hidden md:inline">Voltar para o início</span>
             </Link>
         </header>
     );
