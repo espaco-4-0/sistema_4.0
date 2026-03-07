@@ -47,7 +47,7 @@ model Comentario {
 
   // Suporte a respostas aninhadas
   parentId  String?
-  parent    Comentario?  @relation("ComentarioRespostas", fields: [parentId], references: [id])
+  parent    Comentario?  @relation("ComentarioRespostas", fields: [parentId], references: [id], onDelete: SetNull)
   respostas Comentario[] @relation("ComentarioRespostas")
 
   @@index([autorId])
