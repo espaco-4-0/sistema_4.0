@@ -1,0 +1,20 @@
+model Certificado {
+  id           String    @id @default(cuid())
+  titulo       String
+  descricao    String?
+  cargaHoraria Int?
+  arquivoUrl   String?   // PDF gerado
+  emitidoEm    DateTime  @default(now())
+  validadeAte  DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // Pode estar vinculado a um curso
+  curso   Curso?  @relation(fields: [cursoId], references: [id])
+  cursoId String?
+
+  @@index([userId])
+  @@index([cursoId])
+}

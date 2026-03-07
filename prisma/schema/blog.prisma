@@ -1,0 +1,70 @@
+model Post {
+  id             String   @id @default(cuid())
+  titulo         String
+  slug           String   @unique
+  resumo         String?
+  conteudo       String
+  tempoDeLeitura Int?     // minutos estimados
+  publicado      Boolean  @default(false)
+  capaBannerUrl  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  autor   User   @relation(fields: [autorId], references: [id])
+  autorId String
+
+  fotos       PostFoto[]
+  comentarios Comentario[]
+  curtidas    Curtida[]
+
+  @@index([autorId])
+}
+
+model PostFoto {
+  id        String   @id @default(cuid())
+  url       String
+  legenda   String?
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  @@index([postId])
+}
+
+model Comentario {
+  id        String   @id @default(cuid())
+  conteudo  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  autor   User   @relation(fields: [autorId], references: [id], onDelete: Cascade)
+  autorId String
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  // Suporte a respostas aninhadas
+  parentId  String?
+  parent    Comentario?  @relation("ComentarioRespostas", fields: [parentId], references: [id], onDelete: SetNull)
+  respostas Comentario[] @relation("ComentarioRespostas")
+
+  @@index([autorId])
+  @@index([postId])
+  @@index([parentId])
+}
+
+model Curtida {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
