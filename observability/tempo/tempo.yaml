@@ -1,0 +1,58 @@
+server:
+  http_listen_port: 3200
+  log_level: info
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+        http:
+
+ingester:
+  max_block_duration: 5m
+
+querier: {}
+
+query_frontend:
+  search:
+    max_duration: 24h
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/blocks
+    wal:
+      path: /var/tempo/wal
+
+metrics_generator:
+  ring:
+    kvstore:
+      store: inmemory
+  processor:
+    span_metrics:
+      dimensions:
+        - next.route
+        - http.target
+        - http.method
+        - http.status_code
+      intrinsic_dimensions:
+        span_kind: false
+    service_graphs:
+      max_items: 10000
+  registry:
+    external_labels:
+      source: tempo
+      cluster: sistema-4.0
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+
+overrides:
+  metrics_generator_processors:
+    - span-metrics
+    - service-graphs
+  metrics_generator_max_active_series: 10000

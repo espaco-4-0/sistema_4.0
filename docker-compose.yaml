@@ -2,24 +2,21 @@ services:
   app:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: dockerfile.prod
     container_name: sistema-4.0
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/json
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sistema40}
     ports:
       - "3000:3000"
     depends_on:
       postgres:
-        condition: service_healthy
-    volumes:
-      #hot reload em dev
-      - .:/app                       
-      - /app/node_modules  
-      - /app/.next                    
+        condition: service_healthy                
     networks:
       - app-network
 
