@@ -4,6 +4,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     //futuro teste pra ci/cd
     output: "standalone",
+	serverExternalPackages: [
+    "@opentelemetry/sdk-node",
+    "@opentelemetry/exporter-trace-otlp-http",
+    "@opentelemetry/instrumentation-http",
+    "@opentelemetry/api",
+  ],
+
     //Dps apagar issae quando pegar as images dos cursos via API
     images: {
         remotePatterns: [
@@ -20,9 +27,9 @@ export default withSentryConfig(nextConfig, {
     // For all available options, see:
     // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-    org: "espaco-7l",
+    org: process.env.SENTRY_ORG,
 
-    project: "javascript-nextjs",
+    project: process.env.SENTRY_PROJECT,
 
     // Only print logs for uploading source maps in CI
     silent: !process.env.CI,

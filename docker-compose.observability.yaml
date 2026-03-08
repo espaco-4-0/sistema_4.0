@@ -4,16 +4,15 @@ services:
     container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./observability/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - ./observability/prometheus/alerts.yaml:/etc/prometheus/alerts.yaml:ro
       - prometheus_data:/prometheus
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--config.file=/etc/prometheus/prometheus.yaml"
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
       - "--web.enable-lifecycle"
-    ports:
-      - "9090:9090"
+      - "--web.enable-remote-write-receiver"
     networks:
       - observability
       - app-network
@@ -43,11 +42,9 @@ services:
     container_name: loki
     restart: unless-stopped
     volumes:
-      - ./observability/loki/loki.yml:/etc/loki/local-config.yaml:ro
+      - ./observability/loki/loki.yaml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
-    ports:
-      - "3100:3100"
     networks:
       - observability
       - app-network
@@ -57,11 +54,11 @@ services:
     container_name: promtail
     restart: unless-stopped
     volumes:
-      - ./observability/promtail/promtail.yml:/etc/promtail/config.yml:ro
+      - ./observability/promtail/promtail.yaml:/etc/promtail/config.yaml:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: -config.file=/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yaml
     depends_on:
       - loki
     networks:
@@ -81,13 +78,36 @@ services:
       - "--path.rootfs=/rootfs"
       - "--path.sysfs=/host/sys"
       - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
-    ports:
-      - "9100:9100"
     networks:
       - observability
 
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    networks:
+      - observability
+      - app-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-collector
+    restart: unless-stopped
+    volumes:
+      - ./observability/otelcollector/otelcollector.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - observability
+      - app-network
+
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
     restart: unless-stopped
     privileged: true
@@ -96,54 +116,10 @@ services:
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-    ports:
-      - "8080:8080"
-    networks:
-      - observability
-
-  sonarqube:
-    image: sonarqube:community
-    container_name: sonarqube
-    restart: unless-stopped
-    depends_on:
-      sonarqube-db:
-        condition: service_healthy
-    environment:
-      - SONAR_JDBC_URL=jdbc:postgresql://sonarqube-db:5432/sonar
-      - SONAR_JDBC_USERNAME=${SONAR_DB_USER:-sonar}
-      - SONAR_JDBC_PASSWORD=${SONAR_DB_PASSWORD}
-      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    ports:
-      - "9000:9000"
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-    networks:
-      - observability
-
-  sonarqube-db:
-    image: postgres:18-alpine
-    container_name: sonarqube-db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${SONAR_DB_USER:-sonar}
-      - POSTGRES_PASSWORD=${SONAR_DB_PASSWORD}
-      - POSTGRES_DB=sonar
-    volumes:
-      - sonarqube_db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SONAR_DB_USER:-sonar}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - observability
 
@@ -158,7 +134,4 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
-  sonarqube_db:
+  tempo_data:
