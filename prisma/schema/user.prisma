@@ -1,0 +1,49 @@
+enum Role {
+  ADMIN       // Administrador – acesso total ao sistema
+  PROFESSOR   // Define cursos, aulas, horários e locais
+  MONITOR     // Acompanha aulas; nível abaixo do professor
+  PESQUISADOR // Semelhante ao monitor; foco em pesquisa
+  VISITANTE   // Escolhe curso/data/hora e confirma presença
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nome      String
+  senha     String
+  role      Role     @default(VISITANTE)
+  avatarUrl String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações – Professor
+  cursosMinistrados Curso[] @relation("ProfessorCursos")
+  aulasMinistradas  Aula[]  @relation("ProfessorAulas")
+
+  // Relações – Monitor / Pesquisador
+  monitoramentos AulaMonitor[]
+
+  // Relações – Visitante
+  inscricoes Inscricao[]
+  presencas  Presenca[]
+
+  // Inventário
+  itensInventario InventarioItem[]
+
+  // Blog
+  posts       Post[]
+  comentarios Comentario[]
+  curtidas    Curtida[]
+
+  // Projetos
+  projetosLiderados Projeto[]       @relation("LiderProjeto")
+  projetosMembro    ProjetoMembro[]
+
+  // Gamificação
+  gamificacao Gamificacao?
+  userBadges  UserBadge[]
+
+  // Certificados
+  certificados Certificado[]
+}

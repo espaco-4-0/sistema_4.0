@@ -1,0 +1,77 @@
+enum TipoProjeto {
+  EXTENSAO
+  PESQUISA
+}
+
+enum StatusProjeto {
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+}
+
+model Projeto {
+  id         String        @id @default(cuid())
+  titulo     String
+  descricao  String?
+  tipo       TipoProjeto
+  status     StatusProjeto @default(EM_ANDAMENTO)
+  dataInicio DateTime?
+  dataFim    DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  lider   User   @relation("LiderProjeto", fields: [liderId], references: [id])
+  liderId String
+
+  membros    ProjetoMembro[]
+  fotos      ProjetoFoto[]
+  relatorios RelatorioProj[]
+  inventario InventarioItem[]
+
+  @@index([liderId])
+}
+
+model ProjetoMembro {
+  id       String   @id @default(cuid())
+  funcao   String?  // ex: "pesquisador", "bolsista"
+  joinedAt DateTime @default(now())
+
+  projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+  projetoId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([projetoId, userId])
+  @@index([userId])
+}
+
+
+model ProjetoFoto {
+  id        String   @id @default(cuid())
+  url       String
+  legenda   String?
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+  projetoId String
+
+  @@index([projetoId])
+}
+
+
+model RelatorioProj {
+  id          String    @id @default(cuid())
+  titulo      String
+  conteudo    String
+  arquivoUrl  String?   // PDF ou outro anexo
+  publicadoEm DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+  projetoId String
+
+  @@index([projetoId])
+}

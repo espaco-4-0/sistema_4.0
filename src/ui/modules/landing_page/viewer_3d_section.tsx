@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Box, Eye, MousePointer2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const listItems = [
     "Visualização 360° de todos os ambientes",
@@ -90,16 +91,21 @@ export default function Viewer3dSection() {
                             ))}
                         </motion.ul>
 
-                        <motion.button
+                        <motion.div
+                            className="w-fit"
                             variants={fadeLeft}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.97 }}
-                            className="group px-10 py-5 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold rounded-xl transition-colors duration-300 flex items-center gap-3 shadow-2xl hover:shadow-yellow-400/30 cursor-pointer"
                         >
-                            <Box className="w-6 h-6 group-hover:rotate-360 transition-transform duration-700" />
-                            Iniciar Tour Virtual
-                            <MousePointer2 className="w-5 h-5  group-hover:rotate-360 transition-transform duration-700" />
-                        </motion.button>
+                            <Link
+                                href="/espaco-3D"
+                                className="group px-10 py-5 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold rounded-xl transition-colors duration-300 flex items-center gap-3 shadow-2xl hover:shadow-yellow-400/30 cursor-pointer"
+                            >
+                                <Box className="w-6 h-6 group-hover:rotate-360 transition-transform duration-700" />
+                                Iniciar Tour Virtual
+                                <MousePointer2 className="w-5 h-5  group-hover:rotate-360 transition-transform duration-700" />
+                            </Link>
+                        </motion.div>
                     </motion.div>
 
                     <motion.div

@@ -1,0 +1,81 @@
+groups:
+
+  - name: app
+    rules:
+
+      - alert: AppFora
+        expr: up{job="nextjs-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Sistema 4.0 fora do ar"
+          description: "A aplicação está inacessível há mais de 1 minuto."
+
+      - alert: AltaLatencia
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="nextjs-app"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta latência na aplicação"
+          description: "P95 de latência em {{ $value | humanizeDuration }} (limite: 2s)"
+          
+      - alert: AltaTaxaDeErros
+        expr: rate(http_requests_total{job="nextjs-app", status=~"5.."}[5m]) / rate(http_requests_total{job="nextjs-app"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taxa de erros 5xx elevada"
+          description: "Taxa de erros: {{ $value | humanizePercentage }} (limite: 5%)"
+
+
+  - name: host
+    rules:
+      - alert: CPUAlta
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU alta no host"
+          description: "CPU em {{ $value | humanize }}% por mais de 10 minutos."
+
+      - alert: MemoriaAlta
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memória alta no host"
+          description: "Uso de memória em {{ $value | humanize }}%."
+      - alert: DiscoQuaseCheio
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disco quase cheio"
+          description: "Apenas {{ $value | humanize }}% de espaço livre."
+
+
+  - name: containers
+    rules:
+      - alert: ContainerParado
+        expr: absent(container_last_seen{name=~"sistema-4.0|prometheus|grafana|loki|postgres"})
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container crítico parado"
+          description: "O container {{ $labels.name }} não está rodando."
+
+      - alert: ContainerMemoriaAlta
+        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container com memória alta"
+          description: "Container {{ $labels.name }}: {{ $value | humanize }}% de memória usada."
