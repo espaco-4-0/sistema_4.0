@@ -105,7 +105,7 @@ export default function Configuracoes() {
                                     <p className="text-xs text-gray-500 uppercase font-medium">Versão</p>
                                     <p className="text-gray-900 font-medium mt-1">2.5.1</p>
                                 </div>
-                                <Badge variant="success">Atualizado</Badge>
+                                <Badge>Atualizado</Badge>
                             </div>
 
                             <div className="flex justify-between items-center py-3">
@@ -132,7 +132,7 @@ export default function Configuracoes() {
                                     <p className="text-xs text-gray-500 uppercase font-medium">Autenticação 2FA</p>
                                     <p className="text-sm text-gray-600 mt-1">Proteção adicional</p>
                                 </div>
-                                <Badge variant="success">
+                                <Badge>
                                     <Lock className="w-3 h-3" />
                                     Ativado
                                 </Badge>

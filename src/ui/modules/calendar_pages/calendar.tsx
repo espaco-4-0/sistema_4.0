@@ -19,6 +19,8 @@ import { useForm } from "react-hook-form";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
+import { nonEmpty } from "valibot";
+
 export const locales = { "pt-BR": ptBR };
 export const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 

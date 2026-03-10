@@ -48,7 +48,7 @@ export function UpcomingEvents() {
                             <Card className="group p-0 h-full w-full gap-0 overflow-hidden border-none">
                                 <div className="relative w-full h-48 overflow-hidden">
                                     <Image
-                                        src={event.image}
+                                        src={event.image || ""}
                                         alt={event.title}
                                         fill
                                         className="object-cover scale-[1.02] transition-transform duration-500 group-hover:scale-110"
