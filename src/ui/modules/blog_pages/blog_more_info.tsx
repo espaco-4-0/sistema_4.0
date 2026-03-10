@@ -5,10 +5,13 @@ import { newsData } from "@/src/infra/modules/blog/blog-mock";
 import { ArrowLeft, Bookmark, Calendar, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
 
 export default function BlogMoreInfo() {
+    const methods = useForm();
     const params = useParams<{ id: string }>();
     const router = useRouter();
     const id = Array.isArray(params?.id) ? params?.id[0] : params?.id;
@@ -108,8 +111,8 @@ export default function BlogMoreInfo() {
                 </div>
 
                 <div className="prose prose-lg max-w-none mb-12">
-                    {news.content.slice(1).map((paragraph, index) => (
-                        <div key={index} className="mb-6">
+                    {news.content.slice(1).map((paragraph) => (
+                        <div key={paragraph} className="mb-6">
                             <p className="text-gray-700 leading-relaxed text-lg">{paragraph}</p>
                         </div>
                     ))}
@@ -135,33 +138,35 @@ export default function BlogMoreInfo() {
                         </Button>
                     </div>
 
-                    <Form className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 mb-8">
-                        <div className="mb-4">
-                            <input
-                                type="text"
-                                placeholder="Seu nome"
-                                value={authorName}
-                                onChange={(e) => setAuthorName(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-yellow-400 bg-white"
-                            />
-                        </div>
+                    <Form {...methods}>
+                        <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 mb-8">
+                            <div className="mb-4">
+                                <input
+                                    type="text"
+                                    placeholder="Seu nome"
+                                    value={authorName}
+                                    onChange={(e) => setAuthorName(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-yellow-400 bg-white"
+                                />
+                            </div>
 
-                        <div className="mb-4">
-                            <textarea
-                                placeholder="Adicione um comentário..."
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-yellow-400 min-h-25 resize-y bg-white"
-                            />
-                        </div>
+                            <div className="mb-4">
+                                <textarea
+                                    placeholder="Adicione um comentário..."
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-yellow-400 min-h-25 resize-y bg-white"
+                                />
+                            </div>
 
-                        <Button
-                            type="button"
-                            className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-bold hover:cursor-pointer"
-                        >
-                            <Send className="w-4 h-4" />
-                            Enviar Comentário
-                        </Button>
+                            <Button
+                                type="button"
+                                className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-bold hover:cursor-pointer"
+                            >
+                                <Send className="w-4 h-4" />
+                                Enviar Comentário
+                            </Button>
+                        </div>
                     </Form>
 
                     <div className="space-y-6">

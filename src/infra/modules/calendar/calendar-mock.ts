@@ -9,7 +9,7 @@ export interface CalendarEvent {
     description: string;
     time: string;
     local: string;
-    image: string;
+    image?: string;
     whatsapp?: string;
     quantidade?: string | number;
     professor?: string;

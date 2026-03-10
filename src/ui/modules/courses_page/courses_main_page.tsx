@@ -7,7 +7,6 @@ import Link from "next/link";
 import CourseCard from "./course_card";
 import CourseForm from "./course_form";
 import { CourseHero } from "./course_hero";
-import { number } from "valibot";
 
 type RightInformation = {
     id: number;
@@ -24,8 +23,14 @@ const initialCourseDetails: CourseDetails = {
     longDescription: "",
     durationWeeks: 0,
     subscribes: 0,
+    maxSubscribes: 0,
     level: "",
+    category: "progamacao",
     startDate: "",
+    endDate: "",
+    weekDays: [],
+    schedule: "",
+    location: "",
     cardImage: "",
     gallery: [],
     topics: [],
