@@ -84,7 +84,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "topk(10, sum by(next_route)(rate(traces_spanmetrics_latency_sum{service=\"sistema-4.0\"}[$__range])) / sum by(next_route)(rate(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range])))",
+          "expr": "topk(\n  10,\n  sum by (next_route)(\n    rate(traces_spanmetrics_latency_sum{service=\"sistema-4.0\"}[$__range])\n  )\n  /\n  sum by (next_route)(\n    rate(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range])\n  )\n)",
           "format": "table",
           "legendFormat": "__auto",
           "range": true,
@@ -126,7 +126,32 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "next_route"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 477
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 393
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -137,7 +162,8 @@
       "id": 701,
       "options": {
         "cellHeight": "sm",
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -148,7 +174,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, round(sum by(next_route)(increase(traces_spanmetrics_calls_total{service=\"sistema-4.0\"}[$__range]))))",
+          "expr": "topk(\n  10,\n  sum by (http_method, next_route)(\n    increase(\n      traces_spanmetrics_calls_total{\n        service=\"sistema-4.0\",\n      }[$__range]\n    )\n  )\n)",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -156,7 +182,7 @@
           "refId": "A"
         }
       ],
-      "title": "Páginas mais acessadas",
+      "title": "Quantidade de spans executados",
       "type": "table"
     },
     {
@@ -439,7 +465,8 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(traces_spanmetrics_calls_total{service=\"sistema-4.0\",status_code=\"STATUS_CODE_ERROR\"}) / sum(traces_spanmetrics_calls_total{service=\"sistema-4.0\"})",
+          "editorMode": "code",
+          "expr": "sum(\n  increase(\n    traces_spanmetrics_calls_total{\n      service=\"sistema-4.0\",\n      status_code=\"STATUS_CODE_ERROR\"\n    }[$__range]\n  )\n)\n/\nsum(\n  increase(\n    traces_spanmetrics_calls_total{\n      service=\"sistema-4.0\"\n    }[$__range]\n  )\n)",
           "instant": true,
           "legendFormat": "Taxa de erro",
           "refId": "A"
@@ -746,6 +773,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
+          "editorMode": "code",
           "expr": "sum(rate(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\"}[$__rate_interval])) by (le)",
           "format": "heatmap",
           "instant": false,
@@ -821,7 +849,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "(sum(increase(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\",le=\"0.256\"}[$__range])) + sum(increase(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\",le=\"1.024\"}[$__range])) / 2) / sum(increase(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range]))",
+          "expr": "(\n  sum(increase(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\",le=\"0.256\"}[$__range]))\n  +\n  sum(increase(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\",le=\"1.024\"}[$__range]))\n) / 2\n/\nsum(increase(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range]))",
           "instant": true,
           "legendFormat": "Apdex (T=0.3s)",
           "refId": "A"
@@ -1524,7 +1552,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by(span_name)(increase(traces_spanmetrics_calls_total{service=\"sistema-4.0\"}[$__range]))",
+          "expr": "sum by(span_name, next_route)(\n  increase(traces_spanmetrics_calls_total{\n    service=\"sistema-4.0\",\n  }[$__range])\n)",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1538,7 +1566,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by(span_name)(rate(traces_spanmetrics_latency_sum{service=\"sistema-4.0\"}[$__range])) / sum by(span_name)(rate(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range]))",
+          "expr": "sum by(span_name, next_route)(\n  rate(traces_spanmetrics_latency_sum{service=\"sistema-4.0\"}[$__range])\n)\n/\nsum by(span_name, next_route)(\n  rate(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range])\n)",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1552,7 +1580,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.95, sum by(span_name, le)(rate(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\"}[$__range])))",
+          "expr": "histogram_quantile(\n  0.95,\n  sum by(span_name, next_route, le)(\n    rate(traces_spanmetrics_latency_bucket{service=\"sistema-4.0\"}[$__range])\n  )\n)",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1566,7 +1594,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by(span_name)(increase(traces_spanmetrics_calls_total{service=\"sistema-4.0\",status_code=\"STATUS_CODE_ERROR\"}[$__range]))",
+          "expr": "sum by(span_name, next_route)(\n  increase(traces_spanmetrics_calls_total{\n    service=\"sistema-4.0\",\n    status_code=\"STATUS_CODE_ERROR\"\n  }[$__range])\n)",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1648,13 +1676,70 @@
             "type": "tempo",
             "uid": "P214B5B846CF3925F"
           },
+          "filters": [
+            {
+              "id": "42b2d9f3",
+              "isCustomValue": false,
+              "operator": "$span_name",
+              "scope": "span",
+              "tag": "next.route",
+              "value": [
+                "$span_name"
+              ],
+              "valueType": "string"
+            },
+            {
+              "id": "service-name",
+              "isCustomValue": false,
+              "operator": "=",
+              "scope": "resource",
+              "tag": "service.name",
+              "value": [
+                "sistema-4.0"
+              ]
+            },
+            {
+              "id": "span-name",
+              "isCustomValue": false,
+              "operator": "=",
+              "scope": "span",
+              "tag": "name",
+              "value": [
+                "GET"
+              ],
+              "valueType": "string"
+            },
+            {
+              "id": "status",
+              "isCustomValue": false,
+              "operator": "=",
+              "scope": "intrinsic",
+              "tag": "status",
+              "value": "ok",
+              "valueType": "keyword"
+            },
+            {
+              "id": "min-duration",
+              "operator": ">",
+              "tag": "duration",
+              "value": "=",
+              "valueType": "duration"
+            },
+            {
+              "id": "max-duration",
+              "operator": "<",
+              "tag": "duration",
+              "value": "=",
+              "valueType": "duration"
+            }
+          ],
           "limit": 20,
           "metricsQueryType": "range",
-          "query": "{resource.service.name=\"sistema-4.0\"}",
+          "query": "{resource.service.name=\"sistema-4.0\" && name =~ \"RSC GET|GET|POST|PUT|DELETE|PATCH\"}",
           "queryType": "traceql",
           "refId": "A",
           "serviceMapUseNativeHistograms": false,
-          "tableType": "traces"
+          "tableType": "spans"
         }
       ],
       "title": "Traces - sistema-4.0",
@@ -1812,12 +1897,8 @@
       {
         "allValue": ".+",
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
@@ -1833,17 +1914,27 @@
         "regexApplyTo": "value",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "baseFilters": [],
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "filters": [],
+        "name": "Filters",
+        "type": "adhoc"
       }
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Sistema 4.0 - Observabilidade Copy",
-  "uid": "adzwqvc",
-  "version": 1,
+  "title": "Sistema 4.0 - Observabilidade",
+  "uid": "adljkhr",
+  "version": 19,
   "weekStart": ""
 }

@@ -33,12 +33,12 @@ metrics_generator:
   processor:
     span_metrics:
       dimensions:
-        - next.route
+        - next_route
         - http.target
         - http.method
         - http.status_code
       intrinsic_dimensions:
-        span_kind: false
+        span_kind: true
     service_graphs:
       max_items: 10000
   registry:
@@ -52,7 +52,9 @@ metrics_generator:
         send_exemplars: true
 
 overrides:
-  metrics_generator_processors:
-    - span-metrics
-    - service-graphs
-  metrics_generator_max_active_series: 10000
+  defaults:
+    metrics_generator:
+      processors:
+        - span-metrics
+        - service-graphs
+      max_active_series: 10000
