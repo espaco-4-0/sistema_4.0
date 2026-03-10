@@ -16,6 +16,9 @@ processors:
         action: delete
       - key: "http.request.header.cookie"
         action: delete
+      - key: next_route
+        from_attribute: http.route
+        action: upsert 
 
 exporters:
   prometheus:
