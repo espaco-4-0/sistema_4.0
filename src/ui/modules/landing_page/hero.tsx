@@ -155,12 +155,3 @@ export function Hero() {
         </section>
     );
 }
-
-//   <motion.div
-//className="absolute inset-0"
-//initial={{ opacity: 0, scale: 1.08 }}
-//animate={{ opacity: 0.25, scale: 1 }}
-//transition={{ duration: 1.4, ease: "easeOut" }}
-//>
-//<Image src="/espaco-externo.png" alt="" fill className="object-cover object-center" loading="eager" />
-//</motion.div>
