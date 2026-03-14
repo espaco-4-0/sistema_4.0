@@ -1,40 +1,50 @@
 import { Button } from "@/src/ui/components/ui/button";
 import { motion, type Variants } from "framer-motion";
 import { Calendar, FolderOpen, MouseIcon, Play } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const buttonVariants: Variants = { hover: { scale: 1.05 } };
 const iconVariants: Variants = { hover: { rotate: 360 } };
 
-const fadeUp = (delay: number): Variants => ({
+const fadeUp = (): Variants => ({
     hidden: { opacity: 0, y: 40 },
     show: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.7, ease: "easeOut", delay },
+        transition: { duration: 0.4, ease: "easeOut" },
     },
 });
 
 export function Hero() {
     const scrollToSection = (id: string) => {
         const section = document.getElementById(id);
-        section?.scrollIntoView({ behavior: "smooth" });
+        section?.scrollIntoView({ behavior: "instant" });
     };
 
     return (
         <section
             id="welcome"
-            className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-linear-to-r from-black via-slate-800 to-slate-800 px-4"
+            className="relative flex min-h-screen flex-col items-center justify-center object-cover overflow-hidden bg-linear-to-r from-black via-slate-800 to-slate-800 px-4"
         >
             <motion.div
-                className="absolute inset-0 bg-[url('/espaco-externo.png')] bg-cover bg-center"
-                initial={{ opacity: 0, scale: 1.08 }}
-                animate={{ opacity: 0.25, scale: 1 }}
+                className="absolute inset-0 bg-cover bg-center"
+                initial={{ opacity: 0.25, scale: 1.08 }}
+                animate={{ scale: 1 }}
                 transition={{ duration: 1.4, ease: "easeOut" }}
-            />
+            >
+                <Image
+                    src="/espaco-externo.png"
+                    alt=""
+                    fill
+                    className="delay-0 object-cover object-center"
+                    loading="eager"
+                    priority
+                />
+            </motion.div>
 
             <div className="relative z-10 flex flex-col items-center text-center">
-                <motion.div className="mb-8" variants={fadeUp(0.1)} initial="hidden" animate="show">
+                <motion.div className="mb-8" variants={fadeUp()} initial="hidden" animate="show">
                     <span className="px-5 py-2.5 bg-yellow-400 text-slate-900 text-sm font-semibold rounded-full tracking-wide">
                         Inovação na Educação
                     </span>
@@ -42,7 +52,7 @@ export function Hero() {
 
                 <motion.h1
                     className="text-6xl md:text-8xl font-bold text-white"
-                    variants={fadeUp(0.25)}
+                    variants={fadeUp()}
                     initial="hidden"
                     animate="show"
                 >
@@ -51,7 +61,7 @@ export function Hero() {
 
                 <motion.p
                     className="mt-5 text-2xl md:text-3xl font-normal text-yellow-50 max-w-2xl"
-                    variants={fadeUp(0.4)}
+                    variants={fadeUp()}
                     initial="hidden"
                     animate="show"
                 >
@@ -60,7 +70,7 @@ export function Hero() {
 
                 <motion.p
                     className="mt-6 text-yellow-100 text-lg md:text-xl max-w-3xl leading-relaxed"
-                    variants={fadeUp(0.55)}
+                    variants={fadeUp()}
                     initial="hidden"
                     animate="show"
                 >
@@ -70,7 +80,7 @@ export function Hero() {
 
                 <motion.div
                     className="mt-12 flex flex-wrap justify-center gap-4"
-                    variants={fadeUp(0.7)}
+                    variants={fadeUp()}
                     initial="hidden"
                     animate="show"
                 >
@@ -129,7 +139,7 @@ export function Hero() {
 
                 <motion.div
                     className="flex flex-col items-center gap-2 pt-16 text-slate-400"
-                    variants={fadeUp(0.85)}
+                    variants={fadeUp()}
                     initial="hidden"
                     animate="show"
                 >
