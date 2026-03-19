@@ -1,31 +1,31 @@
-import { PrismaClient, Role } from "../../src/generated/prisma/client";
+import { PrismaClient } from "../../src/generated/prisma/client";
 
 export async function seedUsuarios(prisma: PrismaClient) {
     const usuarios = [
         {
             email: "admin@ifal.edu.br",
             nome: "Administrador",
-            role: Role.ADMIN,
+            role: "ADMIN",
         },
         {
             email: "professor@ifal.edu.br",
             nome: "Prof. João Silva",
-            role: Role.PROFESSOR,
+            role: "PROFESSOR",
         },
         {
             email: "monitor@ifal.edu.br",
             nome: "Maria Monitor",
-            role: Role.MONITOR,
+            role: "MONITOR",
         },
         {
             email: "pesquisador@ifal.edu.br",
             nome: "Carlos Pesq.",
-            role: Role.PESQUISADOR,
+            role: "PESQUISADOR",
         },
         {
             email: "visitante@email.com",
             nome: "Ana Visitante",
-            role: Role.VISITANTE,
+            role: "VISITANTE",
         },
     ];
 

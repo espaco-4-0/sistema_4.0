@@ -1,9 +1,3 @@
-/**
- * prisma/seed.ts
- * Ponto de entrada — chama cada módulo de seed na ordem correta.
- * Execute com: npx prisma db seed
- */
-
 import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -21,8 +15,6 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
     console.log("Iniciando a seed...\n");
-
-    // A ordem importa: usuários e locais antes de cursos/projetos
     await seedUsuarios(prisma);
     await seedLocais(prisma);
     await seedCursos(prisma);
@@ -30,7 +22,7 @@ async function main() {
     await seedInventario(prisma);
     await seedBadges(prisma);
 
-    console.log("\n🎉 Seed concluído!");
+    console.log("\n Seed concluído!");
 }
 
 main()
