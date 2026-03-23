@@ -10,7 +10,7 @@ import { Eye, EyeOff, Home } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -22,7 +22,7 @@ export default function LoginPage() {
                     className="absolute top-8 left-6 flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:cursor-pointer"
                 >
                     <Home className="h-4 w-4" />
-                    Home Page
+                    Página Inicial
                 </Link>
 
                 <div className="w-full max-w-md space-y-8 mt-12 lg:mt-0">
@@ -50,7 +50,7 @@ export default function LoginPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">Senha</Label>
                             <div className="relative">
                                 <Input
                                     id="password"
@@ -88,31 +88,15 @@ export default function LoginPage() {
                             type="submit"
                             className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-primary hover:bg-black/90"
                         >
-                            SIGN IN
+                            ENTRAR
                         </Button>
                     </form>
 
-                    <div className="flex items-center gap-4">
-                        <div className="h-px flex-1 bg-border" />
-                        <span className="text-xs text-muted-foreground">ou</span>
-                        <div className="h-px flex-1 bg-border" />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <Button variant="outline" className="h-12 hover:cursor-pointer gap-2">
-                            <Image src="/google.svg" alt="Google" width={18} height={18} />
-                            GOOGLE
-                        </Button>
-
-                        <Button variant="outline" className="h-12 hover:cursor-pointer gap-2">
-                            <Image src="/github-mark.svg" alt="GitHub" width={18} height={18} />
-                            GITHUB
-                        </Button>
-                    </div>
-
                     <p className="text-center text-sm text-muted-foreground">
                         Não possui uma conta?{" "}
-                        <button className="font-semibold text-foreground hover:underline">CRIE UMA</button>
+                        <Link href="/register" className="font-semibold text-foreground hover:underline">
+                            CRIE UMA
+                        </Link>
                     </p>
                 </div>
             </div>
