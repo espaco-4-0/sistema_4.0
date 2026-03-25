@@ -44,7 +44,14 @@ export const userRegistrationSchema = z
             .regex(/\d/, "Deve conter pelo menos um número")
             .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos um caractere especial (@, #, $, etc.)"),
 
-        confirmPassword: z.string(),
+        confirmPassword: z
+            .string()
+            .min(6, "A senha deve ter no mínimo 6 caracteres")
+            .max(16, "A senha deve ter no máximo 16 caracteres")
+            .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
+            .regex(/[a-z]/, "Deve conter pelo menos uma letra minúscula")
+            .regex(/\d/, "Deve conter pelo menos um número")
+            .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos um caractere especial (@, #, $, etc.)"),
 
         dateOfBirth: z
             .string()

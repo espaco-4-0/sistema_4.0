@@ -1,11 +1,13 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { IMaskInput } from "react-imask";
 
 import { Button } from "../../components/ui/button";
 import { DatePicker } from "../../components/ui/date-picker";
 import { Field, FieldError, FieldLabel } from "../../components/ui/field";
 import { Input } from "../../components/ui/input";
+import { cn } from "../../lib/utils";
 import {
     DEFICIENCY_OPTIONS,
     EDUCATION_OPTIONS,
@@ -14,6 +16,77 @@ import {
     userRegistrationSchema,
     type userRegistrationData,
 } from "../schemas/user-registration-schema";
+
+function InputText({
+    name,
+    label,
+    placeholder,
+    control,
+    type,
+}: Readonly<{
+    name: string;
+    label: string;
+    placeholder: string;
+    control: any;
+    type?: string;
+}>) {
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="gap-1">
+                    <FieldLabel className="text-[13px]" htmlFor={name}>
+                        {label}
+                    </FieldLabel>
+                    <Input
+                        className="py-5 placeholder:text-[13px] text-[13px]"
+                        {...field}
+                        id={name}
+                        placeholder={placeholder}
+                        type={type}
+                    />
+                    {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
+                </Field>
+            )}
+        />
+    );
+}
+
+function InputSelect({
+    name,
+    control,
+    label,
+    options,
+    placeholder,
+}: Readonly<{ name: string; control: any; label: string; options: readonly string[]; placeholder?: string }>) {
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="gap-1">
+                    <FieldLabel htmlFor={name} className="text-[13px]">
+                        {label}
+                    </FieldLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="w-full h-9 border-gray-200 text-xs bg-white py-5 placeholder:text-[13px] text-[13px]">
+                            <SelectValue placeholder={placeholder} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white max-h-40 ">
+                            {options.map((opt) => (
+                                <SelectItem className="capitalize" key={opt} value={opt}>
+                                    {opt}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
+                </Field>
+            )}
+        />
+    );
+}
 
 export default function UserRegistrationForm() {
     const form = useForm<userRegistrationData>({
@@ -42,72 +115,43 @@ export default function UserRegistrationForm() {
     }
 
     return (
-        <form id="register" onSubmit={form.handleSubmit(onSubmit)}>
-            <Controller
-                name="completeName"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="completeName">Nome Completo</FieldLabel>
-                        <Input {...field} id="completeName" placeholder="Insira seu nome aqui" />
-                        {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                )}
-            />
+        <form id="register" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
+            <InputText name="completeName" label="Nome Completo" placeholder="Ex.: João Silva" control={form.control} />
 
-            <Controller
-                name="email"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="email">E-mail</FieldLabel>
-                        <Input {...field} id="email" type="email" placeholder="Insira seu email aqui" />
-                        {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                )}
-            />
+            <InputText name="email" label="E-mail" placeholder="nome@exemplo.com" control={form.control} type="email" />
 
-            <div className="grid grid-cols-2">
-                <Controller
+            <div className="grid grid-cols-2 gap-3">
+                <InputText
                     name="password"
+                    label="Senha"
+                    placeholder="Mín. 8 caracteres"
                     control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="password">Senha</FieldLabel>
-                            <Input {...field} id="password" type="password" placeholder="Insira sua senha aqui" />
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                    )}
+                    type="password"
                 />
 
-                <Controller
+                <InputText
                     name="confirmPassword"
+                    label="Confirme a senha"
+                    placeholder="Repita a senha"
                     control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="confirmPassword">Confirme a senha</FieldLabel>
-                            <Input
-                                {...field}
-                                id="confirmPassword"
-                                type="password"
-                                placeholder="Insira sua senha aqui novamente"
-                            />
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                    )}
+                    type="password"
                 />
 
                 <Controller
                     name="dateOfBirth"
                     control={form.control}
                     render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="dateOfBirth">Data de Nascimento</FieldLabel>
+                        <Field data-invalid={fieldState.invalid} className="gap-1">
+                            <FieldLabel htmlFor="dateOfBirth" className="text-[13px]">
+                                Data de Nascimento
+                            </FieldLabel>
                             <DatePicker
                                 date={field.value ? new Date(field.value) : undefined}
                                 onDateChange={(date) => field.onChange(date ? date.toISOString() : "")}
-                                placeholder="Selecione sua data de nascimento"
+                                placeholder="dd/mm/aaaa"
+                                className="py-5 placeholder:text-[13px] text-[13px]"
                             />
+                            {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
                         </Field>
                     )}
                 />
@@ -116,144 +160,86 @@ export default function UserRegistrationForm() {
                     name="whatsapp"
                     control={form.control}
                     render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="whatsapp">Whatsapp</FieldLabel>
-                            <Input {...field} id="whatsapp" placeholder="(00) 00000-0000" />
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
+                        <Field data-invalid={fieldState.invalid} className="gap-1">
+                            <FieldLabel htmlFor="whatsapp" className="text-[13px]">
+                                Whatsapp
+                            </FieldLabel>
+                            <IMaskInput
+                                {...field}
+                                data-slot="input"
+                                id="whatsapp"
+                                name={field.name}
+                                mask="(00) 00000-0000"
+                                onAccept={(value: string) => field.onChange(value)}
+                                onBlur={field.onBlur}
+                                placeholder="(00) 00000-0000"
+                                className={cn(
+                                    "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-5 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                                    "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                                )}
+                            />
+                            {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
                         </Field>
                     )}
                 />
 
-                <Controller
+                <InputSelect
                     name="race"
                     control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="race">Raça</FieldLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                                <SelectTrigger className="capitalize w-full h-9 border-gray-200 text-xs bg-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white max-h-40">
-                                    {raceOptions.map((race) => (
-                                        <SelectItem className="capitalize" key={race} value={race}>
-                                            {race}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                    )}
+                    label="Raça"
+                    options={raceOptions}
+                    placeholder="Selecione"
                 />
 
-                <Controller
+                <InputSelect
                     name="education"
                     control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="education">Escolaridade</FieldLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                                <SelectTrigger className="capitalize w-full h-9 border-gray-200 text-xs bg-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white max-h-40">
-                                    {EDUCATION_OPTIONS.map((education) => (
-                                        <SelectItem className="capitalize" key={education} value={education}>
-                                            {education}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                    )}
+                    label="Escolaridade"
+                    options={EDUCATION_OPTIONS}
+                    placeholder="Selecione"
                 />
 
-                <Controller
+                <InputSelect
                     name="ifal_afiliation"
                     control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="ifal_afiliation">Vinculo com IFAL</FieldLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                                <SelectTrigger className="capitalize w-full h-9 border-gray-200 text-xs bg-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white max-h-40">
-                                    {IFAL_AFFILIATION_OPTIONS.map((ifal_afiliation) => (
-                                        <SelectItem
-                                            className="capitalize"
-                                            key={ifal_afiliation}
-                                            value={ifal_afiliation}
-                                        >
-                                            {ifal_afiliation}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                    )}
+                    label="Vinculo com IFAL"
+                    options={IFAL_AFFILIATION_OPTIONS}
+                    placeholder="Selecione"
                 />
 
-                <Controller
+                <InputSelect
                     name="deficiency"
                     control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor="deficiency">Deficiência</FieldLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                                <SelectTrigger className="capitalize w-full h-9 border-gray-200 text-xs bg-white">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white max-h-40">
-                                    {DEFICIENCY_OPTIONS.map((deficiency) => (
-                                        <SelectItem className="capitalize" key={deficiency} value={deficiency}>
-                                            {deficiency}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                        </Field>
-                    )}
+                    label="Deficiência"
+                    options={DEFICIENCY_OPTIONS}
+                    placeholder="Selecione"
                 />
 
                 {deficiencyValue !== undefined && (
-                    <Controller
+                    <InputText
                         name="deficiencyNeeds"
+                        label="Necessidade especial"
+                        placeholder="Opcional"
                         control={form.control}
-                        render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor="deficiencyNeeds">Necessidade especial</FieldLabel>
-                                <Input
-                                    {...field}
-                                    id="deficiencyNeeds"
-                                    placeholder="Informe alguma condição ou necessidade especial (opcional)"
-                                />
-                                {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                            </Field>
-                        )}
                     />
                 )}
 
                 {deficiencyValue === "Outro" && (
-                    <Controller
+                    <InputText
                         name="deficiencyDetail"
+                        label="Especifique a deficiência"
+                        placeholder="Descreva"
                         control={form.control}
-                        render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor="deficiencyDetail">Especifique a deficiência</FieldLabel>
-                                <Input {...field} id="deficiencyDetail" placeholder="Descreva a deficiência" />
-                                {fieldState.error && <FieldError errors={[fieldState.error]} />}
-                            </Field>
-                        )}
                     />
                 )}
             </div>
 
-            <Button type="submit" form="register">
+            <Button
+                className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-primary hover:bg-black/90 mt-2"
+                type="submit"
+                form="register"
+            >
                 Registrar
             </Button>
         </form>

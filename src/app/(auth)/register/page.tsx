@@ -39,8 +39,10 @@ export default function Register() {
                     <UserRegistrationForm />
 
                     <p className="text-center text-sm text-muted-foreground">
-                        Não possui uma conta?{" "}
-                        <button className="font-semibold text-foreground hover:underline">CRIE UMA</button>
+                        Já possui uma conta?{" "}
+                        <Link href="/login" className="font-semibold text-foreground hover:underline">
+                            ENTRE AGORA
+                        </Link>
                     </p>
                 </div>
             </div>
