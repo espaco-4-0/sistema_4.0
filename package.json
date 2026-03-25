@@ -15,7 +15,7 @@
         "seed": "tsx prisma/seed.ts"
     },
     "dependencies": {
-        "@hookform/resolvers": "3.10.0",
+        "@hookform/resolvers": "5.2.2",
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/auto-instrumentations-node": "^0.71.0",
         "@opentelemetry/exporter-metrics-otlp-http": "^0.213.0",
@@ -70,7 +70,8 @@
         "sonner": "^2.0.7",
         "tailwind-merge": "^3.4.0",
         "three": "^0.183.2",
-        "valibot": "^1.2.0"
+        "valibot": "^1.2.0",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
