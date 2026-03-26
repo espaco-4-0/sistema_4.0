@@ -17,7 +17,7 @@ import {
     type userRegistrationData,
 } from "../schemas/user-registration-schema";
 
-function InputText({
+export function InputText({
     name,
     label,
     placeholder,
@@ -36,11 +36,11 @@ function InputText({
             control={control}
             render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid} className="gap-1">
-                    <FieldLabel className="text-[13px]" htmlFor={name}>
+                    <FieldLabel className="text-[13px] !text-foreground" htmlFor={name}>
                         {label}
                     </FieldLabel>
                     <Input
-                        className="py-5 placeholder:text-[13px] text-[13px]"
+                        className="py-5 placeholder:text-[13px] text-[13px] !text-foreground"
                         {...field}
                         id={name}
                         placeholder={placeholder}
@@ -66,11 +66,11 @@ function InputSelect({
             control={control}
             render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid} className="gap-1">
-                    <FieldLabel htmlFor={name} className="text-[13px]">
+                    <FieldLabel htmlFor={name} className="text-[13px] !text-foreground">
                         {label}
                     </FieldLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className="w-full h-9 border-gray-200 text-xs bg-white py-5 placeholder:text-[13px] text-[13px]">
+                        <SelectTrigger className="w-full h-9 border-gray-200 text-xs bg-white py-5 placeholder:text-[13px] text-[13px] !text-foreground">
                             <SelectValue placeholder={placeholder} />
                         </SelectTrigger>
                         <SelectContent className="bg-white max-h-40 ">
@@ -105,7 +105,7 @@ export default function UserRegistrationForm() {
             deficiencyNeeds: "",
             deficiencyDetail: "",
         },
-        mode: "onChange",
+        mode: "onBlur",
     });
 
     const deficiencyValue = form.watch("deficiency");
@@ -124,7 +124,7 @@ export default function UserRegistrationForm() {
                 <InputText
                     name="password"
                     label="Senha"
-                    placeholder="Mín. 8 caracteres"
+                    placeholder="Insira a senha"
                     control={form.control}
                     type="password"
                 />
@@ -142,14 +142,14 @@ export default function UserRegistrationForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid} className="gap-1">
-                            <FieldLabel htmlFor="dateOfBirth" className="text-[13px]">
+                            <FieldLabel htmlFor="dateOfBirth" className="text-[13px] !text-foreground">
                                 Data de Nascimento
                             </FieldLabel>
                             <DatePicker
                                 date={field.value ? new Date(field.value) : undefined}
                                 onDateChange={(date) => field.onChange(date ? date.toISOString() : "")}
                                 placeholder="dd/mm/aaaa"
-                                className="py-5 placeholder:text-[13px] text-[13px]"
+                                className="py-5 placeholder:text-[13px] text-[13px] !text-foreground"
                             />
                             {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
                         </Field>
@@ -161,7 +161,7 @@ export default function UserRegistrationForm() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid} className="gap-1">
-                            <FieldLabel htmlFor="whatsapp" className="text-[13px]">
+                            <FieldLabel htmlFor="whatsapp" className="text-[13px] !text-foreground">
                                 Whatsapp
                             </FieldLabel>
                             <IMaskInput
@@ -174,7 +174,7 @@ export default function UserRegistrationForm() {
                                 onBlur={field.onBlur}
                                 placeholder="(00) 00000-0000"
                                 className={cn(
-                                    "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-5 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                                    "!text-foreground file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-5 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
                                     "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                                     "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                                 )}
