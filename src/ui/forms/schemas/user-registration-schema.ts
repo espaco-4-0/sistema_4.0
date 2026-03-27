@@ -25,7 +25,7 @@ export const IFAL_AFFILIATION_OPTIONS = ["aluno", "ex-aluno", "nao-aluno"] as co
 
 export const userRegistrationSchema = z
     .object({
-        completeName: z
+        nomeCompleto: z
             .string()
             .min(6, "O nome completo deve ter no mínimo 6 caracteres")
             .refine((value) => {
@@ -36,15 +36,6 @@ export const userRegistrationSchema = z
         email: z.email("Por favor, insira um endereço de e-mail válido"),
 
         password: z
-            .string()
-            .min(6, "A senha deve ter no mínimo 6 caracteres")
-            .max(16, "A senha deve ter no máximo 16 caracteres")
-            .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
-            .regex(/[a-z]/, "Deve conter pelo menos uma letra minúscula")
-            .regex(/\d/, "Deve conter pelo menos um número")
-            .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos um caractere especial (@, #, $, etc.)"),
-
-        confirmPassword: z
             .string()
             .min(6, "A senha deve ter no mínimo 6 caracteres")
             .max(16, "A senha deve ter no máximo 16 caracteres")
@@ -84,10 +75,6 @@ export const userRegistrationSchema = z
             message: "Selecione uma opção válida",
         }),
     })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: "As senhas não coincidem",
-        path: ["confirmPassword"],
-    })
     .refine(
         (data) => {
             if (data.deficiency !== "Nenhuma") {
@@ -113,4 +100,20 @@ export const userRegistrationSchema = z
         }
     );
 
-export type userRegistrationData = z.infer<typeof userRegistrationSchema>;
+export const userRegistrationFrontSchema = userRegistrationSchema
+    .extend({
+        confirmPassword: z
+            .string()
+            .min(6, "A senha deve ter no mínimo 6 caracteres")
+            .max(16, "A senha deve ter no máximo 16 caracteres")
+            .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
+            .regex(/[a-z]/, "Deve conter pelo menos uma letra minúscula")
+            .regex(/\d/, "Deve conter pelo menos um número")
+            .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos um caractere especial (@, #, $, etc.)"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "As senhas não coincidem",
+        path: ["confirmPassword"],
+    });
+
+export type userRegistrationFrontData = z.infer<typeof userRegistrationFrontSchema>;

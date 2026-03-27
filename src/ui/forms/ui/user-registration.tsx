@@ -13,8 +13,8 @@ import {
     EDUCATION_OPTIONS,
     IFAL_AFFILIATION_OPTIONS,
     raceOptions,
-    userRegistrationSchema,
-    type userRegistrationData,
+    userRegistrationFrontSchema,
+    type userRegistrationFrontData,
 } from "../schemas/user-registration-schema";
 
 export function InputText({
@@ -89,10 +89,10 @@ function InputSelect({
 }
 
 export default function UserRegistrationForm() {
-    const form = useForm<userRegistrationData>({
-        resolver: zodResolver(userRegistrationSchema as any),
+    const form = useForm<userRegistrationFrontData>({
+        resolver: zodResolver(userRegistrationFrontSchema as any),
         defaultValues: {
-            completeName: "",
+            nomeCompleto: "",
             email: "",
             password: "",
             confirmPassword: "",
@@ -110,8 +110,27 @@ export default function UserRegistrationForm() {
 
     const deficiencyValue = form.watch("deficiency");
 
-    function onSubmit(data: userRegistrationData) {
-        console.log("DATA:", data);
+    async function onSubmit(data: userRegistrationFrontData) {
+        console.log(data);
+        try {
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                console.error("deu erro");
+                return;
+            }
+
+            console.log("logou");
+        } catch (error) {
+            console.error(error);
+            return;
+        }
     }
 
     return (

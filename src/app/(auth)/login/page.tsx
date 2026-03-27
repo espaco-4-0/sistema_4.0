@@ -1,5 +1,3 @@
-"use client";
-
 import UserLoginForm from "@/src/ui/forms/ui/user-login";
 import LeftSpaceDecoration from "@/src/ui/modules/auth_pages/left-space-decoration";
 import { Home } from "lucide-react";
