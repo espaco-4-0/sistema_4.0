@@ -16,7 +16,7 @@ import {
 } from "@/src/ui/components/ui/dropdown-menu";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Plus, PlusCircle, Search } from "lucide-react";
 
-export default function Recursos() {
+export default function Resources() {
     const [openImportar, setOpenImportar] = useState(false);
     const [openRecursos, setOpenRecursos] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);

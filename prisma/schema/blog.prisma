@@ -4,7 +4,7 @@ model Post {
   slug           String   @unique
   resumo         String?
   conteudo       String
-  tempoDeLeitura Int?     // minutos estimados
+  tempoDeLeitura Int? // minutos estimados
   publicado      Boolean  @default(false)
   capaBannerUrl  String?
   createdAt      DateTime @default(now())

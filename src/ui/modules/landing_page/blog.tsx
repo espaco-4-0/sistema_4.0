@@ -6,7 +6,7 @@ import { Transition, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 const noticias = newsData.slice(0, 5);
 
@@ -102,13 +102,18 @@ export default function Blog() {
                                         : `col-span-1 row-span-1 ${smallSlotClass} h-36 sm:h-44 md:h-60 rounded-xl hover:shadow-xl transition-shadow`
                                 }`}
                             >
-                                <Link href={`/blog/${noticia.id}`}>
+                                <Link href={`/blog/${noticia.id}`} className="relative block size-full">
                                     <div className="absolute inset-0 z-10 size-full bg-linear-to-t from-slate-900 via-slate-900/75 to-transparent" />
 
                                     <Image
                                         src={noticia.image}
                                         alt={noticia.title}
                                         fill
+                                        sizes={
+                                            isFeatured
+                                                ? "(max-width: 768px) 100vw, 66vw"
+                                                : "(max-width: 768px) 50vw, 16vw"
+                                        }
                                         className="z-0 object-cover group-hover:scale-110 transition-all duration-700 brightness-80 group-hover:brightness-95"
                                     />
 
@@ -172,10 +177,7 @@ export default function Blog() {
                         >
                             <motion.div
                                 variants={{
-                                    rest: {
-                                        scale: 1,
-                                        rotate: 0,
-                                    },
+                                    rest: { scale: 1, rotate: 0 },
                                     hover: {
                                         scale: [1, 1.15, 1],
                                         rotate: [0, 6, -6, 0],

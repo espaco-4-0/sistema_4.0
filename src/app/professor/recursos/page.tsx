@@ -1,11 +1,11 @@
 "use client";
 
-import Recursos from "@/src/ui/modules/professor_pages/recursos";
+import Resources from "@/src/ui/modules/tearcher_pages/resources";
 
 export default function RecursosPage() {
     return (
-	<div className="space-y-6">
-		<Recursos />
-	</div>
-	);
+        <div className="space-y-6">
+            <Resources />
+        </div>
+    );
 }

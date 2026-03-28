@@ -3,7 +3,7 @@ model Certificado {
   titulo       String
   descricao    String?
   cargaHoraria Int?
-  arquivoUrl   String?   // PDF gerado
+  arquivoUrl   String? // PDF gerado
   emitidoEm    DateTime  @default(now())
   validadeAte  DateTime?
   updatedAt    DateTime  @updatedAt

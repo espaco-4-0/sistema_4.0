@@ -1,10 +1,11 @@
 "use client";
 
-import { GerenciarProjetos } from "@/src/ui/modules/professor_pages/gerenciar_projetos";
+import { ManageProjects } from "@/src/ui/modules/tearcher_pages/manage_projects";
 
-export default function GerenciarProjetosPage() {
+export default function GerenciarProjetos() {
     return (
-	<div className="space-y-6">
-		<GerenciarProjetos />
-	</div>);
+        <div className="space-y-6">
+            <ManageProjects />
+        </div>
+    );
 }

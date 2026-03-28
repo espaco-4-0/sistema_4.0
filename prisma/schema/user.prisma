@@ -1,9 +1,9 @@
 enum UserRole {
-  ADMIN       // Administrador – acesso total ao sistema
-  PROFESSOR   // Define cursos, aulas, horários e locais
-  MONITOR     // Acompanha aulas; nível abaixo do professor
-  PESQUISADOR // Semelhante ao monitor; foco em pesquisa
-  VISITANTE   // Escolhe curso/data/hora e confirma presença
+  ADMIN // Administrador – acesso total ao sistema
+  TEACHER // Define cursos, aulas, horários e locais
+  MONITOR // Acompanha aulas; nível abaixo do professor
+  RESEARCHER // Semelhante ao monitor; foco em pesquisa
+  VISITOR // Escolhe curso/data/hora e confirma presença
 }
 
 model User {
@@ -11,7 +11,7 @@ model User {
   email     String   @unique
   nome      String
   senha     String
-  role      UserRole     @default(VISITANTE)
+  role      UserRole @default(VISITOR)
   avatarUrl String?
   ativo     Boolean  @default(true)
   createdAt DateTime @default(now())

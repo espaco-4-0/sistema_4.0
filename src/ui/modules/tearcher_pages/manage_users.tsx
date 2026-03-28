@@ -14,7 +14,7 @@ import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPl
 
 import NewUserModal from "../../components/modals/professor/usuarios/new-user-modal";
 
-export default function GerenciarUsuarios() {
+export default function ManageUsers() {
     const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
     const [typeFilter, setTypeFilter] = useState("Todos");

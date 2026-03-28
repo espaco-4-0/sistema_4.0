@@ -4,7 +4,7 @@ import { ProjetoDetalhesModal } from "@/src/ui/components/modals/projeto-detalhe
 import { ProjetoResumo } from "@/src/ui/components/props/professor/props";
 import { ChevronRight, DollarSign, ListTodo, Search, User, Users } from "lucide-react";
 
-export function GerenciarProjetos() {
+export function ManageProjects() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState<string>("todos");
     const [selectedProjeto, setSelectedProjeto] = useState<ProjetoResumo | null>(null);

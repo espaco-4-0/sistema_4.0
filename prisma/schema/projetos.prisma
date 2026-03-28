@@ -33,7 +33,7 @@ model Projeto {
 
 model ProjetoMembro {
   id       String   @id @default(cuid())
-  funcao   String?  // ex: "pesquisador", "bolsista"
+  funcao   String? // ex: "pesquisador", "bolsista"
   joinedAt DateTime @default(now())
 
   projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
@@ -45,7 +45,6 @@ model ProjetoMembro {
   @@unique([projetoId, userId])
   @@index([userId])
 }
-
 
 model ProjetoFoto {
   id        String   @id @default(cuid())
@@ -60,12 +59,11 @@ model ProjetoFoto {
   @@index([projetoId])
 }
 
-
 model RelatorioProj {
   id          String    @id @default(cuid())
   titulo      String
   conteudo    String
-  arquivoUrl  String?   // PDF ou outro anexo
+  arquivoUrl  String? // PDF ou outro anexo
   publicadoEm DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
