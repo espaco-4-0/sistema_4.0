@@ -1,23 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/src/ui/components/ui/button";
+import { Checkbox } from "@/src/ui/components/ui/checkbox";
+import { Label } from "@/src/ui/components/ui/label";
+import { UserLoginData, userLoginSchema } from "@/src/ui/forms/schemas/user-login-schema";
+import { InputText } from "@/src/ui/forms/ui/user-registration";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 
-import { Button } from "../../components/ui/button";
-import { Checkbox } from "../../components/ui/checkbox";
-import { Label } from "../../components/ui/label";
-import { userLoginData, userLoginSchema } from "../schemas/user-login-schema";
-import { InputText } from "./user-registration";
-
 export default function UserLoginForm() {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
     const [serverError, setServerError] = useState<string | null>(null);
 
-    const form = useForm<userLoginData>({
+    const form = useForm<UserLoginData>({
         resolver: zodResolver(userLoginSchema as any),
         defaultValues: {
             email: "",
@@ -25,28 +26,38 @@ export default function UserLoginForm() {
             remember: false,
         },
         mode: "onBlur",
+        reValidateMode: "onChange",
     });
 
-    async function handleSubmit(data: userLoginData) {
+    async function handleSubmit(data: UserLoginData) {
         setServerError(null);
-        const res = await signIn("credentials", {
-            redirect: false,
-            email: data.email,
-            password: data.password,
-        });
+        setIsLoading(true);
 
-        if (!res) {
-            setServerError("Erro inesperado, tente novamente.");
-            return;
+        try {
+            const res = await signIn("credentials", {
+                redirect: false,
+                email: data.email,
+                password: data.password,
+                remember: String(data.remember),
+            });
+
+            if (!res) {
+                setServerError("Erro inesperado. Tente novamente.");
+                return;
+            }
+
+            if (res.error) {
+                const message = res.error === "CredentialsSignin" ? "E-mail ou senha incorretos." : res.error;
+                setServerError(message);
+                return;
+            }
+
+            router.push("/dashboard");
+        } catch {
+            setServerError("Erro de conexão. Verifique sua internet e tente novamente.");
+        } finally {
+            setIsLoading(false);
         }
-
-        if (res.error) {
-            setServerError(res.error);
-            form.setError("password", { type: "manual", message: "" });
-            return;
-        }
-
-        router.push("/dashboard");
     }
 
     return (
@@ -94,9 +105,16 @@ export default function UserLoginForm() {
             <Button
                 className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-primary hover:bg-black/90 mt-2"
                 type="submit"
-                form="login"
+                disabled={isLoading}
             >
-                Entrar
+                {isLoading ? (
+                    <span className="flex items-center gap-2">
+                        <Loader2 className="animate-spin w-4 h-4" />
+                        Entrando...
+                    </span>
+                ) : (
+                    "Entrar"
+                )}
             </Button>
         </form>
     );

@@ -3,10 +3,14 @@ import bcrypt from "bcryptjs";
 import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+const SESSION_DURATION_LONG = 30 * 24 * 60 * 60; //30 DIAS
+const SESSION_DURATION_SHORT = 1 * 24 * 60 * 60; //1 DIA
+
 declare module "next-auth" {
     interface User extends DefaultUser {
         id: string;
         role: string;
+        remember: boolean; // ← adiciona
     }
 
     interface Session {
@@ -21,6 +25,7 @@ declare module "next-auth/jwt" {
     interface JWT {
         id: string;
         role: string;
+        remember: boolean; // ← adiciona
     }
 }
 
@@ -31,12 +36,13 @@ const handler = NextAuth({
             credentials: {
                 email: { label: "Email", type: "email" },
                 password: { label: "Senha", type: "password" },
+                remember: { label: "Lembrar-me", type: "text" },
             },
 
             async authorize(credentials) {
                 if (!credentials) return null;
 
-                const { email, password } = credentials;
+                const { email, password, remember } = credentials;
 
                 const user = await prisma.user.findUnique({
                     where: { email },
@@ -53,6 +59,7 @@ const handler = NextAuth({
                     id: user.id,
                     email: user.email,
                     role: user.role,
+                    remember: remember === "true",
                 };
             },
         }),
@@ -67,14 +74,19 @@ const handler = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.remember = user.remember;
+
+                token.exp =
+                    Math.floor(Date.now() / 1000) + (user.remember ? SESSION_DURATION_LONG : SESSION_DURATION_SHORT);
             }
+
             return token;
         },
 
         async session({ session, token }) {
             if (session.user) {
-                session.user.id = token.id as string;
-                session.user.role = token.role as string;
+                session.user.id = token.id;
+                session.user.role = token.role;
             }
             return session;
         },
