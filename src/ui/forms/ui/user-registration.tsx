@@ -18,10 +18,7 @@ import {
     type UserRegistrationFrontData,
 } from "../schemas/user-registration-schema";
 
-type SelectOption<T = string> = {
-    value: T;
-    label: string;
-};
+type SelectOption<T = string> = { value: T; label: string };
 
 export const raceOptions: SelectOption<Race>[] = [
     { value: Race.BRANCA, label: "Branco" },
@@ -51,23 +48,20 @@ const deficiencyOptions: SelectOption<DeficiencyOption>[] = Object.values(Defici
     label: value,
 }));
 
-export function InputText<T extends FieldValues>({
+const inputCn =
+    "text-foreground! file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-5 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive";
+
+function FieldWrapper<T extends FieldValues>({
     name,
-    label,
-    placeholder,
     control,
-    type,
+    label,
+    children,
 }: Readonly<{
     name: Path<T>;
-    label: string;
-    placeholder: string;
     control: Control<T>;
-    type?: string;
+    label: string;
+    children: (field: any, fieldState: any) => React.ReactNode;
 }>) {
-    const [viewPassword, setViewPassword] = useState(false);
-    const isPassword = type === "password";
-    const inputType = isPassword && viewPassword ? "text" : type;
-
     return (
         <Controller
             name={name}
@@ -77,33 +71,52 @@ export function InputText<T extends FieldValues>({
                     <FieldLabel className="text-[13px] text-foreground!" htmlFor={name}>
                         {label}
                     </FieldLabel>
-                    <InputGroup>
-                        <InputGroupInput
-                            className="py-5 placeholder:text-[13px] text-[13px] text-foreground!"
-                            {...field}
-                            id={name}
-                            placeholder={placeholder}
-                            type={inputType}
-                        />
-                        {isPassword && (
-                            <InputGroupAddon align="inline-end">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setViewPassword((prev) => !prev)}
-                                    aria-label={viewPassword ? "Ocultar senha" : "Mostrar senha"}
-                                    className="cursor-pointer"
-                                >
-                                    {viewPassword ? <Eye /> : <EyeClosed />}
-                                </Button>
-                            </InputGroupAddon>
-                        )}
-                    </InputGroup>
+                    {children(field, fieldState)}
                     {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
                 </Field>
             )}
         />
+    );
+}
+
+export function InputText<T extends FieldValues>({
+    name,
+    label,
+    placeholder,
+    control,
+    type,
+}: Readonly<{ name: Path<T>; label: string; placeholder: string; control: Control<T>; type?: string }>) {
+    const [viewPassword, setViewPassword] = useState(false);
+    const isPassword = type === "password";
+
+    return (
+        <FieldWrapper name={name} control={control} label={label}>
+            {(field, _) => (
+                <InputGroup>
+                    <InputGroupInput
+                        className="py-5 placeholder:text-[13px] text-[13px] text-foreground!"
+                        {...field}
+                        id={name}
+                        placeholder={placeholder}
+                        type={isPassword && viewPassword ? "text" : type}
+                    />
+                    {isPassword && (
+                        <InputGroupAddon align="inline-end">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setViewPassword((p) => !p)}
+                                aria-label={viewPassword ? "Ocultar senha" : "Mostrar senha"}
+                                className="cursor-pointer"
+                            >
+                                {viewPassword ? <Eye /> : <EyeClosed />}
+                            </Button>
+                        </InputGroupAddon>
+                    )}
+                </InputGroup>
+            )}
+        </FieldWrapper>
     );
 }
 
@@ -123,37 +136,28 @@ function InputSelect<T extends FieldValues, TValue extends string>({
     onChange?: (value: TValue) => void;
 }>) {
     return (
-        <Controller
-            name={name}
-            control={control}
-            render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="gap-1">
-                    <FieldLabel className="text-[13px] text-foreground!">{label}</FieldLabel>
-
-                    <Select
-                        value={field.value}
-                        onValueChange={(val: TValue) => {
-                            field.onChange(val);
-                            onChange?.(val);
-                        }}
-                    >
-                        <SelectTrigger className="w-full h-9 py-5 text-[13px]">
-                            <SelectValue placeholder={placeholder} />
-                        </SelectTrigger>
-
-                        <SelectContent className="bg-white max-h-40">
-                            {options.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
-                </Field>
+        <FieldWrapper name={name} control={control} label={label}>
+            {(field) => (
+                <Select
+                    value={field.value}
+                    onValueChange={(val: TValue) => {
+                        field.onChange(val);
+                        onChange?.(val);
+                    }}
+                >
+                    <SelectTrigger className="w-full h-9 py-5 text-[13px]">
+                        <SelectValue placeholder={placeholder} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white max-h-40">
+                        {options.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             )}
-        />
+        </FieldWrapper>
     );
 }
 
@@ -180,38 +184,28 @@ export default function UserRegistrationForm() {
     });
 
     const deficiencyValue = form.watch("deficiency");
-
-    const showOtherDeficiency = deficiencyValue === DeficiencyOption.Outro;
-    const showDeficiencyNeeds = deficiencyValue !== undefined && deficiencyValue !== DeficiencyOption.Nenhuma;
+    const isOtherDeficiency = deficiencyValue === DeficiencyOption.Outro;
+    const isNenhuma = deficiencyValue === DeficiencyOption.Nenhuma;
 
     async function onSubmit(data: UserRegistrationFrontData) {
         setIsLoading(true);
-
         try {
-            const isOther = data.deficiency === DeficiencyOption.Outro;
-            const isNenhuma = data.deficiency === DeficiencyOption.Nenhuma;
-
-            const finalDeficiency = isOther ? data.otherDeficiency! : data.deficiency;
-            const finalDeficiencyNeeds = isNenhuma ? undefined : data.deficiencyNeeds?.trim() || undefined;
-
             const { confirmPassword, otherDeficiency, deficiencyNeeds, ...rest } = data;
-
             const payload = {
                 ...rest,
-                deficiency: finalDeficiency,
-                ...(finalDeficiencyNeeds && { deficiencyNeeds: finalDeficiencyNeeds }),
+                deficiency: isOtherDeficiency ? otherDeficiency! : data.deficiency,
+                ...(!isNenhuma && deficiencyNeeds?.trim() && { deficiencyNeeds: deficiencyNeeds.trim() }),
             };
 
-            const response = await fetch("/api/auth/register", {
+            const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) {
-                const body = await response.json().catch(() => null);
-                const message = body?.message ?? "Erro ao realizar cadastro. Tente novamente.";
-                toast.error(message);
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                toast.error(body?.message ?? "Erro ao realizar cadastro. Tente novamente.");
                 return;
             }
 
@@ -245,52 +239,31 @@ export default function UserRegistrationForm() {
                     type="password"
                 />
 
-                <Controller
-                    name="dateOfBirth"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid} className="gap-1">
-                            <FieldLabel htmlFor="dateOfBirth" className="text-[13px] text-foreground!">
-                                Data de Nascimento
-                            </FieldLabel>
-                            <DatePicker
-                                date={field.value ? new Date(field.value) : undefined}
-                                onDateChange={(date) => field.onChange(date ? date.toISOString() : "")}
-                                placeholder="dd/mm/aaaa"
-                                className="py-5 placeholder:text-[13px] text-[13px] text-foreground!"
-                            />
-                            {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
-                        </Field>
+                <FieldWrapper name="dateOfBirth" control={form.control} label="Data de Nascimento">
+                    {(field, _) => (
+                        <DatePicker
+                            date={field.value ? new Date(field.value) : undefined}
+                            onDateChange={(date) => field.onChange(date ? date.toISOString() : "")}
+                            placeholder="dd/mm/aaaa"
+                            className="py-5 placeholder:text-[13px] text-[13px] text-foreground!"
+                        />
                     )}
-                />
+                </FieldWrapper>
 
-                <Controller
-                    name="telephone"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid} className="gap-1">
-                            <FieldLabel htmlFor="telephone" className="text-[13px] text-foreground!">
-                                Telefone
-                            </FieldLabel>
-                            <IMaskInput
-                                {...field}
-                                data-slot="input"
-                                id="telephone"
-                                name={field.name}
-                                mask="(00) 00000-0000"
-                                onAccept={(value: string) => field.onChange(value)}
-                                onBlur={field.onBlur}
-                                placeholder="(00) 00000-0000"
-                                className={cn(
-                                    "text-foreground! file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-5 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                                    "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                                )}
-                            />
-                            {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
-                        </Field>
+                <FieldWrapper name="telephone" control={form.control} label="Telefone">
+                    {(field, _) => (
+                        <IMaskInput
+                            {...field}
+                            data-slot="input"
+                            id="telephone"
+                            mask="(00) 00000-0000"
+                            onAccept={(value: string) => field.onChange(value)}
+                            onBlur={field.onBlur}
+                            placeholder="(00) 00000-0000"
+                            className={cn(inputCn)}
+                        />
                     )}
-                />
+                </FieldWrapper>
 
                 <InputSelect
                     name="race"
@@ -313,7 +286,6 @@ export default function UserRegistrationForm() {
                     options={ifalOptions}
                     placeholder="Selecione"
                 />
-
                 <InputSelect
                     name="deficiency"
                     control={form.control}
@@ -332,7 +304,7 @@ export default function UserRegistrationForm() {
                     }}
                 />
 
-                {showOtherDeficiency && (
+                {isOtherDeficiency && (
                     <InputText
                         name="otherDeficiency"
                         label="Especifique a deficiência"
@@ -340,8 +312,7 @@ export default function UserRegistrationForm() {
                         control={form.control}
                     />
                 )}
-
-                {showDeficiencyNeeds && (
+                {deficiencyValue && !isNenhuma && (
                     <InputText
                         name="deficiencyNeeds"
                         label="Necessidade especial"
