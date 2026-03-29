@@ -12,11 +12,11 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function UserLoginForm() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const [serverError, setServerError] = useState<string | null>(null);
 
     const form = useForm<UserLoginData>({
         resolver: zodResolver(userLoginSchema as any),
@@ -25,12 +25,10 @@ export default function UserLoginForm() {
             password: "",
             remember: false,
         },
-        mode: "onBlur",
-        reValidateMode: "onChange",
+        mode: "onTouched",
     });
 
     async function handleSubmit(data: UserLoginData) {
-        setServerError(null);
         setIsLoading(true);
 
         try {
@@ -42,19 +40,19 @@ export default function UserLoginForm() {
             });
 
             if (!res) {
-                setServerError("Erro inesperado. Tente novamente.");
+                toast.error("Erro inesperado. Tente novamente.");
                 return;
             }
 
             if (res.error) {
                 const message = res.error === "CredentialsSignin" ? "E-mail ou senha incorretos." : res.error;
-                setServerError(message);
+                toast.error(message);
                 return;
             }
 
             router.push("/dashboard");
         } catch {
-            setServerError("Erro de conexão. Verifique sua internet e tente novamente.");
+            toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
         } finally {
             setIsLoading(false);
         }
@@ -95,12 +93,6 @@ export default function UserLoginForm() {
                     Esqueci minha senha ?
                 </Link>
             </div>
-
-            {serverError && (
-                <div role="alert" aria-live="assertive" className="text-sm text-red-600">
-                    {serverError}
-                </div>
-            )}
 
             <Button
                 className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-primary hover:bg-black/90 mt-2"

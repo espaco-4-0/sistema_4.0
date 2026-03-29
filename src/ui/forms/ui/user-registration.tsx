@@ -143,7 +143,7 @@ export default function UserRegistrationForm() {
             deficiencyNeeds: "",
             otherDeficiency: "",
         },
-        mode: "onBlur",
+        mode: "onTouched",
     });
 
     const deficiencyValue = form.watch("deficiency");
