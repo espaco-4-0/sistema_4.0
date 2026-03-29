@@ -1,64 +1,55 @@
-import { Education, Race } from "@/src/generated/prisma/enums";
+import { userRegistrationSchema } from "@/src/ui/forms/schemas/user-registration-schema";
+import { getErrorMessage, getRequestInfo } from "@/src/ui/lib/errors";
+import { logger } from "@/src/ui/lib/logger";
 import { prisma } from "@/src/ui/lib/prisma";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
-import { userRegistrationFrontSchema } from "./../../../../ui/forms/schemas/user-registration-schema";
-
-function normalizeEnum<T extends Record<string, string>>(enumObj: T, value: unknown): T[keyof T] | null {
-    if (!value || typeof value !== "string") return null;
-
-    const normalized = value.trim().toUpperCase().replaceAll(/\s+/g, "_");
-
-    const enumValues = Object.values(enumObj);
-
-    if (enumValues.includes(normalized as T[keyof T])) {
-        return normalized as T[keyof T];
-    }
-
-    return null;
-}
+const SALT_ROUNDS = 12;
 
 export async function POST(request: NextRequest) {
-    const body = await request.json();
-    const verifiedBody = userRegistrationFrontSchema.safeParse(body);
-
-    if (!verifiedBody.success) {
-        return NextResponse.json({ error: verifiedBody.error }, { status: 400 });
-    }
-
-    const { data } = verifiedBody; // ✅ use validated data
-
-    const haveUser = await prisma.user.findUnique({
-        where: { email: data.email },
-        select: { id: true },
-    });
-
-    if (haveUser) {
-        return NextResponse.json({ error: "Email já cadastrado" }, { status: 400 });
-    }
-
     try {
+        const body = await request.json();
+
+        const verifiedBody = userRegistrationSchema.safeParse(body);
+        if (!verifiedBody.success) {
+            return NextResponse.json(
+                { message: verifiedBody.error.issues[0]?.message ?? "Dados inválidos" },
+                { status: 400 }
+            );
+        }
+        const { data } = verifiedBody;
+
+        const haveUser = await prisma.user.findUnique({
+            where: { email: data.email },
+            select: { id: true },
+        });
+
+        if (haveUser) {
+            return NextResponse.json({ message: "Email já cadastrado" }, { status: 409 });
+        }
+
+        const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+
         await prisma.user.create({
             data: {
-                nomeCompleto: data.nomeCompleto,
+                nomeCompleto: data.completeName,
                 email: data.email,
-                senha: data.password,
-
-                dataNascimento: new Date(data.dateOfBirth),
-
-                telefone: data.whatsapp ?? null,
-
-                raca: normalizeEnum(Race, data.race),
-                educacao: normalizeEnum(Education, data.education),
+                senha: hashedPassword,
+                dataNascimento: data.dateOfBirth,
+                telefone: data.telephone,
+                raca: data.race,
+                educacao: data.education,
+                ifalAfiliacao: data.ifal_afiliation,
                 deficiencia: data.deficiency ?? null,
-                necessidadeEspecial: data.deficiency_Needs ?? null,
+                necessidadeEspecial: data.deficiencyNeeds ?? null,
             },
         });
-    } catch (err: any) {
-        console.log(err);
 
-        return NextResponse.json({ error: err?.message ?? String(err) }, { status: 500 });
+        return NextResponse.json({ message: "Usuário criado com sucesso" }, { status: 201 });
+    } catch (err) {
+        const errorMessage = getErrorMessage(err);
+        logger.error({ err, route: getRequestInfo(request) }, errorMessage);
+        return NextResponse.json({ message: errorMessage }, { status: 500 });
     }
-
-    return NextResponse.json({ message: "criou" }, { status: 201 });
 }

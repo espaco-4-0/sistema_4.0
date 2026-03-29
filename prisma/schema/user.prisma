@@ -35,7 +35,7 @@ model User {
     nomeCompleto        String
     email               String         @unique
     senha               String
-    dataNascimento      DateTime
+    dataNascimento      DateTime       @db.Date
     telefone            String
     raca                Race
     educacao            Education

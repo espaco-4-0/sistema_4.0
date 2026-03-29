@@ -107,7 +107,7 @@ export async function seedUsuarios(prisma: PrismaClient) {
         },
     ];
 
-    const defaultSenha = await bcrypt.hash("trocar_em_producao", 10);
+    const defaultSenha = await bcrypt.hash("trocar_em_producao", 12);
 
     for (const u of usuarios) {
         await prisma.user.upsert({
