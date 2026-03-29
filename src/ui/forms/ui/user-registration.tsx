@@ -13,11 +13,43 @@ import { Field, FieldError, FieldLabel } from "../../components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../../components/ui/input-group";
 import { cn } from "../../lib/utils";
 import {
-    DEFAULT_DEFICIENCY_OPTIONS,
     DeficiencyOption,
     userRegistrationFrontSchema,
     type UserRegistrationFrontData,
 } from "../schemas/user-registration-schema";
+
+type SelectOption<T = string> = {
+    value: T;
+    label: string;
+};
+
+export const raceOptions: SelectOption<Race>[] = [
+    { value: Race.BRANCA, label: "Branco" },
+    { value: Race.PRETA, label: "Preto" },
+    { value: Race.PARDA, label: "Pardo" },
+    { value: Race.AMARELA, label: "Amarelo" },
+    { value: Race.INDIGENA, label: "Indígena" },
+];
+
+export const educationOptions: SelectOption<Education>[] = [
+    { value: Education.FUNDAMENTAL_INCOMPLETO, label: "Fundamental incompleto" },
+    { value: Education.FUNDAMENTAL_COMPLETO, label: "Fundamental completo" },
+    { value: Education.MEDIO_CURSANDO, label: "Ensino médio incompleto" },
+    { value: Education.MEDIO_COMPLETO, label: "Ensino médio completo" },
+    { value: Education.SUPERIOR_CURSANDO, label: "Superior incompleto" },
+    { value: Education.SUPERIOR_COMPLETO, label: "Superior completo" },
+];
+
+export const ifalOptions: SelectOption<IfalAfiliation>[] = [
+    { value: IfalAfiliation.ALUNO, label: "Aluno" },
+    { value: IfalAfiliation.EX_ALUNO, label: "Ex-aluno" },
+    { value: IfalAfiliation.NÃO_ALUNO, label: "Não aluno" },
+];
+
+const deficiencyOptions: SelectOption<DeficiencyOption>[] = Object.values(DeficiencyOption).map((value) => ({
+    value,
+    label: value,
+}));
 
 export function InputText<T extends FieldValues>({
     name,
@@ -75,7 +107,7 @@ export function InputText<T extends FieldValues>({
     );
 }
 
-function InputSelect<T extends FieldValues>({
+function InputSelect<T extends FieldValues, TValue extends string>({
     name,
     control,
     label,
@@ -86,9 +118,9 @@ function InputSelect<T extends FieldValues>({
     name: Path<T>;
     control: Control<T>;
     label: string;
-    options: readonly string[];
+    options: SelectOption<TValue>[];
     placeholder?: string;
-    onChange?: (value: string) => void;
+    onChange?: (value: TValue) => void;
 }>) {
     return (
         <Controller
@@ -96,27 +128,28 @@ function InputSelect<T extends FieldValues>({
             control={control}
             render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid} className="gap-1">
-                    <FieldLabel htmlFor={name} className="text-[13px] text-foreground!">
-                        {label}
-                    </FieldLabel>
+                    <FieldLabel className="text-[13px] text-foreground!">{label}</FieldLabel>
+
                     <Select
-                        onValueChange={(val) => {
+                        value={field.value}
+                        onValueChange={(val: TValue) => {
                             field.onChange(val);
                             onChange?.(val);
                         }}
-                        value={field.value}
                     >
-                        <SelectTrigger className="w-full h-9 border-gray-200 text-xs bg-white py-5 placeholder:text-[13px] text-[13px] text-foreground!">
+                        <SelectTrigger className="w-full h-9 py-5 text-[13px]">
                             <SelectValue placeholder={placeholder} />
                         </SelectTrigger>
+
                         <SelectContent className="bg-white max-h-40">
                             {options.map((opt) => (
-                                <SelectItem className="capitalize" key={opt} value={opt}>
-                                    {opt}
+                                <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
+
                     {fieldState.error && <FieldError className="text-[11px]" errors={[fieldState.error]} />}
                 </Field>
             )}
@@ -263,21 +296,21 @@ export default function UserRegistrationForm() {
                     name="race"
                     control={form.control}
                     label="Raça"
-                    options={Object.values(Race)}
+                    options={raceOptions}
                     placeholder="Selecione"
                 />
                 <InputSelect
                     name="education"
                     control={form.control}
                     label="Escolaridade"
-                    options={Object.values(Education)}
+                    options={educationOptions}
                     placeholder="Selecione"
                 />
                 <InputSelect
                     name="ifal_afiliation"
                     control={form.control}
                     label="Vinculo com IFAL"
-                    options={Object.values(IfalAfiliation)}
+                    options={ifalOptions}
                     placeholder="Selecione"
                 />
 
@@ -285,7 +318,7 @@ export default function UserRegistrationForm() {
                     name="deficiency"
                     control={form.control}
                     label="Deficiência"
-                    options={DEFAULT_DEFICIENCY_OPTIONS}
+                    options={deficiencyOptions}
                     placeholder="Selecione"
                     onChange={(val) => {
                         if (val !== DeficiencyOption.Outro) {

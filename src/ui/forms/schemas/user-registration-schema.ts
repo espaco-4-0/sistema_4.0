@@ -11,7 +11,6 @@ export enum DeficiencyOption {
     Multipla = "Deficiência múltipla",
     Outro = "Outro",
 }
-export const DEFAULT_DEFICIENCY_OPTIONS = Object.values(DeficiencyOption) as readonly string[];
 
 export const userRegistrationSchema = z.object({
     completeName: z
