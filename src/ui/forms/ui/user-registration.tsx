@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Education, Race, ifalAffiliation } from "@/src/generated/prisma/enums";
+import { Education, IfalAffiliation, Race } from "@/src/generated/prisma/enums";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed, Loader2 } from "lucide-react";
@@ -37,10 +37,10 @@ export const educationOptions: SelectOption<Education>[] = [
     { value: Education.SUPERIOR_COMPLETO, label: "Superior completo" },
 ];
 
-export const ifalOptions: SelectOption<ifalAffiliation>[] = [
-    { value: ifalAffiliation.ALUNO, label: "Aluno" },
-    { value: ifalAffiliation.EX_ALUNO, label: "Ex-aluno" },
-    { value: ifalAffiliation.NAO_ALUNO, label: "Não aluno" },
+export const ifalOptions: SelectOption<IfalAffiliation>[] = [
+    { value: IfalAffiliation.ALUNO, label: "Aluno" },
+    { value: IfalAffiliation.EX_ALUNO, label: "Ex-aluno" },
+    { value: IfalAffiliation.NAO_ALUNO, label: "Não aluno" },
 ];
 
 const deficiencyOptions: SelectOption<DeficiencyOption>[] = Object.values(DeficiencyOption).map((value) => ({
@@ -209,7 +209,7 @@ export default function UserRegistrationForm() {
                 return;
             }
 
-            toast.success("Cadastro realizado com sucesso!");
+            toast.success("Cadastro realizado com sucesso! Você será redirecionado(a).");
             form.reset();
         } catch {
             toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
@@ -316,7 +316,7 @@ export default function UserRegistrationForm() {
                     <InputText
                         name="deficiencyNeeds"
                         label="Necessidade especial"
-                        placeholder="Opcional"
+                        placeholder="Ex.: Acompanhante"
                         control={form.control}
                     />
                 )}

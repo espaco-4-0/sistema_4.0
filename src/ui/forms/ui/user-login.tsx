@@ -30,6 +30,7 @@ export default function UserLoginForm() {
 
     async function handleSubmit(data: UserLoginData) {
         setIsLoading(true);
+        const id = toast.loading("Entrando...");
 
         try {
             const res = await signIn("credentials", {
@@ -40,19 +41,20 @@ export default function UserLoginForm() {
             });
 
             if (!res) {
-                toast.error("Erro inesperado. Tente novamente.");
+                toast.error("Erro inesperado. Tente novamente.", { id, duration: 3000 });
                 return;
             }
 
             if (res.error) {
                 const message = res.error === "CredentialsSignin" ? "E-mail ou senha incorretos." : res.error;
-                toast.error(message);
+                toast.error(message, { id, duration: 3000 });
                 return;
             }
 
+            toast.success("Login efetuado com sucesso!", { id, duration: 2000 });
             router.push("/dashboard");
         } catch {
-            toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
+            toast.error("Erro de conexão. Verifique sua internet.", { id, duration: 3000 });
         } finally {
             setIsLoading(false);
         }

@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 
-import { Education, PrismaClient, Race, UserRole } from "../../src/generated/prisma/client";
-import { ifalAffiliation } from "../../src/generated/prisma/enums";
+import { Education, IfalAffiliation, PrismaClient, Race, UserRole } from "../../src/generated/prisma/client";
 
 interface UsuarioSeed {
     email: string;
@@ -12,7 +11,7 @@ interface UsuarioSeed {
     telefone: string;
     raca: keyof typeof Race;
     educacao: keyof typeof Education;
-    ifalAfiliacao: keyof typeof ifalAffiliation;
+    ifalAfiliacao: keyof typeof IfalAffiliation;
     deficiencia?: string;
     necessidadeEspecial?: string;
 }
@@ -159,7 +158,7 @@ export async function seedUsuarios(prisma: PrismaClient): Promise<void> {
                 telefone: u.telefone,
                 raca: Race[u.raca],
                 educacao: Education[u.educacao],
-                ifalAfiliacao: ifalAffiliation[u.ifalAfiliacao],
+                ifalAfiliacao: IfalAffiliation[u.ifalAfiliacao],
                 deficiencia: u.deficiencia ?? null,
                 necessidadeEspecial: u.necessidadeEspecial ?? null,
             },

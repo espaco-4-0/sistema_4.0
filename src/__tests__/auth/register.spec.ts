@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Education, Race, ifalAffiliation } from "../../generated/prisma/enums";
+import { Education, IfalAffiliation, Race } from "../../generated/prisma/enums";
 
 const mockFindUnique = vi.fn();
 const mockCreate = vi.fn();
@@ -29,7 +29,7 @@ const validRegistrationBody = {
     telephone: "(82) 99999-9999",
     race: Race.BRANCA,
     education: Education.SUPERIOR_COMPLETO,
-    ifalAffiliation: ifalAffiliation.ALUNO,
+    ifalAffiliation: IfalAffiliation.ALUNO,
 };
 
 // Helpers

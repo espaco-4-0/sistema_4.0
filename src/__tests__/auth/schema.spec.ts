@@ -2,7 +2,7 @@ import { userLoginSchema } from "@/src/ui/forms/schemas/user-login-schema";
 import { userRegistrationSchema } from "@/src/ui/forms/schemas/user-registration-schema";
 import { describe, expect, it } from "vitest";
 
-import { Education, Race, ifalAffiliation } from "../../generated/prisma/enums";
+import { Education, IfalAffiliation, Race } from "../../generated/prisma/enums";
 
 const validRegistrationBody = {
     completeName: "João Silva",
@@ -12,7 +12,7 @@ const validRegistrationBody = {
     telephone: "(82) 99999-9999",
     race: Race.BRANCA,
     education: Education.SUPERIOR_COMPLETO,
-    ifalAffiliation: ifalAffiliation.ALUNO,
+    ifalAffiliation: IfalAffiliation.ALUNO,
 };
 
 const validLoginBody = {
