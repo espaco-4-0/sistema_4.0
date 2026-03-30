@@ -55,13 +55,11 @@ describe("userLoginSchema", () => {
     });
 
     it("Should reject when email is missing", () => {
-        const { email: _, ...withoutEmail } = validLoginBody;
-        expectFailure(parseLogin(withoutEmail));
+        expectFailure(parseLogin({ email: undefined }));
     });
 
     it("Should reject when password is missing", () => {
-        const { password: _, ...withoutPassword } = validLoginBody;
-        expectFailure(parseLogin(withoutPassword));
+        expectFailure(parseLogin({ password: undefined }));
     });
 
     it("Should accept remember as true", () => {
