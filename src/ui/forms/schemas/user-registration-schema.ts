@@ -1,4 +1,4 @@
-import { Education, IfalAfiliation, Race } from "@/src/generated/prisma/enums";
+import { Education, Race, ifalAffiliation } from "@/src/generated/prisma/enums";
 import { differenceInYears } from "date-fns";
 import * as z from "zod";
 
@@ -38,7 +38,7 @@ export const userRegistrationSchema = z.object({
     deficiency: z.string().trim().max(255).optional(),
     deficiencyNeeds: z.string().trim().max(500).optional(),
     education: z.enum(Education, { message: "Selecione uma opção válida" }),
-    ifal_afiliation: z.enum(IfalAfiliation, { message: "Selecione uma opção válida" }),
+    ifalAffiliation: z.enum(ifalAffiliation, { message: "Selecione uma opção válida" }),
 });
 
 export const userRegistrationFrontSchema = userRegistrationSchema

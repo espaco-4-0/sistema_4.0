@@ -12,7 +12,7 @@ enum Race {
     PARDA
     AMARELA
     INDIGENA
-    NÃO_INFORMADA
+    NAO_INFORMADA
 }
 
 enum Education {
@@ -24,29 +24,30 @@ enum Education {
     SUPERIOR_COMPLETO
 }
 
-enum IfalAfiliation {
+enum IfalAffiliation {
     ALUNO
     EX_ALUNO
-    NÃO_ALUNO
+    NAO_ALUNO
+    SERVIDOR
 }
 
 model User {
-    id                  String         @id @default(cuid())
+    id                  String          @id @default(cuid())
     nomeCompleto        String
-    email               String         @unique
+    email               String          @unique
     senha               String
-    dataNascimento      DateTime       @db.Date
+    dataNascimento      DateTime        @db.Date
     telefone            String
     raca                Race
     educacao            Education
-    ifalAfiliacao       IfalAfiliation
+    ifalAfiliacao       ifalAffiliation
     deficiencia         String?
     necessidadeEspecial String?
-    role                UserRole       @default(VISITANTE)
+    role                UserRole        @default(VISITANTE)
     avatarUrl           String?
-    ativo               Boolean        @default(true)
-    createdAt           DateTime       @default(now())
-    updatedAt           DateTime       @updatedAt
+    ativo               Boolean         @default(true)
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @updatedAt
 
     // Relações – Professor
     cursosMinistrados Curso[] @relation("ProfessorCursos")

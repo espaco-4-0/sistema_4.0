@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 
 import { Education, PrismaClient, Race, UserRole } from "../../src/generated/prisma/client";
-import { IfalAfiliation } from "../../src/generated/prisma/enums";
+import { ifalAffiliation } from "../../src/generated/prisma/enums";
 
 interface UsuarioSeed {
     email: string;
@@ -12,7 +12,7 @@ interface UsuarioSeed {
     telefone: string;
     raca: keyof typeof Race;
     educacao: keyof typeof Education;
-    ifalAfiliacao: keyof typeof IfalAfiliation;
+    ifalAfiliacao: keyof typeof ifalAffiliation;
     deficiencia?: string;
     necessidadeEspecial?: string;
 }
@@ -85,7 +85,7 @@ const usuarios: UsuarioSeed[] = [
         telefone: "+55 82 90000-0013",
         raca: "PRETA",
         educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "NÃO_ALUNO",
+        ifalAfiliacao: "NAO_ALUNO",
         deficiencia: "VISUAL",
         necessidadeEspecial: "LEITOR_DE_TELA",
     },
@@ -99,7 +99,7 @@ const usuarios: UsuarioSeed[] = [
         telefone: "+55 82 90000-0005",
         raca: "BRANCA",
         educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "NÃO_ALUNO",
+        ifalAfiliacao: "NAO_ALUNO",
     },
     {
         email: "aluno1@ifal.edu.br",
@@ -134,7 +134,7 @@ const usuarios: UsuarioSeed[] = [
         telefone: "+55 82 90000-0014",
         raca: "AMARELA",
         educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "NÃO_ALUNO",
+        ifalAfiliacao: "NAO_ALUNO",
     },
 ];
 
@@ -159,7 +159,7 @@ export async function seedUsuarios(prisma: PrismaClient): Promise<void> {
                 telefone: u.telefone,
                 raca: Race[u.raca],
                 educacao: Education[u.educacao],
-                ifalAfiliacao: IfalAfiliation[u.ifalAfiliacao],
+                ifalAfiliacao: ifalAffiliation[u.ifalAfiliacao],
                 deficiencia: u.deficiencia ?? null,
                 necessidadeEspecial: u.necessidadeEspecial ?? null,
             },

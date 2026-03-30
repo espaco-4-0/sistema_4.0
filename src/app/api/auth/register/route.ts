@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
                 telefone: data.telephone,
                 raca: data.race,
                 educacao: data.education,
-                ifalAfiliacao: data.ifal_afiliation,
+                ifalAfiliacao: data.ifalAffiliation,
                 deficiencia: data.deficiency ?? null,
                 necessidadeEspecial: data.deficiencyNeeds ?? null,
             },

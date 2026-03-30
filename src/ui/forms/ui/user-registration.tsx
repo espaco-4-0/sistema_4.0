@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Education, IfalAfiliation, Race } from "@/src/generated/prisma/enums";
+import { Education, Race, ifalAffiliation } from "@/src/generated/prisma/enums";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed, Loader2 } from "lucide-react";
@@ -37,10 +37,10 @@ export const educationOptions: SelectOption<Education>[] = [
     { value: Education.SUPERIOR_COMPLETO, label: "Superior completo" },
 ];
 
-export const ifalOptions: SelectOption<IfalAfiliation>[] = [
-    { value: IfalAfiliation.ALUNO, label: "Aluno" },
-    { value: IfalAfiliation.EX_ALUNO, label: "Ex-aluno" },
-    { value: IfalAfiliation.NÃO_ALUNO, label: "Não aluno" },
+export const ifalOptions: SelectOption<ifalAffiliation>[] = [
+    { value: ifalAffiliation.ALUNO, label: "Aluno" },
+    { value: ifalAffiliation.EX_ALUNO, label: "Ex-aluno" },
+    { value: ifalAffiliation.NAO_ALUNO, label: "Não aluno" },
 ];
 
 const deficiencyOptions: SelectOption<DeficiencyOption>[] = Object.values(DeficiencyOption).map((value) => ({
@@ -175,7 +175,7 @@ export default function UserRegistrationForm() {
             telephone: "",
             race: undefined,
             education: undefined,
-            ifal_afiliation: undefined,
+            ifalAffiliation: undefined,
             deficiency: undefined,
             deficiencyNeeds: "",
             otherDeficiency: "",
@@ -280,7 +280,7 @@ export default function UserRegistrationForm() {
                     placeholder="Selecione"
                 />
                 <InputSelect
-                    name="ifal_afiliation"
+                    name="ifalAffiliation"
                     control={form.control}
                     label="Vinculo com IFAL"
                     options={ifalOptions}
