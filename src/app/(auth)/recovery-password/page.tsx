@@ -18,7 +18,7 @@ export default function RecoveryPassword() {
             <div className="relative flex flex-col items-center justify-center px-6">
                 <div className="mt-12 mb-8 w-full max-w-md lg:mt-0">
                     <Button className="flex gap-2 px-0 text-sm text-gray-600 hover:text-gray-500 bg-white cursor-pointer hover:bg-white text-left">
-                        <Link href="/login-page" className="flex gap-2 text-center items-center">
+                        <Link href="/login" className="flex gap-2 text-center items-center">
                             <ArrowLeft />
                             Voltar para o login
                         </Link>
@@ -41,7 +41,7 @@ export default function RecoveryPassword() {
                             Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
                         </p>
 
-                        <Link href="/login-page" className="w-full max-w-md">
+                        <Link href="/login" className="w-full max-w-md">
                             <Button className="mb-6 w-full rounded-lg bg-yellow-primary hover:cursor-pointer hover:bg-yellow-secondary text-black">
                                 VOLTAR PARA LOGIN
                             </Button>

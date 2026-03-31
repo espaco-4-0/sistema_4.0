@@ -117,7 +117,7 @@ export default function NavBar() {
                                 </Link>
                                 <div className="h-6 w-px bg-gray-300" />
                                 <Link
-                                    href="/login-page"
+                                    href="/login"
                                     className="flex h-9 items-center justify-center gap-2 rounded-sm border-2 border-gray-300 px-3 text-[13px] font-semibold text-black whitespace-nowrap hover:border-black hover:bg-gray-50 transition-all duration-300 ease-in-out"
                                 >
                                     <User className="h-5 w-5" /> Entrar
@@ -172,7 +172,7 @@ export default function NavBar() {
                                                 <Calendar className="h-5 w-5" /> Agendar Visita
                                             </Link>
                                             <Link
-                                                href="/login-page"
+                                                href="/login"
                                                 className="flex h-10 items-center justify-center gap-2 rounded-sm border border-gray-300 text-sm font-semibold text-black"
                                             >
                                                 <User className="h-5 w-5" /> Entrar
