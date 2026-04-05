@@ -45,7 +45,7 @@ export default function RecoveryPasswordForm() {
                 {/* Botão para voltar ao login */}
                 {!passwordChanged && (
                     <Link
-                        href="/login-page"
+                        href="/login"
                         className="absolute top-8 left-6 flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:cursor-pointer"
                     >
                         <ArrowLeft className="h-4 w-4" />
@@ -66,7 +66,7 @@ export default function RecoveryPasswordForm() {
                                 Sua senha foi redefinida com sucesso. Agora você pode fazer login com sua nova senha.
                             </p>
 
-                            <Link href="/login-page" className="w-full max-w-md">
+                            <Link href="/login" className="w-full max-w-md">
                                 <Button className="mb-6 w-full rounded-lg hover:cursor-pointer hover:bg-yellow-secondary bg-yellow-primary text-black h-12">
                                     VOLTAR PARA LOGIN
                                 </Button>
