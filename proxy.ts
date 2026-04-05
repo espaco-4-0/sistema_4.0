@@ -1,9 +1,8 @@
 import { checkRateLimit, isRateLimitEnabled } from "@/src/infra/cache/rate-limit";
-import { authorizeRole } from "@/src/infra/modules/auth/authorize-role.middleware";
+import { authorizeRole, protectedRouteMatchers } from "@/src/infra/modules/auth/authorize-role.middleware";
 import { withAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
-import { UserRole } from "./src/generated/prisma/enums";
 import { authenticateUser } from "./src/infra/modules/auth/authenticate-user.middleware";
 
 function getClientIp(req: NextRequest): string {
@@ -36,7 +35,7 @@ export default withAuth(
             }
         }
 
-        const role = req.nextauth.token?.role as UserRole;
+        const role = req.nextauth.token?.role;
         const forbidden = authorizeRole(req, role);
         if (forbidden) return forbidden;
     },
@@ -48,14 +47,5 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: [
-        "/admin/:path*",
-        "/courses/:path*",
-        "/classes/:path*",
-        "/search/:path*",
-        "/projects/:path*",
-        "/inventory/:path*",
-        "/blog/:path*",
-        "/presence/:path*",
-    ],
+    matcher: protectedRouteMatchers,
 };
