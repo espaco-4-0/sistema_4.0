@@ -1,6 +1,6 @@
 "use client";
 
-import { ManageProjects } from "@/src/ui/modules/tearcher_pages/manage_projects";
+import { ManageProjects } from "@/src/ui/modules/teacher_pages/manage_projects";
 
 export default function GerenciarProjetos() {
     return (

@@ -1,7 +1,7 @@
 "use client";
 
-import { Header } from "@/src/ui/modules/tearcher_pages/header";
-import { Sidebar } from "@/src/ui/modules/tearcher_pages/sidebar";
+import { Header } from "@/src/ui/modules/teacher_pages/header";
+import { Sidebar } from "@/src/ui/modules/teacher_pages/sidebar";
 
 export default function ProfessorLayout({
     children,

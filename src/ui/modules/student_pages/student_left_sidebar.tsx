@@ -59,6 +59,7 @@ export default function StudentLeftSidebar() {
                         width={60}
                         height={60}
                         className="size-full object-cover scale-[1.05]"
+                        style={{ width: "auto", height: "auto" }}
                         alt="asd"
                     />
                 </div>
@@ -96,9 +97,7 @@ export default function StudentLeftSidebar() {
                         <User className="size-5 text-yellow-primary" strokeWidth={2.5} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                            {profileDataMock.name}
-                        </p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{profileDataMock.name}</p>
                         <p className="text-xs text-gray-600 truncate">{profileDataMock.affiliation}</p>
                     </div>
                 </div>

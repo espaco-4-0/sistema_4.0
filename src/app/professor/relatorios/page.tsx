@@ -1,6 +1,6 @@
 "use client";
 
-import RelatoriosState from "@/src/ui/modules/tearcher_pages/reports";
+import RelatoriosState from "@/src/ui/modules/teacher_pages/reports";
 
 export default function RelatoriosPage() {
     return (

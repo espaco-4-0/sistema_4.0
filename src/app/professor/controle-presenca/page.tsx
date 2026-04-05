@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AttendanceTable } from "@/src/ui/modules/tearcher_pages/attendance_control";
+import { AttendanceTable } from "@/src/ui/modules/teacher_pages/attendance_control";
 
 export default function ControlePresencaPage() {
     const [date] = useState("");

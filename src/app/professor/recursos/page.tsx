@@ -1,6 +1,6 @@
 "use client";
 
-import Resources from "@/src/ui/modules/tearcher_pages/resources";
+import Resources from "@/src/ui/modules/teacher_pages/resources";
 
 export default function RecursosPage() {
     return (

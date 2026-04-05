@@ -136,6 +136,7 @@ export default function WhatIsSpace() {
                             src="/espaco-interior.jpeg"
                             alt="Imagem do interior do Espaço 4.0"
                             fill
+                            sizes="(max-width: 1024px) 100vw, 50vw"
                             priority
                             className="object-cover transition-transform duration-10000 group-hover:scale-110"
                         />

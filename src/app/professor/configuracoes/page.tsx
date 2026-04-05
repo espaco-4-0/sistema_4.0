@@ -1,6 +1,6 @@
 "use client";
 
-import Configuracoes from "@/src/ui/modules/tearcher_pages/configurations";
+import Configuracoes from "@/src/ui/modules/teacher_pages/configurations";
 
 export default function ConfiguracoesPage() {
     return (

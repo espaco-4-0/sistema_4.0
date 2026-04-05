@@ -43,4 +43,8 @@ export const viewTitles: Record<string, { title: string; subtitle: string }> = {
         title: "Configurações",
         subtitle: "Personalize o sistema",
     },
+    agenda: {
+        title: "Agenda de Visitas e Eventos",
+        subtitle: "Recebimento de e-mail, análise documental e aprovação IFAL",
+    },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import Gamificacao from "@/src/ui/modules/tearcher_pages/gamification";
+import Gamificacao from "@/src/ui/modules/teacher_pages/gamification";
 
 export default function GamificacaoPage() {
     return (

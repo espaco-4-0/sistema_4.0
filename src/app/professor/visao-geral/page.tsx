@@ -1,6 +1,6 @@
 "use client";
 
-import { VisaoGeral } from "@/src/ui/modules/tearcher_pages/overview";
+import { VisaoGeral } from "@/src/ui/modules/teacher_pages/overview";
 
 export default function visao() {
     return (

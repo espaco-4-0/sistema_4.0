@@ -23,7 +23,14 @@ export function Sidebar() {
             <div className="flex-1 px-4 py-8 overflow-y-auto">
                 <div className="flex items-center gap-3 px-2 mb-10">
                     <div className="relative bg-[#F5C747] w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden shrink-0">
-                        <Image src="/espaco.svg" alt="Logo" width={42} height={42} className="object-contain" />
+                        <Image
+                            src="/espaco.svg"
+                            alt="Logo"
+                            width={42}
+                            height={42}
+                            className="object-contain"
+                            style={{ width: "auto", height: "auto" }}
+                        />
                     </div>
                     <span className="text-xl font-bold text-gray-800 tracking-tight">Espaço 4.0</span>
                 </div>

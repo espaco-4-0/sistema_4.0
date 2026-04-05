@@ -1,6 +1,6 @@
 "use client";
 
-import ManageUsers from "@/src/ui/modules/tearcher_pages/manage_users";
+import ManageUsers from "@/src/ui/modules/teacher_pages/manage_users";
 
 export default function GerenciarUsuariosPage() {
     return (

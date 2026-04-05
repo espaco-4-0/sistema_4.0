@@ -4,7 +4,7 @@ import Link from "next/link";
 
 // retirar e colocar no .env
 const WHATSAPP_NUMBER = "558597947611";
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 export default function ComeAndDiscover() {
     const steps = [
