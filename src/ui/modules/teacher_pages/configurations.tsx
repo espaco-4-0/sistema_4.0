@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { mockConfig } from "@/src/infra/modules/professor/configuracoes-mock";
 import { ChangePasswordModal } from "@/src/ui/components/modals/professor/configuracoes/change-password-modal";
 import { EditProfileModal } from "@/src/ui/components/modals/professor/configuracoes/edit-profile-modal";
@@ -9,11 +9,58 @@ import { Badge } from "@/src/ui/components/ui/badge";
 import { Button } from "@/src/ui/components/ui/button";
 import { Switch } from "@/src/ui/components/ui/switch";
 import { Lock, Settings, Shield, User } from "lucide-react";
+import { toast } from "sonner";
 
 type ModalType = "editProfile" | "editSystem" | "changePassword" | null;
 
+type ProfileData = {
+    id: string;
+    nomeCompleto: string;
+    email: string;
+    role: string;
+    avatarUrl: string | null;
+};
+
+function roleLabel(role: string): string {
+    const map: Record<string, string> = {
+        ADMIN: "Administrador do Sistema",
+        PROFESSOR: "Professor",
+        MONITOR: "Monitor",
+        PESQUISADOR: "Pesquisador",
+        VISITANTE: "Visitante",
+    };
+    return map[role] ?? role;
+}
+
 export default function Configuracoes() {
     const [activeModal, setActiveModal] = useState<ModalType>(null);
+    const [profile, setProfile] = useState<ProfileData | null>(null);
+
+    async function loadProfile() {
+        try {
+            const response = await fetch("/api/profile/me", { cache: "no-store" });
+            const body = (await response.json().catch(() => null)) as { data?: ProfileData; message?: string } | null;
+
+            if (!response.ok) {
+                toast.error(body?.message ?? "Falha ao carregar perfil");
+                return;
+            }
+
+            setProfile(body?.data ?? null);
+        } catch {
+            toast.error("Erro de conexão ao carregar perfil");
+        }
+    }
+
+    useEffect(() => {
+        loadProfile();
+    }, []);
+
+    const firstLetter = useMemo(() => {
+        const name = profile?.nomeCompleto?.trim();
+        return name ? name.charAt(0).toUpperCase() : "U";
+    }, [profile]);
+
     const handleModalChange = (open: boolean) => {
         if (!open) {
             setActiveModal(null);
@@ -26,12 +73,21 @@ export default function Configuracoes() {
                 <div className="bg-linear-to-r from-yellow-400 to-yellow-500 rounded-xl p-6 mb-6 shadow-md">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
-                                <User className="w-8 h-8 text-yellow-500" />
-                            </div>
+                            {profile?.avatarUrl ? (
+                                <img
+                                    src={profile.avatarUrl}
+                                    alt={profile.nomeCompleto}
+                                    className="w-16 h-16 rounded-full object-cover bg-black"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                                    <span className="text-yellow-500 text-2xl font-bold">{firstLetter}</span>
+                                </div>
+                            )}
                             <div className="text-black">
-                                <h2 className="text-xl font-bold">Renata Imaculada</h2>
-                                <p className="text-sm opacity-90">Renata@ifal.edu.com.br</p>
+                                <h2 className="text-xl font-bold">{profile?.nomeCompleto ?? "Usuário"}</h2>
+                                <p className="text-sm opacity-90">{profile?.email ?? "-"}</p>
+                                <p className="text-xs opacity-80 mt-0.5">{roleLabel(profile?.role ?? "")}</p>
                             </div>
                         </div>
                         <Button
@@ -169,6 +225,8 @@ export default function Configuracoes() {
             <EditProfileModal
                 isOpen={activeModal === "editProfile"}
                 onOpenChange={handleModalChange}
+                profile={profile}
+                onSaved={loadProfile}
                 onClose={() => setActiveModal(null)}
             />
 

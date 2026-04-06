@@ -1,6 +1,6 @@
 import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import NextAuth, { DefaultSession, DefaultUser, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 const SESSION_DURATION_LONG = 30 * 24 * 60 * 60; //30 DIAS
@@ -29,7 +29,7 @@ declare module "next-auth/jwt" {
     }
 }
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -58,6 +58,8 @@ const handler = NextAuth({
                 return {
                     id: user.id,
                     email: user.email,
+                    name: user.nomeCompleto,
+                    image: user.avatarUrl,
                     role: user.role,
                     remember: remember === "true",
                 };
@@ -75,6 +77,8 @@ const handler = NextAuth({
                 token.id = user.id;
                 token.role = user.role;
                 token.remember = user.remember;
+                token.name = user.name;
+                token.picture = user.image;
 
                 token.exp =
                     Math.floor(Date.now() / 1000) + (user.remember ? SESSION_DURATION_LONG : SESSION_DURATION_SHORT);
@@ -87,12 +91,16 @@ const handler = NextAuth({
             if (session.user) {
                 session.user.id = token.id;
                 session.user.role = token.role;
+                session.user.name = token.name ?? session.user.name;
+                session.user.image = (token.picture as string | null | undefined) ?? session.user.image;
             }
             return session;
         },
     },
 
     secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

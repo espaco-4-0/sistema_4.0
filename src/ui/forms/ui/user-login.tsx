@@ -8,11 +8,19 @@ import { UserLoginData, userLoginSchema } from "@/src/ui/forms/schemas/user-logi
 import { InputText } from "@/src/ui/forms/ui/user-registration";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+const roleRedirectMap: Record<string, string> = {
+    ADMIN: "/professor/gerenciar-usuarios",
+    PROFESSOR: "/professor/visao-geral",
+    MONITOR: "/professor/controle-presenca",
+    PESQUISADOR: "/professor/relatorios",
+    VISITANTE: "/estudante/profile",
+};
 
 export default function UserLoginForm() {
     const router = useRouter();
@@ -52,7 +60,13 @@ export default function UserLoginForm() {
             }
 
             toast.success("Login efetuado com sucesso!", { id, duration: 2000 });
-            router.push("/dashboard");
+
+            const session = await getSession();
+            const role = (session?.user as { role?: string } | undefined)?.role;
+            const destination = role ? (roleRedirectMap[role] ?? "/") : "/";
+
+            router.push(destination);
+            router.refresh();
         } catch {
             toast.error("Erro de conexão. Verifique sua internet.", { id, duration: 3000 });
         } finally {

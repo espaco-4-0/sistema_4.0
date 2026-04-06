@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getStatusStyle } from "@/src/infra/modules/professor/manage-users-mock";
 import { inventoryData, statsEstoque } from "@/src/infra/modules/professor/recursos-mock";
 import { ImportarRecurso } from "@/src/ui/components/modals/professor/recursos/import-recurso-modal";
 import { ImportarRecursosModal } from "@/src/ui/components/modals/professor/recursos/import-recursos-modal";
@@ -15,6 +14,19 @@ import {
     DropdownMenuTrigger,
 } from "@/src/ui/components/ui/dropdown-menu";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Plus, PlusCircle, Search } from "lucide-react";
+
+function getStatusStyle(status: string) {
+    switch (status) {
+        case "Disponível":
+            return "bg-green-100 text-green-700 border-green-200";
+        case "Estoque Baixo":
+            return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        case "Esgotado":
+            return "bg-red-100 text-red-700 border-red-200";
+        default:
+            return "bg-gray-100 text-gray-700";
+    }
+}
 
 export default function Resources() {
     const [openImportar, setOpenImportar] = useState(false);

@@ -1,5 +1,5 @@
 import { checkRateLimit, isRateLimitEnabled } from "@/src/infra/cache/rate-limit";
-import { authorizeRole, protectedRouteMatchers } from "@/src/infra/modules/auth/authorize-role.middleware";
+import { authorizeRole } from "@/src/infra/modules/auth/authorize-role.middleware";
 import { withAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -47,5 +47,20 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: protectedRouteMatchers,
+    matcher: [
+        "/admin/:path*",
+        "/courses/:path*",
+        "/classes/:path*",
+        "/search/:path*",
+        "/projects/:path*",
+        "/inventory/:path*",
+        "/blog/:path*",
+        "/presence/:path*",
+        "/cursos/:path*",
+        "/aulas/:path*",
+        "/pesquisa/:path*",
+        "/projetos/:path*",
+        "/inventario/:path*",
+        "/presenca/:path*",
+    ],
 };

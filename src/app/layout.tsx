@@ -1,3 +1,4 @@
+import { AuthSessionProvider } from "@/src/ui/providers/session-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
@@ -34,7 +35,9 @@ export default function RootLayout({
           overflow-hidden
         `}
             >
-                <main className="h-screen overflow-y-auto scroll-smooth overscroll-none">{children}</main>
+                <AuthSessionProvider>
+                    <main className="h-screen overflow-y-auto scroll-smooth overscroll-none">{children}</main>
+                </AuthSessionProvider>
 
                 <Toaster richColors position="top-right" closeButton />
             </body>

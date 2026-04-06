@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
                 nomeCompleto: data.completeName,
                 email: data.email,
                 senha: hashedPassword,
-                dataNascimento: data.dateOfBirth,
+                dataNascimento: new Date(data.dateOfBirth),
                 telefone: data.telephone,
                 raca: data.race,
                 educacao: data.education,

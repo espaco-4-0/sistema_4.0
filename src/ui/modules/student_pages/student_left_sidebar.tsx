@@ -1,5 +1,6 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { profileDataMock } from "@/src/infra/modules/student/profile-card-mock";
 import {
     Sidebar,
     SidebarContent,
@@ -10,6 +11,7 @@ import {
     SidebarMenuItem,
 } from "@/src/ui/components/ui/sidebar";
 import { Award, BookOpen, ClipboardCheck, LogOut, User } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -44,6 +46,17 @@ const sidebar_options = [
 export default function StudentLeftSidebar() {
     const [selected, setSelected] = useState("");
     const pathname = usePathname();
+    const { data: session } = useSession();
+    const userName = session?.user?.name ?? session?.user?.email ?? "Usuário";
+    const userRole = (session?.user as { role?: string } | undefined)?.role ?? "VISITANTE";
+
+    const roleLabel: Record<string, string> = {
+        ADMIN: "Administrador",
+        PROFESSOR: "Professor",
+        MONITOR: "Monitor",
+        PESQUISADOR: "Pesquisador",
+        VISITANTE: "Visitante",
+    };
 
     useEffect(() => {
         const currentOption = sidebar_options.find((i) => pathname?.startsWith(i.link))?.link ?? "";
@@ -97,17 +110,18 @@ export default function StudentLeftSidebar() {
                         <User className="size-5 text-yellow-primary" strokeWidth={2.5} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{profileDataMock.name}</p>
-                        <p className="text-xs text-gray-600 truncate">{profileDataMock.affiliation}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{userName}</p>
+                        <p className="text-xs text-gray-600 truncate">{roleLabel[userRole] ?? userRole}</p>
                     </div>
                 </div>
                 <SidebarMenuItem className="flex items-center gap-2 lg:gap-3 2xl:gap-3">
-                    <Link href="/">
-                        <SidebarMenuButton className="w-auto transition-all py-3.5 lg:py-5 2xl:py-5 px-3 lg:px-3 2xl:px-3 text-red-600 text-sm lg:text-sm 2xl:text-base font-semibold hover:bg-red-100 hover:text-red-500 cursor-pointer">
-                            <LogOut className="size-5 lg:size-5 2xl:size-5" />
-                            <span className="text-sm lg:text-sm 2xl:text-base">Sair</span>
-                        </SidebarMenuButton>
-                    </Link>
+                    <SidebarMenuButton
+                        className="w-auto transition-all py-3.5 lg:py-5 2xl:py-5 px-3 lg:px-3 2xl:px-3 text-red-600 text-sm lg:text-sm 2xl:text-base font-semibold hover:bg-red-100 hover:text-red-500 cursor-pointer"
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                    >
+                        <LogOut className="size-5 lg:size-5 2xl:size-5" />
+                        <span className="text-sm lg:text-sm 2xl:text-base">Sair</span>
+                    </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarFooter>
         </Sidebar>

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { getTypeStyle, stats, userData } from "@/src/infra/modules/professor/manage-users-mock";
 import { ImportCSVModal } from "@/src/ui/components/modals/professor/usuarios/import-csv-modal";
 import {
     DropdownMenu,
@@ -10,24 +9,123 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/src/ui/components/ui/dropdown-menu";
-import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus, Users } from "lucide-react";
+import { toast } from "sonner";
 
 import NewUserModal from "../../components/modals/professor/usuarios/new-user-modal";
+
+type UserRole = "ADMIN" | "PROFESSOR" | "MONITOR" | "PESQUISADOR" | "VISITANTE";
+
+type ApiUser = {
+    id: string;
+    nomeCompleto: string;
+    email: string;
+    role: UserRole;
+    ativo: boolean;
+    createdAt: string;
+};
+
+const roleLabel: Record<UserRole, string> = {
+    ADMIN: "Administrador",
+    PROFESSOR: "Professor",
+    MONITOR: "Monitor",
+    PESQUISADOR: "Pesquisador",
+    VISITANTE: "Visitante",
+};
+
+function getRoleStyle(role: UserRole): string {
+    const styles: Record<UserRole, string> = {
+        ADMIN: "bg-slate-100 text-slate-700 border-slate-200",
+        PROFESSOR: "bg-red-50 text-red-700 border-red-100",
+        MONITOR: "bg-orange-50 text-orange-700 border-orange-100",
+        PESQUISADOR: "bg-amber-50 text-amber-700 border-amber-100",
+        VISITANTE: "bg-yellow-50 text-yellow-700 border-yellow-100",
+    };
+    return styles[role];
+}
 
 export default function ManageUsers() {
     const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
     const [typeFilter, setTypeFilter] = useState("Todos");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [users, setUsers] = useState<ApiUser[]>([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const filteredUsers = useMemo(() => {
-        if (typeFilter === "Todos") {
-            return userData;
+    async function loadUsers() {
+        setIsLoadingUsers(true);
+        try {
+            const response = await fetch("/api/users?page=1&limit=100");
+            const body = (await response.json().catch(() => null)) as { data?: ApiUser[]; message?: string } | null;
+
+            if (!response.ok) {
+                toast.error(body?.message ?? "Falha ao carregar usuários");
+                setUsers([]);
+                return;
+            }
+
+            setUsers(body?.data ?? []);
+        } catch {
+            toast.error("Erro de conexão ao carregar usuários");
+            setUsers([]);
+        } finally {
+            setIsLoadingUsers(false);
         }
-        return userData.filter((user) => user.type === typeFilter);
-    }, [typeFilter]);
+    }
+
+    useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const filteredUsers = useMemo(() => {
+        const term = searchTerm.trim().toLowerCase();
+
+        return users.filter((user) => {
+            const matchFilter = typeFilter === "Todos" || roleLabel[user.role] === typeFilter;
+            const matchSearch =
+                term.length === 0 ||
+                user.nomeCompleto.toLowerCase().includes(term) ||
+                user.email.toLowerCase().includes(term);
+            return matchFilter && matchSearch;
+        });
+    }, [users, typeFilter, searchTerm]);
+
+    const stats = useMemo(
+        () => [
+            {
+                title: "Total de Usuários",
+                value: String(users.length),
+                icon: Users,
+                color: "bg-yellow-100",
+                iconColor: "text-yellow-700",
+            },
+            {
+                title: "Visitantes",
+                value: String(users.filter((u) => u.role === "VISITANTE").length),
+                icon: Users,
+                color: "bg-blue-100",
+                iconColor: "text-blue-700",
+            },
+            {
+                title: "Monitores",
+                value: String(users.filter((u) => u.role === "MONITOR").length),
+                icon: Users,
+                color: "bg-green-100",
+                iconColor: "text-green-700",
+            },
+            {
+                title: "Professores",
+                value: String(users.filter((u) => u.role === "PROFESSOR").length),
+                icon: Users,
+                color: "bg-purple-100",
+                iconColor: "text-purple-700",
+            },
+        ],
+        [users]
+    );
 
     const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
@@ -93,6 +191,8 @@ export default function ManageUsers() {
                     <input
                         type="text"
                         placeholder="Buscar usuários..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-yellow-400 focus:border-yellow-400 sm:text-sm"
                     />
                 </div>
@@ -106,11 +206,13 @@ export default function ManageUsers() {
                         <DropdownMenuLabel>Tipo de usuário</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={typeFilter} onValueChange={setTypeFilter}>
-                            {["Todos", "Estudante", "Monitor", "Pesquisador", "Professor"].map((type) => (
-                                <DropdownMenuRadioItem key={type} value={type}>
-                                    {type}
-                                </DropdownMenuRadioItem>
-                            ))}
+                            {["Todos", "Administrador", "Professor", "Monitor", "Pesquisador", "Visitante"].map(
+                                (type) => (
+                                    <DropdownMenuRadioItem key={type} value={type}>
+                                        {type}
+                                    </DropdownMenuRadioItem>
+                                )
+                            )}
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -142,30 +244,38 @@ export default function ManageUsers() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {currentUsers.map((user, index) => (
-                                <tr key={user.email + index} className="hover:bg-gray-50/50 transition-colors">
+                            {currentUsers.map((user) => (
+                                <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-yellow-400 text-black text-xs font-semibold flex items-center justify-center">
-                                                {user.name.charAt(0).toUpperCase()}
+                                                {user.nomeCompleto.charAt(0).toUpperCase()}
                                             </div>
-                                            <span>{user.name}</span>
+                                            <span>{user.nomeCompleto}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                                     <td className="px-6 py-4 text-sm">
                                         <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getTypeStyle(user.type)}`}
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleStyle(user.role)}`}
                                         >
-                                            {user.type}
+                                            {roleLabel[user.role]}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm">
-                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
-                                            {user.status}
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                                                user.ativo
+                                                    ? "bg-green-50 text-green-700 border-green-100"
+                                                    : "bg-red-50 text-red-700 border-red-100"
+                                            }`}
+                                        >
+                                            {user.ativo ? "Ativo" : "Inativo"}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{user.date}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-right">
                                         <button className="text-gray-400 hover:text-gray-600">
                                             <MoreVertical size={18} />
@@ -173,6 +283,20 @@ export default function ManageUsers() {
                                     </td>
                                 </tr>
                             ))}
+                            {!isLoadingUsers && currentUsers.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                                        Nenhum usuário encontrado.
+                                    </td>
+                                </tr>
+                            )}
+                            {isLoadingUsers && (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                                        Carregando usuários...
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -208,6 +332,7 @@ export default function ManageUsers() {
             <NewUserModal
                 isOpen={isNewUserModalOpen}
                 handleOpenChange={setIsNewUserModalOpen}
+                onUserCreated={loadUsers}
                 onClose={() => setIsNewUserModalOpen(false)}
             />
             <ImportCSVModal isOpen={isCSVModalOpen} onClose={() => setIsCSVModalOpen(false)} />

@@ -29,24 +29,7 @@ export const newsData: News[] = [
         ],
         tags: ["Sustentabilidade", "Impressão 3D", "IoT", "Reciclagem", "Inovação"],
     },
-    {
-        id: 2,
-        category: "Modelagem 3D e Saúde",
-        title: "Impressora 3D juntamente a IA faz com que estudo do corpo humano seja mais preciso",
-        image: "/noticia-secundaria.jpg",
-        date: "25 de Janeiro, 2026",
-        author: "Marina Mitsue",
-        about: "Marina Mitsue atua como pesquisadora, acompanhando projetos que unem IA, impressão 3D e educação clínica.",
-        content: [
-            "Uma parceria entre o Espaço 4.0 e o curso de Enfermagem resultou em um projeto que combina inteligência artificial e impressão 3D para criar modelos anatômicos ultra-realistas.",
-            "O sistema analisa imagens médicas (como tomografias e ressonâncias) por meio de algoritmos de IA e gera automaticamente modelos 3D personalizados de órgãos e estruturas com precisão milimétrica.",
-            "Os modelos impressos são utilizados em treinamentos práticos, permitindo que estudantes da área da saúde ensaiem procedimentos complexos antes de atender pacientes reais.",
-            "Em aulas piloto, a solução elevou o desempenho dos alunos e reduziu a ansiedade durante práticas clínicas, com melhoria consistente nas avaliações simuladas.",
-            "O projeto já atraiu interesse de hospitais e instituições de ensino de várias regiões, que buscam replicar a metodologia em seus laboratórios.",
-            "A próxima etapa prevê a criação de um acervo de modelos anatômicos e um portal para compartilhamento de protocolos de impressão.",
-        ],
-        tags: ["IA", "Impressão 3D", "Saúde", "Educação", "Modelagem"],
-    },
+
     {
         id: 3,
         category: "CSBC",
@@ -101,24 +84,7 @@ export const newsData: News[] = [
         ],
         tags: ["Robótica", "Automação", "Competição", "IA", "Visão Computacional"],
     },
-    {
-        id: 6,
-        category: "IoT",
-        title: "Dispositivos IoT desenvolvidos no Espaço 4.0 otimizam automação residencial",
-        image: "/robotica-noticia.jpeg",
-        date: "12 de Janeiro, 2026",
-        author: "Marina",
-        about: "Marina escreve sobre IoT e automação residencial, com foco em soluções acessíveis e eficiência energética.",
-        content: [
-            "Estudantes do Espaço 4.0 desenvolveram uma linha completa de dispositivos IoT de baixo custo para automação residencial inteligente.",
-            "O sistema inclui sensores de presença, temperatura, umidade e qualidade do ar, todos conectados a uma central com controle via aplicativo móvel.",
-            "A instalação foi pensada para usuários sem conhecimento técnico, com configuração guiada e perfis prontos para diferentes ambientes.",
-            "Testes em residências voluntárias mostraram redução média de 25% no consumo de energia com automação de iluminação e climatização.",
-            "O projeto também implementa alertas de manutenção e relatórios de uso, ajudando os moradores a entender seus padrões de consumo.",
-            "Investidores demonstraram interesse em produzir os dispositivos em escala comercial, com piloto previsto para o segundo semestre.",
-        ],
-        tags: ["IoT", "Automação", "Smart Home", "Eficiência Energética", "Inovação"],
-    },
+
     {
         id: 7,
         category: "Realidade Virtual",

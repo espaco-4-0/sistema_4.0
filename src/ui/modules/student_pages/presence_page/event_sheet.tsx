@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { EventSituation } from "@/src/infra/modules/student/presences-mock";
 import {
     Sheet,
     SheetClose,
@@ -15,6 +14,8 @@ import EventInformatons from "./event_informations";
 import PresenceForm from "./presence_form";
 import SheetBadge from "./sheet_badge";
 import StatusCard from "./status_card";
+
+type EventSituation = "pending" | "confirmed" | "absent";
 
 interface EventSheetProps {
     isOpen: boolean;
