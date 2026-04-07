@@ -1,4 +1,4 @@
-import { CourseDetails } from "@/src/infra/modules/courses/course-mock";
+import { CourseDetails } from "@/src/infra/modules/courses/courses.types";
 import { Button } from "@/src/ui/components/ui/button";
 import { ArrowRight, Calendar, Clock, Users } from "lucide-react";
 import Image from "next/image";
