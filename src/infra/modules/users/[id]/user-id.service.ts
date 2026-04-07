@@ -1,3 +1,4 @@
+import { invalidateCacheNamespace } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -36,7 +37,7 @@ export async function emailExistsForAnotherUser(id: string, email: string): Prom
 export async function updateUserById(id: string, data: PatchUserPayload): Promise<UpdatedUser> {
     const hashedPassword = data.senha ? await bcrypt.hash(data.senha, SALT_ROUNDS) : undefined;
 
-    return prisma.user.update({
+    const updated = await prisma.user.update({
         where: { id },
         data: {
             ...(data.nomeCompleto !== undefined ? { nomeCompleto: data.nomeCompleto } : {}),
@@ -51,4 +52,9 @@ export async function updateUserById(id: string, data: PatchUserPayload): Promis
         },
         select: USER_UPDATE_SELECT,
     });
+
+    await invalidateCacheNamespace("users:list");
+    await invalidateCacheNamespace("profile:me");
+
+    return updated;
 }

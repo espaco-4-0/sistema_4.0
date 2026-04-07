@@ -1,3 +1,4 @@
+import { invalidateCacheNamespace, rememberCache } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/ui/lib/prisma";
 
@@ -33,10 +34,16 @@ export type ProfileData = Prisma.UserGetPayload<{ select: typeof PROFILE_SELECT 
 export type UpdatedProfileData = Prisma.UserGetPayload<{ select: typeof UPDATED_PROFILE_SELECT }>;
 
 export async function getProfileById(userId: string): Promise<ProfileData | null> {
-    return prisma.user.findUnique({
-        where: { id: userId },
-        select: PROFILE_SELECT,
-    });
+    return rememberCache(
+        "profile:me",
+        userId,
+        async () =>
+            prisma.user.findUnique({
+                where: { id: userId },
+                select: PROFILE_SELECT,
+            }),
+        120
+    );
 }
 
 export async function emailExistsForAnotherProfile(userId: string, email: string): Promise<boolean> {
@@ -52,7 +59,7 @@ export async function emailExistsForAnotherProfile(userId: string, email: string
 }
 
 export async function updateProfileById(userId: string, payload: UpdateProfilePayload): Promise<UpdatedProfileData> {
-    return prisma.user.update({
+    const updated = await prisma.user.update({
         where: { id: userId },
         data: {
             ...(payload.nomeCompleto !== undefined ? { nomeCompleto: payload.nomeCompleto } : {}),
@@ -68,4 +75,9 @@ export async function updateProfileById(userId: string, payload: UpdateProfilePa
         },
         select: UPDATED_PROFILE_SELECT,
     });
+
+    await invalidateCacheNamespace("profile:me");
+    await invalidateCacheNamespace("users:list");
+
+    return updated;
 }

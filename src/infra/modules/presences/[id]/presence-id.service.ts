@@ -1,3 +1,4 @@
+import { invalidateCacheNamespace } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/ui/lib/prisma";
 
@@ -40,9 +41,13 @@ export function buildPresenceUpdateData(situation: PresenceSituation): Prisma.Pr
 }
 
 export async function updatePresenceById(id: string, data: Prisma.PresencaUpdateInput): Promise<UpdatedPresence> {
-    return prisma.presenca.update({
+    const updated = await prisma.presenca.update({
         where: { id },
         data,
         select: PRESENCE_UPDATE_SELECT,
     });
+
+    await invalidateCacheNamespace("presences:me");
+
+    return updated;
 }

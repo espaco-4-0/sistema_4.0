@@ -1,11 +1,12 @@
-"use client";
-
 import { useState } from "react";
 import { newsData } from "@/src/infra/modules/blog/blog-mock";
 import { Clock, Filter, Home, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { Button } from "../../components/ui/button";
+
+// futuramente iremos implementar o redis, e subistituir por uma api funcional ao invés do mock
 
 export default function BlogNews() {
     const [selectedCategory, setSelectedCategory] = useState("Todas");
@@ -20,7 +21,8 @@ export default function BlogNews() {
         "Impressão 3D",
     ];
 
-    const filteredNews = selectedCategory === "Todas" ? newsData : newsData.filter((news) => news.category === selectedCategory);
+    const filteredNews =
+        selectedCategory === "Todas" ? newsData : newsData.filter((news) => news.category === selectedCategory);
 
     return (
         <div className="min-h-screen bg-white">

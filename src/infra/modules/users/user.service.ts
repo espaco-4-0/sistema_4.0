@@ -1,3 +1,4 @@
+import { invalidateCacheNamespace, rememberCache } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -53,32 +54,39 @@ export async function listUsers(filter: ListUsersFilter): Promise<ListUsersResul
             : {}),
     };
 
-    const [users, total] = await Promise.all([
-        prisma.user.findMany({
-            where,
-            orderBy: { createdAt: "desc" },
-            skip: (page - 1) * limit,
-            take: limit,
-            select: USER_PUBLIC_SELECT,
-        }),
-        prisma.user.count({ where }),
-    ]);
+    return rememberCache(
+        "users:list",
+        JSON.stringify({ page, limit, role: normalizedRole ?? null, search, active: active ?? null }),
+        async () => {
+            const [users, total] = await Promise.all([
+                prisma.user.findMany({
+                    where,
+                    orderBy: { createdAt: "desc" },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    select: USER_PUBLIC_SELECT,
+                }),
+                prisma.user.count({ where }),
+            ]);
 
-    return {
-        data: users,
-        pagination: {
-            page,
-            limit,
-            total,
-            totalPages: Math.max(1, Math.ceil(total / limit)),
+            return {
+                data: users,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.max(1, Math.ceil(total / limit)),
+                },
+            };
         },
-    };
+        60
+    );
 }
 
 export async function createUser(data: CreateUserPayload): Promise<PublicUser> {
     const hashedPassword = await bcrypt.hash(data.senha, SALT_ROUNDS);
 
-    return prisma.user.create({
+    const user = await prisma.user.create({
         data: {
             nomeCompleto: data.nomeCompleto,
             email: data.email,
@@ -95,6 +103,10 @@ export async function createUser(data: CreateUserPayload): Promise<PublicUser> {
         },
         select: USER_PUBLIC_SELECT,
     });
+
+    await invalidateCacheNamespace("users:list");
+
+    return user;
 }
 
 export async function emailExists(email: string): Promise<boolean> {

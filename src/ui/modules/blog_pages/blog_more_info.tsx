@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
 
+// futuramente iremos implementar o redis, e subistituir por uma api funcional ao invés do mock
+
 export default function BlogMoreInfo() {
     const methods = useForm();
     const params = useParams<{ id: string }>();

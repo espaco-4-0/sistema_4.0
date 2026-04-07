@@ -8,6 +8,8 @@ import CourseCard from "./course_card";
 import CourseForm from "./course_form";
 import { CourseHero } from "./course_hero";
 
+// futuarmente iremos implementar o redis, e subistituir por uma api funcional ao invés do mock
+
 type RightInformation = {
     id: number;
     icon: LucideIcon;
