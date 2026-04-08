@@ -4,6 +4,8 @@ import { Calendar, FolderOpen, MouseIcon, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { scrollToSection } from "../../lib/scroll";
+
 const buttonVariants: Variants = { hover: { scale: 1.05 } };
 const iconVariants: Variants = { hover: { rotate: 360 } };
 
@@ -17,11 +19,6 @@ const fadeUp = (): Variants => ({
 });
 
 export function Hero() {
-    const scrollToSection = (id: string) => {
-        const section = document.getElementById(id);
-        section?.scrollIntoView({ behavior: "instant" });
-    };
-
     return (
         <section
             id="hero"
@@ -88,7 +85,7 @@ export function Hero() {
                         <Button
                             size="lg"
                             className="bg-yellow-400 text-black hover:bg-yellow-500 cursor-pointer text-base px-6 gap-2"
-                            onClick={() => scrollToSection("viewer_3d_section")}
+                            onClick={() => scrollToSection("viewer_3d_section", "start")}
                         >
                             <motion.span
                                 variants={iconVariants}
@@ -123,7 +120,7 @@ export function Hero() {
                         <Button
                             size="lg"
                             className="border border-white bg-white/10 hover:bg-white/20 backdrop-blur-sm cursor-pointer text-white text-base px-6 gap-2"
-                            onClick={() => scrollToSection("space_gallery")}
+                            onClick={() => scrollToSection("gallery", "center")}
                         >
                             <motion.span
                                 variants={iconVariants}
