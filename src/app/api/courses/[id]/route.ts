@@ -44,6 +44,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 }
 
+// pelo que entendi quando estava lendo na doc: o PATCH serve para que atualize parcialmente ao inves de ter que ir atualizando tudo
 export async function PATCH(req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);

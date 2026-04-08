@@ -30,22 +30,17 @@ type Props = {
 export function RequestCard({ request, denyReason, setDenyReason, refresh }: Props) {
     const visitDate = format(new Date(`${request.data}T00:00:00`), "dd/MM/yyyy", { locale: ptBR });
 
-    const stageInstructions: Record<VisitRequest["processStage"], string> = {
-        aguardando_email: "Como admin, confirme o recebimento do pedido por e-mail para iniciar a análise.",
-        email_recebido: "Como admin, analise os anexos e decida: aprovar documentação ou negar solicitação.",
-        documentacao_em_analise: "Como admin, finalize a triagem documental e envie ao IFAL quando estiver conferida.",
-        aguardando_aprovacao_ifal: "Como admin, registre aqui a decisão final do IFAL (aprovação ou negativa).",
-        aprovado_ifal: "Solicitação finalizada com aprovação do IFAL.",
-        negado_admin: "Solicitação finalizada com negativa administrativa.",
-        negado_ifal: "Solicitação finalizada com negativa do IFAL.",
-    };
+    const btnBase =
+        "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none";
+
+    const btnStatus = "disabled:opacity-50 disabled:cursor-not-allowed enabled:cursor-pointer";
 
     return (
         <Dialog>
             <DialogTrigger asChild>
                 <button
                     type="button"
-                    className="w-full text-left bg-white rounded-xl border border-gray-100 p-4 transition hover:border-yellow-300 hover:shadow-sm hover:cursor-pointer"
+                    className="w-full text-left bg-white rounded-xl border border-gray-100 p-4 transition hover:border-yellow-300 hover:shadow-sm cursor-pointer"
                 >
                     <div className="flex items-center justify-between gap-2">
                         <div>
@@ -58,25 +53,16 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                 </button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-3xl p-0 overflow-hidden">
-                <div className="px-6 py-5 border-b border-gray-100">
+            <DialogContent className="max-w-3xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="px-6 py-5 border-b border-gray-100 shrink-0">
                     <DialogHeader>
                         <DialogTitle>{request.instituicao}</DialogTitle>
                         <DialogDescription>{request.responsavel} • Painel do Admin (Professor)</DialogDescription>
                     </DialogHeader>
                 </div>
 
-                <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                    {request.status === "pendente" ? (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                            <p className="text-xs uppercase tracking-wide text-yellow-700 font-semibold mb-1">
-                                Ação atual do admin
-                            </p>
-                            <p className="text-sm text-yellow-900">{stageInstructions[request.processStage]}</p>
-                        </div>
-                    ) : null}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
                         <p>
                             <strong>Data:</strong> {visitDate}
                         </p>
@@ -103,13 +89,13 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         {stageLabels[request.processStage]}
                     </span>
 
-                    {request.mensagem ? (
+                    {request.mensagem && (
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700">
                             <strong>Mensagem da escola:</strong> {request.mensagem}
                         </div>
-                    ) : null}
+                    )}
 
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2">
                         <p className="text-xs font-semibold text-gray-600 mb-2">Documentação anexada</p>
                         {request.documentos.length > 0 ? (
                             <ul className="space-y-1">
@@ -124,11 +110,11 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         )}
                     </div>
 
-                    {request.motivoNegativa ? (
+                    {request.motivoNegativa && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
                             <strong>Motivo da negativa:</strong> {request.motivoNegativa}
                         </div>
-                    ) : null}
+                    )}
 
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                         <p className="text-xs font-semibold text-gray-600 mb-2">Histórico do processo</p>
@@ -142,7 +128,7 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         </div>
                     </div>
 
-                    {request.status === "pendente" ? (
+                    {request.status === "pendente" && (
                         <div className="space-y-3">
                             <p className="text-sm font-semibold text-gray-800">Decisão do admin</p>
 
@@ -155,22 +141,22 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                             />
 
                             <div className="flex flex-wrap gap-2">
-                                {request.processStage === "aguardando_email" ? (
+                                {request.processStage === "aguardando_email" && (
                                     <button
                                         onClick={() => refresh(() => confirmEmailReceived(request.id))}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium"
+                                        className={`${btnBase} ${btnStatus} bg-amber-600 hover:bg-amber-700 text-white`}
                                     >
                                         <MailCheck className="w-4 h-4" />
                                         Aprovar recebimento de e-mail
                                     </button>
-                                ) : null}
+                                )}
 
-                                {request.processStage === "email_recebido" ||
-                                request.processStage === "documentacao_em_analise" ? (
+                                {(request.processStage === "email_recebido" ||
+                                    request.processStage === "documentacao_em_analise") && (
                                     <>
                                         <button
                                             onClick={() => refresh(() => startDocumentationAnalysis(request.id, true))}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+                                            className={`${btnBase} ${btnStatus} bg-blue-600 hover:bg-blue-700 text-white`}
                                         >
                                             <FileCheck className="w-4 h-4" />
                                             Aprovar documentação
@@ -178,7 +164,7 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
 
                                         <button
                                             onClick={() => refresh(() => startDocumentationAnalysis(request.id, false))}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-600 hover:bg-zinc-700 text-white text-sm font-medium"
+                                            className={`${btnBase} ${btnStatus} bg-zinc-600 hover:bg-zinc-700 text-white`}
                                         >
                                             <ShieldX className="w-4 h-4" />
                                             Marcar documentação incompleta
@@ -187,7 +173,7 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                                         <button
                                             onClick={() => refresh(() => sendToIfalApproval(request.id))}
                                             disabled={request.documentacaoStatus !== "conferida"}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium"
+                                            className={`${btnBase} ${btnStatus} bg-indigo-600 hover:bg-indigo-700 text-white`}
                                         >
                                             <ShieldCheck className="w-4 h-4" />
                                             Enviar para aprovação do IFAL
@@ -196,19 +182,19 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                                         <button
                                             onClick={() => refresh(() => denyByAdmin(request.id, denyReason))}
                                             disabled={!denyReason.trim()}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white text-sm font-medium"
+                                            className={`${btnBase} ${btnStatus} bg-red-600 hover:bg-red-700 text-white`}
                                         >
                                             <ShieldX className="w-4 h-4" />
                                             Negar solicitação no admin
                                         </button>
                                     </>
-                                ) : null}
+                                )}
 
-                                {request.processStage === "aguardando_aprovacao_ifal" ? (
+                                {request.processStage === "aguardando_aprovacao_ifal" && (
                                     <>
                                         <button
                                             onClick={() => refresh(() => setIfalDecision(request.id, true))}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium"
+                                            className={`${btnBase} ${btnStatus} bg-green-600 hover:bg-green-700 text-white`}
                                         >
                                             <CheckCircle2 className="w-4 h-4" />
                                             IFAL aprovou
@@ -218,16 +204,16 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                                                 refresh(() => setIfalDecision(request.id, false, denyReason))
                                             }
                                             disabled={!denyReason.trim()}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white text-sm font-medium"
+                                            className={`${btnBase} ${btnStatus} bg-red-600 hover:bg-red-700 text-white`}
                                         >
                                             <ShieldX className="w-4 h-4" />
                                             IFAL negou
                                         </button>
                                     </>
-                                ) : null}
+                                )}
                             </div>
                         </div>
-                    ) : null}
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

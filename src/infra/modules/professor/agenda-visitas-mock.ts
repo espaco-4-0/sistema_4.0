@@ -48,6 +48,40 @@ export interface VisitRequest {
 
 export const visitRequestsMock: VisitRequest[] = [
     {
+        id: 900004,
+        instituicao: "Escola Estadual Maria de Louasdfasdfrdes",
+        responsavel: "Ana Paula fasdf",
+        email: "ana.sdafsd@escola.edu.br",
+        whatsapp: "82 99999-1111",
+        quantidade: 24,
+        data: "2026-04-09",
+        horaInicio: "09:00",
+        horaFim: "11:00",
+        documentos: [
+            {
+                id: "900004-doc-1",
+                fileName: "oficio-escola.pdf",
+                fileType: "application/pdf",
+                fileSizeKb: 520,
+                uploadedAt: "2026-04-03T10:15:00.000Z",
+            },
+        ],
+        mensagem: "Turma do 8o ano interessada em robótica e impressão 3D.",
+        status: "pendente",
+        processStage: "aguardando_email",
+        ifalStatus: "aguardando",
+        documentacaoStatus: "pendente",
+        createdAt: "2026-04-03T10:15:00.000Z",
+        processLog: [
+            {
+                id: "900004-1",
+                stage: "aguardando_email",
+                description: "Solicitação enviada no portal e aguardando confirmação de recebimento do e-mail.",
+                createdAt: "2026-04-03T10:15:00.000Z",
+            },
+        ],
+    },
+    {
         id: 900001,
         instituicao: "Escola Estadual Maria de Lourdes",
         responsavel: "Ana Paula Souza",

@@ -1,8 +1,4 @@
-import "server-only";
-
-import { redis } from "@/lib/redis";
-
-type CachedValue = string;
+import { redis } from "./redis";
 
 function buildVersionKey(namespace: string): string {
     return `cache:version:${namespace}`;
@@ -28,14 +24,24 @@ export async function rememberCache<T>(
 ): Promise<T> {
     const version = await getNamespaceVersion(namespace);
     const cacheKey = buildDataKey(namespace, version, key);
-    const cached = await redis.get<CachedValue>(cacheKey);
+
+    const cached = await redis.get<T>(cacheKey);
 
     if (cached) {
-        return JSON.parse(cached) as T;
+        if (typeof cached === "string") {
+            try {
+                return JSON.parse(cached) as T;
+            } catch {
+                return cached as unknown as T;
+            }
+        }
+        return cached;
     }
 
     const value = await loader();
-    await redis.set(cacheKey, JSON.stringify(value), { ex: ttlSeconds });
+
+    const valueToStore = typeof value === "string" ? value : JSON.stringify(value);
+    await redis.set(cacheKey, valueToStore, { ex: ttlSeconds });
 
     return value;
 }
