@@ -24,7 +24,7 @@ export function Hero() {
 
     return (
         <section
-            id="welcome"
+            id="hero"
             className="relative flex min-h-screen flex-col items-center justify-center object-cover overflow-hidden bg-linear-to-r from-black via-slate-800 to-slate-800 px-4"
         >
             <motion.div

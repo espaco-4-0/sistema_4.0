@@ -50,13 +50,13 @@ export default function NavBar() {
     };
 
     const menuItems = [
-        { id: "inicio", label: "Inicio" },
+        { id: "hero", label: "Inicio" },
         { id: "what-is", label: "Sobre" },
         { id: "viewer_3d_section", label: "Tecnologias" },
         { id: "blog", label: "Notícias" },
         { id: "courses", label: "Cursos" },
         { id: "upcoming-events", label: "Eventos" },
-        { id: "galeria", label: "Galeria" },
+        { id: "gallery", label: "Galeria" },
         { id: "footer", label: "Contato" },
     ];
 
