@@ -4,6 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import { seedBadges } from "./seeds/badges";
+import { seedBlog } from "./seeds/blog";
 import { seedCursos } from "./seeds/cursos";
 import { seedInventario } from "./seeds/inventario";
 import { seedLocais } from "./seeds/locais";
@@ -21,6 +22,7 @@ async function main() {
     await seedProjetos(prisma);
     await seedInventario(prisma);
     await seedBadges(prisma);
+    await seedBlog(prisma);
 
     console.log("\n Seed concluído!");
 }
