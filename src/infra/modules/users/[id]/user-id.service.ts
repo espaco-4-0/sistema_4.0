@@ -1,5 +1,5 @@
 import { invalidateCacheNamespace } from "@/lib/cache";
-import { Prisma } from "@/src/generated/prisma/client";
+import { Prisma, User } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -15,6 +15,12 @@ const USER_UPDATE_SELECT = {
     ativo: true,
     updatedAt: true,
 } satisfies Prisma.UserSelect;
+
+export async function getUserById(id: string): Promise<User | null> {
+    return prisma.user.findUnique({
+        where: { id },
+    });
+}
 
 export type UpdatedUser = Prisma.UserGetPayload<{ select: typeof USER_UPDATE_SELECT }>;
 
@@ -35,20 +41,27 @@ export async function emailExistsForAnotherUser(id: string, email: string): Prom
 }
 
 export async function updateUserById(id: string, data: PatchUserPayload): Promise<UpdatedUser> {
+    if (data.email) {
+        const emailEmUso = await emailExistsForAnotherUser(id, data.email);
+        if (emailEmUso) {
+            throw new Error("Este e-mail já está em uso por outro usuário.");
+        }
+    }
+
     const hashedPassword = data.senha ? await bcrypt.hash(data.senha, SALT_ROUNDS) : undefined;
 
     const updated = await prisma.user.update({
         where: { id },
         data: {
-            ...(data.nomeCompleto !== undefined ? { nomeCompleto: data.nomeCompleto } : {}),
-            ...(data.email !== undefined ? { email: data.email } : {}),
-            ...(hashedPassword !== undefined ? { senha: hashedPassword } : {}),
-            ...(data.telefone !== undefined ? { telefone: data.telefone } : {}),
-            ...(data.role !== undefined ? { role: data.role } : {}),
-            ...(data.ativo !== undefined ? { ativo: data.ativo } : {}),
-            ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
-            ...(data.deficiencia !== undefined ? { deficiencia: data.deficiencia } : {}),
-            ...(data.necessidadeEspecial !== undefined ? { necessidadeEspecial: data.necessidadeEspecial } : {}),
+            nomeCompleto: data.nomeCompleto,
+            email: data.email,
+            senha: hashedPassword,
+            telefone: data.telefone,
+            role: data.role,
+            ativo: data.ativo,
+            avatarUrl: data.avatarUrl,
+            deficiencia: data.deficiencia,
+            necessidadeEspecial: data.necessidadeEspecial,
         },
         select: USER_UPDATE_SELECT,
     });
