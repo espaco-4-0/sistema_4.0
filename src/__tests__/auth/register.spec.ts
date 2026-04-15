@@ -5,6 +5,11 @@ import { Education, IfalAffiliation, Race } from "../../generated/prisma/enums";
 const mockFindUnique = vi.fn();
 const mockCreate = vi.fn();
 
+vi.mock("@/lib/cache", () => ({
+    invalidateCacheNamespace: vi.fn(),
+    rememberCache: vi.fn((key, deps, callback) => callback()),
+}));
+
 vi.mock("@/src/ui/lib/prisma", () => ({
     prisma: {
         user: {

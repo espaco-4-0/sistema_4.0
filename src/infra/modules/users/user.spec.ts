@@ -4,6 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createUser, emailExists, listUsers } from "../users/user.service";
 
+vi.mock("@/lib/cache", () => ({
+    invalidateCacheNamespace: vi.fn(),
+    rememberCache: vi.fn((key, deps, callback) => callback()),
+}));
 vi.mock("@/src/ui/lib/prisma", () => ({
     prisma: {
         user: {
