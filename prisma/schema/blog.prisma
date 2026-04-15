@@ -4,11 +4,13 @@ model Post {
     slug           String   @unique
     resumo         String?
     conteudo       String
-    tempoDeLeitura Int? // minutos estimados
+    tempoDeLeitura Int
     publicado      Boolean  @default(false)
-    capaBannerUrl  String?
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt
+
+    capaImagemId String?
+    capaImagem   PostFoto? @relation("CapaPost", fields: [capaImagemId], references: [id])
 
     autor   User   @relation(fields: [autorId], references: [id])
     autorId String
@@ -30,6 +32,8 @@ model PostFoto {
 
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
     postId String
+
+    capaDe Post[] @relation("CapaPost")
 
     @@index([postId])
 }

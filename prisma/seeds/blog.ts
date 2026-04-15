@@ -1,3 +1,5 @@
+import { estimateReadingTimeInMinutes } from "@/src/lib/reading-time";
+
 import { PrismaClient } from "../../src/generated/prisma/client";
 
 interface PostSeed {
@@ -20,11 +22,6 @@ function toSlug(value: string): string {
         .replaceAll(/[^a-z0-9\s-]/g, "")
         .replaceAll(/\s+/g, "-")
         .replaceAll(/-+/g, "-");
-}
-
-function estimateReadingTimeInMinutes(text: string): number {
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
-    return Math.max(1, Math.ceil(words / 200));
 }
 
 async function getCategoryIdByName(prisma: PrismaClient, nome: string): Promise<string> {
@@ -246,7 +243,7 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
 
         const categoriasIds = await Promise.all(categoriasNomes.map((nome) => getCategoryIdByName(prisma, nome)));
 
-        await prisma.post.upsert({
+        const savedPost = await prisma.post.upsert({
             where: { slug },
             update: {
                 titulo: post.title,
@@ -254,7 +251,6 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 conteudo: conteudoCompleto,
                 tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
                 publicado: true,
-                capaBannerUrl: post.image,
                 autorId: fallbackAuthor.id,
                 categorias: {
                     set: [],
@@ -268,14 +264,37 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 conteudo: conteudoCompleto,
                 tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
                 publicado: true,
-                capaBannerUrl: post.image,
                 autorId: fallbackAuthor.id,
                 categorias: {
                     connect: categoriasIds.map((id) => ({ id })),
                 },
             },
+            select: { id: true },
+        });
+
+        const existingPhoto = await prisma.postFoto.findFirst({
+            where: { postId: savedPost.id, url: post.image },
+            select: { id: true },
+        });
+
+        const photo =
+            existingPhoto ??
+            (await prisma.postFoto.create({
+                data: {
+                    url: post.image,
+                    legenda: post.about ?? undefined,
+                    postId: savedPost.id,
+                },
+                select: { id: true },
+            }));
+
+        await prisma.post.update({
+            where: { id: savedPost.id },
+            data: {
+                capaImagemId: photo.id,
+            },
         });
     }
 
-    console.log("Posts e suas categorias criados");
+    console.log("Posts, fotos e categorias do blog criados/atualizados");
 }
