@@ -21,10 +21,17 @@ function sanitizeFileName(name: string) {
         .replace(/--+/g, "-");
 }
 
-async function upload(file: File | Buffer, fileName: string, bucket: string, mimeType?: string): Promise<UploadResult> {
+async function upload(file: File | Buffer, filePath: string, bucket: string, mimeType?: string): Promise<UploadResult> {
     const buffer = file instanceof File ? Buffer.from(await file.arrayBuffer()) : file;
+
+    const parts = filePath.split("/");
+    const fileName = parts.pop()!; // último segmento = nome
+    const folder = parts.join("/"); // o resto = pasta
+
     const sanitized = sanitizeFileName(fileName);
-    const uniqueName = `${randomUUID()}-${sanitized}`;
+    const uniqueName = folder
+        ? `${folder}/${randomUUID()}-${sanitized}` // mantém a pasta intacta
+        : `${randomUUID()}-${sanitized}`;
 
     const { data, error } = await client.storage.from(bucket).upload(uniqueName, buffer, {
         contentType: mimeType ?? "application/octet-stream",
@@ -32,7 +39,6 @@ async function upload(file: File | Buffer, fileName: string, bucket: string, mim
     });
 
     if (error) throw new Error(error.message);
-
     return { path: data.path };
 }
 

@@ -106,9 +106,9 @@ export async function POST(req: NextRequest) {
                     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
                 }
 
-                ({ path, url } = await storage.uploadPublic(file, slug, detected.mime));
+                ({ path, url } = await storage.uploadPublic(file, `posts/${slug}`, detected.mime));
             } else {
-                ({ path } = await storage.uploadPrivate(file, slug, detected.mime));
+                ({ path } = await storage.uploadPrivate(file, `posts/${slug}`, detected.mime));
             }
 
             await prisma.$transaction(async (tx) => {
