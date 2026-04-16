@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { courses } from "@/src/infra/modules/courses/course-mock";
+import { useEffect, useMemo, useState } from "react";
+import { fetchCourses } from "@/src/infra/modules/courses/courses.service";
+import { CourseDetails } from "@/src/infra/modules/courses/courses.types";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/src/ui/components/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@/src/ui/components/ui/toggle-group";
 import { BookOpen, Check, SearchIcon } from "lucide-react";
@@ -30,8 +31,32 @@ const styleVariants = {
 } as const;
 
 export default function AvailableCoursesPage() {
+    const [courses, setCourses] = useState<CourseDetails[]>([]);
     const [search, setSearch] = useState("");
     const [selectedCategories, setSelectedCategories] = useState<string[]>(["todos"]);
+
+    useEffect(() => {
+        let mounted = true;
+
+        async function loadCourses() {
+            try {
+                const data = await fetchCourses();
+                if (mounted) {
+                    setCourses(data);
+                }
+            } catch {
+                if (mounted) {
+                    setCourses([]);
+                }
+            }
+        }
+
+        loadCourses();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const handleCategoryChange = (values: string[]) => {
         if (values.length === 0) {

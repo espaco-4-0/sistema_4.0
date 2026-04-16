@@ -1,6 +1,6 @@
 "use client";
 
-import Certificados from "@/src/ui/modules/professor_pages/certificados";
+import Certificados from "@/src/ui/modules/teacher_pages/certifications";
 
 export default function CertificadosPage() {
     return (

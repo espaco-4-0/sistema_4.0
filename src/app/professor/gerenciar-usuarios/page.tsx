@@ -1,11 +1,11 @@
 "use client";
 
-import GerenciarUsuarios from "@/src/ui/modules/professor_pages/gerenciar_usuarios";
+import ManageUsers from "@/src/ui/modules/teacher_pages/manage_users";
 
 export default function GerenciarUsuariosPage() {
-    return(
-	<div className="space-y-6">
-		<GerenciarUsuarios />;
-	</div>
-	)
+    return (
+        <div className="space-y-6">
+            <ManageUsers />;
+        </div>
+    );
 }

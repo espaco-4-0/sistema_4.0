@@ -1,28 +1,22 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
-import { calendarEventsMock } from "@/src/infra/modules/calendar/calendar-mock";
-import { Button } from "@/src/ui/components/ui/button";
+import { getUnifiedCalendarEvents } from "@/src/ui/lib/unified-calendar-events";
+import { createVisitRequest, getVisitRequests, requestToCalendarEvent } from "@/src/ui/lib/visit-requests-storage";
 import { EventDetail } from "@/src/ui/modules/calendar_pages/components/event-detail";
 import { EventList } from "@/src/ui/modules/calendar_pages/components/event-list";
 import { PanelWrapper } from "@/src/ui/modules/calendar_pages/components/panel-wrapper";
+import { UnifiedVisitCalendar } from "@/src/ui/modules/calendar_pages/components/shared/unified-visit-calendar";
 import { ErrorState, IdleState, LoadingState, SuccessState } from "@/src/ui/modules/calendar_pages/components/states";
 import { BookingForm, CalendarFormInput } from "@/src/ui/modules/calendar_pages/forms/booking-form";
-import { format, getDay, isSameDay, parse, setHours, setMinutes, startOfWeek } from "date-fns";
-import { ptBR } from "date-fns/locale/pt-BR";
-import { ChevronLeft, ChevronRight, Home } from "lucide-react";
+import { format, isSameDay, setHours, setMinutes } from "date-fns";
+import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { useForm } from "react-hook-form";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
-
-import { nonEmpty } from "valibot";
-
-export const locales = { "pt-BR": ptBR };
-export const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
 const monthMap: { [key: string]: number } = {
     jan: 0,
@@ -41,69 +35,6 @@ const monthMap: { [key: string]: number } = {
 
 const MAX_STUDENTS = 30;
 const MIN_EVENT_GAP_MINUTES = 30;
-
-interface ToolbarProps {
-    date: Date;
-    onNavigate: (action: "PREV" | "TODAY" | "NEXT") => void;
-}
-
-const Toolbar = ({ date, onNavigate }: ToolbarProps) => {
-    const month = format(date, "MMMM", { locale: ptBR });
-    const year = format(date, "yyyy");
-
-    const handlePrev = useCallback(() => {
-        onNavigate("PREV");
-    }, [onNavigate]);
-
-    const handleToday = useCallback(() => {
-        onNavigate("TODAY");
-    }, [onNavigate]);
-
-    const handleNext = useCallback(() => {
-        onNavigate("NEXT");
-    }, [onNavigate]);
-
-    return (
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center px-2 pb-4 lg:pb-6 pt-1 gap-3 lg:gap-0">
-            <div className="flex gap-2 lg:gap-4 items-center">
-                <div>
-                    <div className="flex gap-1 items-center font-medium text-sm lg:text-base">
-                        <span className="capitalize">
-                            {month}, {year}
-                        </span>
-                    </div>
-                    <span className="text-xs lg:text-sm text-gray-600">Calendário de Atividades</span>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-2 lg:gap-3 w-full lg:w-auto">
-                <Button
-                    onClick={handlePrev}
-                    variant="outline"
-                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
-                    type="button"
-                >
-                    <ChevronLeft className="size-4 lg:size-5" />
-                </Button>
-                <Button
-                    onClick={handleToday}
-                    className="bg-yellow-primary hover:bg-yellow-primary-dark border-none text-black h-9 lg:h-10 cursor-pointer text-sm lg:text-base flex-1 lg:flex-none"
-                    type="button"
-                >
-                    Hoje
-                </Button>
-                <Button
-                    onClick={handleNext}
-                    variant="outline"
-                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
-                    type="button"
-                >
-                    <ChevronRight className="size-4 lg:size-5" />
-                </Button>
-            </div>
-        </div>
-    );
-};
 
 export default function AllCalendar() {
     const searchParams = useSearchParams();
@@ -127,7 +58,7 @@ export default function AllCalendar() {
     );
 
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
-    const [events, setEvents] = useState<CalendarEvent[]>(calendarEventsMock);
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     const formMethods = useForm<CalendarFormInput>({
@@ -139,9 +70,15 @@ export default function AllCalendar() {
             quantidade: "",
             hora: "09:00",
             horaSaida: "10:00",
+            anexos: null,
+            confirmacaoDocumentos: false,
             mensagem: "",
         },
     });
+
+    useEffect(() => {
+        setEvents(getUnifiedCalendarEvents());
+    }, []);
 
     const handleFormSubmit = (data: CalendarFormInput) => {
         setErrorMessage("");
@@ -157,6 +94,19 @@ export default function AllCalendar() {
 
             if (quantidade > MAX_STUDENTS) {
                 setErrorMessage(`Máximo de ${MAX_STUDENTS} alunos.`);
+                setStep("error");
+                return;
+            }
+
+            const anexos = data.anexos ? Array.from(data.anexos) : [];
+            if (anexos.length === 0) {
+                setErrorMessage("Anexe pelo menos 1 documento na aba de documentação.");
+                setStep("error");
+                return;
+            }
+
+            if (!data.confirmacaoDocumentos) {
+                setErrorMessage("Confirme a documentação antes de enviar o pedido.");
                 setStep("error");
                 return;
             }
@@ -180,20 +130,30 @@ export default function AllCalendar() {
                 setErrorMessage(`Intervalo mínimo de ${MIN_EVENT_GAP_MINUTES} minutos entre eventos.`);
                 setStep("error");
             } else {
-                const newEvent: CalendarEvent = {
-                    id: Date.now(),
-                    title: `Visita: ${data.instituicao}`,
-                    start,
-                    end,
-                    type: "aprovado",
-                    description: data.mensagem || "Solicitação de visita.",
-                    time: `${data.hora} - ${data.horaSaida}`,
-                    local: "Espaço 4.0",
-                    professor: data.professor,
+                const createdRequest = createVisitRequest({
+                    instituicao: data.instituicao,
+                    responsavel: data.professor,
+                    email: data.email,
                     whatsapp: data.whatsapp,
-                    quantidade: data.quantidade,
-                };
-                setEvents([...events, newEvent]);
+                    quantidade,
+                    data: format(start, "yyyy-MM-dd"),
+                    horaInicio: data.hora,
+                    horaFim: data.horaSaida,
+                    documentos: anexos.map((file, idx) => ({
+                        id: `${Date.now()}-doc-${idx + 1}`,
+                        fileName: file.name,
+                        fileType: file.type || "application/octet-stream",
+                        fileSizeKb: Math.max(1, Math.round(file.size / 1024)),
+                        uploadedAt: new Date().toISOString(),
+                    })),
+                    mensagem: data.mensagem,
+                });
+
+                const newEvent = requestToCalendarEvent(createdRequest);
+                if (newEvent) {
+                    setEvents((prev) => [...prev, newEvent]);
+                }
+
                 setStep("success");
                 formMethods.reset();
             }
@@ -222,42 +182,18 @@ export default function AllCalendar() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 2xl:gap-6 items-start">
                     <div className="lg:col-span-7 2xl:col-span-8 bg-white rounded-lg lg:rounded-xl 2xl:rounded-lg shadow-lg p-4 lg:p-5 2xl:p-4 hover:shadow-xl transition-shadow duration-300">
-                        <Calendar
-                            localizer={localizer}
+                        <UnifiedVisitCalendar
                             events={events}
-                            date={viewDate}
-                            onNavigate={setViewDate}
-                            selectable
-                            onSelectSlot={(slot) => {
-                                setSelectedDate(slot.start);
-                                setStep(events.some((e) => isSameDay(e.start, slot.start)) ? "list" : "form");
+                            selectedDate={selectedDate}
+                            viewDate={viewDate}
+                            onViewDateChange={setViewDate}
+                            onSelectDay={(date) => {
+                                setSelectedDate(date);
+                                setStep(events.some((event) => isSameDay(event.start, date)) ? "list" : "form");
                             }}
-                            onSelectEvent={(ev) => {
-                                setSelectedDate(ev.start);
+                            onSelectEvent={() => {
                                 setStep("list");
                             }}
-                            style={{ height: 520 }}
-                            className="calendar-mobile"
-                            culture="pt-BR"
-                            views={["month"]}
-                            components={{ toolbar: Toolbar }}
-                            dayPropGetter={(date) => {
-                                const hasEv = events.filter((e) => isSameDay(e.start, date));
-                                const isToday = isSameDay(date, new Date());
-                                let cls = "transition-all cursor-pointer hover:opacity-80 ";
-                                if (isSameDay(selectedDate, date)) cls += "!bg-blue-50";
-                                else if (hasEv.some((e) => e.type === "aprovado")) cls += "!bg-green-50";
-                                else if (hasEv.some((e) => e.type === "agendado")) cls += "!bg-amber-50";
-                                if (isToday) cls += " !border-2 !border-yellow-primary";
-                                return { className: cls };
-                            }}
-                            eventPropGetter={(ev) => ({
-                                className:
-                                    ev.type === "agendado"
-                                        ? "!bg-yellow-primary !text-black !text-[10px] font-bold border-none"
-                                        : "!bg-green-500 !text-white !text-[10px] font-bold border-rounded-xl",
-                            })}
-                            messages={{ next: ">", previous: "<", today: "Hoje" }}
                         />
                     </div>
 

@@ -13,6 +13,8 @@ import { Calendar, Menu, Play, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { scrollToSection } from "../../lib/scroll";
+
 export default function NavBar() {
     const [open, setOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
@@ -46,17 +48,17 @@ export default function NavBar() {
 
     const automaticScroll = (id: string) => {
         setOpen(false);
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection(id, "start");
     };
 
     const menuItems = [
-        { id: "inicio", label: "Inicio" },
+        { id: "hero", label: "Inicio" },
         { id: "what-is", label: "Sobre" },
-        { id: "tecnologias", label: "Tecnologias" },
+        { id: "viewer_3d_section", label: "Tecnologias" },
         { id: "blog", label: "Notícias" },
         { id: "courses", label: "Cursos" },
         { id: "upcoming-events", label: "Eventos" },
-        { id: "galeria", label: "Galeria" },
+        { id: "gallery", label: "Galeria" },
         { id: "footer", label: "Contato" },
     ];
 
@@ -77,7 +79,13 @@ export default function NavBar() {
                                 className="flex items-center gap-3 p-0 cursor-pointer shrink-0"
                                 onClick={() => automaticScroll("welcome")}
                             >
-                                <Image src="/Icone-Espaco4.0.svg" alt="Logo do Espaço 4.0" width={48} height={48} />
+                                <Image
+                                    src="/Icone-Espaco4.0.svg"
+                                    alt="Logo do Espaço 4.0"
+                                    width={48}
+                                    height={48}
+                                    style={{ width: "auto", height: "auto" }}
+                                />
                                 <div className="flex flex-col items-start leading-tight">
                                     <span className="text-base font-bold text-black leading-none">Espaco 4.0</span>
                                     <span className="text-xs font-semibold text-gray-400 leading-none">
@@ -104,7 +112,7 @@ export default function NavBar() {
 
                             <div className="ml-auto hidden lg:flex shrink-0 items-center gap-4">
                                 <Link
-                                    href="#3D"
+                                    href="/espaco-3D"
                                     className="flex items-center gap-2 text-[13px] font-semibold text-black/70 hover:text-black whitespace-nowrap"
                                 >
                                     <Play className="h-5 w-5" /> Ver em 3D

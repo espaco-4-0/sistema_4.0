@@ -1,6 +1,6 @@
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 export default function Header() {
     return (
@@ -12,6 +12,7 @@ export default function Header() {
                     width={48}
                     height={48}
                     className="shadow-2xl"
+                    style={{ width: "auto", height: "auto" }}
                     priority
                 />
                 <div className="flex flex-col">

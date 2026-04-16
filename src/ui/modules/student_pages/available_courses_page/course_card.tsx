@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CourseDetails } from "@/src/infra/modules/courses/course-mock";
+import { CourseDetails } from "@/src/infra/modules/courses/courses.types";
 import { Badge } from "@/src/ui/components/ui/badge";
 import { Button } from "@/src/ui/components/ui/button";
 import CourseDialog from "@/src/ui/modules/landing_page/course_dialog";
@@ -33,7 +33,6 @@ export default function CourseCard(course: Readonly<CourseDetails>) {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 
-                {/* Category Badge */}
                 <div className="flex gap-1.5 lg:gap-2 absolute top-3 left-3 lg:top-4 lg:left-4">
                     <Badge className="bg-white/90 text-gray-900 backdrop-blur-sm border-0 capitalize text-xs">
                         {course.category}
@@ -42,9 +41,7 @@ export default function CourseCard(course: Readonly<CourseDetails>) {
                 </div>
             </div>
 
-            {/* Content */}
             <div className="p-4 lg:p-5 2xl:p-6">
-                {/* Title and Level */}
                 <div className="flex items-start justify-between mb-2 lg:mb-3">
                     <div className="flex-1">
                         <h3 className="text-base lg:text-lg mb-1">{course.title}</h3>
@@ -54,9 +51,6 @@ export default function CourseCard(course: Readonly<CourseDetails>) {
                     </div>
                 </div>
 
-                {/* Description */}
-
-                {/* Info Grid */}
                 <div className="space-y-1.5 lg:space-y-2 mb-3 lg:mb-4 pb-3 lg:pb-4 border-b">
                     <div className="flex items-center gap-1.5 lg:gap-2 text-xs lg:text-sm text-gray-600">
                         <CalendarClock className="size-3.5 lg:size-4 text-blue-500" />

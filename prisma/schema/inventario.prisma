@@ -11,8 +11,8 @@ model InventarioItem {
   descricao   String?
   categoria   CategoriaInventario @default(OUTRO)
   quantidade  Int                 @default(1)
-  unidade     String?             // ex: "un", "kg", "L"
-  localizacao String?             // onde está guardado
+  unidade     String? // ex: "un", "kg", "L"
+  localizacao String? // onde está guardado
   ativo       Boolean             @default(true)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt

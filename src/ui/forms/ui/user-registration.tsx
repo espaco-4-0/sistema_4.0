@@ -3,6 +3,7 @@ import { Education, IfalAffiliation, Race } from "@/src/generated/prisma/enums";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeClosed, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Control, Controller, FieldValues, Path, useForm } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { toast } from "sonner";
@@ -162,6 +163,7 @@ function InputSelect<T extends FieldValues, TValue extends string>({
 }
 
 export default function UserRegistrationForm() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm<UserRegistrationFrontData>({
@@ -211,6 +213,7 @@ export default function UserRegistrationForm() {
 
             toast.success("Cadastro realizado com sucesso! Você será redirecionado(a).");
             form.reset();
+            router.push("/login");
         } catch {
             toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
         } finally {

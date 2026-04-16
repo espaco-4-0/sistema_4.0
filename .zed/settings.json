@@ -1,0 +1,18 @@
+{
+    "tab_size": 4,
+    "hard_tabs": true,
+    "format_on_save": "on",
+    "preferred_line_length": 120,
+    "wrap": "soft",
+    "language_overrides": {
+        "javascriptreact": {
+            "formatter": "prettier"
+        }
+    },
+    "formatter": {
+        "external": {
+            "command": "node_modules/.bin/prettier",
+            "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+    }
+}

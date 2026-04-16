@@ -26,6 +26,7 @@ import SubscribeSucess from "./subscribe_sucess";
 
 interface CourseFormProps {
     readonly course: string;
+    readonly courseId: string;
     readonly setCloseCourse: (value: boolean) => void;
 }
 
@@ -39,9 +40,7 @@ const LoadingState = ({ ref }: { ref: React.RefObject<HTMLDivElement | null> }) 
     </div>
 );
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export default function CourseForm({ course, setCloseCourse }: CourseFormProps) {
+export default function CourseForm({ course, courseId, setCloseCourse }: CourseFormProps) {
     const [formComplete, setFormComplete] = useState(false);
     const [loading, setLoading] = useState(false);
     const isMounted = useIsMounted();
@@ -106,16 +105,22 @@ export default function CourseForm({ course, setCloseCourse }: CourseFormProps) 
                     try {
                         setLoading(true);
 
-                        console.log("Submit Data:", data);
+                        const response = await fetch(`/api/courses/${courseId}/subscribe`, {
+                            method: "POST",
+                        });
 
-                        await sleep(2000);
+                        if (!response.ok) {
+                            const payload = (await response.json().catch(() => ({}))) as { message?: string };
+                            throw new Error(payload.message ?? "Erro ao enviar inscricao");
+                        }
 
                         toast.success("Inscrição realizada com sucesso!");
                         setFormComplete(true);
 
                         window.scrollTo({ top: 0, behavior: "smooth" });
-                    } catch {
-                        toast.error("Erro ao enviar inscrição");
+                    } catch (error) {
+                        const message = error instanceof Error ? error.message : "Erro ao enviar inscricao";
+                        toast.error(message);
                     } finally {
                         setLoading(false);
                     }

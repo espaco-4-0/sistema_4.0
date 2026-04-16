@@ -1,0 +1,11 @@
+model Visit {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  status    String   @default("pendente")
+  message   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

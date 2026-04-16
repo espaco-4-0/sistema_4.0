@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { courses } from "@/src/infra/modules/courses/course-mock";
+import { useEffect, useState } from "react";
+import { fetchCourses } from "@/src/infra/modules/courses/courses.service";
+import { CourseDetails } from "@/src/infra/modules/courses/courses.types";
 import { Button } from "@/src/ui/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
 import { ArrowRight, Clock4Icon, LoaderCircle, Users } from "lucide-react";
@@ -8,14 +9,39 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { getHoursOfPeriod } from "../../lib/date";
+import { EmptyState } from "./empty_state";
 
 const CourseDialog = dynamic(() => import("@/src/ui/modules/landing_page/course_dialog"), { ssr: false });
 const MotionButton = motion.create(Button);
 
 export default function CoursesAndTraining() {
+    const [courses, setCourses] = useState<CourseDetails[]>([]);
     const [open, setOpen] = useState(false);
     const [cursoSelecionado, setCursoSelecionado] = useState("");
     const [openingCourse, setOpeningCourse] = useState<string | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+
+        async function loadCourses() {
+            try {
+                const data = await fetchCourses();
+                if (mounted) {
+                    setCourses(data);
+                }
+            } catch {
+                if (mounted) {
+                    setCourses([]);
+                }
+            }
+        }
+
+        loadCourses();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     function abrirDialog(curso: string) {
         if (openingCourse !== null) return;
@@ -46,125 +72,140 @@ export default function CoursesAndTraining() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="mt-4 text-gray-600"
+                    className="mt-4 text-gray-600 mb-18"
                 >
                     Aprenda com especialistas e desenvolva habilidades práticas em tecnologia
                 </motion.p>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 pt-18 md:grid-cols-2 lg:grid-cols-3">
-                {courses.slice(0, 6).map((course, index) => (
-                    <motion.div
-                        key={course.id}
-                        whileHover="hover"
-                        layout
-                        initial={{ opacity: 0.75, y: 40, x: 5 }}
-                        whileInView={{
-                            opacity: 1,
-                            x: 0,
-                            y: 0,
-                            transition: { duration: 0.45, delay: index * 0.12 },
-                        }}
-                        viewport={{ once: true }}
-                    >
-                        <Card className="group rounded-2xl border-gray-200 border-[0.5px] shadow-lg transition-all duration-250 hover:shadow-xl p-0">
-                            <CardHeader className="group bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-300 rounded-t-2xl h-20 pb-22 px-6 pt-6">
-                                <span className="text-xs font-semibold text-black bg-white/20 border-[0.5px] border-white/10 backdrop-blur-sm w-fit px-3 py-1 mb-1 rounded-xl shadow-xs">
-                                    {course.level}
-                                </span>
+            {courses.length > 0 ? (
+                <div>
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        {courses.slice(0, 6).map((course, index) => {
+                            const totalHours = getHoursOfPeriod(course.weekDays, course.schedule, course.durationWeeks);
 
-                                <CardTitle className="text-xl font-bold text-black">{course.title}</CardTitle>
-                            </CardHeader>
-
-                            <CardContent>
-                                <p className="text-md text-gray-700">{course.description}</p>
-
-                                <div className="flex justify-between w-7/10 my-2">
-                                    <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
-                                        <Clock4Icon className="h-4 w-4 text-yellow-600" />
-                                        {getHoursOfPeriod(course.weekDays, course.schedule, course.durationWeeks)} horas
-                                    </div>
-
-                                    <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
-                                        <Users className="h-4 w-4 text-yellow-600" />
-                                        {course.maxSubscribes - course.subscribes} vagas
-                                    </div>
-                                </div>
-                            </CardContent>
-
-                            <CardFooter className="pb-6 pt-6">
-                                <MotionButton
-                                    onClick={() => abrirDialog(course.title)}
-                                    disabled={openingCourse !== null || openingCourse != null}
-                                    size="lg"
-                                    variants={{
-                                        rest: { scale: 1 },
-                                        hover: { scale: 1.02 },
+                            return (
+                                <motion.div
+                                    key={course.id}
+                                    whileHover="hover"
+                                    layout
+                                    initial={{ opacity: 0.75, y: 40, x: 5 }}
+                                    whileInView={{
+                                        opacity: 1,
+                                        x: 0,
+                                        y: 0,
+                                        transition: { duration: 0.45, delay: index * 0.12 },
                                     }}
-                                    whileTap={{ scale: 0.97 }}
-                                    transition={{ duration: 0.02 }}
-                                    className="bg-yellow-primary text-black hover:bg-yellow-secondary cursor-pointer text-base w-full py-5.5 font-semibold"
+                                    viewport={{ once: true }}
                                 >
-                                    {openingCourse === course.title ? (
-                                        <span className="flex items-center gap-2">
-                                            <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            Carregando...
-                                        </span>
-                                    ) : (
-                                        "Inscrever-se agora"
-                                    )}
-                                </MotionButton>
-                            </CardFooter>
-                        </Card>
-                    </motion.div>
-                ))}
-            </div>
+                                    <Card className="group rounded-2xl border-gray-200 border-[0.5px] shadow-lg transition-all duration-250 hover:shadow-xl p-0">
+                                        <CardHeader className="group bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-300 rounded-t-2xl h-20 pb-22 px-6 pt-6">
+                                            <span className="text-xs font-semibold text-black bg-white/20 border-[0.5px] border-white/10 backdrop-blur-sm w-fit px-3 py-1 mb-1 rounded-xl shadow-xs">
+                                                {course.level}
+                                            </span>
 
-            <div className="flex justify-center mt-20">
-                <motion.div
-                    initial={{ opacity: 0.6, y: 30 }}
-                    whileInView={{
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.6, delay: 0.2 },
-                    }}
-                    viewport={{ once: true }}
-                    whileHover="hover"
-                    whileTap={{ scale: 0.97 }}
-                    variants={{
-                        rest: { scale: 1 },
-                        hover: { scale: 1.04 },
-                    }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                >
-                    <Link
-                        href="/courses"
-                        className="flex items-center justify-center font-semibold rounded-xl text-sm text-white bg-slate-900 2xl:text-[16px] px-8 py-4 gap-2"
-                    >
-                        Ver todos os Cursos
-                        <motion.span
-                            variants={{
-                                rest: {
-                                    x: 0,
-                                    rotate: 0,
-                                },
-                                hover: {
-                                    x: [0, 3, 0],
-                                    rotate: [0, 10, 0],
-                                    transition: {
-                                        duration: 0.6,
-                                        repeat: 3,
-                                        ease: "easeInOut",
-                                    },
-                                },
+                                            <CardTitle className="text-xl font-bold text-black">
+                                                {course.title}
+                                            </CardTitle>
+                                        </CardHeader>
+
+                                        <CardContent>
+                                            <p className="text-md text-gray-700">{course.description}</p>
+
+                                            <div className="flex justify-between w-7/10 my-2">
+                                                <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
+                                                    <Clock4Icon className="h-4 w-4 text-yellow-600" />
+                                                    {totalHours === null ? "Horario a definir" : `${totalHours} horas`}
+                                                </div>
+
+                                                <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
+                                                    <Users className="h-4 w-4 text-yellow-600" />
+                                                    {course.maxSubscribes - course.subscribes} vagas
+                                                </div>
+                                            </div>
+                                        </CardContent>
+
+                                        <CardFooter className="pb-6 pt-6">
+                                            <MotionButton
+                                                onClick={() => abrirDialog(course.title)}
+                                                disabled={openingCourse !== null || openingCourse != null}
+                                                size="lg"
+                                                variants={{
+                                                    rest: { scale: 1 },
+                                                    hover: { scale: 1.02 },
+                                                }}
+                                                whileTap={{ scale: 0.97 }}
+                                                transition={{ duration: 0.02 }}
+                                                className="bg-yellow-primary text-black hover:bg-yellow-secondary cursor-pointer text-base w-full py-5.5 font-semibold"
+                                            >
+                                                {openingCourse === course.title ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                        Carregando...
+                                                    </span>
+                                                ) : (
+                                                    "Inscrever-se agora"
+                                                )}
+                                            </MotionButton>
+                                        </CardFooter>
+                                    </Card>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex justify-center mt-20">
+                        <motion.div
+                            initial={{ opacity: 0.6, y: 30 }}
+                            whileInView={{
+                                opacity: 1,
+                                y: 0,
+                                transition: { duration: 0.6, delay: 0.2 },
                             }}
-                            className="inline-flex"
+                            viewport={{ once: true }}
+                            whileHover="hover"
+                            whileTap={{ scale: 0.97 }}
+                            variants={{
+                                rest: { scale: 1 },
+                                hover: { scale: 1.04 },
+                            }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
                         >
-                            <ArrowRight />
-                        </motion.span>
-                    </Link>
-                </motion.div>
-            </div>
+                            <Link
+                                href="/courses"
+                                className="flex items-center justify-center font-semibold rounded-xl text-sm text-white bg-slate-900 2xl:text-[16px] px-8 py-4 gap-2"
+                            >
+                                Ver todos os Cursos
+                                <motion.span
+                                    variants={{
+                                        rest: {
+                                            x: 0,
+                                            rotate: 0,
+                                        },
+                                        hover: {
+                                            x: [0, 3, 0],
+                                            rotate: [0, 10, 0],
+                                            transition: {
+                                                duration: 0.6,
+                                                repeat: 3,
+                                                ease: "easeInOut",
+                                            },
+                                        },
+                                    }}
+                                    className="inline-flex"
+                                >
+                                    <ArrowRight />
+                                </motion.span>
+                            </Link>
+                        </motion.div>
+                    </div>
+                </div>
+            ) : (
+                <EmptyState
+                    title="Nada encontrado por enquanto"
+                    description="Quando houver novidades, elas aparecerão aqui"
+                />
+            )}
 
             <CourseDialog open={open} setOpen={setOpen} curso={cursoSelecionado} />
         </section>
