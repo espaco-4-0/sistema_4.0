@@ -87,25 +87,29 @@ export async function POST(req: NextRequest) {
 
         const { title, slug, content, published, file, summary, category } = validatedData.data;
 
-        if (published && session.user.role !== "ADMIN") {
-            return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-        }
-
         if (category) {
             const haveCategory = await prisma.postCategoria.findUnique({ where: { nome: category } });
             if (!haveCategory) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
         }
 
-        let imagePath: string | null = null;
+        let path: string | null = null;
+        let url: string | undefined = undefined;
         try {
             const fileBytes = await file.arrayBuffer();
             const fileBuffer = Buffer.from(fileBytes);
             const detected = await fileTypeFromBuffer(fileBuffer);
             if (!detected || !ALLOWED_TYPES.includes(detected.mime))
                 return NextResponse.json({ error: "Tipo de arquivo não permitido" }, { status: 415 });
-            const { path } = await storage.uploadPrivate(file, slug, detected.mime);
 
-            imagePath = path;
+            if (published) {
+                if (session.user.role !== "ADMIN") {
+                    return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+                }
+
+                ({ path, url } = await storage.uploadPublic(file, slug, detected.mime));
+            } else {
+                ({ path } = await storage.uploadPrivate(file, slug, detected.mime));
+            }
 
             await prisma.$transaction(async (tx) => {
                 const post = await tx.post.create({
@@ -127,7 +131,7 @@ export async function POST(req: NextRequest) {
 
                 const foto = await tx.postFoto.create({
                     data: {
-                        url: path,
+                        url: url ? url : path!,
                         postId: post.id,
                     },
                 });
@@ -140,11 +144,11 @@ export async function POST(req: NextRequest) {
                 });
             });
 
-            return NextResponse.json({ message: "Post criado" }, { status: 201 });
+            return NextResponse.json({ message: "Post criado", ...(url && { url: url }) }, { status: 201 });
         } catch (err: any) {
             console.error(err);
 
-            if (imagePath) await storage.delete(imagePath);
+            if (path) await storage.delete(path);
 
             if (err.code === "P2002") {
                 return NextResponse.json({ error: "Slug já existe" }, { status: 409 });
