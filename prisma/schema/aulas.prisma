@@ -30,7 +30,7 @@ model Curso {
 
   aulas        Aula[]
   inscricoes   Inscricao[]
-  certificados Certificado[]
+  certificates Certificate[]
 
   @@index([professorId])
 }

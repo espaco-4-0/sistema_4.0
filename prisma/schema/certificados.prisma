@@ -1,20 +1,45 @@
-model Certificado {
-  id           String    @id @default(cuid())
-  titulo       String
-  descricao    String?
+model Certificate {
+  id          String   @id @default(uuid())
+  titulo      String
+  descricao   String
   cargaHoraria Int?
-  arquivoUrl   String? // PDF gerado
-  emitidoEm    DateTime  @default(now())
-  validadeAte  DateTime?
-  updatedAt    DateTime  @updatedAt
+  arquivoUrl  String
+  curso       String?
+  turmaId     String?
+  validadeAte DateTime?
+  status      String   @default("ATIVO")
+  emitidoPor  String
+  createdAt   DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  emissor     User     @relation("ProfessorCertificados", fields: [emitidoPor], references: [id])
+  inscricoes  CertificateSubscription[]
+  emissoes    CertificateEmission[]
+}
 
-  // Pode estar vinculado a um curso
-  curso   Curso?  @relation(fields: [cursoId], references: [id])
-  cursoId String?
+model CertificateSubscription {
+  id            String   @id @default(uuid())
+  certificateId String
+  alunoId       String
+  createdAt     DateTime @default(now())
 
-  @@index([userId])
-  @@index([cursoId])
+  certificate   Certificate @relation(fields: [certificateId], references: [id])
+  aluno         User        @relation(fields: [alunoId], references: [id])
+
+  @@unique([certificateId, alunoId])
+}
+
+model CertificateEmission {
+  id             String   @id @default(uuid())
+  certificateId  String
+  alunoId        String
+  arquivoUrl     String
+  emitidoEm      DateTime @default(now())
+  emitidoPor     String
+  ultimoDownload DateTime?
+  totalDownloads Int      @default(0)
+
+  certificate    Certificate @relation(fields: [certificateId], references: [id])
+  aluno          User        @relation(fields: [alunoId], references: [id])
+
+  @@unique([certificateId, alunoId])
 }

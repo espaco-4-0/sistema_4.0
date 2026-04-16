@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+//refactor: modificar o line box para clicar nela seguindo o padrao da pagina do professor
 const sidebar_options = [
     {
         id: 1,
