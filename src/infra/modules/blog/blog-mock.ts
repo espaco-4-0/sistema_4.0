@@ -1,16 +1,4 @@
-export interface News {
-    id: number;
-    category: string;
-    title: string;
-    image: string;
-    date: string;
-    author: string;
-    about: string;
-    content: string[];
-    tags: string[];
-}
-
-export const newsData: News[] = [
+export const newsData = [
     {
         id: 1,
         category: "IOT E AUTOMAÇÃO",
@@ -27,11 +15,11 @@ export const newsData: News[] = [
             "Segundo o coordenador do projeto, Prof. João Silva, a iniciativa mostra como a tecnologia pode resolver problemas ambientais e, ao mesmo tempo, gerar aprendizado aplicado para os alunos.",
             "Com o prêmio, a equipe pretende ampliar a capacidade de produção, firmar parcerias com cooperativas locais e publicar um manual aberto para replicação do protótipo.",
         ],
-        tags: ["Sustentabilidade", "Impressão 3D", "IoT", "Reciclagem", "Inovação"],
+        tags: ["Impressão 3D", "IoT"],
     },
 
     {
-        id: 3,
+        id: 2,
         category: "CSBC",
         title: "O Instituto Federal de Alagoas Campus Arapiraca chegou forte na competição nacional de tecnologia",
         image: "/noticia-quartenaria.jpg",
@@ -46,10 +34,10 @@ export const newsData: News[] = [
             "A banca avaliadora elogiou o rigor técnico e o impacto social das soluções, destacando o potencial de aplicação direta no cotidiano das comunidades locais.",
             "A participação expressiva reforça a qualidade do ensino e a dedicação de alunos e professores em desenvolver tecnologias com propósito.",
         ],
-        tags: ["CSBC", "Competição", "Prêmios", "Tecnologia", "IFAL"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 4,
+        id: 3,
         category: "Sustentabilidade",
         title: "Alunos do IFAL Campus Arapiraca envolvidos na área de sustentabilidade desenvolvem projeto inovador",
         image: "/noticia-quinta.jpg",
@@ -64,10 +52,10 @@ export const newsData: News[] = [
             "Também foram criadas ações educativas com sinalização por cores e oficinas para orientar o descarte correto nas áreas de maior fluxo.",
             "A expansão para a comunidade local já conta com apoio da prefeitura e empresas parceiras interessadas em adotar a solução em escala municipal.",
         ],
-        tags: ["Sustentabilidade", "IoT", "Meio Ambiente", "Reciclagem", "Smart City"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 5,
+        id: 4,
         category: "Robótica",
         title: "Projetos de robótica ganham destaque no Espaço 4.0 e conquistam prêmios regionais",
         image: "/robotica-meme.jpeg",
@@ -82,11 +70,11 @@ export const newsData: News[] = [
             "Os estudantes também recebem mentoria de professores e ex-alunos do campus, fortalecendo o ciclo de inovação e formação técnica.",
             "O desempenho no torneio abriu portas para parcerias com empresas de tecnologia e oportunidades de estágio para os integrantes do projeto.",
         ],
-        tags: ["Robótica", "Automação", "Competição", "IA", "Visão Computacional"],
+        tags: ["Impressão 3D", "IoT"],
     },
 
     {
-        id: 7,
+        id: 5,
         category: "Realidade Virtual",
         title: "Projeto de realidade virtual revoluciona aprendizado no campus",
         image: "/pibic.jpeg",
@@ -101,10 +89,10 @@ export const newsData: News[] = [
             "A plataforma também está recebendo melhorias de acessibilidade e suporte a diferentes dispositivos, incluindo visores mais simples e PCs do laboratório.",
             "Instituições de outros estados já demonstraram interesse em adotar a solução, que poderá ser disponibilizada gratuitamente para escolas públicas.",
         ],
-        tags: ["VR", "Educação", "Tecnologia", "Inovação", "Aprendizado"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 8,
+        id: 6,
         category: "Inteligência Artificial",
         title: "Laboratório de IA do Espaço 4.0 desenvolve soluções para indústria local",
         image: "/inauguracao.jpeg",
@@ -119,10 +107,10 @@ export const newsData: News[] = [
             "O time também desenvolveu protocolos de governança de dados e critérios éticos para uso de IA em ambientes industriais.",
             "A iniciativa reforça a parceria entre academia e setor produtivo, impulsionando inovação e desenvolvimento regional.",
         ],
-        tags: ["IA", "Indústria", "Machine Learning", "Qualidade", "Inovação"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 9,
+        id: 7,
         category: "Inovação",
         title: "Workshop no Espaço 4.0 capacita estudantes em tecnologias emergentes",
         image: "/importante.jpeg",
@@ -137,10 +125,10 @@ export const newsData: News[] = [
             "Questionários de satisfação apontaram alta adesão e pedidos por novos temas, o que reforçou o calendário semestral de atividades.",
             "Novos workshops já estão programados, abordando Web3, realidade aumentada, computação em nuvem e segurança digital.",
         ],
-        tags: ["Workshop", "Capacitação", "Tecnologia", "Inovação", "Educação"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 10,
+        id: 8,
         category: "Impressão 3D",
         title: "Novos materiais para impressão 3D são testados em laboratório do campus",
         image: "https://images.unsplash.com/photo-1703221561813-cdaa308cf9e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHwzRCUyMHByaW50aW5nJTIwdGVjaG5vbG9neXxlbnwxfHx8fDE3NzAwNTI1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -155,10 +143,10 @@ export const newsData: News[] = [
             "As pesquisas atraíram atenção internacional, com publicações em revistas científicas e convites para conferências especializadas.",
             "O objetivo é tornar a impressão 3D mais acessível e ambientalmente responsável, contribuindo para práticas de fabricação sustentável.",
         ],
-        tags: ["Impressão 3D", "Materiais", "Sustentabilidade", "Pesquisa", "Inovação"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 11,
+        id: 9,
         category: "Automação",
         title: "Sistema automatizado de controle de estoque é implementado com sucesso",
         image: "https://images.unsplash.com/photo-1712599609774-172848255a9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxJb1QlMjBhdXRvbWF0aW9uJTIwZGV2aWNlc3xlbnwxfHx8fDE3NzAxNDU5MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -173,10 +161,10 @@ export const newsData: News[] = [
             "A integração com sistemas internos facilitou auditorias e reduziu erros de lançamento, aumentando a confiabilidade dos dados.",
             "Pequenas e médias empresas da região já estão adotando a tecnologia, com planos de expansão para outros setores nos próximos meses.",
         ],
-        tags: ["Automação", "Estoque", "RFID", "Gestão", "Eficiência"],
+        tags: ["Impressão 3D", "IoT"],
     },
     {
-        id: 12,
+        id: 10,
         category: "Tecnologia Educacional",
         title: "Plataforma digital desenvolvida no Espaço 4.0 melhora ensino de programação",
         image: "https://images.unsplash.com/photo-1758270704534-fd9715bffc0e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWNobm9sb2d5JTIwY2FtcHVzJTIwc3R1ZGVudHN8ZW58MXx8fHwxNzcwMTQ1OTIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -191,6 +179,6 @@ export const newsData: News[] = [
             "Professores também contam com relatórios de progresso e sugestões de intervenção para turmas com maior dificuldade.",
             "A plataforma está sendo disponibilizada gratuitamente para escolas públicas, contribuindo para a democratização do ensino de tecnologia no país.",
         ],
-        tags: ["Educação", "Programação", "Plataforma", "IA", "Gamificação"],
+        tags: ["Impressão 3D", "IoT"],
     },
 ];

@@ -15,6 +15,8 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { scrollToSection } from "../../lib/scroll";
+
 export default function Footer() {
     const mapLink = "https://www.google.com/maps/search/?api=1&query=IFAL+Campus+Arapiraca";
 
@@ -156,7 +158,7 @@ function FooterItem({ icon: Icon, title, desc, href, external = false }: FooterI
         if (!href.includes("#")) return;
         e.preventDefault();
         const id = href.slice(2);
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection(id, "start");
     };
 
     return (

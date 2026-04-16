@@ -13,6 +13,8 @@ import { Calendar, Menu, Play, User, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { scrollToSection } from "../../lib/scroll";
+
 export default function NavBar() {
     const [open, setOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
@@ -46,17 +48,17 @@ export default function NavBar() {
 
     const automaticScroll = (id: string) => {
         setOpen(false);
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        scrollToSection(id, "start");
     };
 
     const menuItems = [
-        { id: "inicio", label: "Inicio" },
+        { id: "hero", label: "Inicio" },
         { id: "what-is", label: "Sobre" },
         { id: "viewer_3d_section", label: "Tecnologias" },
         { id: "blog", label: "Notícias" },
         { id: "courses", label: "Cursos" },
         { id: "upcoming-events", label: "Eventos" },
-        { id: "galeria", label: "Galeria" },
+        { id: "gallery", label: "Galeria" },
         { id: "footer", label: "Contato" },
     ];
 

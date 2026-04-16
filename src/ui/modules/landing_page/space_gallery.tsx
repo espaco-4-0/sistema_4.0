@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Minimize, X } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "../../components/ui/button";
+import { EmptyState } from "./empty_state";
 
 export default function SpaceGallery() {
     const [selectedImage, setSelectedImage] = useState<number | null>(null);
@@ -40,7 +41,7 @@ export default function SpaceGallery() {
     };
 
     return (
-        <section id="space_gallery" className="bg-[#F9FAFB] py-20">
+        <section id="gallery" className="bg-[#F9FAFB] py-20">
             <div className="mx-auto max-w-7xl px-6">
                 <h2 className="text-4xl font-semibold text-center">
                     Galeria do <span className="text-yellow-muted font-semibold">Espaco 4.0</span>
@@ -49,36 +50,43 @@ export default function SpaceGallery() {
                     Veja Momentos Reais de aprendizado, criação e inovação
                 </p>
 
-                <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
-                    {images.map((image, index) => (
-                        <button
-                            key={`${image.title}-${index}`}
-                            className="relative overflow-hidden rounded-2xl  group cursor-pointer block w-full text-left"
-                            onClick={() => setSelectedImage(index)}
-                            aria-label={`Abrir imagem: ${image.title}`}
-                        >
-                            <Image
-                                src={image.src}
-                                width={1024}
-                                height={980}
-                                alt={image.title}
-                                className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
+                {images.length > 0 ? (
+                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                        {images.map((image, index) => (
+                            <button
+                                key={`${image.title}-${index}`}
+                                className="relative overflow-hidden rounded-2xl  group cursor-pointer block w-full text-left"
+                                onClick={() => setSelectedImage(index)}
+                                aria-label={`Abrir imagem: ${image.title}`}
+                            >
+                                <Image
+                                    src={image.src}
+                                    width={1024}
+                                    height={980}
+                                    alt={image.title}
+                                    className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
+                                />
 
-                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                                <div>
-                                    <h3 className="bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-xl mb-2">
-                                        {image.title}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-white/80 text-sm">
-                                        <span>Ver em tela cheia</span>
-                                        <Minimize />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                                    <div>
+                                        <h3 className="bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-xl mb-2">
+                                            {image.title}
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-white/80 text-sm">
+                                            <span>Ver em tela cheia</span>
+                                            <Minimize />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </button>
-                    ))}
-                </div>
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyState
+                        title="Nada encontrado por enquanto"
+                        description="Quando houver novidades, elas aparecerão aqui"
+                    />
+                )}
             </div>
 
             {selectedImage !== null && (

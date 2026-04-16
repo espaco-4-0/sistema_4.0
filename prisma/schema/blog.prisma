@@ -1,70 +1,81 @@
 model Post {
-  id             String   @id @default(cuid())
-  titulo         String
-  slug           String   @unique
-  resumo         String?
-  conteudo       String
-  tempoDeLeitura Int? // minutos estimados
-  publicado      Boolean  @default(false)
-  capaBannerUrl  String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+    id             String   @id @default(cuid())
+    titulo         String
+    slug           String   @unique
+    resumo         String?
+    conteudo       String
+    tempoDeLeitura Int
+    publicado      Boolean  @default(false)
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 
-  autor   User   @relation(fields: [autorId], references: [id])
-  autorId String
+    capaImagemId String?
+    capaImagem   PostFoto? @relation("CapaPost", fields: [capaImagemId], references: [id])
 
-  fotos       PostFoto[]
-  comentarios Comentario[]
-  curtidas    Curtida[]
+    autor   User   @relation(fields: [autorId], references: [id])
+    autorId String
 
-  @@index([autorId])
+    fotos       PostFoto[]
+    comentarios Comentario[]
+    curtidas    Curtida[]
+    categorias  PostCategoria[]
+
+    @@index([autorId])
 }
 
 model PostFoto {
-  id        String   @id @default(cuid())
-  url       String
-  legenda   String?
-  ordem     Int      @default(0)
-  createdAt DateTime @default(now())
+    id        String   @id @default(cuid())
+    url       String
+    legenda   String?
+    ordem     Int      @default(0)
+    createdAt DateTime @default(now())
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId String
 
-  @@index([postId])
+    capaDe Post[] @relation("CapaPost")
+
+    @@index([postId])
 }
 
 model Comentario {
-  id        String   @id @default(cuid())
-  conteudo  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    id        String   @id @default(cuid())
+    conteudo  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  autor   User   @relation(fields: [autorId], references: [id], onDelete: Cascade)
-  autorId String
+    autor   User   @relation(fields: [autorId], references: [id], onDelete: Cascade)
+    autorId String
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId String
 
-  // Suporte a respostas aninhadas
-  parentId  String?
-  parent    Comentario?  @relation("ComentarioRespostas", fields: [parentId], references: [id], onDelete: SetNull)
-  respostas Comentario[] @relation("ComentarioRespostas")
+    // Suporte a respostas aninhadas
+    parentId  String?
+    parent    Comentario?  @relation("ComentarioRespostas", fields: [parentId], references: [id], onDelete: SetNull)
+    respostas Comentario[] @relation("ComentarioRespostas")
 
-  @@index([autorId])
-  @@index([postId])
-  @@index([parentId])
+    @@index([autorId])
+    @@index([postId])
+    @@index([parentId])
 }
 
 model Curtida {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId String
 
-  @@unique([userId, postId])
-  @@index([postId])
+    @@unique([userId, postId])
+    @@index([postId])
+}
+
+model PostCategoria {
+    id    String @id @default(cuid())
+    nome  String @unique
+    posts Post[]
 }

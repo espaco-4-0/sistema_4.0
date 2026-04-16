@@ -6,6 +6,8 @@ import { Transition, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { EmptyState } from "./empty_state";
+
 const MotionLink = motion.create(Link);
 
 const noticias = newsData.slice(0, 5);
@@ -72,129 +74,140 @@ export default function Blog() {
                 >
                     Novidades do <span className="text-yellow-muted font-bold">Espaço 4.0</span>
                 </motion.h2>
+                {newsData.length > 0 ? ( //trocar
+                    <div>
+                        <ul className="grid grid-cols-2 grid-rows-4 gap-3 lg:gap-2 px-2 lg:px-4 py-2 lg:py-4 md:grid-cols-6 md:grid-rows-2">
+                            {noticias.map((noticia, index) => {
+                                const isFeatured = noticia.id === layoutState.featuredId;
+                                const smallIndex = slotIndexMap.get(noticia.id) ?? -1;
+                                const smallSlotClass = smallIndex >= 0 ? smallSlotClasses[smallIndex] : "";
 
-                <ul className="grid grid-cols-2 grid-rows-4 gap-3 lg:gap-2 px-2 lg:px-4 py-2 lg:py-4 md:grid-cols-6 md:grid-rows-2">
-                    {noticias.map((noticia, index) => {
-                        const isFeatured = noticia.id === layoutState.featuredId;
-                        const smallIndex = slotIndexMap.get(noticia.id) ?? -1;
-                        const smallSlotClass = smallIndex >= 0 ? smallSlotClasses[smallIndex] : "";
-
-                        return (
-                            <motion.li
-                                key={noticia.id}
-                                layout
-                                initial={
-                                    isFeatured ? { opacity: 0.75, x: -25 } : { opacity: 0.75, y: (index / 4) * 25 }
-                                }
-                                whileInView={{
-                                    opacity: 1,
-                                    x: 0,
-                                    y: 0,
-                                    transition: isFeatured
-                                        ? { duration: 0.55, delay: 0.25 }
-                                        : { duration: (0.55 * index) / 4, delay: 0.25 },
-                                }}
-                                viewport={{ once: true }}
-                                transition={transitionCards}
-                                className={`group relative overflow-hidden cursor-pointer shadow-lg ${
-                                    isFeatured
-                                        ? "col-span-2 row-span-2 col-start-1 row-start-1 md:col-span-4 md:row-span-2 md:col-start-auto md:row-start-auto h-72 sm:h-80 md:h-125 rounded-2xl md:rounded-3xl md:mr-2"
-                                        : `col-span-1 row-span-1 ${smallSlotClass} h-36 sm:h-44 md:h-60 rounded-xl hover:shadow-xl transition-shadow`
-                                }`}
-                            >
-                                <Link href={`/blog/${noticia.id}`} className="relative block size-full">
-                                    <div className="absolute inset-0 z-10 size-full bg-linear-to-t from-slate-900 via-slate-900/75 to-transparent" />
-
-                                    <Image
-                                        src={noticia.image}
-                                        alt={noticia.title}
-                                        fill
-                                        sizes={
+                                return (
+                                    <motion.li
+                                        key={noticia.id}
+                                        layout
+                                        initial={
                                             isFeatured
-                                                ? "(max-width: 768px) 100vw, 66vw"
-                                                : "(max-width: 768px) 50vw, 16vw"
+                                                ? { opacity: 0.75, x: -25 }
+                                                : { opacity: 0.75, y: (index / 4) * 25 }
                                         }
-                                        className="z-0 object-cover group-hover:scale-110 transition-all duration-700 brightness-80 group-hover:brightness-95"
-                                    />
-
-                                    <div
-                                        className={`relative size-full z-10 flex flex-col justify-end ${
-                                            isFeatured ? "gap-4 md:gap-5 p-6 md:p-10 items-start" : "gap-1 p-4 md:p-5"
+                                        whileInView={{
+                                            opacity: 1,
+                                            x: 0,
+                                            y: 0,
+                                            transition: isFeatured
+                                                ? { duration: 0.55, delay: 0.25 }
+                                                : { duration: (0.55 * index) / 4, delay: 0.25 },
+                                        }}
+                                        viewport={{ once: true }}
+                                        transition={transitionCards}
+                                        className={`group relative overflow-hidden cursor-pointer shadow-lg ${
+                                            isFeatured
+                                                ? "col-span-2 row-span-2 col-start-1 row-start-1 md:col-span-4 md:row-span-2 md:col-start-auto md:row-start-auto h-72 sm:h-80 md:h-125 rounded-2xl md:rounded-3xl md:mr-2"
+                                                : `col-span-1 row-span-1 ${smallSlotClass} h-36 sm:h-44 md:h-60 rounded-xl hover:shadow-xl transition-shadow`
                                         }`}
                                     >
-                                        {isFeatured ? (
-                                            <span className="bg-yellow-primary py-1.5 px-5 rounded-2xl text-xs font-bold">
-                                                {noticia.category}
-                                            </span>
-                                        ) : null}
+                                        <Link href={`/blog/${noticia.id}`} className="relative block size-full">
+                                            <div className="absolute inset-0 z-10 size-full bg-linear-to-t from-slate-900 via-slate-900/75 to-transparent" />
 
-                                        <h3
-                                            className={`${isFeatured ? "text-lg md:text-3xl" : "text-sm md:text-md"} text-white font-bold line-clamp-3`}
-                                        >
-                                            {noticia.title}
-                                        </h3>
+                                            <Image
+                                                src={noticia.image}
+                                                alt={noticia.title}
+                                                fill
+                                                sizes={
+                                                    isFeatured
+                                                        ? "(max-width: 768px) 100vw, 66vw"
+                                                        : "(max-width: 768px) 50vw, 16vw"
+                                                }
+                                                className="z-0 object-cover group-hover:scale-110 transition-all duration-700 brightness-80 group-hover:brightness-95"
+                                            />
 
-                                        <p
-                                            className={`${isFeatured ? "line-clamp-2 lg:line-clamp-4 text-white/80 text-md" : "text-white/80 text-xs line-clamp-3"}`}
-                                        >
-                                            {noticia.about}
-                                        </p>
+                                            <div
+                                                className={`relative size-full z-10 flex flex-col justify-end ${
+                                                    isFeatured
+                                                        ? "gap-4 md:gap-5 p-6 md:p-10 items-start"
+                                                        : "gap-1 p-4 md:p-5"
+                                                }`}
+                                            >
+                                                {isFeatured ? (
+                                                    <span className="bg-yellow-primary py-1.5 px-5 rounded-2xl text-xs font-bold">
+                                                        {noticia.category}
+                                                    </span>
+                                                ) : null}
 
-                                        {isFeatured ? (
-                                            <div className="flex font-bold gap-2 text-yellow-primary">
-                                                Ler mais
-                                                <ArrowRight className="group-hover:translate-x-1 transition-transform duration-700" />
+                                                <h3
+                                                    className={`${isFeatured ? "text-lg md:text-3xl" : "text-sm md:text-md"} text-white font-bold line-clamp-3`}
+                                                >
+                                                    {noticia.title}
+                                                </h3>
+
+                                                <p
+                                                    className={`${isFeatured ? "line-clamp-2 lg:line-clamp-4 text-white/80 text-md" : "text-white/80 text-xs line-clamp-3"}`}
+                                                >
+                                                    {noticia.about}
+                                                </p>
+
+                                                {isFeatured ? (
+                                                    <div className="flex font-bold gap-2 text-yellow-primary">
+                                                        Ler mais
+                                                        <ArrowRight className="group-hover:translate-x-1 transition-transform duration-700" />
+                                                    </div>
+                                                ) : null}
                                             </div>
-                                        ) : null}
-                                    </div>
-                                </Link>
-                            </motion.li>
-                        );
-                    })}
-                </ul>
-
-                <div className="w-full flex justify-center mt-15">
-                    <motion.div
-                        initial={{ opacity: 0.6, y: 15 }}
-                        whileInView={{
-                            opacity: 1,
-                            y: 0,
-                            transition: { duration: 0.5, delay: 0.2 },
-                        }}
-                        viewport={{ once: true }}
-                        transition={{ scale: { duration: 0.2, ease: "easeInOut" } }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{
-                            scale: 0.95,
-                            transition: { duration: 0.1 },
-                        }}
-                    >
-                        <MotionLink
-                            href="/blog"
-                            initial="rest"
-                            whileHover="hover"
-                            className="border-slate-900 border-2 bg-transparent text-md text-slate-900 font-semibold hover:bg-slate-950 hover:text-slate-50 transition-all rounded-md px-7 py-3.5 flex gap-2 items-center"
-                        >
+                                        </Link>
+                                    </motion.li>
+                                );
+                            })}
+                        </ul>
+                        <div className="w-full flex justify-center mt-15">
                             <motion.div
-                                variants={{
-                                    rest: { scale: 1, rotate: 0 },
-                                    hover: {
-                                        scale: [1, 1.15, 1],
-                                        rotate: [0, 6, -6, 0],
-                                        transition: {
-                                            duration: 0.8,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                        },
-                                    },
+                                initial={{ opacity: 0.6, y: 15 }}
+                                whileInView={{
+                                    opacity: 1,
+                                    y: 0,
+                                    transition: { duration: 0.5, delay: 0.2 },
+                                }}
+                                viewport={{ once: true }}
+                                transition={{ scale: { duration: 0.2, ease: "easeInOut" } }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{
+                                    scale: 0.95,
+                                    transition: { duration: 0.1 },
                                 }}
                             >
-                                <Newspaper size={20} />
+                                <MotionLink
+                                    href="/blog"
+                                    initial="rest"
+                                    whileHover="hover"
+                                    className="border-slate-900 border-2 bg-transparent text-md text-slate-900 font-semibold hover:bg-slate-950 hover:text-slate-50 transition-all rounded-md px-7 py-3.5 flex gap-2 items-center"
+                                >
+                                    <motion.div
+                                        variants={{
+                                            rest: { scale: 1, rotate: 0 },
+                                            hover: {
+                                                scale: [1, 1.15, 1],
+                                                rotate: [0, 6, -6, 0],
+                                                transition: {
+                                                    duration: 0.8,
+                                                    repeat: Infinity,
+                                                    ease: "easeInOut",
+                                                },
+                                            },
+                                        }}
+                                    >
+                                        <Newspaper size={20} />
+                                    </motion.div>
+                                    Mais notícias
+                                </MotionLink>
                             </motion.div>
-                            Mais notícias
-                        </MotionLink>
-                    </motion.div>
-                </div>
+                        </div>
+                    </div>
+                ) : (
+                    <EmptyState
+                        title="Nada encontrado por enquanto"
+                        description="Quando houver novidades, elas aparecerão aqui"
+                    />
+                )}
             </div>
         </section>
     );
