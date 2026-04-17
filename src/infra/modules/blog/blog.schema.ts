@@ -34,3 +34,16 @@ export const postBlogSchema = z.object({
     category: z.string().trim().min(1).max(30).optional(),
     file: imageSchema,
 });
+
+export const postIdBlogSchema = z.object({
+    id: z.string().trim().min(1).max(36),
+});
+
+export const patchBlogSchema = z.object({
+    id: z.string().trim().min(1).max(36),
+    published: z.preprocess((val) => {
+        if (val === "true") return true;
+        if (val === "false") return false;
+        return val;
+    }, z.boolean()),
+});
