@@ -17,7 +17,7 @@ processors:
       - key: "http.request.header.cookie"
         action: delete
       - key: next_route
-        from_attribute: http.route
+        from_attribute: http.target
         action: upsert 
 
 exporters:
