@@ -1,5 +1,7 @@
-import { profileDataMock } from "@/src/infra/modules/student/profile-card-mock";
+"use client";
+
 import { Menu, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "../../components/ui/button";
@@ -7,22 +9,22 @@ import { useSidebar } from "../../components/ui/sidebar";
 
 const PAGE_META = [
     {
-        match: (path: string) => path.startsWith("/available-courses"),
+        match: (path: string) => path.startsWith("/estudante/available-courses"),
         title: "Cursos Disponíveis",
         description: "Explore e inscreva-se nos cursos oferecidos",
     },
     {
-        match: (path: string) => path.startsWith("/presence"),
+        match: (path: string) => path.startsWith("/estudante/presence"),
         title: "Progamação do Espaço 4.0",
         description: "Gerencie sua presença e acompanhe seus cursos",
     },
     {
-        match: (path: string) => path.startsWith("/certifications"),
+        match: (path: string) => path.startsWith("/estudante/certifications"),
         title: "Certificados",
         description: "Visualize e baixe seus certificados",
     },
     {
-        match: (path: string) => path.startsWith("/profile"),
+        match: (path: string) => path.startsWith("/estudante/profile"),
         title: "Meu perfil",
         description: "Visualize e edite suas informações pessoais",
     },
@@ -36,6 +38,8 @@ const PAGE_META = [
 export default function StudentTopbar() {
     const { toggleSidebar } = useSidebar();
     const pathname = usePathname() ?? "";
+    const { data: session } = useSession();
+    const userName = session?.user?.name ?? session?.user?.email ?? "Usuário";
     const current = PAGE_META.find((item) => item.match(pathname)) ?? {
         title: "Painel",
         description: "Resumo das suas atividades",
@@ -57,9 +61,7 @@ export default function StudentTopbar() {
                     <div className="size-10 rounded-full bg-linear-to-br from-yellow-100 to-yellow-50 flex items-center justify-center ring-2 ring-yellow-200">
                         <User className="size-5 text-yellow-primary" strokeWidth={2.5} />
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
-                        {profileDataMock.name}
-                    </span>
+                    <span className="text-sm font-medium text-gray-900">{userName}</span>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
-import { EventSituation } from "@/src/infra/modules/student/presences-mock";
 import { Badge } from "@/src/ui/components/ui/badge";
 import { AlertCircleIcon, Check, CircleX } from "lucide-react";
+
+type EventSituation = "pending" | "confirmed" | "absent";
 
 interface BadgeConfig {
     icon: React.ComponentType<{ size: number; className?: string }>;

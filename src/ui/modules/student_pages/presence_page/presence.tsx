@@ -1,13 +1,30 @@
-import { useCallback, useState } from "react";
-import { events } from "@/src/infra/modules/student/presences-mock";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/src/ui/components/ui/button";
-import { format } from "date-fns";
+import { format, getDay, parse, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { Calendar } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { toast } from "sonner";
 
-import { localizer } from "../../calendar_pages/calendar";
 import EventSheet from "./event_sheet";
+
+const locales = { "pt-BR": ptBR };
+const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
+
+type EventSituation = "pending" | "confirmed" | "absent";
+
+type PresenceEvent = {
+    id?: string | number;
+    title: string;
+    description: string;
+    instructor: string;
+    location: string;
+    situation: EventSituation;
+    observation: string;
+    registeredAt: Date | null;
+    start: Date;
+    end: Date;
+};
 
 interface ToolbarProps {
     date: Date;
@@ -109,22 +126,92 @@ const eventPropGetter = (event: any) => {
 };
 
 export default function PresencePage() {
-    const [allEvents, setAllEvents] = useState(events);
-    const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [allEvents, setAllEvents] = useState<PresenceEvent[]>([]);
+    const [selectedEvent, setSelectedEvent] = useState<PresenceEvent | null>(null);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-    const handleSelectEvent = (event: any) => {
+    useEffect(() => {
+        async function loadEvents() {
+            try {
+                const response = await fetch("/api/presences/me", { cache: "no-store" });
+                const body = (await response.json().catch(() => null)) as {
+                    data?: Array<
+                        Omit<PresenceEvent, "start" | "end" | "registeredAt"> & {
+                            start: string;
+                            end: string;
+                            registeredAt: string | null;
+                        }
+                    >;
+                    message?: string;
+                } | null;
+
+                if (!response.ok) {
+                    toast.error(body?.message ?? "Falha ao carregar presenças");
+                    setAllEvents([]);
+                    return;
+                }
+
+                const parsed = (body?.data ?? []).map((event) => ({
+                    ...event,
+                    start: new Date(event.start),
+                    end: new Date(event.end),
+                    registeredAt: event.registeredAt ? new Date(event.registeredAt) : null,
+                }));
+
+                setAllEvents(parsed);
+            } catch {
+                toast.error("Erro de conexão ao carregar presenças");
+                setAllEvents([]);
+            }
+        }
+
+        loadEvents();
+    }, []);
+
+    const handleSelectEvent = (event: PresenceEvent) => {
         setSelectedEvent(event);
         setIsSheetOpen(true);
     };
 
     // Isso ai serve pra mudar a situação de um evento e é usado lá no "event_sheet"
-    const handleSituationChange = (eventId: string | number, newSituation: "pending" | "confirmed" | "absent") => {
+    const handleSituationChange = async (eventId: string | number, newSituation: EventSituation) => {
+        const previousEvents = allEvents;
+
         setAllEvents((prevEvents) =>
             prevEvents.map((event) => (event.id === eventId ? { ...event, situation: newSituation } : event))
         );
+
         if (selectedEvent?.id === eventId) {
             setSelectedEvent({ ...selectedEvent, situation: newSituation });
+        }
+
+        try {
+            const response = await fetch(`/api/presences/${eventId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ situation: newSituation }),
+            });
+
+            const body = (await response.json().catch(() => null)) as { message?: string } | null;
+            if (!response.ok) {
+                setAllEvents(previousEvents);
+                if (selectedEvent?.id === eventId) {
+                    const old = previousEvents.find((event) => event.id === eventId);
+                    if (old) {
+                        setSelectedEvent(old);
+                    }
+                }
+                toast.error(body?.message ?? "Não foi possível atualizar a presença");
+            }
+        } catch {
+            setAllEvents(previousEvents);
+            if (selectedEvent?.id === eventId) {
+                const old = previousEvents.find((event) => event.id === eventId);
+                if (old) {
+                    setSelectedEvent(old);
+                }
+            }
+            toast.error("Erro de conexão ao atualizar presença");
         }
     };
 

@@ -1,5 +1,6 @@
 import {
     BarChart3,
+    Calendar,
     ClipboardCheck,
     FolderKanban,
     House,
@@ -15,9 +16,10 @@ export const navItems = [
     { id: "gerenciar-projetos", name: "Gerenciar Projetos", icon: FolderKanban },
     { id: "gerenciar-usuarios", name: "Gerenciar Usuários", icon: Users },
     { id: "relatorios", name: "Relatórios", icon: BarChart3 },
-	{ id: "certificados", name: "Certificados", icon: Medal },
+    { id: "certificados", name: "Certificados", icon: Medal },
     { id: "controle-presenca", name: "Controle de Presença", icon: ClipboardCheck },
     { id: "gamificacao", name: "Gamificação & Prêmios", icon: Trophy },
     { id: "recursos", name: "Recursos", icon: Package },
     { id: "configuracoes", name: "Configurações", icon: Settings },
+    { id: "agenda", name: "Agenda De Visitas", icon: Calendar },
 ];

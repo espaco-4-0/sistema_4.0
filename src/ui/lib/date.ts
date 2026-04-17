@@ -12,13 +12,27 @@ export function getPeriodWeeks(startDate: string, endDate: string) {
 }
 
 export function getHoursOfPeriod(weekDays: string[], schedule: string, durationWeeks: number) {
-    const [startStr, endStr] = schedule.split("-");
+    if (!schedule || !schedule.includes("-")) {
+        return null;
+    }
 
-    const [startHour, startMinute] = startStr.trim().split(":").map(Number);
-    const [endHour, endMinute] = endStr.trim().split(":").map(Number);
+    const [startStr, endStr] = schedule.split("-").map((part) => part?.trim());
+    if (!startStr || !endStr) {
+        return null;
+    }
+
+    const [startHour, startMinute] = startStr.split(":").map(Number);
+    const [endHour, endMinute] = endStr.split(":").map(Number);
+    if ([startHour, startMinute, endHour, endMinute].some((value) => Number.isNaN(value))) {
+        return null;
+    }
 
     const startInMinutes = startHour * 60 + startMinute;
     const endInMinutes = endHour * 60 + endMinute;
+    if (endInMinutes <= startInMinutes || durationWeeks <= 0 || weekDays.length === 0) {
+        return null;
+    }
+
     const periodInHours = (endInMinutes - startInMinutes) / 60;
     const courseHours = periodInHours * weekDays.length * durationWeeks;
 

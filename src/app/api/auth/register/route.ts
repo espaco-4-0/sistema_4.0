@@ -1,3 +1,4 @@
+import { invalidateCacheNamespace } from "@/lib/cache";
 import { userRegistrationSchema } from "@/src/ui/forms/schemas/user-registration-schema";
 import { getErrorMessage, getRequestInfo } from "@/src/ui/lib/errors";
 import { logger } from "@/src/ui/lib/logger";
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
                 nomeCompleto: data.completeName,
                 email: data.email,
                 senha: hashedPassword,
-                dataNascimento: data.dateOfBirth,
+                dataNascimento: new Date(data.dateOfBirth),
                 telefone: data.telephone,
                 raca: data.race,
                 educacao: data.education,
@@ -45,6 +46,8 @@ export async function POST(request: NextRequest) {
                 necessidadeEspecial: data.deficiencyNeeds ?? null,
             },
         });
+
+        await invalidateCacheNamespace("users:list");
 
         return NextResponse.json({ message: "Usuário criado com sucesso" }, { status: 201 });
     } catch (err) {

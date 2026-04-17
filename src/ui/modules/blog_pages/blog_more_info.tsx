@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
 
+// futuramente iremos implementar o redis, e subistituir por uma api funcional ao invés do mock
+
 export default function BlogMoreInfo() {
     const methods = useForm();
     const params = useParams<{ id: string }>();
@@ -107,7 +109,14 @@ export default function BlogMoreInfo() {
                 </div>
 
                 <div className="mb-12 rounded-2xl overflow-hidden relative h-125">
-                    <Image src={news.image} alt={news.title} fill priority className="object-cover" />
+                    <Image
+                        src={news.image}
+                        alt={news.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 896px"
+                        priority
+                        className="object-cover"
+                    />
                 </div>
 
                 <div className="prose prose-lg max-w-none mb-12">
@@ -194,6 +203,7 @@ export default function BlogMoreInfo() {
                                         src={article.image}
                                         alt={article.title}
                                         fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                                     />
                                 </div>

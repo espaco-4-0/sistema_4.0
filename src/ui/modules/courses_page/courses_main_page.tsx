@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { CourseDetails, courses } from "@/src/infra/modules/courses/course-mock";
+import { useEffect, useMemo, useState } from "react";
+import { fetchCourses } from "@/src/infra/modules/courses/courses.service";
+import { CourseDetails } from "@/src/infra/modules/courses/courses.types";
 import { Book, Calendar, ChevronRight, Clock, Home, LucideIcon, SquareCheck, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,7 +17,7 @@ type RightInformation = {
 };
 
 const initialCourseDetails: CourseDetails = {
-    id: 0,
+    id: "",
     title: "",
     instructor: "",
     description: "",
@@ -38,35 +39,67 @@ const initialCourseDetails: CourseDetails = {
 };
 
 export default function CoursesMainPage() {
+    const [courses, setCourses] = useState<CourseDetails[]>([]);
     const [course, setCourse] = useState<CourseDetails>(initialCourseDetails);
     const [showCourse, setShowCourse] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const rightInformations: RightInformation[] = [
-        {
-            id: 1,
-            icon: Clock,
-            title: "Duração",
-            description: course.durationWeeks,
-        },
-        {
-            id: 2,
-            icon: Calendar,
-            title: "Alunos inscritos",
-            description: course.subscribes,
-        },
-        {
-            id: 3,
-            icon: Users,
-            title: "Instrutor responsável",
-            description: course.instructor,
-        },
-        {
-            id: 4,
-            icon: Book,
-            title: "Início das aulas",
-            description: course.startDate,
-        },
-    ] as const;
+    useEffect(() => {
+        let mounted = true;
+
+        async function loadCourses() {
+            try {
+                const data = await fetchCourses();
+                if (!mounted) return;
+                setCourses(data);
+                setError(null);
+            } catch {
+                if (!mounted) return;
+                setError("Nao foi possivel carregar os cursos no momento.");
+            } finally {
+                if (mounted) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadCourses();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const rightInformations: RightInformation[] = useMemo(
+        () => [
+            {
+                id: 1,
+                icon: Clock,
+                title: "Duracao",
+                description: `${course.durationWeeks} semana(s)`,
+            },
+            {
+                id: 2,
+                icon: Calendar,
+                title: "Alunos inscritos",
+                description: course.subscribes,
+            },
+            {
+                id: 3,
+                icon: Users,
+                title: "Instrutor responsavel",
+                description: course.instructor,
+            },
+            {
+                id: 4,
+                icon: Book,
+                title: "Inicio das aulas",
+                description: course.startDate,
+            },
+        ],
+        [course]
+    );
 
     return (
         <section className="min-h-screen bg-gray-50 py-7 font-sans">
@@ -108,7 +141,11 @@ export default function CoursesMainPage() {
 
                         <div className="mt-8 flex flex-col justify-center gap-8 px-4 lg:mt-12 lg:flex-row lg:px-20 2xl:px-80">
                             <div className="order-2 w-full lg:order-1 lg:flex-1">
-                                <CourseForm course={course.title} setCloseCourse={() => setShowCourse(false)} />
+                                <CourseForm
+                                    course={course.title}
+                                    courseId={course.id}
+                                    setCloseCourse={() => setShowCourse(false)}
+                                />
                             </div>
 
                             <div className="order-1 flex w-full flex-col gap-4 lg:order-2 lg:w-96">
@@ -181,6 +218,11 @@ export default function CoursesMainPage() {
                         </div>
 
                         <div className="mt-10 px-4 lg:px-20 2xl:px-80">
+                            {loading && <p className="text-gray-500">Carregando cursos...</p>}
+                            {!loading && error && <p className="text-red-600">{error}</p>}
+                            {!loading && !error && courses.length === 0 && (
+                                <p className="text-gray-500">Nenhum curso disponivel no momento.</p>
+                            )}
                             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2 lg:gap-15 2xl:grid-cols-3">
                                 {courses.map((course) => (
                                     <CourseCard

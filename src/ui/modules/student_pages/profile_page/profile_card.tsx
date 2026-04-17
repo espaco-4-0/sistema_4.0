@@ -1,7 +1,17 @@
 import { useState } from "react";
-import { ProfileCardFunctionProps } from "@/src/infra/modules/student/profile-card-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { Edit, Eye, EyeClosed, FileText, Loader2, User } from "lucide-react";
+
+type ProfileCardFunctionProps = {
+    name: string;
+    role: string;
+    course: string;
+    matricula: string;
+    editorModeFunction: () => void;
+    editorBlurFunction: () => void;
+    isEditing: boolean;
+    isBlur: boolean;
+};
 
 export function ProfileCard({
     name,
