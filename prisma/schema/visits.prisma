@@ -1,11 +1,64 @@
+enum VisitStatus {
+  pendente
+  aprovado
+  negado
+}
+
+enum VisitProcessStage {
+  aguardando_email
+  email_recebido
+  documentacao_em_analise
+  aguardando_aprovacao_ifal
+  aprovado_ifal
+  negado_admin
+  negado_ifal
+}
+
+enum VisitIfalStatus {
+  aguardando
+  aprovado
+  negado
+}
+
+enum VisitDocumentacaoStatus {
+  pendente
+  conferida
+  incompleta
+}
+
 model Visit {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  status    String   @default("pendente")
-  message   String
-  createdAt DateTime @default(now())
+  id                 Int                     @id @default(autoincrement())
+  instituicao        String
+  responsavel        String
+  email              String
+  whatsapp           String
+  quantidade         Int
+  dataVisita         DateTime                @db.Date
+  horaInicio         String
+  horaFim            String
+  mensagem           String?
+  status             VisitStatus             @default(pendente)
+  processStage       VisitProcessStage       @default(aguardando_email)
+  ifalStatus         VisitIfalStatus         @default(aguardando)
+  documentacaoStatus VisitDocumentacaoStatus @default(pendente)
+  motivoNegativa     String?
+  processLog         Json                    @default("[]")
+  createdAt          DateTime                @default(now())
+  reviewedAt         DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentos VisitDocumento[]
+}
 
-  @@index([userId])
+model VisitDocumento {
+  id          Int      @id @default(autoincrement())
+  visitId     Int
+  fileName    String
+  fileType    String
+  fileSizeKb  Int
+  storagePath String   // caminho no bucket do Supabase Storage
+  uploadedAt  DateTime @default(now())
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
 }

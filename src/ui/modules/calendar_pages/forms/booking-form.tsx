@@ -162,7 +162,7 @@ export const BookingForm = ({
                             <button
                                 type="button"
                                 onClick={handleNextStep}
-                                className="w-full bg-yellow-primary text-black hover:bg-yellow-primary-dark font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
+                                className="hover:cursor-pointer w-full bg-yellow-primary text-black hover:bg-yellow-primary-dark font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
                             >
                                 Próxima etapa: Documentação
                             </button>
