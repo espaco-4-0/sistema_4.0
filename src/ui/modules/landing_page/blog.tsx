@@ -1,5 +1,8 @@
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
-import { newsData } from "@/src/infra/modules/blog/blog-mock";
+import { getTopPosts } from "@/src/infra/modules/blog/blog.service";
+import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { useIsMobile } from "@/src/ui/hooks/use-mobile";
 import { ArrowRight, Newspaper } from "lucide-react";
 import { Transition, motion } from "motion/react";
@@ -10,22 +13,24 @@ import { EmptyState } from "./empty_state";
 
 const MotionLink = motion.create(Link);
 
-const noticias = newsData.slice(0, 5);
-
 const transitionCards: Transition = {
     type: "spring",
     damping: 35,
     stiffness: 250,
 };
 
-type LayoutState = {
-    featuredId: number;
-    smallSlots: number[];
+type NewsCard = {
+    id: string;
+    slug: string;
+    title: string;
+    summary: string;
+    category: string;
+    imageUrl: string;
 };
 
-const initialLayoutState: LayoutState = {
-    featuredId: noticias[0].id,
-    smallSlots: noticias.slice(1).map((n) => n.id),
+type LayoutState = {
+    featuredId: string;
+    smallSlots: string[];
 };
 
 const smallSlotClasses = [
@@ -35,32 +40,136 @@ const smallSlotClasses = [
     "col-start-2 row-start-4 md:col-start-6 md:row-start-2",
 ];
 
+const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+
+function normalizeNews(items: BlogPost[]): NewsCard[] {
+    return items
+        .map((item) => {
+            const id = String(item.id ?? "");
+            if (!id) return null;
+
+            return {
+                id,
+                slug: item.slug?.trim() || id,
+                title: item.titulo?.trim() || "Notícia sem título",
+                summary: item.resumo?.trim() || "Leia a notícia completa para mais detalhes.",
+                category: item.categorias?.[0]?.nome?.trim() || "Geral",
+                imageUrl: item.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
+            };
+        })
+        .filter((item): item is NewsCard => Boolean(item));
+}
+
+function buildInitialLayout(news: NewsCard[]): LayoutState {
+    const ids = news.map((n) => n.id);
+
+    if (ids.length === 0) {
+        return { featuredId: "", smallSlots: [] };
+    }
+
+    return {
+        featuredId: ids[0],
+        smallSlots: ids.slice(1, 5),
+    };
+}
+
 export default function Blog() {
     const isMobile = useIsMobile();
-    const [layoutState, setLayoutState] = useState(initialLayoutState);
+
+    const [news, setNews] = useState<NewsCard[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [layoutState, setLayoutState] = useState<LayoutState>({ featuredId: "", smallSlots: [] });
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadNews = async () => {
+            try {
+                const response = await getTopPosts();
+                const rawItems: BlogPost[] = Array.isArray(response) ? response : [];
+
+                const normalized = normalizeNews(rawItems);
+
+                if (!isMounted) return;
+
+                setNews(normalized);
+                setLayoutState(buildInitialLayout(normalized));
+            } catch {
+                if (!isMounted) return;
+                setNews([]);
+                setLayoutState({ featuredId: "", smallSlots: [] });
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadNews();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const rotateCards = () =>
         setLayoutState((previous) => {
-            const [topLeft, topRight, bottomLeft, bottomRight] = previous.smallSlots;
+            if (previous.smallSlots.length === 0 || !previous.featuredId) return previous;
+
+            const [s1, s2, s3, s4, ...rest] = previous.smallSlots;
+
+            if (isMobile) {
+                const nextSmallSlots = [s3, previous.featuredId, s4, s2, ...rest].filter((id): id is string =>
+                    Boolean(id)
+                );
+
+                return {
+                    featuredId: s1 ?? previous.featuredId,
+                    smallSlots: nextSmallSlots,
+                };
+            }
+
+            const nextSmallSlots = [s2, s4, previous.featuredId, s3, ...rest].filter((id): id is string => Boolean(id));
 
             return {
-                featuredId: topLeft,
-                smallSlots: isMobile
-                    ? [bottomLeft, previous.featuredId, bottomRight, topRight]
-                    : [topRight, bottomRight, previous.featuredId, bottomLeft],
+                featuredId: s1 ?? previous.featuredId,
+                smallSlots: nextSmallSlots,
             };
         });
 
     useEffect(() => {
-        const interval = setInterval(rotateCards, 40000);
+        if (news.length <= 1) return;
 
+        const interval = setInterval(rotateCards, 40000);
         return () => clearInterval(interval);
-    }, [isMobile]);
+    }, [isMobile, news.length]);
 
     const slotIndexMap = useMemo(
         () => new Map(layoutState.smallSlots.map((id, i) => [id, i])),
         [layoutState.smallSlots]
     );
+
+    if (loading) {
+        return (
+            <section id="blog" className="bg-white py-16 md:py-28">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                    <motion.h2
+                        initial={{ opacity: 0.7, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.55, delay: 0.25 }}
+                        className="font-medium text-2xl sm:text-3xl md:text-4xl text-center mb-10 md:mb-17"
+                    >
+                        Novidades do <span className="text-yellow-muted font-bold">Espaço 4.0</span>
+                    </motion.h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
+                        <div className="h-72 md:h-80 rounded-2xl bg-slate-200" />
+                        <div className="h-36 md:h-60 rounded-xl bg-slate-200" />
+                        <div className="h-36 md:h-60 rounded-xl bg-slate-200" />
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section id="blog" className="bg-white py-16 md:py-28">
@@ -74,10 +183,11 @@ export default function Blog() {
                 >
                     Novidades do <span className="text-yellow-muted font-bold">Espaço 4.0</span>
                 </motion.h2>
-                {newsData.length > 0 ? ( //trocar
+
+                {news.length > 0 ? (
                     <div>
                         <ul className="grid grid-cols-2 grid-rows-4 gap-3 lg:gap-2 px-2 lg:px-4 py-2 lg:py-4 md:grid-cols-6 md:grid-rows-2">
-                            {noticias.map((noticia, index) => {
+                            {news.map((noticia, index) => {
                                 const isFeatured = noticia.id === layoutState.featuredId;
                                 const smallIndex = slotIndexMap.get(noticia.id) ?? -1;
                                 const smallSlotClass = smallIndex >= 0 ? smallSlotClasses[smallIndex] : "";
@@ -89,7 +199,7 @@ export default function Blog() {
                                         initial={
                                             isFeatured
                                                 ? { opacity: 0.75, x: -25 }
-                                                : { opacity: 0.75, y: (index / 4) * 25 }
+                                                : { opacity: 0.75, y: (index / Math.max(news.length, 1)) * 25 }
                                         }
                                         whileInView={{
                                             opacity: 1,
@@ -97,7 +207,7 @@ export default function Blog() {
                                             y: 0,
                                             transition: isFeatured
                                                 ? { duration: 0.55, delay: 0.25 }
-                                                : { duration: (0.55 * index) / 4, delay: 0.25 },
+                                                : { duration: (0.55 * index) / Math.max(news.length, 1), delay: 0.25 },
                                         }}
                                         viewport={{ once: true }}
                                         transition={transitionCards}
@@ -107,11 +217,11 @@ export default function Blog() {
                                                 : `col-span-1 row-span-1 ${smallSlotClass} h-36 sm:h-44 md:h-60 rounded-xl hover:shadow-xl transition-shadow`
                                         }`}
                                     >
-                                        <Link href={`/blog/${noticia.id}`} className="relative block size-full">
+                                        <Link href={`/blog/${noticia.slug}`} className="relative block size-full">
                                             <div className="absolute inset-0 z-10 size-full bg-linear-to-t from-slate-900 via-slate-900/75 to-transparent" />
 
                                             <Image
-                                                src={noticia.image}
+                                                src={noticia.imageUrl}
                                                 alt={noticia.title}
                                                 fill
                                                 sizes={
@@ -144,7 +254,7 @@ export default function Blog() {
                                                 <p
                                                     className={`${isFeatured ? "line-clamp-2 lg:line-clamp-4 text-white/80 text-md" : "text-white/80 text-xs line-clamp-3"}`}
                                                 >
-                                                    {noticia.about}
+                                                    {noticia.summary}
                                                 </p>
 
                                                 {isFeatured ? (
@@ -159,21 +269,15 @@ export default function Blog() {
                                 );
                             })}
                         </ul>
+
                         <div className="w-full flex justify-center mt-15">
                             <motion.div
                                 initial={{ opacity: 0.6, y: 15 }}
-                                whileInView={{
-                                    opacity: 1,
-                                    y: 0,
-                                    transition: { duration: 0.5, delay: 0.2 },
-                                }}
+                                whileInView={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.2 } }}
                                 viewport={{ once: true }}
                                 transition={{ scale: { duration: 0.2, ease: "easeInOut" } }}
                                 whileHover={{ scale: 1.05 }}
-                                whileTap={{
-                                    scale: 0.95,
-                                    transition: { duration: 0.1 },
-                                }}
+                                whileTap={{ scale: 0.95, transition: { duration: 0.1 } }}
                             >
                                 <MotionLink
                                     href="/blog"
@@ -187,11 +291,7 @@ export default function Blog() {
                                             hover: {
                                                 scale: [1, 1.15, 1],
                                                 rotate: [0, 6, -6, 0],
-                                                transition: {
-                                                    duration: 0.8,
-                                                    repeat: Infinity,
-                                                    ease: "easeInOut",
-                                                },
+                                                transition: { duration: 0.8, repeat: Infinity, ease: "easeInOut" },
                                             },
                                         }}
                                     >

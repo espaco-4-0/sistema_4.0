@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
             if (!categoryEntity) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
         }
 
-        if (includeArchived !== undefined) {
+        if (includeArchived === true) {
             const session = await getServerSession(authOptions);
 
             if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
@@ -56,12 +56,20 @@ export async function GET(req: NextRequest) {
                 },
             };
 
-        if (includeArchived !== undefined) where.publicado = includeArchived;
+        if (includeArchived === false || includeArchived === undefined) where.publicado = true;
 
         const posts = await prisma.post.findMany({
             take: quantity,
             orderBy: { createdAt: "desc" },
             where,
+            include: {
+                fotos: {
+                    select: { url: true },
+                },
+                categorias: {
+                    select: { nome: true },
+                },
+            },
         });
 
         return NextResponse.json({ data: posts }, { status: 200 });
