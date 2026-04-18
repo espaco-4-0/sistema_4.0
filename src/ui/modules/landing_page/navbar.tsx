@@ -53,9 +53,9 @@ export default function NavBar() {
 
     const menuItems = [
         { id: "hero", label: "Inicio" },
-        { id: "what-is", label: "Sobre" },
-        { id: "viewer_3d_section", label: "Tecnologias" },
         { id: "blog", label: "Notícias" },
+        { id: "what-is", label: "Sobre" },
+        { id: "viewer_3d_section", label: "Ambiente" },
         { id: "courses", label: "Cursos" },
         { id: "upcoming-events", label: "Eventos" },
         { id: "gallery", label: "Galeria" },
