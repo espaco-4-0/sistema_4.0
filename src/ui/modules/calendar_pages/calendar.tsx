@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
-import { getUnifiedCalendarEvents } from "@/src/ui/lib/unified-calendar-events";
-import { createVisitRequest, getVisitRequests, requestToCalendarEvent } from "@/src/ui/lib/visit-requests-storage";
+import { calendarEventsMock, type CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
+import { getPublicVisitEvents, publicVisitToCalendarEvent, submitVisitRequest } from "@/src/ui/lib/visit-requests-api";
 import { EventDetail } from "@/src/ui/modules/calendar_pages/components/event-detail";
 import { EventList } from "@/src/ui/modules/calendar_pages/components/event-list";
 import { PanelWrapper } from "@/src/ui/modules/calendar_pages/components/panel-wrapper";
@@ -76,88 +75,99 @@ export default function AllCalendar() {
         },
     });
 
+    // Carrega eventos do banco via API + mock estático
     useEffect(() => {
-        setEvents(getUnifiedCalendarEvents());
+        async function loadEvents() {
+            const visitEvents = await getPublicVisitEvents();
+            const converted = visitEvents.filter((v) => v.status !== "negado").map(publicVisitToCalendarEvent);
+            setEvents([...calendarEventsMock, ...converted]);
+        }
+        loadEvents();
     }, []);
 
-    const handleFormSubmit = (data: CalendarFormInput) => {
+    const handleFormSubmit = async (data: CalendarFormInput) => {
         setErrorMessage("");
         setStep("loading");
 
-        setTimeout(() => {
-            const quantidade = Number.parseInt(data.quantidade, 10);
-            if (!Number.isFinite(quantidade) || quantidade <= 0) {
-                setErrorMessage("Informe a quantidade de alunos.");
-                setStep("error");
-                return;
+        // Validações locais
+        const quantidade = Number.parseInt(data.quantidade, 10);
+        if (!Number.isFinite(quantidade) || quantidade <= 0) {
+            setErrorMessage("Informe a quantidade de alunos.");
+            setStep("error");
+            return;
+        }
+        if (quantidade > MAX_STUDENTS) {
+            setErrorMessage(`Máximo de ${MAX_STUDENTS} alunos.`);
+            setStep("error");
+            return;
+        }
+
+        const anexos = data.anexos ? Array.from(data.anexos) : [];
+        if (anexos.length === 0) {
+            setErrorMessage("Anexe pelo menos 1 documento na aba de documentação.");
+            setStep("error");
+            return;
+        }
+        if (!data.confirmacaoDocumentos) {
+            setErrorMessage("Confirme a documentação antes de enviar o pedido.");
+            setStep("error");
+            return;
+        }
+
+        const [sh, sm] = data.hora.split(":").map(Number);
+        const [eh, em] = data.horaSaida.split(":").map(Number);
+        const start = setMinutes(setHours(new Date(selectedDate), sh), sm);
+        let end = setMinutes(setHours(new Date(selectedDate), eh), em);
+        if (end <= start) end = setMinutes(setHours(new Date(selectedDate), eh + 1), em);
+
+        const gapMs = MIN_EVENT_GAP_MINUTES * 60 * 1000;
+        const hasConflict = events.some((event) => {
+            if (!isSameDay(event.start, start)) return false;
+            const startBoundary = new Date(event.start.getTime() - gapMs);
+            const endBoundary = new Date(event.end.getTime() + gapMs);
+            return start < endBoundary && end > startBoundary;
+        });
+
+        if (hasConflict) {
+            setErrorMessage(`Intervalo mínimo de ${MIN_EVENT_GAP_MINUTES} minutos entre eventos.`);
+            setStep("error");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("instituicao", data.instituicao);
+            formData.append("responsavel", data.professor);
+            formData.append("email", data.email);
+            formData.append("whatsapp", data.whatsapp);
+            formData.append("quantidade", data.quantidade);
+            formData.append("dataVisita", format(selectedDate, "yyyy-MM-dd"));
+            formData.append("horaInicio", data.hora);
+            formData.append("horaFim", data.horaSaida);
+            if (data.mensagem) formData.append("mensagem", data.mensagem);
+            for (const file of anexos) {
+                formData.append("anexos", file);
             }
 
-            if (quantidade > MAX_STUDENTS) {
-                setErrorMessage(`Máximo de ${MAX_STUDENTS} alunos.`);
-                setStep("error");
-                return;
-            }
+            const result = await submitVisitRequest(formData);
 
-            const anexos = data.anexos ? Array.from(data.anexos) : [];
-            if (anexos.length === 0) {
-                setErrorMessage("Anexe pelo menos 1 documento na aba de documentação.");
-                setStep("error");
-                return;
-            }
-
-            if (!data.confirmacaoDocumentos) {
-                setErrorMessage("Confirme a documentação antes de enviar o pedido.");
-                setStep("error");
-                return;
-            }
-
-            const [sh, sm] = data.hora.split(":").map(Number);
-            const [eh, em] = data.horaSaida.split(":").map(Number);
-            const start = setMinutes(setHours(new Date(selectedDate), sh), sm);
-            let end = setMinutes(setHours(new Date(selectedDate), eh), em);
-
-            if (end <= start) end = setMinutes(setHours(new Date(selectedDate), eh + 1), em);
-
-            const gapMs = MIN_EVENT_GAP_MINUTES * 60 * 1000;
-            const hasConflict = events.some((event) => {
-                if (!isSameDay(event.start, start)) return false;
-                const startBoundary = new Date(event.start.getTime() - gapMs);
-                const endBoundary = new Date(event.end.getTime() + gapMs);
-                return start < endBoundary && end > startBoundary;
+            // Adiciona o novo evento ao calendário local
+            const newEvent = publicVisitToCalendarEvent({
+                id: result.id,
+                instituicao: result.instituicao,
+                dataVisita: result.dataVisita,
+                horaInicio: result.horaInicio,
+                horaFim: result.horaFim,
+                status: result.status,
             });
+            setEvents((prev) => [...prev, newEvent]);
 
-            if (hasConflict) {
-                setErrorMessage(`Intervalo mínimo de ${MIN_EVENT_GAP_MINUTES} minutos entre eventos.`);
-                setStep("error");
-            } else {
-                const createdRequest = createVisitRequest({
-                    instituicao: data.instituicao,
-                    responsavel: data.professor,
-                    email: data.email,
-                    whatsapp: data.whatsapp,
-                    quantidade,
-                    data: format(start, "yyyy-MM-dd"),
-                    horaInicio: data.hora,
-                    horaFim: data.horaSaida,
-                    documentos: anexos.map((file, idx) => ({
-                        id: `${Date.now()}-doc-${idx + 1}`,
-                        fileName: file.name,
-                        fileType: file.type || "application/octet-stream",
-                        fileSizeKb: Math.max(1, Math.round(file.size / 1024)),
-                        uploadedAt: new Date().toISOString(),
-                    })),
-                    mensagem: data.mensagem,
-                });
-
-                const newEvent = requestToCalendarEvent(createdRequest);
-                if (newEvent) {
-                    setEvents((prev) => [...prev, newEvent]);
-                }
-
-                setStep("success");
-                formMethods.reset();
-            }
-        }, 1500);
+            setStep("success");
+            formMethods.reset();
+        } catch (err) {
+            setErrorMessage(err instanceof Error ? err.message : "Erro ao enviar solicitação.");
+            setStep("error");
+        }
     };
 
     const activeEvent = events.find((e) => e.id === selectedEventId);
@@ -257,21 +267,18 @@ export default function AllCalendar() {
                                 Evento agendado
                             </span>
                         </div>
-
                         <div className="flex items-center gap-2">
                             <div className="bg-red-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                             <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
                                 Evento recusado
                             </span>
                         </div>
-
                         <div className="flex items-center gap-2">
                             <div className="bg-green-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                             <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
                                 Evento aprovado
                             </span>
                         </div>
-
                         <div className="flex items-center gap-2">
                             <div className="bg-white border-yellow-primary border-2 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                             <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">Hoje</span>

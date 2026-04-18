@@ -48,9 +48,6 @@ model User {
   ativo               Boolean         @default(true)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
-  // Relaçao inversa
-  visits              Visit[]
-
   // Relações – Professor
   cursosMinistrados Curso[] @relation("ProfessorCursos")
   aulasMinistradas  Aula[]  @relation("ProfessorAulas")
@@ -79,5 +76,7 @@ model User {
   userBadges  UserBadge[]
 
   // Certificados
-  certificados Certificado[]
+  certificadosEmitidos  Certificate[]            @relation("ProfessorCertificados")
+  certificadosInscritos CertificateSubscription[]
+  certificadosEmissoes  CertificateEmission[]
 }
