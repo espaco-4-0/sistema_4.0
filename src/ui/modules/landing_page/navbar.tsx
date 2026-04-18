@@ -73,7 +73,7 @@ export default function NavBar() {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                 >
                     <NavigationMenu className="w-full bg-white">
-                        <div className="relative mx-auto flex h-20 max-w-6xl items-center gap-6 px-4 lg:px-8">
+                        <div className="relative mx-auto flex h-20 justify-center items-center gap-6 px-4 lg:px-8">
                             <Button
                                 variant="ghost"
                                 className="flex items-center gap-3 p-0 cursor-pointer shrink-0 hover:bg-white"
@@ -110,7 +110,7 @@ export default function NavBar() {
                                 ))}
                             </NavigationMenuList>
 
-                            <div className="ml-auto hidden lg:flex shrink-0 items-center gap-4">
+                            <div className="hidden lg:flex shrink-0 items-center gap-4">
                                 <Link
                                     href="/espaco-3D"
                                     className="flex items-center gap-2 text-[13px] font-semibold text-black/70 hover:text-black whitespace-nowrap"
