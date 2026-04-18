@@ -20,7 +20,7 @@ export default function NavBar() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const hero = document.getElementById("welcome");
+        const hero = document.getElementById("hero");
 
         if (!hero) {
             setIsVisible(true);
