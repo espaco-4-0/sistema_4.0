@@ -4,8 +4,7 @@ import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 export function register() {
   if (process.env.NEXT_RUNTIME === "edge") return; 
 
-  const endpoint =
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://otel-collector:4318";
+  const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://otel-collector:4318";
 
   registerOTel({
     serviceName: process.env.OTEL_SERVICE_NAME ?? "sistema-4.0",

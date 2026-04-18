@@ -34,6 +34,8 @@ metrics_generator:
     span_metrics:
       dimensions:
         - next_route
+        - http.route
+        - url.path
         - http.target
         - http.method
         - http.status_code

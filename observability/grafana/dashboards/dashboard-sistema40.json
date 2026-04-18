@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "RED Metrics + Infraestrutura + Traces + Logs para Sistema 4.0 - IFAL Arapiraca",
+  "description": "RED Metrics + Infraestrutura + Traces + Logs para sistema-4.0 ",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -51,6 +51,7 @@
             },
             "inspect": false
           },
+          "decimals": 8,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -64,7 +65,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -78,13 +80,18 @@
       "options": {
         "cellHeight": "sm",
         "showHeader": true,
-        "sortBy": []
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Value"
+          }
+        ]
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "topk(\n  10,\n  sum by (next_route)(\n    rate(traces_spanmetrics_latency_sum{service=\"sistema-4.0\"}[$__range])\n  )\n  /\n  sum by (next_route)(\n    rate(traces_spanmetrics_latency_count{service=\"sistema-4.0\"}[$__range])\n  )\n)",
+          "expr": "topk(\n  10,\n  sum by (http_target)(\n    rate(traces_spanmetrics_latency_sum{service=\"sistema-4.0\", span_kind=\"SPAN_KIND_SERVER\", http_target!=\"\"}[$__rate_interval])\n  )\n  /\n  clamp_min(\n    sum by (http_target)(\n      rate(traces_spanmetrics_latency_count{service=\"sistema-4.0\", span_kind=\"SPAN_KIND_SERVER\", http_target!=\"\"}[$__rate_interval])\n    ),\n    1e-9\n  )\n)",
           "format": "table",
           "legendFormat": "__auto",
           "range": true,
@@ -130,12 +137,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "next_route"
+              "options": "http_target"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 477
+                "value": 179
               }
             ]
           },
@@ -147,7 +154,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 393
+                "value": 364
               }
             ]
           }
@@ -165,7 +172,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -174,7 +181,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(\n  10,\n  sum by (http_method, next_route)(\n    increase(\n      traces_spanmetrics_calls_total{\n        service=\"sistema-4.0\",\n      }[$__range]\n    )\n  )\n)",
+          "expr": "topk(\n  10,\n  sum by (http_method, http_target)(\n    increase(\n      traces_spanmetrics_calls_total{\n        service=\"sistema-4.0\",\n        span_kind=\"SPAN_KIND_SERVER\",\n        http_target!=\"\"\n      }[$__range]\n    )\n  )\n)",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -195,7 +202,7 @@
       },
       "id": 100,
       "panels": [],
-      "title": "🔴 RED Metrics",
+      "title": " RED Metrics",
       "type": "row"
     },
     {
@@ -283,7 +290,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -385,7 +392,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -458,7 +465,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -560,7 +567,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -672,7 +679,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -699,7 +706,7 @@
       },
       "id": 200,
       "panels": [],
-      "title": "⚡ Performance - Heatmap & Apdex",
+      "title": " Performance - Heatmap & Apdex",
       "type": "row"
     },
     {
@@ -766,7 +773,7 @@
           "unit": "s"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -841,7 +848,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -955,7 +962,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1065,7 +1072,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1175,7 +1182,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1213,7 +1220,7 @@
       },
       "id": 400,
       "panels": [],
-      "title": "🟢 Node.js & PostgreSQL",
+      "title": " Node.js & PostgreSQL",
       "type": "row"
     },
     {
@@ -1298,7 +1305,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1338,116 +1345,6 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 8,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 45
-      },
-      "id": 12,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "pg_stat_activity_count{datname=\"sistema40\"}",
-          "instant": false,
-          "legendFormat": "Conexões ativas",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "pg_stat_activity_count{datname=\"sistema40\",state=\"idle\"}",
-          "instant": false,
-          "legendFormat": "Conexões idle",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "PostgreSQL - Conexões Ativas",
-      "type": "timeseries"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1457,7 +1354,7 @@
       },
       "id": 500,
       "panels": [],
-      "title": "🔗 Service Graph",
+      "title": " Service Graph",
       "type": "row"
     },
     {
@@ -1541,9 +1438,15 @@
       "options": {
         "cellHeight": "sm",
         "enablePagination": false,
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "next_route"
+          }
+        ]
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1621,7 +1524,7 @@
       },
       "id": 600,
       "panels": [],
-      "title": "🔍 Traces Recentes",
+      "title": " Traces Recentes",
       "type": "row"
     },
     {
@@ -1669,7 +1572,7 @@
         "cellHeight": "sm",
         "showHeader": true
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1682,7 +1585,7 @@
               "isCustomValue": false,
               "operator": "$span_name",
               "scope": "span",
-              "tag": "next.route",
+              "tag": "next_route",
               "value": [
                 "$span_name"
               ],
@@ -1755,7 +1658,7 @@
       },
       "id": 700,
       "panels": [],
-      "title": "📋 Logs",
+      "title": " Logs",
       "type": "row"
     },
     {
@@ -1787,7 +1690,7 @@
         "unwrappedColumns": false,
         "wrapLogMessage": false
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1801,7 +1704,7 @@
           "refId": "A"
         }
       ],
-      "title": "🚨 Logs de Erro - sistema-4.0",
+      "title": " Logs de Erro - sistema-4.0",
       "type": "logs"
     },
     {
@@ -1833,7 +1736,7 @@
         "unwrappedColumns": false,
         "wrapLogMessage": false
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -1847,7 +1750,7 @@
           "refId": "A"
         }
       ],
-      "title": "📋 Todos os Logs - sistema-4.0",
+      "title": " Todos os Logs - sistema-4.0",
       "type": "logs"
     }
   ],
@@ -1933,8 +1836,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Sistema 4.0 - Observabilidade",
+  "title": "sistema-4.0 - Observabilidade",
   "uid": "adljkhr",
-  "version": 19,
+  "version": 12,
   "weekStart": ""
 }
