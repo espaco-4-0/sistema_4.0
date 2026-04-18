@@ -66,7 +66,7 @@ export default function NavBar() {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    className="fixed top-0 z-20 w-full"
+                    className="fixed top-0 z-20 w-full border border-b-gray-200"
                     initial={{ opacity: 0, y: -12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
