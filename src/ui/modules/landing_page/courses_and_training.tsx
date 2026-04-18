@@ -99,8 +99,8 @@ export default function CoursesAndTraining() {
                                     viewport={{ once: true }}
                                 >
                                     <Card className="group rounded-2xl border-gray-200 border-[0.5px] shadow-lg transition-all duration-250 hover:shadow-xl p-0">
-                                        <CardHeader className="group bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-300 rounded-t-2xl h-20 pb-22 px-6 pt-6">
-                                            <span className="text-xs font-semibold text-black bg-white/20 border-[0.5px] border-white/10 backdrop-blur-sm w-fit px-3 py-1 mb-1 rounded-xl shadow-xs">
+                                        <CardHeader className="group bg-linear-to-r from-yellow-400/80 via-yellow-400 to-yellow-500/80 rounded-t-2xl p-6">
+                                            <span className="text-xs font-semibold text-black bg-white/25 border-[0.5px] border-white/15 backdrop-blur-sm w-fit px-3 py-1 mb-1 rounded-xl shadow-xs">
                                                 {course.level}
                                             </span>
 
@@ -113,19 +113,19 @@ export default function CoursesAndTraining() {
                                             <p className="text-md text-gray-700">{course.description}</p>
 
                                             <div className="flex justify-between w-7/10 my-2">
-                                                <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
+                                                <div className="mt-4 flex items-center gap-1.5 text-sm text-black font-medium">
                                                     <Clock4Icon className="h-4 w-4 text-yellow-600" />
                                                     {totalHours === null ? "Horario a definir" : `${totalHours} horas`}
                                                 </div>
 
-                                                <div className="mt-4 flex items-center gap-2 text-sm text-black font-medium">
+                                                <div className="mt-4 flex items-center gap-1.5 text-sm text-black font-medium">
                                                     <Users className="h-4 w-4 text-yellow-600" />
                                                     {course.maxSubscribes - course.subscribes} vagas
                                                 </div>
                                             </div>
                                         </CardContent>
 
-                                        <CardFooter className="pb-6 pt-6">
+                                        <CardFooter className="pb-6 pt-4">
                                             <MotionButton
                                                 onClick={() => abrirDialog(course.title)}
                                                 disabled={openingCourse !== null || openingCourse != null}
