@@ -112,7 +112,7 @@ export default function CoursesAndTraining() {
                                         <CardContent>
                                             <p className="text-md text-gray-700">{course.description}</p>
 
-                                            <div className="flex justify-between w-7/10 my-2">
+                                            <div className="flex justify-start gap-6 my-2">
                                                 <div className="mt-4 flex items-center gap-1.5 text-sm text-black font-medium">
                                                     <Clock4Icon className="h-4 w-4 text-yellow-600" />
                                                     {totalHours === null ? "Horario a definir" : `${totalHours} horas`}
