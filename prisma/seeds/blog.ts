@@ -300,31 +300,6 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
             },
             select: { id: true },
         });
-
-        await prisma.postFoto.create({
-            data: {
-                url: privateImageOne,
-                legenda: "Imagem privada 1",
-                ordem: 1,
-                postId: savedPost.id,
-            },
-        });
-
-        await prisma.postFoto.create({
-            data: {
-                url: privateImageTwo,
-                legenda: "Imagem privada 2",
-                ordem: 2,
-                postId: savedPost.id,
-            },
-        });
-
-        await prisma.post.update({
-            where: { id: savedPost.id },
-            data: {
-                capaImagemId: coverPhoto.id,
-            },
-        });
     }
 
     console.log("Posts, fotos e categorias do blog criados/atualizados");
