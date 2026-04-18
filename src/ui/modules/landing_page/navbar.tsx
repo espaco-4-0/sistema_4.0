@@ -76,8 +76,8 @@ export default function NavBar() {
                         <div className="relative mx-auto flex h-20 max-w-6xl items-center gap-6 px-4 lg:px-8">
                             <Button
                                 variant="ghost"
-                                className="flex items-center gap-3 p-0 cursor-pointer shrink-0"
-                                onClick={() => automaticScroll("welcome")}
+                                className="flex items-center gap-3 p-0 cursor-pointer shrink-0 hover:bg-white"
+                                onClick={() => automaticScroll("hero")}
                             >
                                 <Image
                                     src="/Icone-Espaco4.0.svg"
@@ -87,7 +87,7 @@ export default function NavBar() {
                                     style={{ width: "auto", height: "auto" }}
                                 />
                                 <div className="flex flex-col items-start leading-tight">
-                                    <span className="text-base font-bold text-black leading-none">Espaco 4.0</span>
+                                    <span className="text-base font-bold text-black leading-none">Espaço 4.0</span>
                                     <span className="text-xs font-semibold text-gray-400 leading-none">
                                         Tecnologia & Educação
                                     </span>
