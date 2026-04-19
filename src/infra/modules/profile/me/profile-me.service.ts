@@ -1,6 +1,6 @@
 import { invalidateCacheNamespace, rememberCache } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 
 import { UpdateProfilePayload } from "./profile-me.schema";
 

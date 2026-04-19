@@ -1,10 +1,10 @@
 import { invalidateCacheNamespace } from "@/lib/cache";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildPresenceUpdateData, findUserPresenceById, updatePresenceById } from "./presence-id.service";
 
-vi.mock("@/src/ui/lib/prisma", () => ({
+vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
         presenca: {
             findFirst: vi.fn(),

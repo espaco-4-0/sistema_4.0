@@ -1,6 +1,6 @@
 import { invalidateCacheNamespace } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 
 import { PresenceSituation } from "./presence-id.schema";
 
