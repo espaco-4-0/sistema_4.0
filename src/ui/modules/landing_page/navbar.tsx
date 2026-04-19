@@ -20,7 +20,7 @@ export default function NavBar() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const hero = document.getElementById("welcome");
+        const hero = document.getElementById("hero");
 
         if (!hero) {
             setIsVisible(true);
@@ -53,9 +53,9 @@ export default function NavBar() {
 
     const menuItems = [
         { id: "hero", label: "Inicio" },
-        { id: "what-is", label: "Sobre" },
-        { id: "viewer_3d_section", label: "Tecnologias" },
         { id: "blog", label: "Notícias" },
+        { id: "what-is", label: "Sobre" },
+        { id: "viewer_3d_section", label: "Ambiente" },
         { id: "courses", label: "Cursos" },
         { id: "upcoming-events", label: "Eventos" },
         { id: "gallery", label: "Galeria" },
@@ -66,18 +66,18 @@ export default function NavBar() {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    className="fixed top-0 z-20 w-full"
+                    className="fixed top-0 z-20 w-full border border-b-gray-200"
                     initial={{ opacity: 0, y: -12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
                 >
                     <NavigationMenu className="w-full bg-white">
-                        <div className="relative mx-auto flex h-20 max-w-6xl items-center gap-6 px-4 lg:px-8">
+                        <div className="relative mx-auto flex h-20 justify-center items-center gap-6 px-4 lg:px-8">
                             <Button
                                 variant="ghost"
-                                className="flex items-center gap-3 p-0 cursor-pointer shrink-0"
-                                onClick={() => automaticScroll("welcome")}
+                                className="flex items-center gap-3 p-0 cursor-pointer shrink-0 hover:bg-white"
+                                onClick={() => automaticScroll("hero")}
                             >
                                 <Image
                                     src="/Icone-Espaco4.0.svg"
@@ -87,7 +87,7 @@ export default function NavBar() {
                                     style={{ width: "auto", height: "auto" }}
                                 />
                                 <div className="flex flex-col items-start leading-tight">
-                                    <span className="text-base font-bold text-black leading-none">Espaco 4.0</span>
+                                    <span className="text-base font-bold text-black leading-none">Espaço 4.0</span>
                                     <span className="text-xs font-semibold text-gray-400 leading-none">
                                         Tecnologia & Educação
                                     </span>
@@ -110,7 +110,7 @@ export default function NavBar() {
                                 ))}
                             </NavigationMenuList>
 
-                            <div className="ml-auto hidden lg:flex shrink-0 items-center gap-4">
+                            <div className="hidden lg:flex shrink-0 items-center gap-4">
                                 <Link
                                     href="/espaco-3D"
                                     className="flex items-center gap-2 text-[13px] font-semibold text-black/70 hover:text-black whitespace-nowrap"
