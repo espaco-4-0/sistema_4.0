@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { Button } from "@/src/ui/components/ui/button";
-import { format, getDay, isSameDay, parse, startOfWeek } from "date-fns";
+import { format, getDay, isSameDay, isSameMonth, isToday, isWeekend, parse, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
@@ -19,10 +19,15 @@ type ToolbarProps = {
 };
 
 function Toolbar({ date, onNavigate }: ToolbarProps) {
+    const today = new Date();
     const month = format(date, "MMMM", { locale: ptBR });
     const year = format(date, "yyyy");
 
-    const handlePrev = useCallback(() => onNavigate("PREV"), [onNavigate]);
+    const isCurrentMonth = isSameMonth(date, today);
+
+    const handlePrev = useCallback(() => {
+        if (!isCurrentMonth) onNavigate("PREV");
+    }, [onNavigate, isCurrentMonth]);
     const handleToday = useCallback(() => onNavigate("TODAY"), [onNavigate]);
     const handleNext = useCallback(() => onNavigate("NEXT"), [onNavigate]);
 
@@ -43,7 +48,8 @@ function Toolbar({ date, onNavigate }: ToolbarProps) {
                 <Button
                     onClick={handlePrev}
                     variant="outline"
-                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
+                    disabled={isCurrentMonth}
+                    className={`h-9 lg:h-10 px-2 lg:px-4 ${isCurrentMonth ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
                     type="button"
                 >
                     <ChevronLeft className="size-4 lg:size-5" />
@@ -109,14 +115,24 @@ export function UnifiedVisitCalendar({
             dayPropGetter={(date) => {
                 const hasEvents = events.filter((event) => isSameDay(event.start, date));
                 const isToday = isSameDay(date, new Date());
-                let classes = "transition-all cursor-pointer hover:opacity-80 ";
+                const weekend = date.getDay() === 0 || date.getDay() === 6;
 
-                if (isSameDay(selectedDate, date)) classes += "!bg-blue-50 ";
-                else if (hasEvents.some((event) => event.type === "aprovado")) classes += "!bg-green-50 ";
-                else if (hasEvents.some((event) => event.type === "agendado")) classes += "!bg-amber-50 ";
-                else classes += "!bg-gray-50 ";
+                let classes = "transition-all ";
+
+                if (weekend) {
+                    classes += "!bg-gray-100 cursor-not-allowed ";
+                } else if (isSameDay(selectedDate, date)) {
+                    classes += "!bg-blue-100 cursor-pointer hover:opacity-80 ";
+                } else if (hasEvents.some((event) => event.type === "aprovado")) {
+                    classes += "!bg-green-100 cursor-pointer hover:opacity-80 ";
+                } else if (hasEvents.some((event) => event.type === "agendado")) {
+                    classes += "!bg-amber-100 cursor-pointer hover:opacity-80 ";
+                } else {
+                    classes += "!bg-white cursor-pointer hover:opacity-80 ";
+                }
 
                 if (isToday) classes += "!border-2 !border-yellow-primary";
+
                 return { className: classes };
             }}
             eventPropGetter={(event) => ({

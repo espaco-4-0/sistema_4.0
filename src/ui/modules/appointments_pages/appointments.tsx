@@ -12,6 +12,7 @@ import {
     IdleState,
     LoadingState,
     SuccessState,
+    WeekendState,
 } from "@/src/ui/modules/appointments_pages/components/states";
 import { BookingForm, CalendarFormInput } from "@/src/ui/modules/appointments_pages/forms/booking-form";
 import { format, isSameDay, setHours, setMinutes } from "date-fns";
@@ -48,19 +49,22 @@ export default function AllCalendar() {
         const month = searchParams.get("month");
         if (day && month && monthMap[month.toLowerCase()] !== undefined) {
             const target = new Date(2026, monthMap[month.toLowerCase()], Number.parseInt(day));
+            const isWeekend = target.getDay() === 0 || target.getDay() === 6;
+            if (isWeekend) {
+                return { date: target, step: "weekend" as const };
+            }
             return { date: target, step: "list" as const };
         }
-        return { date: new Date(2026, 5, 1), step: "idle" as const };
+        return { date: new Date(), step: "idle" as const };
     };
 
     const initialState = getInitialState();
 
     const [viewDate, setViewDate] = useState<Date>(initialState.date);
     const [selectedDate, setSelectedDate] = useState<Date>(initialState.date);
-    const [step, setStep] = useState<"idle" | "list" | "form" | "detail" | "loading" | "success" | "error">(
+    const [step, setStep] = useState<"idle" | "list" | "form" | "detail" | "loading" | "success" | "error" | "weekend">(
         initialState.step
     );
-
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
@@ -80,7 +84,6 @@ export default function AllCalendar() {
         },
     });
 
-    // Carrega eventos do banco via API + mock estático
     useEffect(() => {
         async function loadEvents() {
             const visitEvents = await getPublicVisitEvents();
@@ -94,7 +97,6 @@ export default function AllCalendar() {
         setErrorMessage("");
         setStep("loading");
 
-        // Validações locais
         const quantidade = Number.parseInt(data.quantidade, 10);
         if (!Number.isFinite(quantidade) || quantidade <= 0) {
             setErrorMessage("Informe a quantidade de alunos.");
@@ -155,7 +157,6 @@ export default function AllCalendar() {
             }
 
             const result = await submitVisitRequest(formData);
-
             const newEvent = publicVisitToCalendarEvent({
                 id: result.id,
                 instituicao: result.instituicao,
@@ -165,7 +166,6 @@ export default function AllCalendar() {
                 status: result.status,
             });
             setEvents((prev) => [...prev, newEvent]);
-
             setStep("success");
             formMethods.reset();
         } catch (err) {
@@ -188,13 +188,11 @@ export default function AllCalendar() {
                     <ChevronRight size={12} className="text-gray-400" />{" "}
                     <span>Calendário de Visitas do Espaço 4.0</span>
                 </div>
-
                 <header className="mb-3 lg:mb-4 2xl:mb-6 px-1 lg:px-0">
                     <h2 className="text-lg lg:text-2xl 2xl:text-3xl font-semibold text-gray-800 tracking-tight">
                         Programação do <span className="text-yellow-primary">Espaço 4.0</span>
                     </h2>
                 </header>
-
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 2xl:gap-6 items-start">
                     <div className="lg:col-span-7 2xl:col-span-8 bg-white rounded-lg lg:rounded-xl 2xl:rounded-lg shadow-lg p-4 lg:p-5 2xl:p-4 hover:shadow-xl transition-shadow duration-300">
                         <UnifiedVisitCalendar
@@ -204,6 +202,11 @@ export default function AllCalendar() {
                             onViewDateChange={setViewDate}
                             onSelectDay={(date) => {
                                 setSelectedDate(date);
+                                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                                if (isWeekend) {
+                                    setStep("weekend");
+                                    return;
+                                }
                                 setStep(events.some((event) => isSameDay(event.start, date)) ? "list" : "form");
                             }}
                             onSelectEvent={() => {
@@ -211,12 +214,12 @@ export default function AllCalendar() {
                             }}
                         />
                     </div>
-
                     <aside className="lg:col-span-4 min-h-130">
                         <PanelWrapper
                             align={step === "list" || step === "form" || step === "detail" ? "start" : "center"}
                         >
                             {step === "idle" && <IdleState />}
+                            {step === "weekend" && <WeekendState target={selectedDate} />}
                             {step === "list" && (
                                 <EventList
                                     date={selectedDate}
@@ -235,6 +238,7 @@ export default function AllCalendar() {
                                     onSubmit={handleFormSubmit}
                                     onCancel={() => setStep("idle")}
                                     maxStudents={MAX_STUDENTS_PER_THURM}
+                                    selectedDate={selectedDate}
                                 />
                             )}
                             {step === "detail" && activeEvent && (
@@ -264,7 +268,6 @@ export default function AllCalendar() {
                             )}
                         </PanelWrapper>
                     </aside>
-
                     <div className="col-span-1 lg:col-span-12 flex flex-col lg:flex-row flex-wrap items-start lg:items-center gap-4 lg:gap-6 2xl:gap-7 mt-6 lg:mt-7 2xl:mt-8 mb-3 px-2 py-2 rounded-lg">
                         <div className="flex items-center gap-2">
                             <div className="bg-yellow-primary size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />

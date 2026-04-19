@@ -1,4 +1,3 @@
-import React from "react";
 import { Calendar as CalendarIcon, CheckCircle2, Cog, XCircle } from "lucide-react";
 
 export const IdleState = () => (
@@ -44,3 +43,18 @@ export const ErrorState = ({ onBack, message }: { onBack: () => void; message?: 
         </button>
     </>
 );
+
+export const WeekendState = ({ target }: { target: Date }) => {
+    const isWeekend = target.getDay() === 0 || target.getDay() === 6;
+
+    if (!isWeekend) return null;
+
+    return (
+        <div className="flex flex-col items-center justify-center gap-2">
+            <CalendarIcon className="w-10 h-10 text-gray-300" />
+            <p className="text-gray-400 text-sm text-center">
+                Finais de semana não estão disponíveis para agendamento.
+            </p>
+        </div>
+    );
+};

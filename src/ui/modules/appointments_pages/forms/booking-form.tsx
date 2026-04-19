@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsPanel, TabsPanels, TabsTab } from "@/src/components/animate-ui/components/base/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
 import { ArrowLeft, FileText, Phone, School, User, Users } from "lucide-react";
 import { Control, Controller, UseFormRegisterReturn, UseFormReturn } from "react-hook-form";
 
@@ -38,11 +40,13 @@ export const BookingForm = ({
     onSubmit,
     onCancel,
     maxStudents,
+    selectedDate,
 }: {
     methods: UseFormReturn<CalendarFormInput>;
     onSubmit: (d: CalendarFormInput) => void;
     onCancel: () => void;
     maxStudents?: number;
+    selectedDate: Date;
 }) => {
     const [activeTab, setActiveTab] = useState<"pedido" | "documentacao">("pedido");
 
@@ -68,17 +72,22 @@ export const BookingForm = ({
     async function handleNextStep() {
         const valid = await methods.trigger(requiredPedidoFields);
         if (!valid) return;
-
         setActiveTab("documentacao");
     }
 
     return (
         <>
             <div className="flex items-center gap-2 mb-4">
-                <button onClick={onCancel} className="text-gray-400 hover:text-black">
+                <button
+                    onClick={onCancel}
+                    className="text-gray-400 hover:text-black hover:cursor-pointer hover:transition-all"
+                >
                     <ArrowLeft size={16} />
                 </button>
                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Nova Solicitação</span>
+                <span className="text-[10px] text-gray-500 ml-auto">
+                    {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </span>
             </div>
 
             <Tabs value={activeTab} onValueChange={(value: string) => setActiveTab(value as "pedido" | "documentacao")}>
@@ -99,7 +108,7 @@ export const BookingForm = ({
                     </TabsList>
                 </div>
 
-                <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-3 ">
+                <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full space-y-3">
                     <TabsPanels>
                         <TabsPanel value="pedido" className="grid gap-2.5">
                             <InputWithIcon
@@ -212,7 +221,7 @@ export const BookingForm = ({
                             ) : null}
                             <button
                                 type="submit"
-                                className="w-full bg-black text-yellow-primary hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
+                                className="w-full hover:cursor-pointer bg-black text-yellow-primary hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
                             >
                                 Confirmar
                             </button>
