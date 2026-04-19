@@ -1,3 +1,4 @@
+import { CalendarDaysIcon } from "@/src/ui/components/ui/calendar-days";
 import { Calendar as CalendarIcon, CheckCircle2, Cog, XCircle } from "lucide-react";
 
 export const IdleState = () => (
@@ -54,6 +55,21 @@ export const WeekendState = ({ target }: { target: Date }) => {
             <CalendarIcon className="w-10 h-10 text-gray-300" />
             <p className="text-gray-400 text-sm text-center">
                 Finais de semana não estão disponíveis para agendamento.
+            </p>
+        </div>
+    );
+};
+
+export const PastState = ({ date }: { date: Date }) => {
+    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+
+    if (!isPast) return null;
+
+    return (
+        <div className="flex flex-col items-center justify-center gap-2">
+            <CalendarDaysIcon className=" text-gray-600" size={40} />
+            <p className="text-gray-400 text-sm text-center leading-relaxed">
+                Dias que já se passaram não estao disponíveis para solicitações de agendamento
             </p>
         </div>
     );

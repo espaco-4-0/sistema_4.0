@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { calendarEventsMock, type CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { getPublicVisitEvents, publicVisitToCalendarEvent, submitVisitRequest } from "@/src/ui/lib/visit-requests-api";
 import { EventDetail } from "@/src/ui/modules/appointments_pages/components/event-detail";
@@ -11,6 +11,7 @@ import {
     ErrorState,
     IdleState,
     LoadingState,
+    PastState,
     SuccessState,
     WeekendState,
 } from "@/src/ui/modules/appointments_pages/components/states";
@@ -41,6 +42,8 @@ const monthMap: { [key: string]: number } = {
 const MAX_STUDENTS_PER_THURM = 30;
 const MIN_EVENT_GAP_MINUTES = 30;
 
+type Step = "idle" | "list" | "form" | "detail" | "loading" | "success" | "error" | "weekend" | "past";
+
 export default function AllCalendar() {
     const searchParams = useSearchParams();
 
@@ -50,9 +53,9 @@ export default function AllCalendar() {
         if (day && month && monthMap[month.toLowerCase()] !== undefined) {
             const target = new Date(2026, monthMap[month.toLowerCase()], Number.parseInt(day));
             const isWeekend = target.getDay() === 0 || target.getDay() === 6;
-            if (isWeekend) {
-                return { date: target, step: "weekend" as const };
-            }
+            const isPast = target < new Date(new Date().setHours(0, 0, 0, 0));
+            if (isWeekend) return { date: target, step: "weekend" as const };
+            if (isPast) return { date: target, step: "past" as const };
             return { date: target, step: "list" as const };
         }
         return { date: new Date(), step: "idle" as const };
@@ -62,9 +65,7 @@ export default function AllCalendar() {
 
     const [viewDate, setViewDate] = useState<Date>(initialState.date);
     const [selectedDate, setSelectedDate] = useState<Date>(initialState.date);
-    const [step, setStep] = useState<"idle" | "list" | "form" | "detail" | "loading" | "success" | "error" | "weekend">(
-        initialState.step
-    );
+    const [step, setStep] = useState<Step>(initialState.step);
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
@@ -203,8 +204,14 @@ export default function AllCalendar() {
                             onSelectDay={(date) => {
                                 setSelectedDate(date);
                                 const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                                const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+
                                 if (isWeekend) {
                                     setStep("weekend");
+                                    return;
+                                }
+                                if (isPast) {
+                                    setStep("past");
                                     return;
                                 }
                                 setStep(events.some((event) => isSameDay(event.start, date)) ? "list" : "form");
@@ -220,6 +227,7 @@ export default function AllCalendar() {
                         >
                             {step === "idle" && <IdleState />}
                             {step === "weekend" && <WeekendState target={selectedDate} />}
+                            {step === "past" && <PastState date={selectedDate} />}
                             {step === "list" && (
                                 <EventList
                                     date={selectedDate}

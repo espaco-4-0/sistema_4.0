@@ -116,10 +116,11 @@ export function UnifiedVisitCalendar({
                 const hasEvents = events.filter((event) => isSameDay(event.start, date));
                 const isToday = isSameDay(date, new Date());
                 const weekend = date.getDay() === 0 || date.getDay() === 6;
+                const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
 
                 let classes = "transition-all ";
 
-                if (weekend) {
+                if (weekend || isPast) {
                     classes += "!bg-gray-100 cursor-not-allowed ";
                 } else if (isSameDay(selectedDate, date)) {
                     classes += "!bg-blue-100 cursor-pointer hover:opacity-80 ";
