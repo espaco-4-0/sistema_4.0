@@ -1,28 +1,81 @@
-import { useState } from "react";
-import { newsData } from "@/src/infra/modules/blog/blog-mock";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { getPosts } from "@/src/infra/modules/blog/blog.service";
+import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { Clock, Filter, Home, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "../../components/ui/button";
 
-// futuramente iremos implementar o redis, e subistituir por uma api funcional ao invés do mock
+type BlogCard = {
+    id: string;
+    slug: string;
+    category: string;
+    title: string;
+    image: string;
+    excerpt: string;
+    author: string;
+    readingTime: number;
+};
+
+const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+
+function normalizePostToCard(post: BlogPost): BlogCard {
+    return {
+        id: String(post.id),
+        slug: post.slug,
+        category: post.categorias?.[0]?.nome?.trim() || "Geral",
+        title: post.titulo?.trim() || "Notícia sem título",
+        image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
+        excerpt: post.resumo?.trim() || post.conteudo?.slice(0, 140) || "Leia a notícia completa para mais detalhes.",
+        author: "Espaço 4.0",
+        readingTime: post.tempoDeLeitura || 5,
+    };
+}
 
 export default function BlogNews() {
     const [selectedCategory, setSelectedCategory] = useState("Todas");
+    const [posts, setPosts] = useState<BlogCard[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const router = useRouter();
 
-    const categories = [
-        "Todas",
-        "IOT E AUTOMAÇÃO",
-        "Robótica",
-        "Sustentabilidade",
-        "Inteligência Artificial",
-        "Impressão 3D",
-    ];
+    useEffect(() => {
+        let isMounted = true;
 
-    const filteredNews =
-        selectedCategory === "Todas" ? newsData : newsData.filter((news) => news.category === selectedCategory);
+        const loadPosts = async () => {
+            try {
+                const data = await getPosts({ includeArchived: false });
+                if (!isMounted) return;
+
+                const normalized = (Array.isArray(data) ? data : []).map(normalizePostToCard);
+                setPosts(normalized);
+            } catch {
+                if (!isMounted) return;
+                setPosts([]);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadPosts();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const categories = useMemo(() => {
+        const dynamic = Array.from(new Set(posts.map((p) => p.category).filter(Boolean)));
+        return ["Todas", ...dynamic];
+    }, [posts]);
+
+    const filteredNews = useMemo(
+        () => (selectedCategory === "Todas" ? posts : posts.filter((news) => news.category === selectedCategory)),
+        [posts, selectedCategory]
+    );
 
     return (
         <div className="min-h-screen bg-white">
@@ -34,6 +87,7 @@ export default function BlogNews() {
                     <Home className="text-gray-300 w-4 h-4 " />
                     Voltar para a home page
                 </Link>
+
                 <div className="mb-8">
                     <h1 className="text-5xl font-bold text-black mb-3">Todas as Notícias</h1>
                     <p className="text-gray-600 text-lg">
@@ -42,7 +96,10 @@ export default function BlogNews() {
                 </div>
 
                 <div className="flex items-center gap-4 mb-8 overflow-x-auto pb-4">
-                    <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shrink-0">
+                    <button
+                        type="button"
+                        className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shrink-0"
+                    >
                         <Filter className="w-5 h-5" />
                     </button>
 
@@ -63,52 +120,61 @@ export default function BlogNews() {
                     </div>
                 </div>
 
-                <p className="text-gray-600 mb-6">
-                    Mostrando <span className="font-semibold">{filteredNews.length}</span> artigos
-                </p>
+                {loading ? (
+                    <p className="text-gray-600 mb-6">Carregando notícias...</p>
+                ) : (
+                    <p className="text-gray-600 mb-6">
+                        Mostrando <span className="font-semibold">{filteredNews.length}</span> artigos
+                    </p>
+                )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredNews.map((news, index) => (
-                        <button
-                            key={news.id}
-                            onClick={() => router.push(`/blog/${news.id}`)}
-                            className="group cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
-                        >
-                            <div className="relative h-52 overflow-hidden">
-                                <img
-                                    src={news.image}
-                                    alt={news.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                {index < 3 && (
-                                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                                        <TrendingUp className="w-4 h-4" />
-                                        recém publicada
-                                    </div>
-                                )}
-                            </div>
+                {!loading && filteredNews.length === 0 ? (
+                    <div className="py-16 text-center text-gray-500">Nenhuma notícia encontrada.</div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredNews.map((news, index) => (
+                            <button
+                                key={news.id}
+                                onClick={() => router.push(`/blog/${news.slug}`)}
+                                className="group cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
+                            >
+                                <div className="relative h-52 overflow-hidden">
+                                    <img
+                                        src={news.image}
+                                        alt={news.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                    {index < 3 && (
+                                        <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                                            <TrendingUp className="w-4 h-4" />
+                                            recém publicada
+                                        </div>
+                                    )}
+                                </div>
 
-                            <div className="p-5">
-                                <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
-                                    {news.category}
-                                </span>
+                                <div className="p-5 text-left">
+                                    <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
+                                        {news.category}
+                                    </span>
 
-                                <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
-                                    {news.title}
-                                </h2>
+                                    <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                                        {news.title}
+                                    </h2>
 
-                                <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.content[0]}</p>
+                                    <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.excerpt}</p>
 
-                                <div className="flex items-center gap-3 text-xs text-gray-500">
-                                    <span className="font-medium">{news.author}</span>
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="w-4 h-4" />5 min
+                                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                                        <span className="font-medium">{news.author}</span>
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="w-4 h-4" />
+                                            {news.readingTime} min
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </button>
-                    ))}
-                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
