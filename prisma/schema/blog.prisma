@@ -31,7 +31,7 @@ model PostFoto {
     createdAt DateTime @default(now())
 
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId String
+    postId String @unique
 
     capaDe Post[] @relation("CapaPost")
 

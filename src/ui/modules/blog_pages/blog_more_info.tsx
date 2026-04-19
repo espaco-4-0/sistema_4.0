@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { newsData } from "@/src/infra/modules/blog/blog-mock";
+import { useEffect, useMemo, useState } from "react";
+import { getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
+import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { ArrowLeft, Bookmark, Calendar, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -10,15 +11,65 @@ import { useForm } from "react-hook-form";
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
 
-// futuramente iremos implementar o redis, e subistituir por uma api funcional ao invés do mock
+const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+
+function formatDate(dateValue?: string) {
+    if (!dateValue) return "Data não informada";
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return "Data não informada";
+
+    return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    }).format(date);
+}
+
+function contentToParagraphs(content?: string): string[] {
+    if (!content?.trim()) return [];
+    const fromLineBreaks = content
+        .split(/\r?\n/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+
+    if (fromLineBreaks.length > 1) return fromLineBreaks;
+
+    return content
+        .split(/(?<=\.)\s+/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+}
+
+type RelatedPost = {
+    id: string;
+    slug: string;
+    title: string;
+    category: string;
+    image: string;
+    readingTime: number;
+};
+
+function normalizeRelated(posts: BlogPost[]): RelatedPost[] {
+    return posts.map((post) => ({
+        id: String(post.id),
+        slug: post.slug,
+        title: post.titulo?.trim() || "Notícia sem título",
+        category: post.categorias?.[0]?.nome?.trim() || "Geral",
+        image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
+        readingTime: post.tempoDeLeitura || 5,
+    }));
+}
 
 export default function BlogMoreInfo() {
     const methods = useForm();
-    const params = useParams<{ id: string }>();
+    const params = useParams<{ slug: string }>();
     const router = useRouter();
-    const id = Array.isArray(params?.id) ? params?.id[0] : params?.id;
+    const rawSlug = params?.slug;
+    const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
 
-    const news = newsData.find((n) => n.id === Number(id));
+    const [news, setNews] = useState<BlogPost | null>(null);
+    const [recentNews, setRecentNews] = useState<RelatedPost[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [likes, setLikes] = useState(0);
     const [hasLiked, setHasLiked] = useState(false);
@@ -27,10 +78,62 @@ export default function BlogMoreInfo() {
     const [authorName, setAuthorName] = useState("");
     const [comment, setComment] = useState("");
 
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadData = async () => {
+            if (!slug?.trim()) {
+                if (isMounted) {
+                    setNews(null);
+                    setRecentNews([]);
+                    setLoading(false);
+                }
+                return;
+            }
+
+            try {
+                const [post, list] = await Promise.all([getPostBySlug(slug), getPosts({ quantity: 10 })]);
+
+                if (!isMounted) return;
+
+                setNews(post);
+
+                const related = normalizeRelated(
+                    (Array.isArray(list) ? list : []).filter((p) => p.slug !== slug)
+                ).slice(0, 3);
+                setRecentNews(related);
+            } catch {
+                if (!isMounted) return;
+                setNews(null);
+                setRecentNews([]);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadData();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [slug]);
+
+    const paragraphs = useMemo(() => contentToParagraphs(news?.conteudo), [news?.conteudo]);
+    const lead = paragraphs[0] || news?.resumo || "";
+    const bodyParagraphs = paragraphs.length > 1 ? paragraphs.slice(1) : [];
+
     const handleLike = () => {
         setHasLiked(!hasLiked);
         setLikes((prev) => (hasLiked ? prev - 1 : prev + 1));
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <p className="text-gray-600">Carregando notícia...</p>
+            </div>
+        );
+    }
 
     if (!news) {
         return (
@@ -48,7 +151,10 @@ export default function BlogMoreInfo() {
         );
     }
 
-    const recentNews = newsData.filter((n) => n.id !== news.id).slice(0, 3);
+    const title = news.titulo?.trim() || "Notícia sem título";
+    const image = news.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE;
+    const category = news.categorias?.[0]?.nome?.trim() || "Geral";
+    const readingTime = news.tempoDeLeitura || 5;
 
     return (
         <div className="min-h-screen bg-white">
@@ -63,30 +169,30 @@ export default function BlogMoreInfo() {
 
                 <div className="mb-6">
                     <span className="inline-block px-4 py-2 bg-yellow-400 text-black rounded-full text-sm font-bold">
-                        {news.category}
+                        {category}
                     </span>
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold text-black mb-6 leading-tight">{news.title}</h1>
+                <h1 className="text-4xl md:text-5xl font-bold text-black mb-6 leading-tight">{title}</h1>
 
-                <p className="text-xl text-gray-600 mb-8">{news.content[0]}</p>
+                {lead ? <p className="text-xl text-gray-600 mb-8">{lead}</p> : null}
 
                 <div className="flex flex-wrap items-center gap-6 mb-6 text-gray-600">
                     <div className="flex items-center gap-2">
                         <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                            <span className="font-bold text-black">{news.author.charAt(0)}</span>
+                            <span className="font-bold text-black">E</span>
                         </div>
-                        <span className="font-medium text-black">{news.author}</span>
+                        <span className="font-medium text-black">Espaço 4.0</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>{news.date}</span>
+                        <span>{formatDate(news.createdAt)}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
-                        <span>8 min</span>
+                        <span>{readingTime} min</span>
                     </div>
 
                     <div className="ml-auto flex items-center gap-3">
@@ -110,8 +216,8 @@ export default function BlogMoreInfo() {
 
                 <div className="mb-12 rounded-2xl overflow-hidden relative h-125">
                     <Image
-                        src={news.image}
-                        alt={news.title}
+                        src={image}
+                        alt={title}
                         fill
                         sizes="(max-width: 768px) 100vw, 896px"
                         priority
@@ -120,11 +226,17 @@ export default function BlogMoreInfo() {
                 </div>
 
                 <div className="prose prose-lg max-w-none mb-12">
-                    {news.content.slice(1).map((paragraph) => (
-                        <div key={paragraph} className="mb-6">
-                            <p className="text-gray-700 leading-relaxed text-lg">{paragraph}</p>
+                    {bodyParagraphs.length > 0 ? (
+                        bodyParagraphs.map((paragraph, index) => (
+                            <div key={`${paragraph}-${index}`} className="mb-6">
+                                <p className="text-gray-700 leading-relaxed text-lg">{paragraph}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="mb-6">
+                            <p className="text-gray-700 leading-relaxed text-lg">{news.conteudo}</p>
                         </div>
-                    ))}
+                    )}
                 </div>
 
                 <div className="border-t-2 border-yellow-400 my-12" />
@@ -193,7 +305,7 @@ export default function BlogMoreInfo() {
                             <button
                                 key={article.id}
                                 onClick={() => {
-                                    router.push(`/blog/${article.id}`);
+                                    router.push(`/blog/${article.slug}`);
                                     window.scrollTo(0, 0);
                                 }}
                                 className="group cursor-pointer bg-white rounded-xl overflow-hidden border hover:shadow-xl transition-all duration-300"
@@ -216,7 +328,8 @@ export default function BlogMoreInfo() {
                                         {article.title}
                                     </h3>
                                     <div className="flex items-center gap-2 text-xs text-gray-500">
-                                        <Clock className="w-3 h-3" />5 min
+                                        <Clock className="w-3 h-3" />
+                                        {article.readingTime} min
                                     </div>
                                 </div>
                             </button>
