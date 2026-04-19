@@ -1,6 +1,6 @@
+import { prisma } from "@/src/infra/data/prisma";
 import { patchBlogSchema, postIdBlogSchema } from "@/src/infra/modules/blog/blog.schema";
 import { storage } from "@/src/lib/storage";
-import { prisma } from "@/src/ui/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 

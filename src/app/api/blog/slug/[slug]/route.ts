@@ -1,4 +1,4 @@
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
