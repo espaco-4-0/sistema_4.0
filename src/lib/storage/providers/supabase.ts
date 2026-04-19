@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 
 import { StorageProvider, UploadResult } from "../types";
 
-console.log(process.env.SUPABASE_URL, "ASDASD", process.env.SUPABASE_SERVICE_ROLE_KEY);
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error("Supabase URL and Service Role Key must be set in environment variables.");
 }
@@ -46,7 +45,7 @@ export const supabaseStorage: StorageProvider = {
     async uploadPublic(file, fileName, mimeType) {
         const result = await upload(file, fileName, PUBLIC_BUCKET, mimeType);
         const { data } = client.storage.from(PUBLIC_BUCKET).getPublicUrl(result.path);
-        return { ...result, url: data.publicUrl };
+        return { path: result.path, url: data.publicUrl };
     },
     async uploadPrivate(file, fileName, mimeType) {
         return await upload(file, fileName, PRIVATE_BUCKET, mimeType);
@@ -60,5 +59,37 @@ export const supabaseStorage: StorageProvider = {
         const bucket = isPrivate ? PRIVATE_BUCKET : PUBLIC_BUCKET;
         const { error } = await client.storage.from(bucket).remove([path]);
         if (error) throw new Error(error.message);
+    },
+    async changeVisibility(rawPath: string, isPrivate: boolean) {
+        const fromBucket = isPrivate ? PRIVATE_BUCKET : PUBLIC_BUCKET;
+        const toBucket = isPrivate ? PUBLIC_BUCKET : PRIVATE_BUCKET;
+
+        let path = rawPath;
+        if (rawPath.startsWith("http")) {
+            const marker = `${fromBucket}/`;
+            const idx = rawPath.indexOf(marker);
+            if (idx === -1) throw new Error(`URL não pertence ao bucket esperado (${fromBucket}): ${rawPath}`);
+            path = rawPath.slice(idx + marker.length);
+        }
+
+        const { data: fileData, error: downloadError } = await client.storage.from(fromBucket).download(path);
+
+        if (!fileData || downloadError) {
+            throw new Error(`Falha ao baixar imagem (bucket: ${fromBucket}, path: ${path}): ${downloadError?.message}`);
+        }
+
+        const { error: uploadError } = await client.storage
+            .from(toBucket)
+            .upload(path, fileData, { upsert: true, contentType: fileData.type });
+
+        if (uploadError) {
+            throw new Error(`Falha ao subir imagem: ${uploadError.message}`);
+        }
+
+        await client.storage.from(fromBucket).remove([path]);
+
+        const url = isPrivate ? client.storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
+
+        return { path, ...(url && { url }) };
     },
 };

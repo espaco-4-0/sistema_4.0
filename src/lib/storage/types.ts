@@ -8,4 +8,5 @@ export interface StorageProvider {
     uploadPrivate(file: File | Buffer, fileName: string, mimeType: string): Promise<UploadResult>;
     getPrivateUrl(path: string, expiresInSeconds?: number): Promise<string>;
     delete(path: string, isPrivate?: boolean): Promise<void>;
+    changeVisibility(path: string, isPrivate: boolean): Promise<UploadResult>;
 }

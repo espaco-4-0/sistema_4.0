@@ -218,6 +218,11 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
         },
     ];
 
+    await prisma.comentario.deleteMany();
+    await prisma.curtida.deleteMany();
+    await prisma.post.deleteMany();
+    await prisma.postCategoria.deleteMany();
+
     const defaultAuthor = await prisma.user.findUnique({
         where: { email: "professor@ifal.edu.br" },
         select: { id: true },
@@ -243,6 +248,16 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
 
         const categoriasIds = await Promise.all(categoriasNomes.map((nome) => getCategoryIdByName(prisma, nome)));
 
+        const publicImageUrl =
+            "https://rllnjjtrzwizgrndgfep.supabase.co/storage/v1/object/public/public-uploads/199e0e45-fd12-4f63-99bf-8ead18896051-postsoutraasdao";
+
+        const privateImageOne = "posts/64b59d25-5dc8-4209-9de9-6b9955f9d0d1-outraasdaasdo/private-1.jpg";
+        const privateImageTwo = "posts/0cbd4124-81ba-438e-b35a-e9f6fc4b14d4-outraasdaasdo/private-2.jpg";
+
+        const isPrivateImage = (url: string): boolean => url.startsWith("posts/") || url.includes("/posts/");
+
+        const shouldPublish = !isPrivateImage(publicImageUrl);
+
         const savedPost = await prisma.post.upsert({
             where: { slug },
             update: {
@@ -250,7 +265,7 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 resumo: post.about,
                 conteudo: conteudoCompleto,
                 tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
-                publicado: true,
+                publicado: shouldPublish,
                 autorId: fallbackAuthor.id,
                 categorias: {
                     set: [],
@@ -263,7 +278,7 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 resumo: post.about,
                 conteudo: conteudoCompleto,
                 tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
-                publicado: true,
+                publicado: shouldPublish,
                 autorId: fallbackAuthor.id,
                 categorias: {
                     connect: categoriasIds.map((id) => ({ id })),
@@ -272,27 +287,18 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
             select: { id: true },
         });
 
-        const existingPhoto = await prisma.postFoto.findFirst({
-            where: { postId: savedPost.id, url: post.image },
-            select: { id: true },
+        await prisma.postFoto.deleteMany({
+            where: { postId: savedPost.id },
         });
 
-        const photo =
-            existingPhoto ??
-            (await prisma.postFoto.create({
-                data: {
-                    url: post.image,
-                    legenda: post.about ?? undefined,
-                    postId: savedPost.id,
-                },
-                select: { id: true },
-            }));
-
-        await prisma.post.update({
-            where: { id: savedPost.id },
+        const coverPhoto = await prisma.postFoto.create({
             data: {
-                capaImagemId: photo.id,
+                url: publicImageUrl,
+                legenda: post.about ?? undefined,
+                ordem: 0,
+                postId: savedPost.id,
             },
+            select: { id: true },
         });
     }
 
