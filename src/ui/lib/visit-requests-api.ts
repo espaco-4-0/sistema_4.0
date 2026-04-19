@@ -102,9 +102,6 @@ export async function submitVisitRequest(formData: FormData): Promise<any> {
     return res.json();
 }
 
-// ─── GET ──────────────────────────────────────────────────────────────────────
-
-/** Busca eventos públicos de visitas para exibir no calendário */
 export async function getPublicVisitEvents(): Promise<VisitPublicEvent[]> {
     try {
         const res = await fetch("/api/visits");

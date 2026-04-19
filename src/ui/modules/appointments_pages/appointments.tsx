@@ -3,12 +3,17 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { calendarEventsMock, type CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { getPublicVisitEvents, publicVisitToCalendarEvent, submitVisitRequest } from "@/src/ui/lib/visit-requests-api";
-import { EventDetail } from "@/src/ui/modules/calendar_pages/components/event-detail";
-import { EventList } from "@/src/ui/modules/calendar_pages/components/event-list";
-import { PanelWrapper } from "@/src/ui/modules/calendar_pages/components/panel-wrapper";
-import { UnifiedVisitCalendar } from "@/src/ui/modules/calendar_pages/components/shared/unified-visit-calendar";
-import { ErrorState, IdleState, LoadingState, SuccessState } from "@/src/ui/modules/calendar_pages/components/states";
-import { BookingForm, CalendarFormInput } from "@/src/ui/modules/calendar_pages/forms/booking-form";
+import { EventDetail } from "@/src/ui/modules/appointments_pages/components/event-detail";
+import { EventList } from "@/src/ui/modules/appointments_pages/components/event-list";
+import { PanelWrapper } from "@/src/ui/modules/appointments_pages/components/panel-wrapper";
+import { UnifiedVisitCalendar } from "@/src/ui/modules/appointments_pages/components/shared/unified-visit-calendar";
+import {
+    ErrorState,
+    IdleState,
+    LoadingState,
+    SuccessState,
+} from "@/src/ui/modules/appointments_pages/components/states";
+import { BookingForm, CalendarFormInput } from "@/src/ui/modules/appointments_pages/forms/booking-form";
 import { format, isSameDay, setHours, setMinutes } from "date-fns";
 import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
@@ -32,7 +37,7 @@ const monthMap: { [key: string]: number } = {
     dez: 11,
 };
 
-const MAX_STUDENTS = 30;
+const MAX_STUDENTS_PER_THURM = 30;
 const MIN_EVENT_GAP_MINUTES = 30;
 
 export default function AllCalendar() {
@@ -96,8 +101,8 @@ export default function AllCalendar() {
             setStep("error");
             return;
         }
-        if (quantidade > MAX_STUDENTS) {
-            setErrorMessage(`Máximo de ${MAX_STUDENTS} alunos.`);
+        if (quantidade > MAX_STUDENTS_PER_THURM) {
+            setErrorMessage(`Máximo de ${MAX_STUDENTS_PER_THURM} alunos.`);
             setStep("error");
             return;
         }
@@ -151,7 +156,6 @@ export default function AllCalendar() {
 
             const result = await submitVisitRequest(formData);
 
-            // Adiciona o novo evento ao calendário local
             const newEvent = publicVisitToCalendarEvent({
                 id: result.id,
                 instituicao: result.instituicao,
@@ -181,7 +185,8 @@ export default function AllCalendar() {
                         <Home className="h-3 w-3" />
                         Home
                     </Link>
-                    <ChevronRight size={12} className="text-gray-400" /> <span>Calendário Espaço 4.0</span>
+                    <ChevronRight size={12} className="text-gray-400" />{" "}
+                    <span>Calendário de Visitas do Espaço 4.0</span>
                 </div>
 
                 <header className="mb-3 lg:mb-4 2xl:mb-6 px-1 lg:px-0">
@@ -229,7 +234,7 @@ export default function AllCalendar() {
                                     methods={formMethods}
                                     onSubmit={handleFormSubmit}
                                     onCancel={() => setStep("idle")}
-                                    maxStudents={MAX_STUDENTS}
+                                    maxStudents={MAX_STUDENTS_PER_THURM}
                                 />
                             )}
                             {step === "detail" && activeEvent && (
@@ -264,7 +269,7 @@ export default function AllCalendar() {
                         <div className="flex items-center gap-2">
                             <div className="bg-yellow-primary size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                             <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
-                                Evento agendado
+                                Evento pendente (aguarde atualizações)
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -276,7 +281,7 @@ export default function AllCalendar() {
                         <div className="flex items-center gap-2">
                             <div className="bg-green-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
                             <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
-                                Evento aprovado
+                                Evento aprovado (agendado no calendário)
                             </span>
                         </div>
                         <div className="flex items-center gap-2">

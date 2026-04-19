@@ -118,7 +118,7 @@ export default function NavBar() {
                                     <Play className="h-5 w-5" /> Ver em 3D
                                 </Link>
                                 <Link
-                                    href="/calendar"
+                                    href="/visita"
                                     className="flex h-9 items-center gap-2 rounded-sm bg-yellow-400 px-3 text-[13px] font-semibold text-black hover:bg-yellow-500 transition-colors duration-300 ease-in-out whitespace-nowrap"
                                 >
                                     <Calendar className="h-5 w-5" /> Agendar Visita
@@ -174,7 +174,7 @@ export default function NavBar() {
                                                 <Play className="h-5 w-5" /> Ver em 3D
                                             </Link>
                                             <Link
-                                                href=""
+                                                href="/visita"
                                                 className="flex h-10 items-center justify-center gap-2 rounded-sm bg-yellow-400 text-sm font-semibold text-black"
                                             >
                                                 <Calendar className="h-5 w-5" /> Agendar Visita
