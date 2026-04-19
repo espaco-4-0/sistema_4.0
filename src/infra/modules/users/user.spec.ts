@@ -1,4 +1,4 @@
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import bcrypt from "bcryptjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,7 +8,7 @@ vi.mock("@/lib/cache", () => ({
     invalidateCacheNamespace: vi.fn(),
     rememberCache: vi.fn((key, deps, callback) => callback()),
 }));
-vi.mock("@/src/ui/lib/prisma", () => ({
+vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
         user: {
             findMany: vi.fn(),

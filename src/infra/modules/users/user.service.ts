@@ -1,8 +1,8 @@
 import { invalidateCacheNamespace, rememberCache } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
 
+import { prisma } from "../../data/prisma";
 import { CreateUserPayload, VALID_ROLES, ValidRole } from "./user.schema";
 
 const SALT_ROUNDS = 12;

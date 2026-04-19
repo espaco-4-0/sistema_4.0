@@ -10,7 +10,7 @@ vi.mock("@/lib/cache", () => ({
     rememberCache: vi.fn((key, deps, callback) => callback()),
 }));
 
-vi.mock("@/src/ui/lib/prisma", () => ({
+vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
         user: {
             findUnique: mockFindUnique,

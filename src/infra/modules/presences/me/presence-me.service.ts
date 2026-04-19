@@ -1,5 +1,5 @@
 import { rememberCache } from "@/lib/cache";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 
 type EventSituation = "pending" | "confirmed" | "absent";
 

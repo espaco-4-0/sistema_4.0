@@ -1,11 +1,11 @@
 import { invalidateCacheNamespace, rememberCache } from "@/lib/cache";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { UpdateProfilePayload } from "./profile-me.schema";
 import { emailExistsForAnotherProfile, getProfileById, updateProfileById } from "./profile-me.service";
 
-vi.mock("@/src/ui/lib/prisma", () => ({
+vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),

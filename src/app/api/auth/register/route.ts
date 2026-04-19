@@ -1,8 +1,8 @@
 import { invalidateCacheNamespace } from "@/lib/cache";
+import { prisma } from "@/src/infra/data/prisma";
 import { userRegistrationSchema } from "@/src/ui/forms/schemas/user-registration-schema";
 import { getErrorMessage, getRequestInfo } from "@/src/ui/lib/errors";
 import { logger } from "@/src/ui/lib/logger";
-import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
