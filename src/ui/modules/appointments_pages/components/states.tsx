@@ -52,8 +52,8 @@ export const WeekendState = ({ target }: { target: Date }) => {
 
     return (
         <div className="flex flex-col items-center justify-center gap-2">
-            <CalendarIcon className="w-10 h-10 text-gray-300" />
-            <p className="text-gray-400 text-sm text-center">
+            <CalendarIcon className="w-10 h-10 text-gray-600" />
+            <p className="text-gray-600 text-sm text-center">
                 Finais de semana não estão disponíveis para agendamento.
             </p>
         </div>
@@ -68,7 +68,7 @@ export const PastState = ({ date }: { date: Date }) => {
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <CalendarDaysIcon className=" text-gray-600" size={40} />
-            <p className="text-gray-400 text-sm text-center leading-relaxed">
+            <p className="text-gray-600 text-sm text-center leading-relaxed">
                 Dias que já se passaram não estao disponíveis para solicitações de agendamento
             </p>
         </div>

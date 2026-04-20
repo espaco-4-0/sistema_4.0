@@ -6,10 +6,10 @@ import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { VisitRequest } from "@/src/infra/modules/professor/agenda-visitas-mock";
 import { buildUnifiedCalendarEvents } from "@/src/ui/lib/unified-calendar-events";
 import { getAdminVisits } from "@/src/ui/lib/visit-requests-api";
-import { UnifiedVisitCalendar } from "@/src/ui/modules/calendar_pages/components/shared/unified-visit-calendar";
 import { format, isSameDay } from "date-fns";
 import { ClipboardList, Clock3 } from "lucide-react";
 
+import { UnifiedVisitCalendar } from "../appointments_pages/components/shared/unified-visit-calendar";
 import { MetricsCards } from "./agenda/metrics-cards";
 import { RequestCard } from "./agenda/request-card";
 

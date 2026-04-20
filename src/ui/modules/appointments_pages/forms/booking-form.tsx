@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsPanel, TabsPanels, TabsTab } from "@/src/components/animate-ui/components/base/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ArrowLeft, FileText, Phone, School, User, Users } from "lucide-react";
-import { Control, Controller, UseFormRegisterReturn, UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
+
+import RoteiroPicker from "./RoteiroPicker";
+import { formatPhoneNumber } from "./booking-utils";
 
 export interface CalendarFormInput {
     instituicao: string;
@@ -14,26 +16,11 @@ export interface CalendarFormInput {
     quantidade: string;
     hora: string;
     horaSaida: string;
+    paradas: string[];
     anexos: FileList | null;
     confirmacaoDocumentos: boolean;
     mensagem: string;
 }
-
-const timeOptions = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
-
-const formatPhoneNumber = (value: string) => {
-    if (!value) return "";
-    const cleaned = value.replaceAll(/\D/g, "");
-    const regex = /^(\d{0,2})(\d{0,5})(\d{0,4})$/;
-    const match = regex.exec(cleaned);
-    if (!match) return value;
-
-    const [_, ddd, prefixo, sufixo] = match;
-
-    if (!prefixo) return ddd;
-    const base = `${ddd} ${prefixo}`;
-    return sufixo ? ` ${base}-${sufixo}` : base;
-};
 
 export const BookingForm = ({
     methods,
@@ -50,14 +37,7 @@ export const BookingForm = ({
 }) => {
     const [activeTab, setActiveTab] = useState<"pedido" | "documentacao">("pedido");
 
-    const instituicao = methods.watch("instituicao");
-    const professor = methods.watch("professor");
-    const email = methods.watch("email");
-    const whatsapp = methods.watch("whatsapp");
-    const quantidade = methods.watch("quantidade");
-    const hora = methods.watch("hora");
-    const horaSaida = methods.watch("horaSaida");
-    const anexos = methods.watch("anexos");
+    const anexos = methods.watch("anexos") as FileList | null;
 
     const requiredPedidoFields: Array<keyof CalendarFormInput> = [
         "instituicao",
@@ -66,7 +46,7 @@ export const BookingForm = ({
         "whatsapp",
         "quantidade",
         "hora",
-        "horaSaida",
+        "paradas",
     ];
 
     async function handleNextStep() {
@@ -81,6 +61,7 @@ export const BookingForm = ({
                 <button
                     onClick={onCancel}
                     className="text-gray-400 hover:text-black hover:cursor-pointer hover:transition-all"
+                    type="button"
                 >
                     <ArrowLeft size={16} />
                 </button>
@@ -121,6 +102,7 @@ export const BookingForm = ({
                                 register={methods.register("professor", { required: true })}
                                 placeholder="Professor Responsável"
                             />
+
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="relative">
                                     <div className="absolute left-2.5 top-2.5 text-gray-400">
@@ -133,9 +115,7 @@ export const BookingForm = ({
                                         render={({ field: { onChange, value } }) => (
                                             <input
                                                 value={value}
-                                                onChange={(e) => {
-                                                    onChange(formatPhoneNumber(e.target.value));
-                                                }}
+                                                onChange={(e) => onChange(formatPhoneNumber(e.target.value))}
                                                 className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary"
                                                 placeholder="Whatsapp"
                                                 maxLength={15}
@@ -143,6 +123,7 @@ export const BookingForm = ({
                                         )}
                                     />
                                 </div>
+
                                 <InputWithIcon
                                     icon={<Users size={14} />}
                                     register={methods.register("quantidade", { required: true })}
@@ -152,22 +133,23 @@ export const BookingForm = ({
                                     max={maxStudents}
                                 />
                             </div>
+
                             <input
                                 {...methods.register("email", { required: true })}
                                 type="email"
                                 className="w-full border border-gray-200 rounded-md py-2 px-3 text-xs outline-none focus:border-yellow-primary"
                                 placeholder="Email"
                             />
-                            <div className="grid grid-cols-2 gap-2">
-                                <TimeSelect label="Início" name="hora" control={methods.control} />
-                                <TimeSelect label="Fim" name="horaSaida" control={methods.control} />
-                            </div>
+
+                            <RoteiroPicker control={methods.control} />
+
                             <textarea
                                 {...methods.register("mensagem")}
                                 className="w-full border border-gray-200 rounded-md p-2 text-xs outline-none focus:border-yellow-primary resize-none"
                                 placeholder="Objetivo (opcional)"
                                 rows={2}
                             />
+
                             <button
                                 type="button"
                                 onClick={handleNextStep}
@@ -219,6 +201,7 @@ export const BookingForm = ({
                                     </ul>
                                 </div>
                             ) : null}
+
                             <button
                                 type="submit"
                                 className="w-full hover:cursor-pointer bg-black text-yellow-primary hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
@@ -235,7 +218,7 @@ export const BookingForm = ({
 
 interface InputWithIconProps {
     icon: React.ReactNode;
-    register: UseFormRegisterReturn;
+    register: ReturnType<UseFormReturn<CalendarFormInput>["register"]>;
     type?: string;
     placeholder: string;
     min?: number;
@@ -246,42 +229,12 @@ const InputWithIcon = ({ icon, register, type = "text", placeholder, min, max }:
     <div className="relative">
         <div className="absolute left-2.5 top-2.5 text-gray-400">{icon}</div>
         <input
-            {...register}
+            {...(register as any)}
             type={type}
             min={min}
             max={max}
             className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary"
             placeholder={placeholder}
-        />
-    </div>
-);
-
-interface TimeSelectProps {
-    label: string;
-    name: "hora" | "horaSaida";
-    control: Control<CalendarFormInput>;
-}
-
-const TimeSelect = ({ label, name, control }: TimeSelectProps) => (
-    <div className="space-y-1">
-        <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">{label}</span>
-        <Controller
-            name={name}
-            control={control}
-            render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full h-9 border-gray-200 text-xs bg-white">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white max-h-40">
-                        {timeOptions.map((t) => (
-                            <SelectItem key={t} value={t} className="text-xs">
-                                {t}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            )}
         />
     </div>
 );
