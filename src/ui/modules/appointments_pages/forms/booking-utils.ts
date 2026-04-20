@@ -13,7 +13,19 @@ export const STOPS: Stop[] = [
     { id: "auditorio", label: "Auditório", dur: 20 },
 ];
 
-export const START_HOURS = ["07:00", "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
+export const START_HOURS = [
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+];
 
 export function toMinutes(hhmm: string): number {
     const [hStr = "0", mStr = "0"] = hhmm.split(":");

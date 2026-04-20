@@ -13,6 +13,11 @@ export interface CalendarEvent {
     whatsapp?: string;
     quantidade?: string | number;
     professor?: string;
+
+    isHoliday?: boolean;
+    holidayName?: string | null;
+
+    slotId?: string;
 }
 
 export const calendarEventsMock: CalendarEvent[] = [];

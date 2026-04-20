@@ -1,13 +1,10 @@
 import { prisma } from "@/src/infra/data/prisma";
 import { sendNewRequestNotificationToAdmin, sendRequestConfirmationToApplicant } from "@/src/lib/email";
 import { uploadVisitDocument } from "@/src/lib/supabase-server";
+import { enforceSlotSelection } from "@/src/lib/visits/slots";
 import { NextResponse } from "next/server";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-function formatDate(date: Date | string): string {
-    return new Date(date).toLocaleDateString("pt-BR", { timeZone: "America/Maceio" });
-}
 
 export async function postHandlers(req: Request) {
     try {
@@ -22,9 +19,17 @@ export async function postHandlers(req: Request) {
         const horaInicio = formData.get("horaInicio") as string | null;
         const horaFim = formData.get("horaFim") as string | null;
         const mensagem = formData.get("mensagem") as string | null;
+        const slotId = formData.get("slotId") as string | null;
 
         if (!instituicao || !responsavel || !email || !whatsapp || !dataVisitaRaw || !horaInicio || !horaFim) {
             return NextResponse.json({ message: "Campos obrigatórios faltando" }, { status: 400 });
+        }
+
+        if (!slotId) {
+            return NextResponse.json(
+                { message: "É necessário informar o slot (slotId) para agendamento." },
+                { status: 400 }
+            );
         }
 
         const quantidade = parseInt(quantidadeRaw ?? "", 10);
@@ -41,11 +46,38 @@ export async function postHandlers(req: Request) {
             }
         }
 
+        const visitDate = new Date(dataVisitaRaw);
+        if (isNaN(visitDate.getTime())) {
+            return NextResponse.json({ message: "Data inválida" }, { status: 400 });
+        }
+        visitDate.setHours(0, 0, 0, 0);
+
+        const existingEventsFetcher = async (date: Date) => {
+            const rows = await prisma.visit.findMany({
+                where: { dataVisita: date },
+                select: { horaInicio: true, horaFim: true },
+            });
+            return rows.map((r) => ({ horaInicio: r.horaInicio, horaFim: r.horaFim }));
+        };
+
+        const enforcement = await enforceSlotSelection(
+            { date: visitDate, slotId, eventType: undefined },
+            existingEventsFetcher
+        );
+
+        if (!enforcement.ok) {
+            const status = enforcement.status ?? 400;
+            return NextResponse.json(
+                { message: enforcement.message, holidayName: enforcement.holidayName },
+                { status }
+            );
+        }
+
         const initialLog = [
             {
                 id: `log-${Date.now()}-1`,
                 stage: "aguardando_email",
-                description: "Solicitação enviada no portal e aguardando confirmação de recebimento do e-mail.",
+                description: `Solicitação enviada no portal. Slot selecionado: ${enforcement.slot.id}`,
                 createdAt: new Date().toISOString(),
             },
         ];
@@ -101,6 +133,9 @@ export async function postHandlers(req: Request) {
                 },
             },
         });
+
+        const formatDate = (date: Date | string) =>
+            new Date(date).toLocaleDateString("pt-BR", { timeZone: "America/Maceio" });
 
         const emailData = {
             visitId: visit.id,
