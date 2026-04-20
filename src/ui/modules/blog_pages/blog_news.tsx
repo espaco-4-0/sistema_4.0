@@ -30,7 +30,7 @@ function normalizePostToCard(post: BlogPost): BlogCard {
         title: post.titulo?.trim() || "Notícia sem título",
         image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
         excerpt: post.resumo?.trim() || post.conteudo?.slice(0, 140) || "Leia a notícia completa para mais detalhes.",
-        author: "Espaço 4.0",
+        author: post.autor.nomeCompleto || "Espaço 4.0",
         readingTime: post.tempoDeLeitura || 5,
     };
 }

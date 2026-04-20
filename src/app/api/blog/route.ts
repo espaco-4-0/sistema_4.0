@@ -69,6 +69,11 @@ export async function GET(req: NextRequest) {
                 categorias: {
                     select: { nome: true },
                 },
+                autor: {
+                    select: {
+                        nomeCompleto: true,
+                    },
+                },
             },
         });
 

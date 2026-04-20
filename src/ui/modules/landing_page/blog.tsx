@@ -40,7 +40,7 @@ const smallSlotClasses = [
     "col-start-2 row-start-4 md:col-start-6 md:row-start-2",
 ];
 
-const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+const FALLBACK_IMAGE = "fallback-image.png";
 
 function normalizeNews(items: BlogPost[]): NewsCard[] {
     return items

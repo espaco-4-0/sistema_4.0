@@ -12,6 +12,7 @@ export type BlogPost = {
     autorId: string;
     fotos: { url: string }[];
     categorias: { nome: string }[];
+    autor: { nomeCompleto: string };
 };
 
 export type BlogListResponse = {
