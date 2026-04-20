@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getTopPosts } from "@/src/infra/modules/blog/blog.service";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { useIsMobile } from "@/src/ui/hooks/use-mobile";
@@ -75,10 +75,26 @@ function buildInitialLayout(news: NewsCard[]): LayoutState {
 
 export default function Blog() {
     const isMobile = useIsMobile();
-
     const [news, setNews] = useState<NewsCard[]>([]);
     const [loading, setLoading] = useState(true);
     const [layoutState, setLayoutState] = useState<LayoutState>({ featuredId: "", smallSlots: [] });
+
+    const gridClass = useMemo(() => {
+        switch (news.length) {
+            case 1:
+                return "grid-cols-1 grid-rows-1";
+            case 2:
+                return "sm:grid-cols-2 sm:grid-rows-1 grid-cols-1 grid-rows-2";
+            case 3:
+                return "grid-cols-2 md:grid-cols-3 md:grid-rows-2";
+            case 4:
+                return "grid-cols-2 grid-rows-2";
+            case 5:
+                return "grid-cols-2 grid-rows-4 md:grid-cols-6 md:grid-rows-2";
+            default:
+                return "grid-cols-2 grid-rows-4 md:grid-cols-6 md:grid-rows-2";
+        }
+    }, [news.length]);
 
     useEffect(() => {
         let isMounted = true;
@@ -110,7 +126,7 @@ export default function Blog() {
         };
     }, []);
 
-    const rotateCards = () =>
+    const rotateCards = useCallback(() => {
         setLayoutState((previous) => {
             if (previous.smallSlots.length === 0 || !previous.featuredId) return previous;
 
@@ -120,27 +136,29 @@ export default function Blog() {
                 const nextSmallSlots = [s3, previous.featuredId, s4, s2, ...rest].filter((id): id is string =>
                     Boolean(id)
                 );
-
-                return {
-                    featuredId: s1 ?? previous.featuredId,
-                    smallSlots: nextSmallSlots,
-                };
+                return { featuredId: s1 ?? previous.featuredId, smallSlots: nextSmallSlots };
             }
 
             const nextSmallSlots = [s2, s4, previous.featuredId, s3, ...rest].filter((id): id is string => Boolean(id));
-
-            return {
-                featuredId: s1 ?? previous.featuredId,
-                smallSlots: nextSmallSlots,
-            };
+            return { featuredId: s1 ?? previous.featuredId, smallSlots: nextSmallSlots };
         });
+    }, [isMobile]);
+
+    const getCardVariant = useCallback(
+        (index: number, id: string): "featured" | "medium" | "small" => {
+            if (news.length <= 2) return "featured";
+            if (news.length === 3) return index === 0 ? "featured" : "medium";
+            if (news.length === 4) return isMobile ? "medium" : "featured";
+            return id === layoutState.featuredId ? "featured" : "small";
+        },
+        [news.length, isMobile, layoutState.featuredId]
+    );
 
     useEffect(() => {
         if (news.length <= 1) return;
-
         const interval = setInterval(rotateCards, 40000);
         return () => clearInterval(interval);
-    }, [isMobile, news.length]);
+    }, [news.length, rotateCards]);
 
     const slotIndexMap = useMemo(
         () => new Map(layoutState.smallSlots.map((id, i) => [id, i])),
@@ -186,9 +204,10 @@ export default function Blog() {
 
                 {news.length > 0 ? (
                     <div>
-                        <ul className="grid grid-cols-2 grid-rows-4 gap-3 lg:gap-2 px-2 lg:px-4 py-2 lg:py-4 md:grid-cols-6 md:grid-rows-2">
+                        <ul className={`grid gap-3 lg:gap-2 px-2 lg:px-4 py-2 lg:py-4 ${gridClass}`}>
                             {news.map((noticia, index) => {
-                                const isFeatured = noticia.id === layoutState.featuredId;
+                                const variant = getCardVariant(index, noticia.id);
+                                const isFeatured = variant === "featured";
                                 const smallIndex = slotIndexMap.get(noticia.id) ?? -1;
                                 const smallSlotClass = smallIndex >= 0 ? smallSlotClasses[smallIndex] : "";
 
@@ -212,9 +231,19 @@ export default function Blog() {
                                         viewport={{ once: true }}
                                         transition={transitionCards}
                                         className={`group relative overflow-hidden cursor-pointer shadow-lg ${
-                                            isFeatured
-                                                ? "col-span-2 row-span-2 col-start-1 row-start-1 md:col-span-4 md:row-span-2 md:col-start-auto md:row-start-auto h-72 sm:h-80 md:h-125 rounded-2xl md:rounded-3xl md:mr-2"
-                                                : `col-span-1 row-span-1 ${smallSlotClass} h-36 sm:h-44 md:h-60 rounded-xl hover:shadow-xl transition-shadow`
+                                            news.length === 1
+                                                ? "col-span-2 row-span-1 h-72 sm:h-80 md:h-125 rounded-2xl md:rounded-3xl"
+                                                : news.length === 2
+                                                  ? "col-span-1 row-span-1 h-72 sm:h-80 md:h-125 rounded-2xl md:rounded-3xl"
+                                                  : news.length === 3
+                                                    ? index === 0
+                                                        ? "col-span-2 row-span-1 h-72 sm:h-80 md:col-span-2 md:row-span-2 md:h-125 rounded-2xl md:rounded-3xl"
+                                                        : "col-span-1 row-span-1 h-44 sm:h-52 md:h-60 rounded-xl"
+                                                    : news.length === 4
+                                                      ? "col-span-1 row-span-1 h-72 sm:h-80 md:h-96 rounded-xl"
+                                                      : isFeatured
+                                                        ? "col-span-2 row-span-2 col-start-1 row-start-1 md:col-span-4 md:row-span-2 md:col-start-auto md:row-start-auto h-72 sm:h-80 md:h-125 rounded-2xl md:rounded-3xl md:mr-2"
+                                                        : `col-span-1 row-span-1 ${smallSlotClass} h-36 sm:h-44 md:h-60 rounded-xl hover:shadow-xl transition-shadow`
                                         }`}
                                     >
                                         <Link href={`/blog/${noticia.slug}`} className="relative block size-full">
@@ -234,35 +263,50 @@ export default function Blog() {
 
                                             <div
                                                 className={`relative size-full z-10 flex flex-col justify-end ${
-                                                    isFeatured
+                                                    variant === "featured"
                                                         ? "gap-4 md:gap-5 p-6 md:p-10 items-start"
-                                                        : "gap-1 p-4 md:p-5"
+                                                        : variant === "medium"
+                                                          ? "gap-2 p-4 md:p-6"
+                                                          : "gap-1 p-4 md:p-5"
                                                 }`}
                                             >
-                                                {isFeatured ? (
-                                                    <span className="bg-yellow-primary py-1.5 px-5 rounded-2xl text-xs font-bold">
+                                                {/* badge de categoria */}
+                                                {variant !== "small" && (
+                                                    <span className="bg-yellow-primary py-1.5 px-2 sm:px-5 rounded-2xl text-xs font-bold w-fit">
                                                         {noticia.category}
                                                     </span>
-                                                ) : null}
+                                                )}
 
                                                 <h3
-                                                    className={`${isFeatured ? "text-lg md:text-3xl" : "text-sm md:text-md"} text-white font-bold line-clamp-3`}
+                                                    className={`${
+                                                        variant === "featured"
+                                                            ? "text-lg md:text-3xl"
+                                                            : variant === "medium"
+                                                              ? "text-sm md:text-xl"
+                                                              : "text-sm md:text-md"
+                                                    } text-white font-bold line-clamp-3`}
                                                 >
                                                     {noticia.title}
                                                 </h3>
 
                                                 <p
-                                                    className={`${isFeatured ? "line-clamp-2 lg:line-clamp-4 text-white/80 text-md" : "text-white/80 text-xs line-clamp-3"}`}
+                                                    className={`text-white/80 ${
+                                                        variant === "featured"
+                                                            ? "line-clamp-2 lg:line-clamp-4 text-md"
+                                                            : variant === "medium"
+                                                              ? "text-xs line-clamp-2"
+                                                              : "text-xs line-clamp-3"
+                                                    }`}
                                                 >
                                                     {noticia.summary}
                                                 </p>
 
-                                                {isFeatured ? (
+                                                {variant === "featured" && (
                                                     <div className="flex font-bold gap-2 text-yellow-primary">
                                                         Ler mais
                                                         <ArrowRight className="group-hover:translate-x-1 transition-transform duration-700" />
                                                     </div>
-                                                ) : null}
+                                                )}
                                             </div>
                                         </Link>
                                     </motion.li>
