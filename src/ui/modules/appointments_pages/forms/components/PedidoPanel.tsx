@@ -20,7 +20,6 @@ export const PedidoPanel: React.FC<PedidoPanelProps> = ({ methods, onNext, onCan
         "email",
         "whatsapp",
         "quantidade",
-        "hora",
         "paradas",
     ];
 

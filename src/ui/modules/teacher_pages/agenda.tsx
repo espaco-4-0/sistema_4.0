@@ -7,23 +7,31 @@ import { VisitRequest } from "@/src/infra/modules/professor/agenda-visitas-mock"
 import { buildUnifiedCalendarEvents } from "@/src/ui/lib/unified-calendar-events";
 import { getAdminVisits } from "@/src/ui/lib/visit-requests-api";
 import { format, isSameDay } from "date-fns";
-import { ClipboardList, Clock3 } from "lucide-react";
+import { ClipboardList, Clock3, MapPin } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import { UnifiedVisitCalendar } from "../appointments_pages/components/shared/unified-visit-calendar";
+import { LocalQuickList } from "./agenda/local-card";
 import { MetricsCards } from "./agenda/metrics-cards";
 import { RequestCard } from "./agenda/request-card";
+import { LocalFormModal } from "./locais";
 
 const ITEMS_PER_PAGE = 3;
 
 export function AgendaVisitasAdmin() {
+    const { data: session } = useSession();
+
     const [requests, setRequests] = useState<VisitRequest[]>([]);
     const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [viewDate, setViewDate] = useState<Date>(new Date());
-    const [sideTab, setSideTab] = useState<"solicitacoes" | "dia">("solicitacoes");
+    const [sideTab, setSideTab] = useState<"solicitacoes" | "dia" | "locais">("solicitacoes");
     const [currentPage, setCurrentPage] = useState(1);
     const [denyReasonById, setDenyReasonById] = useState<Record<number, string>>({});
     const [isLoading, setIsLoading] = useState(true);
+
+    // version para forçar recarregar lista de locais quando necessário
+    const [localsVersion, setLocalsVersion] = useState(0);
 
     async function loadData() {
         setIsLoading(true);
@@ -79,7 +87,9 @@ export function AgendaVisitasAdmin() {
             <MetricsCards metrics={metrics} />
 
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-                <div className="xl:col-span-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 lg:p-5">
+                {/* CALENDAR CARD */}
+                <div className="xl:col-span-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 lg:p-5 pb-8">
+                    {/* adicionado pb-8 para garantir espaço inferior e evitar sobreposição */}
                     <UnifiedVisitCalendar
                         events={calendarEvents}
                         selectedDate={selectedDate}
@@ -90,8 +100,8 @@ export function AgendaVisitasAdmin() {
                     />
                 </div>
 
-                <aside className="xl:col-span-4 sticky top-4">
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 lg:p-5 space-y-4">
+                <aside className="xl:col-span-4 sticky top-20">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 lg:p-5 space-y-4">
                         <div>
                             <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500 font-semibold">
                                 Painel administrativo
@@ -101,33 +111,44 @@ export function AgendaVisitasAdmin() {
 
                         <Tabs
                             value={sideTab}
-                            onValueChange={(value: string) => setSideTab(value as "solicitacoes" | "dia")}
+                            onValueChange={(value: string) => setSideTab(value as "solicitacoes" | "dia" | "locais")}
                         >
-                            <div className="relative">
-                                <TabsList className="grid grid-cols-2 w-full h-10">
+                            <div className="relative mb-3">
+                                <TabsList className="grid grid-cols-3 gap-2 items-center w-full h-10 bg-gray-100 rounded-lg  overflow-hidden">
                                     <TabsTab
                                         value="solicitacoes"
-                                        className="text-xs font-semibold data-selected:text-yellow-900"
+                                        className="text-xs font-semibold flex items-center justify-center h-9 rounded-md data-selected:text-yellow-900 data-selected:bg-white data-selected:shadow-md"
                                     >
-                                        <span className="inline-flex items-center gap-1.5">
+                                        <span className="inline-flex items-center gap-2">
                                             <ClipboardList className="size-3.5" />
                                             Solicitações
                                         </span>
                                     </TabsTab>
+
                                     <TabsTab
                                         value="dia"
-                                        className="text-xs font-semibold data-selected:text-yellow-900"
+                                        className="text-xs font-semibold flex items-center justify-center h-9 rounded-md data-selected:text-yellow-900 data-selected:bg-white data-selected:shadow-md"
                                     >
-                                        <span className="inline-flex items-center gap-1.5">
+                                        <span className="inline-flex items-center gap-2">
                                             <Clock3 className="size-3.5" />
-                                            Dia Selecionado
+                                            Dia
+                                        </span>
+                                    </TabsTab>
+
+                                    <TabsTab
+                                        value="locais"
+                                        className="text-xs font-semibold flex items-center justify-center h-9 rounded-md data-selected:text-yellow-900 data-selected:bg-white data-selected:shadow-md"
+                                    >
+                                        <span className="inline-flex items-center gap-2">
+                                            <MapPin className="size-3.5" />
+                                            Locais
                                         </span>
                                     </TabsTab>
                                 </TabsList>
                             </div>
 
                             <TabsPanels>
-                                <TabsPanel value="solicitacoes" className="space-y-3 pt-2">
+                                <TabsPanel value="solicitacoes">
                                     {isLoading ? (
                                         <div className="text-xs text-gray-500 py-4 text-center">Carregando...</div>
                                     ) : (
@@ -190,15 +211,13 @@ export function AgendaVisitasAdmin() {
                                     )}
                                 </TabsPanel>
 
-                                <TabsPanel value="dia" className="pt-2">
+                                <TabsPanel value="dia" className="pt-4">
                                     <div className="rounded-xl border border-gray-200 p-3">
                                         <p className="text-sm font-semibold text-gray-800 mb-2">
                                             Visitas do dia {format(selectedDate, "dd/MM/yyyy")}
                                         </p>
                                         {dayEvents.length === 0 ? (
-                                            <p className="text-sm text-gray-500">
-                                                Nenhuma visita registrada neste dia.
-                                            </p>
+                                            <p className="text-sm text-gray-500">Nenhuma visita registrada neste dia</p>
                                         ) : (
                                             <ul className="space-y-2">
                                                 {dayEvents.map((event) => (
@@ -212,6 +231,27 @@ export function AgendaVisitasAdmin() {
                                                 ))}
                                             </ul>
                                         )}
+                                    </div>
+                                </TabsPanel>
+
+                                <TabsPanel value="locais" className="">
+                                    <div className="rounded-xl r">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-sm font-semibold text-gray-800">Locais cadastrados</h4>
+                                            {session?.user?.role === "ADMIN" ? (
+                                                <LocalFormModal
+                                                    onSuccess={() => {
+                                                        setLocalsVersion((v) => v + 1);
+                                                    }}
+                                                />
+                                            ) : null}
+                                        </div>
+
+                                        <LocalQuickList
+                                            refreshSignal={localsVersion}
+                                            onUpdated={() => setLocalsVersion((v) => v + 1)}
+                                            showHeader={false}
+                                        />
                                     </div>
                                 </TabsPanel>
                             </TabsPanels>

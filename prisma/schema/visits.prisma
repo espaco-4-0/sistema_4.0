@@ -47,6 +47,19 @@ model Visit {
   reviewedAt         DateTime?
 
   documentos VisitDocumento[]
+  paradas    VisitLocal[]
+}
+
+model VisitLocal {
+  id      Int    @id @default(autoincrement())
+  visitId Int
+  localId String
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  local Local @relation(fields: [localId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([localId])
 }
 
 model VisitDocumento {

@@ -1,7 +1,8 @@
 import { prisma } from "@/src/infra/data/prisma";
 import { sendNewRequestNotificationToAdmin, sendRequestConfirmationToApplicant } from "@/src/lib/email";
 import { uploadVisitDocument } from "@/src/lib/supabase-server";
-import { enforceSlotSelection } from "@/src/lib/visits/slots";
+import { getHolidayNameSafe } from "@/src/lib/visits/holiday-utils";
+import { hhmmToMinutes } from "@/src/lib/visits/slots";
 import { NextResponse } from "next/server";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -19,17 +20,10 @@ export async function postHandlers(req: Request) {
         const horaInicio = formData.get("horaInicio") as string | null;
         const horaFim = formData.get("horaFim") as string | null;
         const mensagem = formData.get("mensagem") as string | null;
-        const slotId = formData.get("slotId") as string | null;
+        const paradasRaw = formData.get("paradas") as string | null;
 
         if (!instituicao || !responsavel || !email || !whatsapp || !dataVisitaRaw || !horaInicio || !horaFim) {
             return NextResponse.json({ message: "Campos obrigatórios faltando" }, { status: 400 });
-        }
-
-        if (!slotId) {
-            return NextResponse.json(
-                { message: "É necessário informar o slot (slotId) para agendamento." },
-                { status: 400 }
-            );
         }
 
         const quantidade = parseInt(quantidadeRaw ?? "", 10);
@@ -46,41 +40,75 @@ export async function postHandlers(req: Request) {
             }
         }
 
-        const visitDate = new Date(dataVisitaRaw);
+        const visitDateStr = dataVisitaRaw.includes("T") ? dataVisitaRaw : `${dataVisitaRaw}T00:00:00`;
+        const visitDate = new Date(visitDateStr);
+
         if (isNaN(visitDate.getTime())) {
             return NextResponse.json({ message: "Data inválida" }, { status: 400 });
         }
-        visitDate.setHours(0, 0, 0, 0);
 
-        const existingEventsFetcher = async (date: Date) => {
-            const rows = await prisma.visit.findMany({
-                where: { dataVisita: date },
-                select: { horaInicio: true, horaFim: true },
-            });
-            return rows.map((r) => ({ horaInicio: r.horaInicio, horaFim: r.horaFim }));
-        };
+        const dayOfWeek = visitDate.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const holidayName = getHolidayNameSafe(visitDate);
 
-        const enforcement = await enforceSlotSelection(
-            { date: visitDate, slotId, eventType: undefined },
-            existingEventsFetcher
-        );
-
-        if (!enforcement.ok) {
-            const status = enforcement.status ?? 400;
+        if (isWeekend || holidayName) {
             return NextResponse.json(
-                { message: enforcement.message, holidayName: enforcement.holidayName },
-                { status }
+                { message: holidayName ? `Feriado: ${holidayName}` : "Finais de semana não permitidos" },
+                { status: 400 }
             );
+        }
+
+        const dateStart = new Date(visitDate);
+        dateStart.setHours(0, 0, 0, 0);
+        const dateNext = new Date(dateStart);
+        dateNext.setDate(dateNext.getDate() + 1);
+
+        // Verificação de conflitos (30 min de intervalo)
+        const existingEvents = await prisma.visit.findMany({
+            where: {
+                AND: [
+                    { dataVisita: { gte: dateStart } },
+                    { dataVisita: { lt: dateNext } },
+                    { status: { not: "negado" } },
+                ],
+            },
+            select: { horaInicio: true, horaFim: true },
+        });
+
+        const startMin = hhmmToMinutes(horaInicio);
+        const endMin = hhmmToMinutes(horaFim);
+        const minGap = 30;
+
+        for (const ev of existingEvents) {
+            const evStart = hhmmToMinutes(ev.horaInicio);
+            const evEnd = hhmmToMinutes(ev.horaFim);
+
+            const startBoundary = evStart - minGap;
+            const endBoundary = evEnd + minGap;
+
+            if (startMin < endBoundary && endMin > startBoundary) {
+                return NextResponse.json(
+                    { message: "Conflito de horário com outra visita (mínimo 30 min de intervalo)." },
+                    { status: 409 }
+                );
+            }
         }
 
         const initialLog = [
             {
                 id: `log-${Date.now()}-1`,
                 stage: "aguardando_email",
-                description: `Solicitação enviada no portal. Slot selecionado: ${enforcement.slot.id}`,
+                description: `Solicitação enviada no portal. Horário: ${horaInicio} - ${horaFim}`,
                 createdAt: new Date().toISOString(),
             },
         ];
+
+        let paradas: string[] = [];
+        try {
+            if (paradasRaw) paradas = JSON.parse(paradasRaw);
+        } catch (e) {
+            console.error("Erro ao fazer parse das paradas:", e);
+        }
 
         const visit = await prisma.visit.create({
             data: {
@@ -89,11 +117,16 @@ export async function postHandlers(req: Request) {
                 email,
                 whatsapp,
                 quantidade,
-                dataVisita: new Date(dataVisitaRaw),
+                dataVisita: visitDate,
                 horaInicio,
                 horaFim,
                 mensagem: mensagem || null,
                 processLog: initialLog,
+                paradas: {
+                    create: paradas.map((localId) => ({
+                        localId,
+                    })),
+                },
             },
         });
 
@@ -116,6 +149,12 @@ export async function postHandlers(req: Request) {
                 });
             } catch (uploadError) {
                 console.error(`Erro ao fazer upload de "${file.name}":`, uploadError);
+                // Rollback: deleta a visita se falhar o anexo para não deixar registros soltos
+                await prisma.visit.delete({ where: { id: visit.id } }).catch(() => null);
+                return NextResponse.json(
+                    { message: `Erro ao enviar o anexo "${file.name}". Solicitação cancelada, tente novamente.` },
+                    { status: 500 }
+                );
             }
         }
 
@@ -134,8 +173,8 @@ export async function postHandlers(req: Request) {
             },
         });
 
-        const formatDate = (date: Date | string) =>
-            new Date(date).toLocaleDateString("pt-BR", { timeZone: "America/Maceio" });
+        // String segura de data para o email: YYYY-MM-DD -> DD/MM/YYYY
+        const safeFormattedDate = dataVisitaRaw.split("-").reverse().join("/");
 
         const emailData = {
             visitId: visit.id,
@@ -143,7 +182,7 @@ export async function postHandlers(req: Request) {
             responsavel,
             email,
             quantidade,
-            data: formatDate(dataVisitaRaw),
+            data: safeFormattedDate,
             horaInicio,
             horaFim,
             mensagem: mensagem || undefined,

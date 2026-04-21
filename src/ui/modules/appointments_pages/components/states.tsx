@@ -46,15 +46,21 @@ export const ErrorState = ({ onBack, message }: { onBack: () => void; message?: 
 );
 
 export const WeekendState = ({ target }: { target: Date }) => {
-    const isWeekend = target.getDay() === 0 || target.getDay() === 6;
+    const isSunday = target.getDay() === 0;
+    const isSaturday = target.getDay() === 6;
 
-    if (!isWeekend) return null;
+    if (!isSunday && !isSaturday) return null;
 
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <CalendarIcon className="w-10 h-10 text-gray-600" />
+            <h3 className="text-gray-800 font-bold text-sm uppercase">
+                {isSaturday ? "Sábado Indisponível" : "Domingo Indisponível"}
+            </h3>
             <p className="text-gray-600 text-sm text-center">
-                Finais de semana não estão disponíveis para agendamento.
+                {isSaturday
+                    ? "Infelizmente, aos sábados o Espaço 4.0 não está aberto para visitas externas."
+                    : "Aos domingos o Espaço 4.0 está fechado para atividades externas."}
             </p>
         </div>
     );

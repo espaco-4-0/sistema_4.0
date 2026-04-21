@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { calendarEventsMock, type CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
+import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { getPublicVisitEvents, publicVisitToCalendarEvent, submitVisitRequest } from "@/src/ui/lib/visit-requests-api";
 import { EventDetail } from "@/src/ui/modules/appointments_pages/components/event-detail";
 import { EventList } from "@/src/ui/modules/appointments_pages/components/event-list";
@@ -16,16 +16,20 @@ import {
     WeekendState,
 } from "@/src/ui/modules/appointments_pages/components/states";
 import { useInitialVisitState } from "@/src/ui/modules/appointments_pages/constants";
-import { BookingForm, CalendarFormInput } from "@/src/ui/modules/appointments_pages/forms/booking-form";
-import { format, isSameDay, setHours, setMinutes } from "date-fns";
+import { BookingForm } from "@/src/ui/modules/appointments_pages/forms/booking-form";
+import { format, isSameDay } from "date-fns";
 import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
+import { getLocais } from "@/src/lib/locais-api";
+import { buildHolidayMap, getHolidayNameSafe } from "@/src/lib/visits/holiday-utils";
+
+import { CalendarFormInput } from "./forms/types";
+
 const MAX_STUDENTS_PER_THURM = 30;
-const MIN_EVENT_GAP_MINUTES = 30;
 
 export default function AllCalendar() {
     const initialState = useInitialVisitState();
@@ -36,6 +40,8 @@ export default function AllCalendar() {
     const [selectedEventId, setSelectedEventId] = useState<number>(0);
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
+
+    const [holidayName, setHolidayName] = useState<string>("");
 
     const formMethods = useForm<CalendarFormInput>({
         defaultValues: {
@@ -49,14 +55,37 @@ export default function AllCalendar() {
             anexos: null,
             confirmacaoDocumentos: false,
             mensagem: "",
+            paradas: [],
         },
     });
 
     useEffect(() => {
         async function loadEvents() {
-            const visitEvents = await getPublicVisitEvents();
-            const converted = visitEvents.filter((v) => v.status !== "negado").map(publicVisitToCalendarEvent);
-            setEvents([...calendarEventsMock, ...converted]);
+            try {
+                const visitEvents = await getPublicVisitEvents();
+                const converted = visitEvents.filter((v) => v.status !== "negado").map(publicVisitToCalendarEvent);
+
+                // Gerar feriados como eventos para o calendário
+                const currentYear = new Date().getFullYear();
+                const holidayMap = buildHolidayMap(currentYear);
+                const holidayEvents: CalendarEvent[] = Array.from(holidayMap.entries()).map(([dateStr, name]) => {
+                    const date = new Date(dateStr + "T00:00:00");
+                    return {
+                        id: Math.random(),
+                        title: name,
+                        start: date,
+                        end: date,
+                        allDay: true,
+                        type: "holiday",
+                        isHoliday: true,
+                        holidayName: name,
+                    } as any;
+                });
+
+                setEvents([...converted, ...holidayEvents]);
+            } catch (err) {
+                console.error("Erro ao carregar eventos:", err);
+            }
         }
         loadEvents();
     }, []);
@@ -65,6 +94,7 @@ export default function AllCalendar() {
         setErrorMessage("");
         setStep("loading");
 
+        // Validações básicas
         const quantidade = Number.parseInt(data.quantidade, 10);
         if (!Number.isFinite(quantidade) || quantidade <= 0) {
             setErrorMessage("Informe a quantidade de alunos.");
@@ -89,42 +119,40 @@ export default function AllCalendar() {
             return;
         }
 
-        const [sh, sm] = data.hora.split(":").map(Number);
-        const [eh, em] = data.horaSaida.split(":").map(Number);
-        const start = setMinutes(setHours(new Date(selectedDate), sh), sm);
-        let end = setMinutes(setHours(new Date(selectedDate), eh), em);
-        if (end <= start) end = setMinutes(setHours(new Date(selectedDate), eh + 1), em);
-
-        const gapMs = MIN_EVENT_GAP_MINUTES * 60 * 1000;
-        const hasConflict = events.some((event) => {
-            if (!isSameDay(event.start, start)) return false;
-            const startBoundary = new Date(event.start.getTime() - gapMs);
-            const endBoundary = new Date(event.end.getTime() + gapMs);
-            return start < endBoundary && end > startBoundary;
-        });
-
-        if (hasConflict) {
-            setErrorMessage(`Intervalo mínimo de ${MIN_EVENT_GAP_MINUTES} minutos entre eventos.`);
-            setStep("error");
-            return;
-        }
-
         try {
+            let totalMinutes = 0;
+            if (data.paradas && data.paradas.length > 0) {
+                const locaisCadastrados = await getLocais(false);
+                totalMinutes = data.paradas.reduce((acc: number, id: string) => {
+                    const loc = locaisCadastrados.find((l) => l.id === id);
+                    return acc + (loc?.duracaoMin ?? 0);
+                }, 0);
+            }
+
             const formData = new FormData();
             formData.append("instituicao", data.instituicao);
             formData.append("responsavel", data.professor);
             formData.append("email", data.email);
             formData.append("whatsapp", data.whatsapp);
-            formData.append("quantidade", data.quantidade);
+            formData.append("quantidade", String(quantidade));
             formData.append("dataVisita", format(selectedDate, "yyyy-MM-dd"));
+
             formData.append("horaInicio", data.hora);
             formData.append("horaFim", data.horaSaida);
+
             if (data.mensagem) formData.append("mensagem", data.mensagem);
+
+            if (data.paradas && data.paradas.length > 0) {
+                formData.append("paradas", JSON.stringify(data.paradas));
+                formData.append("totalMinutes", String(totalMinutes));
+            }
+
             for (const file of anexos) {
                 formData.append("anexos", file);
             }
 
             const result = await submitVisitRequest(formData);
+
             const newEvent = publicVisitToCalendarEvent({
                 id: result.id,
                 instituicao: result.instituicao,
@@ -133,11 +161,12 @@ export default function AllCalendar() {
                 horaFim: result.horaFim,
                 status: result.status,
             });
+
             setEvents((prev) => [...prev, newEvent]);
             setStep("success");
             formMethods.reset();
         } catch (err) {
-            setErrorMessage(err instanceof Error ? err.message : "Erro ao enviar solicitação.");
+            setErrorMessage(err instanceof Error ? err.message : "Erro ao processar solicitação.");
             setStep("error");
         }
     };
@@ -153,16 +182,18 @@ export default function AllCalendar() {
                         <Home className="h-3 w-3" />
                         Home
                     </Link>
-                    <ChevronRight size={12} className="text-gray-400" />{" "}
+                    <ChevronRight size={12} className="text-gray-400" />
                     <span>Calendário de Visitas do Espaço 4.0</span>
                 </div>
+
                 <header className="mb-3 lg:mb-4 2xl:mb-6 px-1 lg:px-0">
                     <h2 className="text-lg lg:text-2xl 2xl:text-3xl font-semibold text-gray-800 tracking-tight">
                         Programação do <span className="text-yellow-500">Espaço 4.0</span>
                     </h2>
                 </header>
+
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 2xl:gap-6 items-start">
-                    <div className="lg:col-span-7 2xl:col-span-8 bg-white rounded-lg lg:rounded-xl 2xl:rounded-lg shadow-lg p-4 lg:p-5 2xl:p-4 hover:shadow-xl transition-shadow duration-300">
+                    <div className="lg:col-span-7 2xl:col-span-8 bg-white rounded-lg shadow-lg p-4 lg:p-5 hover:shadow-xl transition-shadow duration-300">
                         <UnifiedVisitCalendar
                             events={events}
                             selectedDate={selectedDate}
@@ -170,10 +201,13 @@ export default function AllCalendar() {
                             onViewDateChange={setViewDate}
                             onSelectDay={(date) => {
                                 setSelectedDate(date);
-                                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
                                 const todayStart = new Date();
                                 todayStart.setHours(0, 0, 0, 0);
                                 const isPast = date < todayStart;
+
+                                const holiday = getHolidayNameSafe(date);
+                                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
                                 if (isWeekend) {
                                     setStep("weekend");
@@ -183,20 +217,40 @@ export default function AllCalendar() {
                                     setStep("past");
                                     return;
                                 }
-                                setStep(events.some((event) => isSameDay(event.start, date)) ? "list" : "form");
+                                if (holiday) {
+                                    setHolidayName(holiday);
+                                    setStep("holiday");
+                                    return;
+                                }
+
+                                setStep(events.some((e) => isSameDay(e.start, date)) ? "list" : "form");
                             }}
-                            onSelectEvent={() => {
-                                setStep("list");
-                            }}
+                            onSelectEvent={() => setStep("list")}
                         />
                     </div>
-                    <aside className="lg:col-span-4 min-h-130">
-                        <PanelWrapper
-                            align={step === "list" || step === "form" || step === "detail" ? "start" : "center"}
-                        >
+
+                    <aside className="lg:col-span-4 min-h-[500px]">
+                        <PanelWrapper align={["list", "form", "detail"].includes(step) ? "start" : "center"}>
                             {step === "idle" && <IdleState />}
                             {step === "weekend" && <WeekendState target={selectedDate} />}
                             {step === "past" && <PastState date={selectedDate} />}
+
+                            {step === "holiday" && (
+                                <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2">Feriado!</h3>
+                                    <p className="text-gray-500 text-sm">
+                                        A data selecionada é feriado de <strong>{holidayName}</strong>. O Espaço 4.0 não
+                                        recebe visitas em feriados. Por favor, selecione outra data.
+                                    </p>
+                                    <button
+                                        onClick={() => setStep("idle")}
+                                        className="mt-6 text-yellow-600 hover:text-yellow-700 font-medium underline text-sm transition-colors"
+                                    >
+                                        Voltar
+                                    </button>
+                                </div>
+                            )}
+
                             {step === "list" && (
                                 <EventList
                                     date={selectedDate}
@@ -234,43 +288,31 @@ export default function AllCalendar() {
                                     }}
                                 />
                             )}
-                            {step === "error" && (
-                                <ErrorState
-                                    message={errorMessage}
-                                    onBack={() => {
-                                        setErrorMessage("");
-                                        setStep("form");
-                                    }}
-                                />
-                            )}
+                            {step === "error" && <ErrorState message={errorMessage} onBack={() => setStep("form")} />}
                         </PanelWrapper>
                     </aside>
-                    <div className="col-span-1 lg:col-span-12 flex flex-col lg:flex-row flex-wrap items-start lg:items-center gap-4 lg:gap-6 2xl:gap-7 mt-6 lg:mt-7 2xl:mt-8 mb-3 px-2 py-2 rounded-lg">
+
+                    <div className="col-span-1 lg:col-span-12 flex flex-col lg:flex-row flex-wrap items-start lg:items-center gap-4 lg:gap-6 mt-6 px-2">
+                        <LegendItem color="bg-pink-400" text="Feriado" />
+                        <LegendItem color="bg-yellow-primary" text="Evento pendente" />
+                        <LegendItem color="bg-red-500" text="Evento recusado" />
+                        <LegendItem color="bg-green-500" text="Evento aprovado" />
                         <div className="flex items-center gap-2">
-                            <div className="bg-yellow-primary size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
-                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
-                                Evento pendente (aguarde atualizações)
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-red-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
-                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
-                                Evento recusado
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-green-500 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
-                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">
-                                Evento aprovado (agendado no calendário)
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="bg-white border-yellow-primary border-2 size-4 lg:size-4.5 2xl:size-5 rounded-sm shadow-sm" />
-                            <span className="text-xs lg:text-sm 2xl:text-sm text-gray-700 font-medium">Hoje</span>
+                            <div className="bg-white border-yellow-primary border-2 size-4 rounded-sm" />
+                            <span className="text-xs lg:text-sm text-gray-700 font-medium">Hoje</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+    );
+}
+
+function LegendItem({ color, text }: { color: string; text: string }) {
+    return (
+        <div className="flex items-center gap-2">
+            <div className={`${color} size-4 rounded-sm shadow-sm`} />
+            <span className="text-xs lg:text-sm text-gray-700 font-medium">{text}</span>
+        </div>
     );
 }

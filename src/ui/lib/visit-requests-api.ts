@@ -36,6 +36,11 @@ export function apiVisitToRequest(visit: any): VisitRequest {
             fileSizeKb: doc.fileSizeKb,
             uploadedAt: typeof doc.uploadedAt === "string" ? doc.uploadedAt : new Date(doc.uploadedAt).toISOString(),
         })),
+        paradas: (visit.paradas ?? []).map((p: any) => ({
+            id: p.id,
+            localId: p.localId,
+            nome: p.local?.nome ?? "Desconhecido",
+        })),
         mensagem: visit.mensagem ?? undefined,
         status: visit.status ?? "pendente",
         processStage: visit.processStage ?? "aguardando_email",
@@ -77,7 +82,8 @@ export function publicVisitToCalendarEvent(visit: VisitPublicEvent): CalendarEve
     // Detect holiday pseudo-events coming from the API:
     // the backend may set `isHoliday: true`, or use status 'feriado', or include `holidayName`.
     const apiAny = visit as any;
-    const isHoliday = apiAny?.isHoliday === true || apiAny?.holidayName !== undefined || visit.status === "feriado";
+    const isHoliday =
+        apiAny?.isHoliday === true || apiAny?.holidayName !== undefined || (visit.status as any) === "feriado";
     const holidayName =
         apiAny?.holidayName ??
         (isHoliday && typeof visit.instituicao === "string"

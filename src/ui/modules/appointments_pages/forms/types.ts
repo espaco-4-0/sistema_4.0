@@ -5,8 +5,7 @@ export interface RoteiroStop {
     label: string;
     dur: number;
 }
-
-export interface CalendarFormInput {
+export type CalendarFormInput = {
     instituicao: string;
     professor: string;
     email: string;
@@ -14,8 +13,8 @@ export interface CalendarFormInput {
     quantidade: string;
     hora: string;
     horaSaida: string;
-    paradas: ParadaId[];
     anexos: FileList | null;
     confirmacaoDocumentos: boolean;
     mensagem: string;
-}
+    paradas: string[];
+};

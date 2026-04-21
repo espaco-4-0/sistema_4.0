@@ -7,20 +7,7 @@ import { Controller, UseFormReturn } from "react-hook-form";
 
 import RoteiroPicker from "./RoteiroPicker";
 import { formatPhoneNumber } from "./booking-utils";
-
-export interface CalendarFormInput {
-    instituicao: string;
-    professor: string;
-    email: string;
-    whatsapp: string;
-    quantidade: string;
-    hora: string;
-    horaSaida: string;
-    paradas: string[];
-    anexos: FileList | null;
-    confirmacaoDocumentos: boolean;
-    mensagem: string;
-}
+import type { CalendarFormInput } from "./types";
 
 export const BookingForm = ({
     methods,
@@ -45,7 +32,6 @@ export const BookingForm = ({
         "email",
         "whatsapp",
         "quantidade",
-        "hora",
         "paradas",
     ];
 
@@ -60,7 +46,7 @@ export const BookingForm = ({
             <div className="flex items-center gap-2 mb-4">
                 <button
                     onClick={onCancel}
-                    className="text-gray-400 hover:text-black hover:cursor-pointer hover:transition-all"
+                    className="text-gray-400 hover:text-black hover:cursor-pointer transition-all"
                     type="button"
                 >
                     <ArrowLeft size={16} />
@@ -73,16 +59,16 @@ export const BookingForm = ({
 
             <Tabs value={activeTab} onValueChange={(value: string) => setActiveTab(value as "pedido" | "documentacao")}>
                 <div className="relative mb-3">
-                    <TabsList className="grid grid-cols-2 w-full h-10">
+                    <TabsList className="grid grid-cols-2 w-full h-10 bg-gray-100/50 p-1 rounded-lg">
                         <TabsTab
                             value="pedido"
-                            className="rounded-md text-xs font-semibold py-2 text-gray-700 data-selected:text-yellow-900"
+                            className="rounded-md text-xs font-semibold py-2 text-gray-500 data-selected:text-yellow-900 data-selected:bg-white data-selected:shadow-sm"
                         >
                             Envio de Pedido
                         </TabsTab>
                         <TabsTab
                             value="documentacao"
-                            className="rounded-md text-xs font-semibold py-2 text-gray-700 data-selected:text-yellow-900"
+                            className="rounded-md text-xs font-semibold py-2 text-gray-500 data-selected:text-yellow-900 data-selected:bg-white data-selected:shadow-sm"
                         >
                             Documentação
                         </TabsTab>
@@ -116,7 +102,7 @@ export const BookingForm = ({
                                             <input
                                                 value={value}
                                                 onChange={(e) => onChange(formatPhoneNumber(e.target.value))}
-                                                className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary"
+                                                className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary focus:ring-1 focus:ring-yellow-primary/20"
                                                 placeholder="Whatsapp"
                                                 maxLength={15}
                                             />
@@ -133,19 +119,18 @@ export const BookingForm = ({
                                     max={maxStudents}
                                 />
                             </div>
-
                             <input
                                 {...methods.register("email", { required: true })}
                                 type="email"
-                                className="w-full border border-gray-200 rounded-md py-2 px-3 text-xs outline-none focus:border-yellow-primary"
+                                className="w-full border border-gray-200 rounded-md py-2 px-3 text-xs outline-none focus:border-yellow-primary focus:ring-1 focus:ring-yellow-primary/20"
                                 placeholder="Email"
                             />
 
-                            <RoteiroPicker control={methods.control} />
+                            <RoteiroPicker control={methods.control} setValue={methods.setValue} />
 
                             <textarea
                                 {...methods.register("mensagem")}
-                                className="w-full border border-gray-200 rounded-md p-2 text-xs outline-none focus:border-yellow-primary resize-none"
+                                className="w-full border border-gray-200 rounded-md p-2 text-xs outline-none focus:border-yellow-primary focus:ring-1 focus:ring-yellow-primary/20 resize-none"
                                 placeholder="Objetivo (opcional)"
                                 rows={2}
                             />
@@ -153,14 +138,14 @@ export const BookingForm = ({
                             <button
                                 type="button"
                                 onClick={handleNextStep}
-                                className="hover:cursor-pointer w-full bg-yellow-primary text-black hover:bg-yellow-primary-dark font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
+                                className="cursor-pointer w-full bg-yellow-primary text-black hover:bg-yellow-500 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm transition-colors"
                             >
                                 Próxima etapa: Documentação
                             </button>
                         </TabsPanel>
 
                         <TabsPanel value="documentacao" className="space-y-3">
-                            <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
+                            <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600 leading-relaxed">
                                 Anexe os documentos obrigatórios do pedido (ex.: ofício da escola, lista de alunos,
                                 autorização da direção).
                             </div>
@@ -172,41 +157,45 @@ export const BookingForm = ({
                                     multiple
                                     accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
                                     {...methods.register("anexos")}
-                                    className="w-full border border-gray-200 rounded-md py-2 pl-9 pr-2 text-xs outline-none focus:border-yellow-primary file:mr-2 file:rounded file:border-0 file:bg-yellow-100 file:px-2 file:py-1 file:text-xs file:font-semibold"
+                                    className="w-full border border-gray-200 rounded-md py-2 pl-9 pr-2 text-xs outline-none focus:border-yellow-primary file:mr-2 file:rounded file:border-0 file:bg-yellow-100 file:px-2 file:py-1 file:text-xs file:font-semibold file:text-amber-800"
                                 />
                             </div>
 
-                            <label className="flex items-start gap-2 text-xs text-gray-700">
+                            <label className="flex items-start gap-2 text-[11px] text-gray-700 cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    {...methods.register("confirmacaoDocumentos")}
-                                    className="mt-0.5"
+                                    {...methods.register("confirmacaoDocumentos", { required: true })}
+                                    className="mt-0.5 accent-yellow-primary"
                                 />
                                 <span>
                                     Confirmo que a documentação anexada está correta para análise administrativa.
                                 </span>
                             </label>
 
-                            {anexos?.length ? (
-                                <div className="rounded-md border border-gray-200 p-2">
-                                    <p className="text-[11px] font-semibold text-gray-600 mb-1">
-                                        Arquivos selecionados
+                            {anexos && anexos.length > 0 && (
+                                <div className="rounded-md border border-gray-200 p-2 bg-white">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1 px-1">
+                                        Arquivos selecionados ({anexos.length})
                                     </p>
                                     <ul className="space-y-1">
                                         {Array.from(anexos).map((file, idx) => (
-                                            <li key={`${file.name}-${idx}`} className="text-[11px] text-gray-700">
-                                                {file.name}
+                                            <li
+                                                key={`${file.name}-${idx}`}
+                                                className="text-[11px] text-gray-700 flex items-center gap-2 bg-gray-50 p-1.5 rounded border border-gray-100"
+                                            >
+                                                <FileText size={12} className="text-gray-400" />
+                                                <span className="truncate">{file.name}</span>
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
-                            ) : null}
+                            )}
 
                             <button
                                 type="submit"
-                                className="w-full hover:cursor-pointer bg-black text-yellow-primary hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm"
+                                className="w-full cursor-pointer bg-black text-yellow-primary hover:bg-gray-800 font-bold py-2.5 rounded-md text-[11px] uppercase shadow-sm transition-colors disabled:opacity-50"
                             >
-                                Confirmar
+                                Confirmar Pedido
                             </button>
                         </TabsPanel>
                     </TabsPanels>
@@ -233,7 +222,7 @@ const InputWithIcon = ({ icon, register, type = "text", placeholder, min, max }:
             type={type}
             min={min}
             max={max}
-            className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary"
+            className="w-full border border-gray-200 rounded-md py-2 pl-8 pr-2 text-xs outline-none focus:border-yellow-primary focus:ring-1 focus:ring-yellow-primary/20"
             placeholder={placeholder}
         />
     </div>

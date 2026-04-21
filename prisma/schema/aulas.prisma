@@ -9,12 +9,15 @@ model Local {
   nome       String
   descricao  String?
   capacidade Int?
+  duracaoMin Int?
   ativo      Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   aulas Aula[]
+  visitas VisitLocal[]
 }
+
 
 model Curso {
   id           String   @id @default(cuid())

@@ -111,20 +111,11 @@ export function UnifiedVisitCalendar({
             onNavigate={onViewDateChange}
             selectable
             onSelectSlot={(slot) => {
-                const day = slot.start;
-                const isPastDay = day < new Date(new Date().setHours(0, 0, 0, 0));
-                const isWeekendDay = isWeekend(day);
-                const hasHoliday = events.some((ev) => ev.isHoliday && isSameDay(ev.start, day));
-
-                if (hasHoliday || isPastDay || isWeekendDay) return;
-
                 onSelectDay(slot.start);
             }}
             onSelectEvent={(event) => {
                 if ((event as any).isHoliday) {
-                    onSelectDay(event.start);
-                    onSelectEvent?.(event as CalendarEvent);
-                    return;
+                    return; // Não faz nada ao clicar no feriado
                 }
                 onSelectDay(event.start);
                 onSelectEvent?.(event as CalendarEvent);
@@ -168,16 +159,17 @@ export function UnifiedVisitCalendar({
                 };
             }}
             eventPropGetter={(event) => {
-                if ((event as any).isHoliday) {
+                const isHoliday = (event as any).isHoliday || (event as any).type === "holiday";
+                if (isHoliday) {
                     return {
-                        className: "!bg-pink-400 !text-white !text-[10px] font-bold border-none",
+                        className: "!bg-pink-400 !text-white !text-[10px] font-bold border-none rounded-md px-1",
                     };
                 }
                 return {
                     className:
                         event.type === "agendado"
-                            ? "!bg-yellow-primary !text-black !text-[10px] font-bold border-none"
-                            : "!bg-green-500 !text-white !text-[10px] font-bold border-rounded-xl",
+                            ? "!bg-yellow-primary !text-black !text-[10px] font-bold border-none rounded-md px-1"
+                            : "!bg-green-500 !text-white !text-[10px] font-bold border-none rounded-md px-1",
                 };
             }}
             messages={{ next: ">", previous: "<", today: "Hoje" }}

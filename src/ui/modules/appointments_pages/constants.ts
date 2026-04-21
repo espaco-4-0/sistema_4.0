@@ -16,7 +16,17 @@ export const monthMap: Record<string, number> = {
     dez: 11,
 };
 
-export type Step = "idle" | "list" | "form" | "detail" | "loading" | "success" | "error" | "weekend" | "past";
+export type Step =
+    | "idle"
+    | "list"
+    | "form"
+    | "detail"
+    | "loading"
+    | "success"
+    | "error"
+    | "weekend"
+    | "past"
+    | "holiday";
 
 export type InitialVisitState = {
     date: Date;
@@ -57,7 +67,8 @@ export function parseInitialVisitState(
 export function useInitialVisitState(): InitialVisitState {
     const searchParams = useSearchParams();
 
-    const key = typeof (searchParams as any)?.toString === "function" ? searchParams.toString() : String(searchParams);
+    // Simplificando o key para não usar 'any'
+    const key = searchParams ? searchParams.toString() : "";
 
-    return useMemo(() => parseInitialVisitState(searchParams), [key]);
+    return useMemo(() => parseInitialVisitState(searchParams), [key, searchParams]);
 }
