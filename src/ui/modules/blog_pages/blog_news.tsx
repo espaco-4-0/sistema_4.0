@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { getPosts } from "@/src/infra/modules/blog/blog.service";
+import { useMemo, useState } from "react";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { Clock, Filter, Home, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "../../components/ui/button";
+import { usePosts } from "./blog.queries";
 
 type BlogCard = {
     id: string;
@@ -37,35 +37,11 @@ function normalizePostToCard(post: BlogPost): BlogCard {
 
 export default function BlogNews() {
     const [selectedCategory, setSelectedCategory] = useState("Todas");
-    const [posts, setPosts] = useState<BlogCard[]>([]);
-    const [loading, setLoading] = useState(true);
-
     const router = useRouter();
 
-    useEffect(() => {
-        let isMounted = true;
+    const { data, isLoading } = usePosts({ includeArchived: false });
 
-        const loadPosts = async () => {
-            try {
-                const data = await getPosts({ includeArchived: false });
-                if (!isMounted) return;
-
-                const normalized = (Array.isArray(data) ? data : []).map(normalizePostToCard);
-                setPosts(normalized);
-            } catch {
-                if (!isMounted) return;
-                setPosts([]);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        loadPosts();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
+    const posts = useMemo(() => (Array.isArray(data) ? data : []).map(normalizePostToCard), [data]);
 
     const categories = useMemo(() => {
         const dynamic = Array.from(new Set(posts.map((p) => p.category).filter(Boolean)));
@@ -82,9 +58,9 @@ export default function BlogNews() {
             <div className="max-w-7xl mx-auto px-4">
                 <Link
                     href="/"
-                    className="mt-5 mb-5 flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:cursor-pointer "
+                    className="mt-5 mb-5 flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:cursor-pointer"
                 >
-                    <Home className="text-gray-300 w-4 h-4 " />
+                    <Home className="text-gray-300 w-4 h-4" />
                     Voltar para a home page
                 </Link>
 
@@ -120,7 +96,7 @@ export default function BlogNews() {
                     </div>
                 </div>
 
-                {loading ? (
+                {isLoading ? (
                     <p className="text-gray-600 mb-6">Carregando notícias...</p>
                 ) : (
                     <p className="text-gray-600 mb-6">
@@ -128,7 +104,7 @@ export default function BlogNews() {
                     </p>
                 )}
 
-                {!loading && filteredNews.length === 0 ? (
+                {!isLoading && filteredNews.length === 0 ? (
                     <div className="py-16 text-center text-gray-500">Nenhuma notícia encontrada.</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -138,7 +114,7 @@ export default function BlogNews() {
                                 onClick={() => router.push(`/blog/${news.slug}`)}
                                 className="group cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
                             >
-                                <div className="relative h-52 overflow-hidden">
+                                <div className="h-52 overflow-hidden">
                                     <img
                                         src={news.image}
                                         alt={news.title}
@@ -156,13 +132,10 @@ export default function BlogNews() {
                                     <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
                                         {news.category}
                                     </span>
-
                                     <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
                                         {news.title}
                                     </h2>
-
                                     <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.excerpt}</p>
-
                                     <div className="flex items-center gap-3 text-xs text-gray-500">
                                         <span className="font-medium">{news.author}</span>
                                         <div className="flex items-center gap-1">
