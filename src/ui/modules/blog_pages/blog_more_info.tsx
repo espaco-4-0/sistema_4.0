@@ -3,17 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
-import { ArrowLeft, Bookmark, Calendar, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Calendar, Check, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
 
 const FALLBACK_IMAGE = "/fallback-image.png";
 
-function formatDate(dateValue?: string) {
+function formatDate(dateValue?: Date) {
     if (!dateValue) return "Data não informada";
     const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return "Data não informada";
@@ -47,6 +48,7 @@ type RelatedPost = {
     category: string;
     image: string;
     readingTime: number;
+    authorName: string;
 };
 
 function normalizeRelated(posts: BlogPost[]): RelatedPost[] {
@@ -57,6 +59,7 @@ function normalizeRelated(posts: BlogPost[]): RelatedPost[] {
         category: post.categorias?.[0]?.nome?.trim() || "Geral",
         image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
         readingTime: post.tempoDeLeitura || 5,
+        authorName: post.autor.nomeCompleto || "Espaço 4.0",
     }));
 }
 
@@ -70,10 +73,10 @@ export default function BlogMoreInfo() {
     const [news, setNews] = useState<BlogPost | null>(null);
     const [recentNews, setRecentNews] = useState<RelatedPost[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCopied, setIsCopied] = useState(false);
 
     const [likes, setLikes] = useState(0);
     const [hasLiked, setHasLiked] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
 
     const [authorName, setAuthorName] = useState("");
     const [comment, setComment] = useState("");
@@ -151,6 +154,17 @@ export default function BlogMoreInfo() {
         );
     }
 
+    async function copyLink(text: string) {
+        try {
+            await navigator.clipboard.writeText(text);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 3000);
+            toast.success("Link copiado com sucesso para a área de transferência");
+        } catch {
+            toast.error("Erro ao copiar o link, tente novamente");
+        }
+    }
+
     const title = news.titulo?.trim() || "Notícia sem título";
     const image = news.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE;
     const category = news.categorias?.[0]?.nome?.trim() || "Geral";
@@ -180,9 +194,9 @@ export default function BlogMoreInfo() {
                 <div className="flex flex-wrap items-center gap-6 mb-6 text-gray-600">
                     <div className="flex items-center gap-2">
                         <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                            <span className="font-bold text-black">E</span>
+                            <span className="font-bold text-black uppercase">{news.autor.nomeCompleto[0]}</span>
                         </div>
-                        <span className="font-medium text-black">Espaço 4.0</span>
+                        <span className="font-medium text-black">{news.autor.nomeCompleto}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -196,20 +210,21 @@ export default function BlogMoreInfo() {
                     </div>
 
                     <div className="ml-auto flex items-center gap-3">
-                        <Button className="flex bg-white text-black items-center gap-2 px-4 py-2 border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors hover:cursor-pointer">
-                            <Share2 className="w-4 h-4" />
-                            Compartilhar
-                        </Button>
-
                         <Button
-                            onClick={() => setIsSaved(!isSaved)}
-                            className={`p-2 border-2 rounded-lg transition-colors hover:cursor-pointer ${
-                                isSaved
-                                    ? "bg-black text-white hover:bg-black border-black"
-                                    : "border-black bg-white text-black hover:bg-gray-100"
-                            }`}
+                            onClick={() => copyLink(window.location.href)}
+                            className={`flex ${isCopied ? "bg-black text-white" : "bg-white text-black"}  items-center gap-2 px-4 py-2 border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors hover:cursor-pointer`}
                         >
-                            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+                            {isCopied ? (
+                                <>
+                                    <Check className="w-4 h-4" />
+                                    Link copiado
+                                </>
+                            ) : (
+                                <>
+                                    <Share2 className="w-4 h-4" />
+                                    Compartilhar
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>

@@ -18,3 +18,15 @@ export type BlogPost = {
 export type BlogListResponse = {
     data: BlogPost[];
 };
+
+export type BlogCard = {
+    id: string;
+    slug: string;
+    category: string;
+    title: string;
+    image: string;
+    excerpt: string;
+    author: string;
+    readingTime: number;
+    createdAt: Date;
+};

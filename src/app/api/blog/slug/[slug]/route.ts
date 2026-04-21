@@ -25,6 +25,9 @@ export async function GET(_req: Request, { params }: RouteContext) {
                 categorias: {
                     select: { nome: true },
                 },
+                autor: {
+                    select: { nomeCompleto: true },
+                },
             },
         });
 
