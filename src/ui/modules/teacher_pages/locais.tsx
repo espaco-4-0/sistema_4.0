@@ -8,7 +8,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/src/ui/components/ui/dialog";
-import { Edit2, Plus } from "lucide-react";
+import { Clock, Home, Plus, Users } from "lucide-react";
 
 type Props = {
     local?: Local;
@@ -35,7 +35,6 @@ export function LocalFormModal({ local, onSuccess, trigger }: Props) {
             setDuracao(local.duracaoMin ?? "");
             setAtivo(local.ativo ?? true);
         } else if (open && !local) {
-            // Reset para criação
             setNome("");
             setDescricao("");
             setCapacidade("");
@@ -88,45 +87,57 @@ export function LocalFormModal({ local, onSuccess, trigger }: Props) {
                 )}
             </DialogTrigger>
 
-            <DialogContent className="max-w-lg border-none shadow-2xl">
-                <DialogHeader>
-                    <DialogTitle>{isEdit ? "Editar local" : "Cadastrar novo local"}</DialogTitle>
-                    <DialogDescription>
-                        {isEdit ? "Altere os dados do local selecionado." : "Preencha os dados do local e salve."}
-                    </DialogDescription>
+            <DialogContent className="max-w-lg border-none shadow-2xl p-0 overflow-hidden">
+                <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                            <Home className="w-4 h-4 text-black" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-[15px] font-semibold text-gray-900 leading-tight">
+                                {isEdit ? "Editar local" : "Cadastrar novo local"}
+                            </DialogTitle>
+                            <DialogDescription className="text-xs text-gray-400 mt-0.5">
+                                {isEdit
+                                    ? "Altere os dados do local selecionado."
+                                    : "Preencha os dados do local e salve."}
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
 
-                <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                            Nome do local *
+                <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                            Nome do local <span className="text-red-400">*</span>
                         </label>
                         <input
                             value={nome}
                             onChange={(e) => setNome(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
                             placeholder="Ex: Laboratório de Robótica"
                             required
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                             Descrição
                         </label>
                         <textarea
                             value={descricao}
                             onChange={(e) => setDescricao(e.target.value)}
                             rows={2}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all resize-none"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all resize-none"
                             placeholder="Descreva brevemente o uso deste local..."
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                                Duração (minutos)
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Clock className="w-3 h-3" />
+                                Duração
                             </label>
                             <div className="relative">
                                 <input
@@ -134,61 +145,80 @@ export function LocalFormModal({ local, onSuccess, trigger }: Props) {
                                     onChange={(e) => setDuracao(e.target.value === "" ? "" : Number(e.target.value))}
                                     type="number"
                                     min={0}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
-                                    placeholder="Ex: 45"
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                                    placeholder="45"
                                 />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 pointer-events-none">
+                                    min
+                                </span>
                             </div>
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Users className="w-3 h-3" />
                                 Capacidade
                             </label>
-                            <input
-                                value={capacidade}
-                                onChange={(e) => setCapacidade(e.target.value === "" ? "" : Number(e.target.value))}
-                                type="number"
-                                min={0}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
-                                placeholder="Ex: 30"
-                            />
+                            <div className="relative">
+                                <input
+                                    value={capacidade}
+                                    onChange={(e) => setCapacidade(e.target.value === "" ? "" : Number(e.target.value))}
+                                    type="number"
+                                    min={0}
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 pr-14 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                                    placeholder="30"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 pointer-events-none">
+                                    pessoas
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <input
-                            id="ativo-checkbox"
-                            type="checkbox"
-                            checked={ativo}
-                            onChange={(e) => setAtivo(e.target.checked)}
-                            className="size-4 accent-yellow-500 rounded border-gray-300"
-                        />
-                        <label
-                            htmlFor="ativo-checkbox"
-                            className="text-sm font-semibold text-gray-700 cursor-pointer select-none"
-                        >
-                            Local disponível para novas visitas
-                        </label>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setAtivo((v) => !v)}
+                        className="w-full flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                        <div className="text-left">
+                            <p className="text-sm font-semibold text-gray-700">Disponível para novas visitas</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                                {ativo ? "Ativo — aceita agendamentos" : "Inativo — sem novos agendamentos"}
+                            </p>
+                        </div>
 
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
-                        <button
-                            type="button"
-                            onClick={() => setOpen(false)}
-                            className="px-6 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-                            disabled={loading}
+                        <div
+                            className={`relative shrink-0 w-10 h-5.5 rounded-full transition-colors duration-200 ${
+                                ativo ? "bg-amber-400" : "bg-gray-300"
+                            }`}
                         >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-8 py-2.5 rounded-xl bg-yellow-500 text-black font-bold text-sm hover:bg-yellow-600 transition-all shadow-md shadow-yellow-200 disabled:opacity-50"
-                            disabled={loading}
-                        >
-                            {loading ? "Salvando..." : "Salvar Local"}
-                        </button>
-                    </div>
+                            <span
+                                className={`absolute top-0.75 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-200 ${
+                                    ativo ? "left-5.5" : "left-0.75"
+                                }`}
+                            />
+                        </div>
+                    </button>
                 </form>
+
+                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        disabled={loading}
+                        className="px-5 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors hover:cursor-pointer disabled:opacity-50"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="px-6 py-2 rounded-lg bg-amber-400 hover:bg-yellow-500 text-stone-900 font-semibold text-sm transition-colors hover:cursor-pointer disabled:opacity-50"
+                    >
+                        {loading ? "Salvando..." : "Salvar local"}
+                    </button>
+                </div>
             </DialogContent>
         </Dialog>
     );
