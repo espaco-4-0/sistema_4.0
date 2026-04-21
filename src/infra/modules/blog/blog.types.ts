@@ -6,8 +6,8 @@ export type BlogPost = {
     conteudo: string;
     tempoDeLeitura: number;
     publicado: boolean;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Date;
+    updatedAt: Date;
     capaImagemId: string | null;
     autorId: string;
     fotos: { url: string }[];
