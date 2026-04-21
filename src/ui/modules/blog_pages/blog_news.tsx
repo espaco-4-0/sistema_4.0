@@ -115,20 +115,20 @@ export default function BlogNews() {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4 mb-8 pb-4">
+                <div className="flex gap-4 mb-8 pb-4 w-full">
                     <Button
                         variant="ghost"
-                        className={`cursor-pointer p-2 border rounded-lg transition-colors shrink-0 ${viewFilters ? "hover:bg-yellow-secondary bg-yellow-primary text-black border-black" : "hover:bg-gray-50 border-gray-300"}`}
+                        className={`cursor-pointer p-2 border rounded-lg transition-colors ${viewFilters ? "hover:bg-yellow-secondary bg-yellow-primary text-black border-black" : "hover:bg-gray-50 border-gray-300"}`}
                         onClick={() => setViewFilters(!viewFilters)}
                     >
                         <Filter className="w-5 h-5" />
                     </Button>
                     {viewFilters && (
-                        <div className="flex w-full justify-between">
+                        <div className="flex w-full">
                             <ToggleGroup
                                 variant="default"
                                 type="multiple"
-                                className="gap-4"
+                                className="gap-4 min-h-10 h-auto! w-7/10 flex-wrap"
                                 value={selectedCategory}
                                 onValueChange={(value: string[]) => {
                                     const getAllOrFilters = value.includes("Todas")
@@ -150,7 +150,7 @@ export default function BlogNews() {
                                     </ToggleGroupItem>
                                 ))}
                             </ToggleGroup>
-                            <InputGroup className="max-w-xs h-10">
+                            <InputGroup className="max-w-xs h-10 w-3/10 ml-auto">
                                 <InputGroupInput
                                     value={wordFilter}
                                     onChange={(e) => setWordFilter(e.target.value)}
@@ -176,7 +176,7 @@ export default function BlogNews() {
                 {!loading && filteredNews.length === 0 ? (
                     <div className="py-16 text-center text-gray-500">Nenhuma notícia encontrada.</div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-15">
                         {filteredNews.map((news, index) => {
                             const createdAt = new Date(news.createdAt).getTime();
 
