@@ -9,10 +9,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/src/ui/components/ui/dropdown-menu";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus, Users } from "lucide-react";
-import { toast } from "sonner";
 
 import NewUserModal from "../../components/modals/professor/usuarios/new-user-modal";
+import { useUsersProfile, userKeys } from "./queries/users.queries";
 
 type UserRole = "ADMIN" | "PROFESSOR" | "MONITOR" | "PESQUISADOR" | "VISITANTE";
 
@@ -49,36 +50,16 @@ export default function ManageUsers() {
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
     const [typeFilter, setTypeFilter] = useState("Todos");
     const [searchTerm, setSearchTerm] = useState("");
-    const [users, setUsers] = useState<ApiUser[]>([]);
-    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+    const queryClient = useQueryClient();
+
+    const { data: users = [], isLoading: isLoadingUsers } = useUsersProfile();
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    async function loadUsers() {
-        setIsLoadingUsers(true);
-        try {
-            const response = await fetch("/api/users?page=1&limit=100");
-            const body = (await response.json().catch(() => null)) as { data?: ApiUser[]; message?: string } | null;
-
-            if (!response.ok) {
-                toast.error(body?.message ?? "Falha ao carregar usuários");
-                setUsers([]);
-                return;
-            }
-
-            setUsers(body?.data ?? []);
-        } catch {
-            toast.error("Erro de conexão ao carregar usuários");
-            setUsers([]);
-        } finally {
-            setIsLoadingUsers(false);
-        }
+    function handleUserCreated() {
+        queryClient.invalidateQueries({ queryKey: userKeys.all });
     }
-
-    useEffect(() => {
-        loadUsers();
-    }, []);
 
     const filteredUsers = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -128,10 +109,8 @@ export default function ManageUsers() {
     );
 
     const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-
     const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
     const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
@@ -139,7 +118,7 @@ export default function ManageUsers() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [typeFilter]);
+    }, [typeFilter, searchTerm]);
 
     return (
         <div className="space-y-6 p-6">
@@ -183,8 +162,9 @@ export default function ManageUsers() {
                 })}
             </div>
 
+            {/* Barra de Busca e Filtro, PS: nao retire o comentario */}
             <div className="p-4 flex flex-col sm:flex-row gap-4 justify-between items-center border-b border-gray-100 bg-white rounded-xl shadow-sm border ">
-                <div className="relative w-full max-w-md">
+                <div className="relative w-full max-md:max-w-none max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-gray-400" />
                     </div>
@@ -244,63 +224,60 @@ export default function ManageUsers() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {currentUsers.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-yellow-400 text-black text-xs font-semibold flex items-center justify-center">
-                                                {user.nomeCompleto.charAt(0).toUpperCase()}
-                                            </div>
-                                            <span>{user.nomeCompleto}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                                    <td className="px-6 py-4 text-sm">
-                                        <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleStyle(user.role)}`}
-                                        >
-                                            {roleLabel[user.role]}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm">
-                                        <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                                                user.ativo
-                                                    ? "bg-green-50 text-green-700 border-green-100"
-                                                    : "bg-red-50 text-red-700 border-red-100"
-                                            }`}
-                                        >
-                                            {user.ativo ? "Ativo" : "Inativo"}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">
-                                        {new Date(user.createdAt).toLocaleDateString("pt-BR")}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-right">
-                                        <button className="text-gray-400 hover:text-gray-600">
-                                            <MoreVertical size={18} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {!isLoadingUsers && currentUsers.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
-                                        Nenhum usuário encontrado.
-                                    </td>
-                                </tr>
-                            )}
-                            {isLoadingUsers && (
+                            {isLoadingUsers ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
                                         Carregando usuários...
                                     </td>
                                 </tr>
+                            ) : currentUsers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                                        Nenhum usuário encontrado.
+                                    </td>
+                                </tr>
+                            ) : (
+                                currentUsers.map((user) => (
+                                    <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-yellow-400 text-black text-xs font-semibold flex items-center justify-center">
+                                                    {user.nomeCompleto.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span>{user.nomeCompleto}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                                        <td className="px-6 py-4 text-sm">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleStyle(user.role)}`}
+                                            >
+                                                {roleLabel[user.role]}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium border ${user.ativo ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-700 border-red-100"}`}
+                                            >
+                                                {user.ativo ? "Ativo" : "Inativo"}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-right">
+                                            <button className="text-gray-400 hover:text-gray-600">
+                                                <MoreVertical size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
                             )}
                         </tbody>
                     </table>
                 </div>
 
+                {/* Paginação prestar atencao nao retire o comentarios */}
                 <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 bg-gray-50/50">
                     <p className="text-sm text-gray-600">
                         Mostrando <span className="font-medium">{filteredUsers.length > 0 ? startIndex + 1 : 0}</span> a{" "}
@@ -332,7 +309,7 @@ export default function ManageUsers() {
             <NewUserModal
                 isOpen={isNewUserModalOpen}
                 handleOpenChange={setIsNewUserModalOpen}
-                onUserCreated={loadUsers}
+                onUserCreated={handleUserCreated}
                 onClose={() => setIsNewUserModalOpen(false)}
             />
             <ImportCSVModal isOpen={isCSVModalOpen} onClose={() => setIsCSVModalOpen(false)} />
