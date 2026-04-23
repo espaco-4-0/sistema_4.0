@@ -23,7 +23,7 @@ export const getBlogSchema = z.object({
 
 export const postBlogSchema = z.object({
     title: z.string().trim().min(1).max(60),
-    slug: z.string().trim().min(3).max(30),
+    slug: z.string().trim().min(3).max(75),
     summary: z.string().trim().min(100).max(100).optional(),
     content: z.string().trim().min(100).max(2000),
     published: z.preprocess((val) => {
@@ -35,9 +35,9 @@ export const postBlogSchema = z.object({
     file: imageSchema,
 });
 
-export const postIdBlogSchema = z.object({
-    id: z.string().trim().min(1).max(36),
-});
+export const postIdBlogSchema = z.string().trim().min(1).max(36);
+
+export const postSlugBlogSchema = z.string().trim().min(3).max(75);
 
 export const patchBlogSchema = z.object({
     id: z.string().trim().min(1).max(36),

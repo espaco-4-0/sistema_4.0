@@ -40,7 +40,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     if (!slug?.trim()) return null;
 
     try {
-        const { data } = await api.get<BlogBySlugResponse>(`/api/blog/slug/${encodeURIComponent(slug)}`);
+        const { data } = await api.get<BlogBySlugResponse>(`/api/blog/${encodeURIComponent(slug)}`);
         return data.data;
     } catch {
         return null;

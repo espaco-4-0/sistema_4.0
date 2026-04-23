@@ -1,21 +1,16 @@
 import { prisma } from "@/src/infra/data/prisma";
+import { postSlugBlogSchema } from "@/src/infra/modules/blog/blog.schema";
 import { NextResponse } from "next/server";
 
-type RouteContext = {
-    params: Promise<{ slug: string }>;
-};
-
-export async function GET(_req: Request, { params }: RouteContext) {
+export async function GET(_: Request, { params }: { params: Promise<{ slug: string }> }) {
     try {
-        const { slug } = await params;
+        const slug: string = (await params).slug;
+        const validatedSlug = postSlugBlogSchema.safeParse(slug);
+        if (!validatedSlug.success) return NextResponse.json({ error: "Dado inválido" }, { status: 422 });
 
-        if (!slug?.trim()) {
-            return NextResponse.json({ error: "Slug inválido" }, { status: 422 });
-        }
-
-        const post = await prisma.post.findFirst({
+        const post = await prisma.post.findUnique({
             where: {
-                slug,
+                slug: validatedSlug.data,
                 publicado: true,
             },
             include: {

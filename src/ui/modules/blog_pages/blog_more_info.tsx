@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Loading from "@/src/app/loading";
 import { getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { ArrowLeft, Calendar, Check, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
@@ -131,11 +132,7 @@ export default function BlogMoreInfo() {
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <p className="text-gray-600">Carregando notícia...</p>
-            </div>
-        );
+        return <Loading />;
     }
 
     if (!news) {
