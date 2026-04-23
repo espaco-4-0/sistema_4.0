@@ -36,8 +36,14 @@ export const postBlogSchema = z.object({
 });
 
 export const postIdBlogSchema = z.string().trim().min(1).max(36);
+export const commentIdBlogSchema = z.string().trim().min(1).max(36);
 
 export const postSlugBlogSchema = z.string().trim().min(3).max(75);
+
+export const postCommentSchema = z.object({
+    postId: z.string().trim().min(1).max(36),
+    comment: z.string().trim().min(1).max(1000),
+});
 
 export const patchBlogSchema = z.object({
     id: z.string().trim().min(1).max(36),
