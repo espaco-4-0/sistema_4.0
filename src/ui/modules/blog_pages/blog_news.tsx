@@ -53,7 +53,6 @@ export default function BlogNews() {
 
     const ITEMS_PER_PAGE = 9;
 
-    // Debounce the word filter to prevent flickering and excessive API calls
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedWordFilter(wordFilter);
@@ -220,10 +219,13 @@ export default function BlogNews() {
                                                     {news.excerpt}
                                                 </p>
 
-                                                <div className="flex items-center gap-3 text-xs text-gray-500">
-                                                    <span className="font-medium">{news.author}</span>
-                                                    <div className="flex items-center gap-1">
-                                                        <Clock className="w-4 h-4" />5 min
+                                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                                    <span className="font-medium text-gray-700">{news.author}</span>
+                                                    <div className="flex items-center gap-3 ml-auto">
+                                                        <div className="flex items-center gap-1">
+                                                            <Clock className="w-3.5 h-3.5" />
+                                                            {news.readingTime} min
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

@@ -81,6 +81,13 @@ export async function getCategories() {
     }
 
     const json = await res.json();
-    console.log(json);
     return json.data ?? [];
+}
+
+export async function toggleLike(postId: string, isLiked: boolean): Promise<void> {
+    if (isLiked) {
+        await api.delete(`/api/blog/curtida/${postId}`);
+    } else {
+        await api.post("/api/blog/curtida", { postId });
+    }
 }

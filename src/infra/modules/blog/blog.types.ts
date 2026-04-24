@@ -13,10 +13,18 @@ export type BlogPost = {
     fotos: { url: string }[];
     categorias: { nome: string }[];
     autor: { nomeCompleto: string };
+    likesCount: number;
+    isLiked: boolean;
 };
 
 export type BlogListResponse = {
     data: BlogPost[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 };
 
 export type BlogCard = {

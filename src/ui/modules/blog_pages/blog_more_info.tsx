@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { ArrowLeft, Calendar, Check, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -10,7 +11,7 @@ import { toast } from "sonner";
 
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
-import { usePostBySlug, usePosts } from "./blog.queries";
+import { usePostBySlug, usePosts, useToggleLike } from "./blog.queries";
 
 const FALLBACK_IMAGE = "/fallback-image.png";
 
@@ -67,14 +68,14 @@ export default function BlogMoreInfo() {
     const rawSlug = params?.slug;
     const slug = Array.isArray(rawSlug) ? rawSlug[0] : (rawSlug ?? "");
 
-    const [likes, setLikes] = useState(0);
-    const [hasLiked, setHasLiked] = useState(false);
+    const { data: session } = useSession();
     const [authorName, setAuthorName] = useState("");
     const [comment, setComment] = useState("");
     const [isCopied, setIsCopied] = useState(false);
 
     const { data: news, isLoading } = usePostBySlug(slug);
     const { data: listData } = usePosts({ quantity: 10 });
+    const { mutate: toggleLike, isPending: isLiking } = useToggleLike();
 
     const recentNews = useMemo(
         () => normalizeRelated((Array.isArray(listData?.data) ? listData.data : []).filter((p) => p.slug !== slug)).slice(0, 3),
@@ -86,8 +87,23 @@ export default function BlogMoreInfo() {
     const bodyParagraphs = paragraphs.length > 1 ? paragraphs.slice(1) : [];
 
     const handleLike = () => {
-        setHasLiked(!hasLiked);
-        setLikes((prev) => (hasLiked ? prev - 1 : prev + 1));
+        if (!session) {
+            toast.error("Você precisa estar logado para curtir uma notícia", {
+                action: {
+                    label: "Entrar",
+                    onClick: () => router.push("/auth/login"),
+                },
+            });
+            return;
+        }
+
+        if (!news) return;
+
+        toggleLike({
+            postId: news.id,
+            isLiked: news.isLiked,
+            slug: news.slug,
+        });
     };
 
     if (isLoading) {
@@ -220,12 +236,13 @@ export default function BlogMoreInfo() {
                     <div className="flex items-center gap-6 mb-8">
                         <Button
                             onClick={handleLike}
+                            disabled={isLiking}
                             className={`flex items-center gap-2 px-6 py-3 rounded-full transition-all hover:cursor-pointer h-max w-max font-bold ${
-                                hasLiked ? "bg-yellow-400 text-black" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                news.isLiked ? "bg-yellow-400 text-black shadow-lg scale-105" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                             }`}
                         >
-                            <ThumbsUp className={`w-5 h-5 ${hasLiked ? "fill-current" : ""}`} />
-                            <span>{likes} Curtidas</span>
+                            <ThumbsUp className={`w-5 h-5 ${news.isLiked ? "fill-current" : ""}`} />
+                            <span>{news.likesCount || 0} Curtidas</span>
                         </Button>
 
                         <Button className="flex items-center gap-2 px-6 py-3 h-max w-max bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors font-bold">
