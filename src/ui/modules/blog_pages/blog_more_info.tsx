@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Loading from "@/src/app/loading";
-import { getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
+import { useMemo, useState } from "react";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
 import { ArrowLeft, Calendar, Check, Clock, MessageCircle, Send, Share2, ThumbsUp } from "lucide-react";
 import Image from "next/image";
@@ -12,6 +10,7 @@ import { toast } from "sonner";
 
 import { Button } from "../../components/ui/button";
 import { Form } from "../../components/ui/form";
+import { usePostBySlug, usePosts } from "./blog.queries";
 
 const FALLBACK_IMAGE = "/fallback-image.png";
 
@@ -19,7 +18,6 @@ function formatDate(dateValue?: Date) {
     if (!dateValue) return "Data não informada";
     const date = new Date(dateValue);
     if (Number.isNaN(date.getTime())) return "Data não informada";
-
     return new Intl.DateTimeFormat("pt-BR", {
         day: "2-digit",
         month: "long",
@@ -33,9 +31,7 @@ function contentToParagraphs(content?: string): string[] {
         .split(/\r?\n/)
         .map((p) => p.trim())
         .filter(Boolean);
-
     if (fromLineBreaks.length > 1) return fromLineBreaks;
-
     return content
         .split(/(?<=\.)\s+/)
         .map((p) => p.trim())
@@ -69,58 +65,21 @@ export default function BlogMoreInfo() {
     const params = useParams<{ slug: string }>();
     const router = useRouter();
     const rawSlug = params?.slug;
-    const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
-
-    const [news, setNews] = useState<BlogPost | null>(null);
-    const [recentNews, setRecentNews] = useState<RelatedPost[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [isCopied, setIsCopied] = useState(false);
+    const slug = Array.isArray(rawSlug) ? rawSlug[0] : (rawSlug ?? "");
 
     const [likes, setLikes] = useState(0);
     const [hasLiked, setHasLiked] = useState(false);
-
+    const [isSaved, setIsSaved] = useState(false);
     const [authorName, setAuthorName] = useState("");
     const [comment, setComment] = useState("");
 
-    useEffect(() => {
-        let isMounted = true;
+    const { data: news, isLoading } = usePostBySlug(slug);
+    const { data: list } = usePosts({ quantity: 10 });
 
-        const loadData = async () => {
-            if (!slug?.trim()) {
-                if (isMounted) {
-                    setNews(null);
-                    setRecentNews([]);
-                    setLoading(false);
-                }
-                return;
-            }
-
-            try {
-                const [post, list] = await Promise.all([getPostBySlug(slug), getPosts({ quantity: 10 })]);
-
-                if (!isMounted) return;
-
-                setNews(post);
-
-                const related = normalizeRelated(
-                    (Array.isArray(list) ? list : []).filter((p) => p.slug !== slug)
-                ).slice(0, 3);
-                setRecentNews(related);
-            } catch {
-                if (!isMounted) return;
-                setNews(null);
-                setRecentNews([]);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        loadData();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [slug]);
+    const recentNews = useMemo(
+        () => normalizeRelated((Array.isArray(list) ? list : []).filter((p) => p.slug !== slug)).slice(0, 3),
+        [list, slug]
+    );
 
     const paragraphs = useMemo(() => contentToParagraphs(news?.conteudo), [news?.conteudo]);
     const lead = paragraphs[0] || news?.resumo || "";
@@ -131,8 +90,12 @@ export default function BlogMoreInfo() {
         setLikes((prev) => (hasLiked ? prev - 1 : prev + 1));
     };
 
-    if (loading) {
-        return <Loading />;
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <p className="text-gray-600">Carregando notícia...</p>
+            </div>
+        );
     }
 
     if (!news) {

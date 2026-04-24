@@ -6,6 +6,8 @@ import "@/styles/globals.css";
 
 import { Toaster } from "sonner";
 
+import { QueryProvider } from "../ui/providers/query-provider";
+
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
@@ -35,9 +37,11 @@ export default function RootLayout({
           overflow-hidden
         `}
             >
-                <AuthSessionProvider>
-                    <main className="h-screen overflow-y-auto scroll-smooth overscroll-none">{children}</main>
-                </AuthSessionProvider>
+                <QueryProvider>
+                    <AuthSessionProvider>
+                        <main className="h-screen overflow-y-auto scroll-smooth overscroll-none">{children}</main>
+                    </AuthSessionProvider>
+                </QueryProvider>
 
                 <Toaster richColors position="top-right" closeButton />
             </body>

@@ -23,7 +23,7 @@ export default function BlogCards({ slug, category, title, image, size = "small"
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
                 style={{ backgroundImage: `url(${image})` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
 
             <div className={`absolute bottom-0 left-0 right-0 p-6 text-white ${isLarge ? "p-8" : ""}`}>
                 <p className="text-sm uppercase tracking-wider mb-2 opacity-90">{category}</p>
