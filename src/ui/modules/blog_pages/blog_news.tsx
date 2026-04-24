@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
-import { ChevronLeft, ChevronRight, Clock, Filter, Home, Search, Search as SearchIcon, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Home, Loader2, Search, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,13 +48,23 @@ export default function BlogNews() {
 
     const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
     const [wordFilter, setWordFilter] = useState<string>("");
+    const [debouncedWordFilter, setDebouncedWordFilter] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
 
     const ITEMS_PER_PAGE = 9;
 
+    // Debounce the word filter to prevent flickering and excessive API calls
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedWordFilter(wordFilter);
+        }, 400);
+
+        return () => clearTimeout(handler);
+    }, [wordFilter]);
+
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedCategory, wordFilter]);
+    }, [selectedCategory, debouncedWordFilter]);
 
     const { data: categoriesData } = useCategories();
 
@@ -65,9 +75,9 @@ export default function BlogNews() {
 
     const apiFilters: Record<string, any> = { includeArchived: false, page: currentPage, limit: ITEMS_PER_PAGE };
     if (selectedCategory && selectedCategory !== "Todas") apiFilters.category = selectedCategory;
-    if (wordFilter && wordFilter.trim().length > 0) apiFilters.name = wordFilter.trim();
+    if (debouncedWordFilter && debouncedWordFilter.trim().length > 0) apiFilters.name = debouncedWordFilter.trim();
 
-    const { data, isLoading, isError } = usePosts(apiFilters);
+    const { data, isLoading, isError, isFetching, isPlaceholderData } = usePosts(apiFilters);
 
     const posts = useMemo(() => {
         if (!data || !Array.isArray(data.data)) return [];
@@ -135,7 +145,7 @@ export default function BlogNews() {
                                 </SelectContent>
                             </Select>
                         </label>
-                        <label className="flex items-center gap-2 flex-1 w-full">
+                        <label className="flex items-center gap-2 flex-1 w-full relative">
                             <InputGroup className="max-w-xs h-10 bg-white border-gray-300 rounded-lg w-6/10">
                                 <InputGroupInput
                                     value={wordFilter}
@@ -143,76 +153,85 @@ export default function BlogNews() {
                                     placeholder="Pesquisar notícias..."
                                 />
                                 <InputGroupAddon>
-                                    <Search />
+                                    {isFetching || wordFilter !== debouncedWordFilter ? (
+                                        <Loader2 className="w-4 h-4 animate-spin text-yellow-600" />
+                                    ) : (
+                                        <Search className="w-4 h-4" />
+                                    )}
                                 </InputGroupAddon>
                             </InputGroup>
                         </label>
                     </div>
                 </div>
 
-                {isLoading ? (
-                    <p className="text-gray-600 mb-6">Carregando notícias...</p>
+                {isLoading && !data ? (
+                    <div className="flex flex-col items-center justify-center py-24">
+                        <Loader2 className="w-10 h-10 animate-spin text-yellow-500 mb-4" />
+                        <p className="text-gray-500 font-medium">Carregando notícias...</p>
+                    </div>
                 ) : (
-                    <p className="text-gray-600 mb-6">
-                        Mostrando <span className="font-semibold">{posts.length}</span> artigos na página {currentPage}{" "}
-                        de {totalPages || 1}
-                    </p>
-                )}
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <p className="text-gray-500 text-sm">
+                                Mostrando <span className="font-semibold text-black">{posts.length}</span> notícias na
+                                página {currentPage} de {totalPages}
+                            </p>
+                        </div>
 
-                {!isLoading && posts.length === 0 ? (
-                    <div className="py-16 text-center text-gray-500">Nenhuma notícia encontrada.</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {posts.map((news, index) => {
-                            const createdAt = news.createdAt ? new Date(news.createdAt as any).getTime() : 0;
-                            const isRecent = createdAt ? now - createdAt < 7 * 24 * 60 * 60 * 1000 : index < 3;
-
-                            return (
-                                <button
-                                    key={news.id}
-                                    onClick={() => router.push(`/blog/${news.slug}`)}
-                                    className="group relative cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
-                                >
-                                    <div className="relative h-52 overflow-hidden">
-                                        <Image
-                                            src={news.image}
-                                            alt={news.title}
-                                            width={800}
-                                            height={500}
-                                            sizes="(max-width: 768px) 100vw, 33vw"
-                                            className="w-full h-full object-cover"
-                                        />
-
-                                        {isRecent && (
-                                            <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                                                <TrendingUp className="w-4 h-4" />
-                                                recém publicada
+                        {!isLoading && posts.length === 0 ? (
+                            <div className="py-20 text-center border-2 border-dashed border-gray-100 rounded-2xl text-gray-400">
+                                Nenhuma notícia encontrada para estes filtros.
+                            </div>
+                        ) : (
+                            <div
+                                className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-300 ${isPlaceholderData ? "opacity-40 pointer-events-none" : "opacity-100"}`}
+                            >
+                                {posts.map((news, index) => {
+                                    return (
+                                        <Link
+                                            key={news.id}
+                                            href={`/blog/${news.slug}`}
+                                            className="group flex flex-col bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-yellow-400 hover:shadow-lg transition-all duration-300"
+                                        >
+                                            <div className="relative h-52 overflow-hidden">
+                                                <img
+                                                    src={news.image}
+                                                    alt={news.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                />
+                                                {index < 3 && (
+                                                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                                                        <TrendingUp className="w-4 h-4" />
+                                                        recém publicada
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
 
-                                    <div className="p-5 text-left">
-                                        <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
-                                            {news.category}
-                                        </span>
+                                            <div className="p-5">
+                                                <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
+                                                    {news.category}
+                                                </span>
 
-                                        <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
-                                            {news.title}
-                                        </h2>
+                                                <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                                                    {news.title}
+                                                </h2>
 
-                                        <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.excerpt}</p>
+                                                <p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+                                                    {news.excerpt}
+                                                </p>
 
-                                        <div className="flex items-center gap-3 text-xs text-gray-500">
-                                            <span className="font-medium">{news.author}</span>
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="w-4 h-4" />
-                                                {news.readingTime} min
+                                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                    <span className="font-medium">{news.author}</span>
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="w-4 h-4" />5 min
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            );
-                        })}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 )}
 

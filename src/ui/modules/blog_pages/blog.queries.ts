@@ -1,5 +1,5 @@
 import { GetPostsParams, getCategories, getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export const blogKeys = {
     all: ["posts"] as const,
@@ -11,6 +11,7 @@ export function usePosts(filters?: GetPostsParams) {
     return useQuery({
         queryKey: blogKeys.list(filters),
         queryFn: () => getPosts(filters ?? {}),
+        placeholderData: keepPreviousData,
     });
 }
 
