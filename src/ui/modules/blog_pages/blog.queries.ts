@@ -1,4 +1,4 @@
-import { getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
+import { GetPostsParams, getCategories, getPostBySlug, getPosts } from "@/src/infra/modules/blog/blog.service";
 import { useQuery } from "@tanstack/react-query";
 
 export const blogKeys = {
@@ -7,7 +7,7 @@ export const blogKeys = {
     detail: (slug: string) => [...blogKeys.all, "detail", slug] as const,
 };
 
-export function usePosts(filters?: { quantity?: number; includeArchived?: boolean }) {
+export function usePosts(filters?: GetPostsParams) {
     return useQuery({
         queryKey: blogKeys.list(filters),
         queryFn: () => getPosts(filters ?? {}),
@@ -19,5 +19,12 @@ export function usePostBySlug(slug: string) {
         queryKey: blogKeys.detail(slug),
         queryFn: () => getPostBySlug(slug),
         enabled: !!slug?.trim(),
+    });
+}
+
+export function useCategories() {
+    return useQuery({
+        queryKey: ["categories"],
+        queryFn: getCategories,
     });
 }

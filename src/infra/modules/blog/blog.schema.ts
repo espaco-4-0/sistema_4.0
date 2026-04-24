@@ -12,6 +12,8 @@ const imageSchema = z.custom<File>(
 
 export const getBlogSchema = z.object({
     quantity: z.coerce.number().int().positive().optional(),
+    page: z.coerce.number().int().positive().optional().default(1),
+    limit: z.coerce.number().int().positive().optional().default(9),
     category: z.string().trim().min(1).max(30).optional(),
     name: z.string().trim().min(1).max(60).optional(),
     includeArchived: z.preprocess((val) => {
@@ -53,3 +55,5 @@ export const patchBlogSchema = z.object({
         return val;
     }, z.boolean()),
 });
+
+export const createCategorySchema = z.string().trim().min(1).max(30);

@@ -1,12 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
-import { Clock, Filter, Home, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Filter, Home, Search, Search as SearchIcon, TrendingUp } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Button } from "../../components/ui/button";
-import { usePosts } from "./blog.queries";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "../../components/ui/input-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { useCategories, usePosts } from "./blog.queries";
 
 type BlogCard = {
     id: string;
@@ -17,6 +21,7 @@ type BlogCard = {
     excerpt: string;
     author: string;
     readingTime: number;
+    createdAt?: string | number | Date;
 };
 
 const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
@@ -28,79 +33,71 @@ function normalizePostToCard(post: BlogPost): BlogCard {
         category: post.categorias?.[0]?.nome?.trim() || "Geral",
         title: post.titulo?.trim() || "Notícia sem título",
         image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
-        excerpt: post.resumo?.trim() || post.conteudo?.slice(0, 140) || "Leia a notícia completa para mais detalhes.",
-        author: "Espaço 4.0",
+        excerpt:
+            post.resumo?.trim() ||
+            (typeof post.conteudo === "string" ? post.conteudo.slice(0, 140) : "") ||
+            "Leia a notícia completa para mais detalhes.",
+        author: post.autor?.nomeCompleto || "Espaço 4.0",
         readingTime: post.tempoDeLeitura || 5,
+        createdAt: post.createdAt,
     };
 }
 
 export default function BlogNews() {
-    const [selectedCategory, setSelectedCategory] = useState("Todas");
     const router = useRouter();
 
-    const { data, isLoading } = usePosts({ includeArchived: false });
+    const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
+    const [wordFilter, setWordFilter] = useState<string>("");
+    const [currentPage, setCurrentPage] = useState<number>(1);
 
-    const posts = useMemo(() => (Array.isArray(data) ? data : []).map(normalizePostToCard), [data]);
+    const ITEMS_PER_PAGE = 9;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCategory, wordFilter]);
+
+    const { data: categoriesData } = useCategories();
 
     const categories = useMemo(() => {
-        const dynamic = Array.from(new Set(posts.map((p) => p.category).filter(Boolean)));
-        return ["Todas", ...dynamic];
-    }, [posts]);
+        const arr = Array.isArray(categoriesData) ? categoriesData : [];
+        return ["Todas", ...arr.map((c) => c.nome)];
+    }, [categoriesData]);
 
-    const filteredNews = (
-        selectedCategory.includes("Todas") ? posts : posts.filter((news) => selectedCategory.includes(news.category))
-    ).filter((news) => filterTextByString(news.title, news.excerpt, wordFilter));
+    const apiFilters: Record<string, any> = { includeArchived: false, page: currentPage, limit: ITEMS_PER_PAGE };
+    if (selectedCategory && selectedCategory !== "Todas") apiFilters.category = selectedCategory;
+    if (wordFilter && wordFilter.trim().length > 0) apiFilters.name = wordFilter.trim();
+
+    const { data, isLoading, isError } = usePosts(apiFilters);
+
+    const posts = useMemo(() => {
+        if (!data || !Array.isArray(data.data)) return [];
+
+        const isBackendPaginating = data.meta && data.meta.limit === ITEMS_PER_PAGE;
+
+        if (!isBackendPaginating) {
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            return data.data.slice(start, end).map(normalizePostToCard);
+        }
+
+        return data.data.map(normalizePostToCard);
+    }, [data, currentPage]);
+
+    const totalPages = data?.meta?.totalPages || Math.ceil((data?.data?.length || 0) / ITEMS_PER_PAGE) || 1;
 
     const now = Date.now();
 
-    const CardComponent = ({ news, index }: { news: BlogCard; index: number }) => {
-        const isRecent = now - new Date(news.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
-
+    if (isError) {
         return (
-            <Link
-                href={`/blog/${news.slug}`}
-                className="group cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
-            >
-                <div className="relative h-52 overflow-hidden">
-                    <Image
-                        priority={index === 0}
-                        src={news.image}
-                        alt={news.title}
-                        width={500}
-                        height={500}
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="w-full h-full object-cover"
-                    />
-                    {isRecent && (
-                        <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                            <TrendingUp className="w-4 h-4" />
-                            recém publicada
-                        </div>
-                    )}
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-xl font-bold mb-2">Erro ao carregar notícias</h2>
+                    <p className="text-gray-600 mb-4">Tente novamente mais tarde.</p>
+                    <Button onClick={() => router.refresh()}>Recarregar</Button>
                 </div>
-
-                <div className="p-5 text-left">
-                    <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
-                        {news.category}
-                    </span>
-
-                    <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
-                        {news.title}
-                    </h2>
-
-                    <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.excerpt}</p>
-
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                        <span className="font-medium">{news.author}</span>
-                        <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {news.readingTime} min
-                        </div>
-                    </div>
-                </div>
-            </Link>
+            </div>
         );
-    };
+    }
 
     return (
         <div className="min-h-screen bg-white">
@@ -120,106 +117,154 @@ export default function BlogNews() {
                     </p>
                 </div>
 
-                <div className="flex gap-4 mb-8 pb-4 w-full">
-                    <Button
-                        variant="ghost"
-                        className={`cursor-pointer p-2 border rounded-lg transition-colors ${viewFilters ? "hover:bg-yellow-secondary bg-yellow-primary text-black border-black" : "hover:bg-gray-50 border-gray-300"}`}
-                        onClick={() => setViewFilters(!viewFilters)}
-                    >
-                        <Filter className="w-5 h-5" />
-                    </Button>
-                    {viewFilters && (
-                        <div className="flex w-full">
-                            <ToggleGroup
-                                variant="default"
-                                type="multiple"
-                                className="gap-4 min-h-10 h-auto! w-7/10 flex-wrap"
-                                value={selectedCategory}
-                                onValueChange={(value: string[]) => {
-                                    const getAllOrFilters = value.includes("Todas")
-                                        ? value.length === 2
-                                            ? [value[value.length - 1]]
-                                            : ["Todas"]
-                                        : value;
-                                    setSelectedCategory(getAllOrFilters);
-                                }}
-                            >
-                                {categories.map((category) => (
-                                    <ToggleGroupItem
-                                        key={category}
-                                        value={category}
-                                        aria-label={`Filtrar por ${category}`}
-                                        className="bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg! h-10 data-[state=on]:text-black cursor-pointer transition-all"
-                                    >
-                                        {category}
-                                    </ToggleGroupItem>
-                                ))}
-                            </ToggleGroup>
-                            <InputGroup className="max-w-xs h-10 w-3/10 ml-auto">
+                <div className="flex gap-4 mb-8 pb-4 w-full items-center">
+                    <div className="flex gap-4 w-full items-center justify-between">
+                        <span className="font-medium bg-yellow-primary px-2 py-1 rounded-lg">Filtros:</span>
+                        <label className="flex items-center gap-2">
+                            <span className="sr-only">Categoria</span>
+                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                <SelectTrigger className="w-60 h-10 py-5 px-3 border border-gray-300 rounded-lg bg-white cursor-pointer">
+                                    <SelectValue placeholder="Categoria" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map((cat) => (
+                                        <SelectItem key={cat} value={cat} className="cursor-pointer">
+                                            {cat}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </label>
+                        <label className="flex items-center gap-2 flex-1 w-full">
+                            <InputGroup className="max-w-xs h-10 bg-white border-gray-300 rounded-lg w-6/10">
                                 <InputGroupInput
                                     value={wordFilter}
                                     onChange={(e) => setWordFilter(e.target.value)}
-                                    placeholder="Digite..."
+                                    placeholder="Pesquisar notícias..."
                                 />
                                 <InputGroupAddon>
                                     <Search />
                                 </InputGroupAddon>
-                                <InputGroupAddon align="inline-end">{filteredNews.length} resultados</InputGroupAddon>
                             </InputGroup>
-                        </div>
-                    )}
+                        </label>
+                    </div>
                 </div>
 
                 {isLoading ? (
                     <p className="text-gray-600 mb-6">Carregando notícias...</p>
                 ) : (
                     <p className="text-gray-600 mb-6">
-                        Mostrando <span className="font-semibold">{filteredNews.length}</span> artigos
+                        Mostrando <span className="font-semibold">{posts.length}</span> artigos na página {currentPage}{" "}
+                        de {totalPages || 1}
                     </p>
                 )}
 
-                {!isLoading && filteredNews.length === 0 ? (
+                {!isLoading && posts.length === 0 ? (
                     <div className="py-16 text-center text-gray-500">Nenhuma notícia encontrada.</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredNews.map((news, index) => (
-                            <button
-                                key={news.id}
-                                onClick={() => router.push(`/blog/${news.slug}`)}
-                                className="group cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
-                            >
-                                <div className="h-52 overflow-hidden">
-                                    <img
-                                        src={news.image}
-                                        alt={news.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                    {index < 3 && (
-                                        <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                                            <TrendingUp className="w-4 h-4" />
-                                            recém publicada
-                                        </div>
-                                    )}
-                                </div>
+                        {posts.map((news, index) => {
+                            const createdAt = news.createdAt ? new Date(news.createdAt as any).getTime() : 0;
+                            const isRecent = createdAt ? now - createdAt < 7 * 24 * 60 * 60 * 1000 : index < 3;
 
-                                <div className="p-5 text-left">
-                                    <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
-                                        {news.category}
-                                    </span>
-                                    <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
-                                        {news.title}
-                                    </h2>
-                                    <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.excerpt}</p>
-                                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                                        <span className="font-medium">{news.author}</span>
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="w-4 h-4" />
-                                            {news.readingTime} min
+                            return (
+                                <button
+                                    key={news.id}
+                                    onClick={() => router.push(`/blog/${news.slug}`)}
+                                    className="group relative cursor-pointer bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
+                                >
+                                    <div className="relative h-52 overflow-hidden">
+                                        <Image
+                                            src={news.image}
+                                            alt={news.title}
+                                            width={800}
+                                            height={500}
+                                            sizes="(max-width: 768px) 100vw, 33vw"
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                        {isRecent && (
+                                            <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                                                <TrendingUp className="w-4 h-4" />
+                                                recém publicada
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="p-5 text-left">
+                                        <span className="inline-block px-3 py-1 bg-yellow-400 text-black rounded-full text-sm font-bold mb-3">
+                                            {news.category}
+                                        </span>
+
+                                        <h2 className="text-lg font-bold text-black mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                                            {news.title}
+                                        </h2>
+
+                                        <p className="text-gray-600 mb-4 line-clamp-2 text-sm">{news.excerpt}</p>
+
+                                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                                            <span className="font-medium">{news.author}</span>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="w-4 h-4" />
+                                                {news.readingTime} min
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </button>
-                        ))}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {!isLoading && posts.length > 0 && (
+                    <div className="flex justify-center items-center gap-2 mt-12 mb-8">
+                        <Button
+                            variant="outline"
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className={`flex items-center gap-1 cursor-pointer ${currentPage === 1 && "bg-gray-100"}`}
+                        >
+                            <ChevronLeft className="w-4 h-4" /> Anterior
+                        </Button>
+
+                        <div className="flex gap-1">
+                            {Array.from({ length: totalPages }).map((_, i) => {
+                                const pageNumber = i + 1;
+                                if (
+                                    pageNumber === 1 ||
+                                    pageNumber === totalPages ||
+                                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                                ) {
+                                    return (
+                                        <Button
+                                            key={pageNumber}
+                                            variant={currentPage === pageNumber ? "default" : "outline"}
+                                            onClick={() => setCurrentPage(pageNumber)}
+                                            disabled={totalPages <= 1}
+                                            className={`w-10 h-10 p-0 cursor-pointer ${currentPage === pageNumber ? "bg-yellow-primary text-black hover:bg-yellow-500 border-none" : ""}`}
+                                        >
+                                            {pageNumber}
+                                        </Button>
+                                    );
+                                } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                                    return (
+                                        <span key={pageNumber} className="flex items-end px-1">
+                                            ...
+                                        </span>
+                                    );
+                                }
+                                return null;
+                            })}
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center gap-1 cursor-pointer ${currentPage === totalPages && "bg-gray-100"}`}
+                        >
+                            Próxima <ChevronRight className="w-4 h-4" />
+                        </Button>
                     </div>
                 )}
             </div>

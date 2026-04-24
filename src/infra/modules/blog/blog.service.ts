@@ -6,6 +6,12 @@ const FALLBACK_IMAGE = "fallback-image.png";
 
 type BlogListResponse = {
     data: BlogPost[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 };
 
 type BlogBySlugResponse = {
@@ -14,26 +20,32 @@ type BlogBySlugResponse = {
 
 export type GetPostsParams = {
     quantity?: number;
+    page?: number;
+    limit?: number;
     category?: string;
     name?: string;
     includeArchived?: boolean;
 };
 
-export async function getPosts(params: GetPostsParams = {}): Promise<BlogPost[]> {
+export async function getPosts(params: GetPostsParams = {}): Promise<BlogListResponse> {
     const { data } = await api.get<BlogListResponse>("/api/blog", {
         params: {
             quantity: params.quantity,
+            page: params.page,
+            limit: params.limit,
             category: params.category,
             name: params.name,
             includeArchived: params.includeArchived,
         },
     });
 
-    return data.data;
+    return data;
 }
 
 export async function getTopPosts(): Promise<BlogPost[]> {
-    return getPosts({ quantity: 5, includeArchived: false });
+    const res = await getPosts({ quantity: 5, includeArchived: false });
+
+    return res.data;
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
@@ -59,4 +71,16 @@ export function normalizePostToCard(post: BlogPost): BlogCard {
         readingTime: post.tempoDeLeitura || 5,
         createdAt: post.createdAt,
     };
+}
+
+export async function getCategories() {
+    const res = await fetch("/api/blog/categoria");
+
+    if (!res.ok) {
+        throw new Error("Erro ao buscar categorias");
+    }
+
+    const json = await res.json();
+    console.log(json);
+    return json.data ?? [];
 }

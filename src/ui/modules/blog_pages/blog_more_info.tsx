@@ -69,16 +69,16 @@ export default function BlogMoreInfo() {
 
     const [likes, setLikes] = useState(0);
     const [hasLiked, setHasLiked] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
     const [authorName, setAuthorName] = useState("");
     const [comment, setComment] = useState("");
+    const [isCopied, setIsCopied] = useState(false);
 
     const { data: news, isLoading } = usePostBySlug(slug);
-    const { data: list } = usePosts({ quantity: 10 });
+    const { data: listData } = usePosts({ quantity: 10 });
 
     const recentNews = useMemo(
-        () => normalizeRelated((Array.isArray(list) ? list : []).filter((p) => p.slug !== slug)).slice(0, 3),
-        [list, slug]
+        () => normalizeRelated((Array.isArray(listData?.data) ? listData.data : []).filter((p) => p.slug !== slug)).slice(0, 3),
+        [listData, slug]
     );
 
     const paragraphs = useMemo(() => contentToParagraphs(news?.conteudo), [news?.conteudo]);

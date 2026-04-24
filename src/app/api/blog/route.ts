@@ -11,6 +11,8 @@ import { authOptions } from "../auth/[...nextauth]/route";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
     try {
         const searchParams = req.nextUrl.searchParams;
@@ -20,9 +22,12 @@ export async function GET(req: NextRequest) {
 
         const validatedData = getBlogSchema.safeParse(paramsOrUndefined);
         if (!validatedData.success)
-            return NextResponse.json({ error: "Dados inválidos", data: validatedData.error }, { status: 422 });
+            return NextResponse.json(
+                { error: "Dados inválidos", data: validatedData.error, input: paramsOrUndefined },
+                { status: 422 }
+            );
 
-        const { category, name, includeArchived, quantity } = validatedData.data;
+        const { category, name, includeArchived, quantity, page, limit } = validatedData.data;
 
         if (category !== undefined) {
             const categoryEntity = await prisma.postCategoria.findUnique({
@@ -58,26 +63,44 @@ export async function GET(req: NextRequest) {
 
         if (includeArchived === false || includeArchived === undefined) where.publicado = true;
 
-        const posts = await prisma.post.findMany({
-            take: quantity,
-            orderBy: { createdAt: "desc" },
-            where,
-            include: {
-                fotos: {
-                    select: { url: true },
-                },
-                categorias: {
-                    select: { nome: true },
-                },
-                autor: {
-                    select: {
-                        nomeCompleto: true,
+        const take = quantity ?? limit;
+        const skip = quantity ? 0 : (page - 1) * limit;
+
+        const [total, posts] = await prisma.$transaction([
+            prisma.post.count({ where }),
+            prisma.post.findMany({
+                take,
+                skip,
+                orderBy: { createdAt: "desc" },
+                where,
+                include: {
+                    fotos: {
+                        select: { url: true },
+                    },
+                    categorias: {
+                        select: { nome: true },
+                    },
+                    autor: {
+                        select: {
+                            nomeCompleto: true,
+                        },
                     },
                 },
-            },
-        });
+            }),
+        ]);
 
-        return NextResponse.json({ data: posts }, { status: 200 });
+        return NextResponse.json(
+            {
+                data: posts,
+                meta: {
+                    total,
+                    page,
+                    limit: quantity ?? limit,
+                    totalPages: quantity ? 1 : Math.ceil(total / take),
+                },
+            },
+            { status: 200 }
+        );
     } catch (err) {
         console.error("Internal Error: ", err);
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
