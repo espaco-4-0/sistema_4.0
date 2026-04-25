@@ -10,38 +10,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../../components/ui/input-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+
+import { normalizePostToCard } from "@/src/infra/modules/blog/blog.service";
 import { useCategories, usePosts } from "./blog.queries";
-
-type BlogCard = {
-    id: string;
-    slug: string;
-    category: string;
-    title: string;
-    image: string;
-    excerpt: string;
-    author: string;
-    readingTime: number;
-    createdAt?: string | number | Date;
-};
-
-const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
-
-function normalizePostToCard(post: BlogPost): BlogCard {
-    return {
-        id: String(post.id),
-        slug: post.slug,
-        category: post.categoria?.nome?.trim() || "Geral",
-        title: post.titulo?.trim() || "Notícia sem título",
-        image: post.foto?.url?.trim() || FALLBACK_IMAGE,
-        excerpt:
-            post.resumo?.trim() ||
-            (typeof post.conteudo === "string" ? post.conteudo.slice(0, 140) : "") ||
-            "Leia a notícia completa para mais detalhes.",
-        author: post.autor?.nomeCompleto || "Espaço 4.0",
-        readingTime: post.tempoDeLeitura || 5,
-        createdAt: post.createdAt,
-    };
-}
 
 export default function BlogNews() {
     const router = useRouter();
