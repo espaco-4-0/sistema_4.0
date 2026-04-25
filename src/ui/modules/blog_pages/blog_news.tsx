@@ -30,9 +30,9 @@ function normalizePostToCard(post: BlogPost): BlogCard {
     return {
         id: String(post.id),
         slug: post.slug,
-        category: post.categorias?.[0]?.nome?.trim() || "Geral",
+        category: post.categoria?.nome?.trim() || "Geral",
         title: post.titulo?.trim() || "Notícia sem título",
-        image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
+        image: post.foto?.url?.trim() || FALLBACK_IMAGE,
         excerpt:
             post.resumo?.trim() ||
             (typeof post.conteudo === "string" ? post.conteudo.slice(0, 140) : "") ||

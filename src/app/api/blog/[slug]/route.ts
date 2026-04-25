@@ -19,17 +19,17 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
                 publicado: true,
             },
             include: {
-                fotos: {
+                foto: {
                     select: { url: true },
                 },
-                categorias: {
+                categoria: {
                     select: { nome: true },
                 },
                 autor: {
                     select: { nomeCompleto: true },
                 },
                 _count: {
-                    select: { curtidas: true },
+                    select: { curtidas: true, comentarios: true },
                 },
                 curtidas: session?.user?.id
                     ? {
@@ -50,7 +50,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
 
         const data = {
             ...post,
-            likesCount: post._count.curtidas,
+            likesCount: post._count?.curtidas || 0,
+            commentsCount: post._count?.comentarios || 0,
             isLiked: (post as any).curtidas?.length > 0,
         };
 

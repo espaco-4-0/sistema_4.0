@@ -1,8 +1,11 @@
 import {
     GetPostsParams,
+    deleteComment,
     getCategories,
     getPostBySlug,
+    getPostComments,
     getPosts,
+    postComment,
     toggleLike,
 } from "@/src/infra/modules/blog/blog.service";
 import type { BlogPost } from "@/src/infra/modules/blog/blog.types";
@@ -13,6 +16,7 @@ export const blogKeys = {
     all: ["posts"] as const,
     list: (filters?: object) => [...blogKeys.all, "list", filters] as const,
     detail: (slug: string) => [...blogKeys.all, "detail", slug] as const,
+    comments: (slug: string, page: number) => [...blogKeys.detail(slug), "comments", page] as const,
 };
 
 export function usePosts(filters?: GetPostsParams) {
@@ -28,6 +32,15 @@ export function usePostBySlug(slug: string) {
         queryKey: blogKeys.detail(slug),
         queryFn: () => getPostBySlug(slug),
         enabled: !!slug?.trim(),
+    });
+}
+
+export function usePostComments(slug: string, page: number) {
+    return useQuery({
+        queryKey: blogKeys.comments(slug, page),
+        queryFn: () => getPostComments(slug, page),
+        enabled: !!slug?.trim(),
+        placeholderData: keepPreviousData,
     });
 }
 
@@ -59,15 +72,48 @@ export function useToggleLike() {
 
             return { previousPost };
         },
-        onError: (variables, context) => {
+        onError: (_error, variables, context) => {
             if (context?.previousPost) {
                 queryClient.setQueryData(blogKeys.detail(variables.slug), context.previousPost);
             }
             toast.error("Erro ao processar curtida. Tente novamente.");
         },
-        onSettled: (variables) => {
+        onSettled: (_data, _error, variables) => {
             queryClient.invalidateQueries({ queryKey: blogKeys.detail(variables.slug) });
             queryClient.invalidateQueries({ queryKey: blogKeys.all });
+        },
+    });
+}
+
+export function usePostComment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, comment }: { postId: string; comment: string; slug: string }) =>
+            postComment(postId, comment),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: blogKeys.detail(variables.slug) });
+            queryClient.invalidateQueries({ queryKey: [...blogKeys.detail(variables.slug), "comments"] });
+            toast.success("Comentário postado com sucesso!");
+        },
+        onError: () => {
+            toast.error("Erro ao postar comentário. Tente novamente.");
+        },
+    });
+}
+
+export function useDeleteComment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ commentId }: { commentId: string; slug: string }) => deleteComment(commentId),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: blogKeys.detail(variables.slug) });
+            queryClient.invalidateQueries({ queryKey: [...blogKeys.detail(variables.slug), "comments"] });
+            toast.success("Comentário excluído com sucesso!");
+        },
+        onError: () => {
+            toast.error("Erro ao excluir comentário. Tente novamente.");
         },
     });
 }

@@ -266,10 +266,11 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 conteudo: conteudoCompleto,
                 tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
                 publicado: shouldPublish,
-                autorId: fallbackAuthor.id,
-                categorias: {
-                    set: [],
-                    connect: categoriasIds.map((id) => ({ id })),
+                autor: {
+                    connect: { id: "cmoeg3f4g0001jnglaa1314wy" },
+                },
+                categoria: {
+                    connect: { id: categoriasIds[0] },
                 },
             },
             create: {
@@ -279,23 +280,23 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 conteudo: conteudoCompleto,
                 tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
                 publicado: shouldPublish,
-                autorId: fallbackAuthor.id,
-                categorias: {
-                    connect: categoriasIds.map((id) => ({ id })),
+                autor: {
+                    connect: { id: "cmoeg3f4g0001jnglaa1314wy" },
+                },
+                categoria: {
+                    connect: { id: categoriasIds[0] },
                 },
             },
             select: { id: true },
         });
 
-        await prisma.postFoto.deleteMany({
+        await prisma.foto.deleteMany({
             where: { postId: savedPost.id },
         });
 
-        const coverPhoto = await prisma.postFoto.create({
+        const coverPhoto = await prisma.foto.create({
             data: {
                 url: publicImageUrl,
-                legenda: post.about ?? undefined,
-                ordem: 0,
                 postId: savedPost.id,
             },
             select: { id: true },

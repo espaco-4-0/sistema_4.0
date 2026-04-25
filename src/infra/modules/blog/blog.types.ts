@@ -1,3 +1,13 @@
+export type BlogComment = {
+    id: string;
+    conteudo: string;
+    createdAt: Date;
+    autor: {
+        id: string;
+        nomeCompleto: string;
+    };
+};
+
 export type BlogPost = {
     id: string;
     titulo: string;
@@ -8,13 +18,23 @@ export type BlogPost = {
     publicado: boolean;
     createdAt: Date;
     updatedAt: Date;
-    capaImagemId: string | null;
     autorId: string;
-    fotos: { url: string }[];
-    categorias: { nome: string }[];
+    foto?: { url: string } | null;
+    categoria?: { nome: string } | null;
     autor: { nomeCompleto: string };
     likesCount: number;
+    commentsCount: number;
     isLiked: boolean;
+};
+
+export type BlogCommentsResponse = {
+    data: BlogComment[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 };
 
 export type BlogListResponse = {

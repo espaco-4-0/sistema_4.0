@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 
-import type { BlogCard, BlogPost } from "./blog.types";
+import type { BlogCard, BlogCommentsResponse, BlogPost } from "./blog.types";
 
 const FALLBACK_IMAGE = "fallback-image.png";
 
@@ -59,13 +59,20 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     }
 }
 
+export async function getPostComments(slug: string, page: number): Promise<BlogCommentsResponse> {
+    const { data } = await api.get<BlogCommentsResponse>(`/api/blog/${encodeURIComponent(slug)}/comentario`, {
+        params: { page },
+    });
+    return data;
+}
+
 export function normalizePostToCard(post: BlogPost): BlogCard {
     return {
         id: String(post.id),
         slug: post.slug,
-        category: post.categorias?.[0]?.nome?.trim() || "Geral",
+        category: post.categoria?.nome?.trim() || "Geral",
         title: post.titulo?.trim() || "Notícia sem título",
-        image: post.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
+        image: post.foto?.url?.trim() || FALLBACK_IMAGE,
         excerpt: post.resumo?.trim() || post.conteudo?.slice(0, 140) || "Leia a notícia completa para mais detalhes.",
         author: post.autor.nomeCompleto || "Espaço 4.0",
         readingTime: post.tempoDeLeitura || 5,
@@ -90,4 +97,12 @@ export async function toggleLike(postId: string, isLiked: boolean): Promise<void
     } else {
         await api.post("/api/blog/curtida", { postId });
     }
+}
+
+export async function postComment(postId: string, comment: string): Promise<void> {
+    await api.post("/api/blog/comentario", { postId, comment });
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+    await api.delete(`/api/blog/comentario/${commentId}`);
 }

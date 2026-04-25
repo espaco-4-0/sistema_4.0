@@ -55,10 +55,8 @@ export async function GET(req: NextRequest) {
             };
 
         if (category)
-            where.categorias = {
-                some: {
-                    nome: category,
-                },
+            where.categoria = {
+                nome: category,
             };
 
         if (includeArchived === false || includeArchived === undefined) where.publicado = true;
@@ -74,10 +72,10 @@ export async function GET(req: NextRequest) {
                 orderBy: { createdAt: "desc" },
                 where,
                 include: {
-                    fotos: {
+                    foto: {
                         select: { url: true },
                     },
-                    categorias: {
+                    categoria: {
                         select: { nome: true },
                     },
                     autor: {
@@ -123,10 +121,12 @@ export async function POST(req: NextRequest) {
 
         const { title, slug, content, published, file, summary, category } = validatedData.data;
 
-        if (category) {
-            const haveCategory = await prisma.postCategoria.findUnique({ where: { nome: category } });
-            if (!haveCategory) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
+        if (!category) {
+            return NextResponse.json({ error: "Categoria é obrigatória" }, { status: 422 });
         }
+
+        const haveCategory = await prisma.postCategoria.findUnique({ where: { nome: category } });
+        if (!haveCategory) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
 
         let path: string | null = null;
         let url: string | undefined = undefined;
@@ -153,31 +153,25 @@ export async function POST(req: NextRequest) {
                         titulo: title,
                         conteudo: content,
                         slug,
-                        autorId: session.user.id,
+                        autor: {
+                            connect: { id: session.user.id },
+                        },
                         publicado: published,
                         resumo: summary,
                         tempoDeLeitura: estimateReadingTimeInMinutes(content),
-                        categorias: category
-                            ? {
-                                  connect: { nome: category },
-                              }
-                            : undefined,
+                        categoria: {
+                            connect: { nome: category },
+                        },
                     },
                 });
 
-                const foto = await tx.postFoto.create({
+                const foto = await tx.foto.create({
                     data: {
                         url: url ? url : path!,
                         postId: post.id,
                     },
                 });
 
-                await tx.post.update({
-                    where: { id: post.id },
-                    data: {
-                        capaImagemId: foto.id,
-                    },
-                });
             });
 
             return NextResponse.json({ message: "Post criado", ...(url && { url: url }) }, { status: 201 });

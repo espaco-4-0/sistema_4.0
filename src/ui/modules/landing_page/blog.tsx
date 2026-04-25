@@ -53,8 +53,8 @@ function normalizeNews(items: BlogPost[]): NewsCard[] {
                 slug: item.slug?.trim() || id,
                 title: item.titulo?.trim() || "Notícia sem título",
                 summary: item.resumo?.trim() || "Leia a notícia completa para mais detalhes.",
-                category: item.categorias?.[0]?.nome?.trim() || "Geral",
-                imageUrl: item.fotos?.[0]?.url?.trim() || FALLBACK_IMAGE,
+                category: item.categoria?.nome?.trim() || "Geral",
+                imageUrl: item.foto?.url?.trim() || FALLBACK_IMAGE,
             };
         })
         .filter((item): item is NewsCard => Boolean(item));
@@ -270,7 +270,6 @@ export default function Blog() {
                                                           : "gap-1 p-4 md:p-5"
                                                 }`}
                                             >
-                                                {/* badge de categoria */}
                                                 {variant !== "small" && (
                                                     <span className="bg-yellow-primary py-1.5 px-2 sm:px-5 rounded-2xl text-xs font-bold w-fit">
                                                         {noticia.category}
