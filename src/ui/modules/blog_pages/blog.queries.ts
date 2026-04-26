@@ -47,7 +47,7 @@ export function usePostComments(slug: string, page: number) {
 export function useCategories() {
     return useQuery({
         queryKey: ["categories"],
-        queryFn: getCategories,
+        queryFn: () => getCategories(),
     });
 }
 

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+
 const imageSchema = z.custom<File>(
     (val) => {
         if (!(val instanceof File)) return false;
@@ -21,6 +23,11 @@ export const getBlogSchema = z.object({
         if (val === "false") return false;
         return val;
     }, z.boolean().optional()),
+    published: z.preprocess((val) => {
+        if (val === "true") return true;
+        if (val === "false") return false;
+        return val;
+    }, z.boolean().optional()),
 });
 
 export const postBlogSchema = z.object({
@@ -34,7 +41,12 @@ export const postBlogSchema = z.object({
         return val;
     }, z.boolean()),
     category: z.string().trim().min(1).max(30).optional(),
+    authorId: z.string().trim().min(1).max(36),
     file: imageSchema,
+});
+
+export const updateBlogSchema = postBlogSchema.extend({
+    file: imageSchema.optional(),
 });
 
 export const postIdBlogSchema = z.string().trim().min(1).max(36);

@@ -48,13 +48,24 @@ function normalizeNews(items: BlogPost[]): NewsCard[] {
             const id = String(item.id ?? "");
             if (!id) return null;
 
+            let imageUrl = item.foto?.url?.trim() || FALLBACK_IMAGE;
+            
+            // Se não for uma URL absoluta nem começar com barra, assume que é um caminho relativo
+            // ou um arquivo que deveria estar no bucket público mas veio sem o prefixo.
+            if (imageUrl && !imageUrl.startsWith("http") && !imageUrl.startsWith("/")) {
+                // Tentamos inferir se é um arquivo local ou do Supabase. 
+                // No sistema atual, imagens de blog vêm do Supabase.
+                // Se for apenas o nome do arquivo, deixamos o Next.js lidar com o erro ou tentamos um fallback.
+                imageUrl = `/${imageUrl}`;
+            }
+
             return {
                 id,
                 slug: item.slug?.trim() || id,
                 title: item.titulo?.trim() || "Notícia sem título",
                 summary: item.resumo?.trim() || "Leia a notícia completa para mais detalhes.",
                 category: item.categoria?.nome?.trim() || "Geral",
-                imageUrl: item.foto?.url?.trim() || FALLBACK_IMAGE,
+                imageUrl,
             };
         })
         .filter((item): item is NewsCard => Boolean(item));

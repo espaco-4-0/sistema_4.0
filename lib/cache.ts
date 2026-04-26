@@ -1,5 +1,7 @@
 import { redis } from "./redis";
 
+const isRedisConfigured = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
 function buildVersionKey(namespace: string): string {
     return `cache:version:${namespace}`;
 }
@@ -9,10 +11,12 @@ function buildDataKey(namespace: string, version: number, key: string): string {
 }
 
 async function getNamespaceVersion(namespace: string): Promise<number> {
+    if (!isRedisConfigured) return 1;
     return (await redis.get<number>(buildVersionKey(namespace))) ?? 1;
 }
 
 export async function invalidateCacheNamespace(namespace: string): Promise<void> {
+    if (!isRedisConfigured) return;
     await redis.incr(buildVersionKey(namespace));
 }
 
@@ -22,6 +26,8 @@ export async function rememberCache<T>(
     loader: () => Promise<T>,
     ttlSeconds = 60
 ): Promise<T> {
+    if (!isRedisConfigured) return loader();
+
     const version = await getNamespaceVersion(namespace);
     const cacheKey = buildDataKey(namespace, version, key);
 

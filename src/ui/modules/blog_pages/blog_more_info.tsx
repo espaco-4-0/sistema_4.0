@@ -65,8 +65,7 @@ export default function BlogMoreInfo() {
     }, [listData, slug]);
 
     const paragraphs = useMemo(() => contentToParagraphs(news?.conteudo), [news?.conteudo]);
-    const lead = paragraphs[0] || news?.resumo || "";
-    const bodyParagraphs = paragraphs.length > 1 ? paragraphs.slice(1) : [];
+    const summary = news?.resumo || "";
 
     const handleLike = () => {
         if (!session) {
@@ -131,7 +130,7 @@ export default function BlogMoreInfo() {
 
                 <h1 className="text-4xl md:text-5xl font-bold text-black mb-6 leading-tight">{title}</h1>
 
-                {lead ? <p className="text-xl text-gray-600 mb-8">{lead}</p> : null}
+                {summary ? <p className="text-xl text-gray-600 mb-8 font-medium">{summary}</p> : null}
 
                 <div className="flex flex-wrap items-center gap-6 mb-6 text-gray-600">
                     <div className="flex items-center gap-2">
@@ -183,8 +182,8 @@ export default function BlogMoreInfo() {
                 </div>
 
                 <div className="prose prose-lg max-w-none mb-12">
-                    {bodyParagraphs.length > 0 ? (
-                        bodyParagraphs.map((paragraph, index) => (
+                    {paragraphs.length > 0 ? (
+                        paragraphs.map((paragraph, index) => (
                             <div key={`${paragraph}-${index}`} className="mb-6">
                                 <p className="text-gray-700 leading-relaxed text-lg">{paragraph}</p>
                             </div>

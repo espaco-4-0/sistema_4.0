@@ -6,10 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const { searchParams } = new URL(req.url);
+        const includeAll = searchParams.get("includeAll") === "true";
+
         const categories = await prisma.postCategoria.findMany({
-            where: {
+            where: includeAll ? {} : {
                 posts: {
                     some: {
                         publicado: true,
@@ -27,6 +30,9 @@ export async function GET() {
                     },
                 },
             },
+            orderBy: {
+                nome: "asc"
+            }
         });
 
         return NextResponse.json({ data: categories }, { status: 200 });

@@ -25,6 +25,7 @@ export type GetPostsParams = {
     category?: string;
     name?: string;
     includeArchived?: boolean;
+    published?: boolean;
 };
 
 export async function getPosts(params: GetPostsParams = {}): Promise<BlogListResponse> {
@@ -36,6 +37,7 @@ export async function getPosts(params: GetPostsParams = {}): Promise<BlogListRes
             category: params.category,
             name: params.name,
             includeArchived: params.includeArchived,
+            published: params.published,
         },
     });
 
@@ -80,8 +82,8 @@ export function normalizePostToCard(post: BlogPost): BlogCard {
     };
 }
 
-export async function getCategories() {
-    const res = await fetch("/api/blog/categoria");
+export async function getCategories(includeAll = false) {
+    const res = await fetch(`/api/blog/categoria${includeAll ? "?includeAll=true" : ""}`);
 
     if (!res.ok) {
         throw new Error("Erro ao buscar categorias");
@@ -105,4 +107,24 @@ export async function postComment(postId: string, comment: string): Promise<void
 
 export async function deleteComment(commentId: string): Promise<void> {
     await api.delete(`/api/blog/comentario/${commentId}`);
+}
+
+export async function updatePostStatus(slug: string, published: boolean): Promise<void> {
+    await api.patch(`/api/blog/${encodeURIComponent(slug)}`, { published });
+}
+
+export async function deletePost(slug: string): Promise<void> {
+    await api.delete(`/api/blog/${encodeURIComponent(slug)}`);
+}
+
+export async function createPost(data: FormData): Promise<void> {
+    await api.post("/api/blog", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+}
+
+export async function updatePost(slug: string, data: FormData): Promise<void> {
+    await api.put(`/api/blog/${encodeURIComponent(slug)}`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
 }
