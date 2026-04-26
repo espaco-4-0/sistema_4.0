@@ -12,17 +12,43 @@ import Link from "next/link";
 export default function RecoveryPassword() {
     const [sent, setSent] = useState(false);
     const [email, setEmail] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const sendIconRef = useRef<SendIconHandle>(null);
 
     const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!isValidEmail(email)) return;
-        setSent(true);
-        setTimeout(() => {
-            sendIconRef.current?.startAnimation();
-        }, 100);
+
+        setErrorMessage("");
+
+        try {
+            setIsLoading(true);
+
+            const res = await fetch("/api/auth/recovery", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setErrorMessage(data.message || "Erro ao enviar o e-mail. Tente novamente.");
+                return;
+            }
+
+            setSent(true);
+            setTimeout(() => {
+                sendIconRef.current?.startAnimation();
+            }, 100);
+        } catch {
+            setErrorMessage("Erro de conexão. Verifique sua internet e tente novamente.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -67,6 +93,7 @@ export default function RecoveryPassword() {
                                 onClick={() => {
                                     setSent(false);
                                     setEmail("");
+                                    setErrorMessage("");
                                 }}
                                 className="cursor-pointer underline text-gray-600 bg-white hover:bg-white p-0 hover:text-yellow-primary"
                             >
@@ -92,16 +119,25 @@ export default function RecoveryPassword() {
                                 placeholder="Digite seu e-mail"
                                 className="h-12 lg:h-9"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    setErrorMessage("");
+                                }}
                             />
                         </div>
 
+                        {errorMessage && (
+                            <div className="w-full p-3 rounded text-sm bg-red-50 text-red-800 border border-red-200 -mt-4">
+                                {errorMessage}
+                            </div>
+                        )}
+
                         <Button
                             onClick={handleSend}
-                            disabled={!isValidEmail(email)}
+                            disabled={!isValidEmail(email) || isLoading}
                             className="w-full h-12 bg-gray-900 text-yellow-primary mt-2 hover:cursor-pointer hover:bg-gray-950 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-yellow-300 transition-all"
                         >
-                            Link para redifinição
+                            {isLoading ? "Enviando..." : "Link para redefinição"}
                         </Button>
                     </div>
                 )}
