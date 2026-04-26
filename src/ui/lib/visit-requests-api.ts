@@ -36,6 +36,11 @@ export function apiVisitToRequest(visit: any): VisitRequest {
             fileSizeKb: doc.fileSizeKb,
             uploadedAt: typeof doc.uploadedAt === "string" ? doc.uploadedAt : new Date(doc.uploadedAt).toISOString(),
         })),
+        paradas: (visit.paradas ?? []).map((p: any) => ({
+            id: p.id,
+            localId: p.localId,
+            nome: p.local?.nome ?? "Desconhecido",
+        })),
         mensagem: visit.mensagem ?? undefined,
         status: visit.status ?? "pendente",
         processStage: visit.processStage ?? "aguardando_email",
@@ -57,33 +62,49 @@ export function apiVisitToRequest(visit: any): VisitRequest {
     };
 }
 
-/** Converte evento público da API para CalendarEvent */
+/** Converte evento público da API para CalendarEvent (agrega metadados de feriado quando presentes) */
 export function publicVisitToCalendarEvent(visit: VisitPublicEvent): CalendarEvent {
-    const [startHour = 9, startMinute = 0] = visit.horaInicio.split(":").map(Number);
-    const [endHour = 10, endMinute = 0] = visit.horaFim.split(":").map(Number);
+    const [startHour = 9, startMinute = 0] = (visit.horaInicio ?? "").split(":").map(Number);
+    const [endHour = 10, endMinute = 0] = (visit.horaFim ?? "").split(":").map(Number);
 
     // dataVisita vem como ISO string da API — parsear como data local para evitar offset de fuso
-    const datePart = visit.dataVisita.slice(0, 10); // "yyyy-MM-dd"
+    const datePart = String(visit.dataVisita).slice(0, 10); // "yyyy-MM-dd"
     const baseDate = new Date(`${datePart}T00:00:00`);
 
     const start = new Date(baseDate);
-    start.setHours(startHour, startMinute, 0, 0);
+    start.setHours(Number.isFinite(startHour) ? startHour : 9, Number.isFinite(startMinute) ? startMinute : 0, 0, 0);
 
     const end = new Date(baseDate);
-    end.setHours(endHour, endMinute, 0, 0);
-    if (end <= start) end.setHours(endHour + 1, endMinute, 0, 0);
+    end.setHours(Number.isFinite(endHour) ? endHour : 10, Number.isFinite(endMinute) ? endMinute : 0, 0, 0);
+    if (end <= start)
+        end.setHours((Number.isFinite(endHour) ? endHour : 10) + 1, Number.isFinite(endMinute) ? endMinute : 0, 0, 0);
+
+    // Detect holiday pseudo-events coming from the API:
+    // the backend may set `isHoliday: true`, or use status 'feriado', or include `holidayName`.
+    const apiAny = visit as any;
+    const isHoliday =
+        apiAny?.isHoliday === true || apiAny?.holidayName !== undefined || (visit.status as any) === "feriado";
+    const holidayName =
+        apiAny?.holidayName ??
+        (isHoliday && typeof visit.instituicao === "string"
+            ? visit.instituicao.replace(/^Feriado:\s*/i, "")
+            : undefined);
 
     const type: "agendado" | "aprovado" = visit.status === "aprovado" ? "aprovado" : "agendado";
 
+    const title = isHoliday ? `Feriado: ${holidayName ?? visit.instituicao}` : `Visita: ${visit.instituicao}`;
+
     return {
         id: visit.id,
-        title: `Visita: ${visit.instituicao}`,
+        title,
         start,
         end,
         type,
-        description: "Solicitação de visita.",
-        time: `${visit.horaInicio} - ${visit.horaFim}`,
+        description: isHoliday ? `Feriado: ${holidayName ?? visit.instituicao}` : "Solicitação de visita.",
+        time: `${visit.horaInicio ?? "00:00"} - ${visit.horaFim ?? "00:00"}`,
         local: "Espaço 4.0",
+        // holiday metadata (optional)
+        ...(isHoliday ? { isHoliday: true, holidayName: holidayName ?? null } : {}),
     };
 }
 
@@ -102,9 +123,6 @@ export async function submitVisitRequest(formData: FormData): Promise<any> {
     return res.json();
 }
 
-// ─── GET ──────────────────────────────────────────────────────────────────────
-
-/** Busca eventos públicos de visitas para exibir no calendário */
 export async function getPublicVisitEvents(): Promise<VisitPublicEvent[]> {
     try {
         const res = await fetch("/api/visits");

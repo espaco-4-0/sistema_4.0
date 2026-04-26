@@ -1,5 +1,5 @@
-import { getSignedDownloadUrl } from "@/src/lib/supabase-server";
 import { prisma } from "@/src/infra/data/prisma";
+import { getSignedDownloadUrl } from "@/src/lib/supabase-server";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -32,7 +32,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
             return NextResponse.json({ message: "Documento não encontrado" }, { status: 404 });
         }
 
-        // Gera URL assinada (válida por 1h) e redireciona o browser para o Supabase
         const signedUrl = await getSignedDownloadUrl(doc.storagePath);
 
         return NextResponse.redirect(signedUrl);

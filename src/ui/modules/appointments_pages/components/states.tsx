@@ -1,4 +1,4 @@
-import React from "react";
+import { CalendarDaysIcon } from "@/src/ui/components/ui/calendar-days";
 import { Calendar as CalendarIcon, CheckCircle2, Cog, XCircle } from "lucide-react";
 
 export const IdleState = () => (
@@ -44,3 +44,39 @@ export const ErrorState = ({ onBack, message }: { onBack: () => void; message?: 
         </button>
     </>
 );
+
+export const WeekendState = ({ target }: { target: Date }) => {
+    const isSunday = target.getDay() === 0;
+    const isSaturday = target.getDay() === 6;
+
+    if (!isSunday && !isSaturday) return null;
+
+    return (
+        <div className="flex flex-col items-center justify-center gap-2">
+            <CalendarIcon className="w-10 h-10 text-gray-600" />
+            <h3 className="text-gray-800 font-bold text-sm uppercase">
+                {isSaturday ? "Sábado Indisponível" : "Domingo Indisponível"}
+            </h3>
+            <p className="text-gray-600 text-sm text-center">
+                {isSaturday
+                    ? "Infelizmente, aos sábados o Espaço 4.0 não está aberto para visitas externas."
+                    : "Aos domingos o Espaço 4.0 está fechado para atividades externas."}
+            </p>
+        </div>
+    );
+};
+
+export const PastState = ({ date }: { date: Date }) => {
+    const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+
+    if (!isPast) return null;
+
+    return (
+        <div className="flex flex-col items-center justify-center gap-2">
+            <CalendarDaysIcon className=" text-gray-600" size={40} />
+            <p className="text-gray-600 text-sm text-center leading-relaxed">
+                Dias que já se passaram não estao disponíveis para solicitações de agendamento
+            </p>
+        </div>
+    );
+};

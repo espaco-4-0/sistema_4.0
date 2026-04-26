@@ -99,7 +99,7 @@ export function Hero() {
                     </motion.div>
 
                     <motion.div whileHover="hover" whileTap={{ scale: 0.97 }} variants={buttonVariants}>
-                        <Link href="/calendar">
+                        <Link href="/visita">
                             <Button
                                 size="lg"
                                 className="bg-white text-black hover:bg-gray-100 cursor-pointer text-base px-6 gap-2"
