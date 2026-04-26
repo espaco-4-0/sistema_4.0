@@ -17,6 +17,7 @@ import { useNewsList } from "./queries/news.queries";
 import { PostModal } from "./components/news/post-modal";
 import { ConfirmModal } from "./components/news/confirm-modal";
 import { PreviewModal } from "./components/news/preview-modal";
+import { CategoryModal } from "./components/news/category-modal";
 import { PostList } from "./components/news/post-list";
 
 export function NewsControl() {
@@ -35,6 +36,7 @@ export function NewsControl() {
         post: BlogPost;
     } | null>(null);
     const [postToEdit, setPostToEdit] = useState<BlogPost | null>(null);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 9;
 
@@ -111,12 +113,20 @@ export function NewsControl() {
                     <h2 className="text-2xl font-bold text-gray-800">Controle de Notícias</h2>
                     <p className="text-gray-500 text-sm">Gerencie os posts do blog e aprove novas solicitações.</p>
                 </div>
-                <button
-                    onClick={() => handleOpenEdit(null)}
-                    className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-semibold cursor-pointer"
-                >
-                    <Plus size={18} /> Novo Post
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsCategoryModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition shadow-sm text-sm font-semibold cursor-pointer border border-gray-200"
+                    >
+                        Gerenciar Categorias
+                    </button>
+                    <button
+                        onClick={() => handleOpenEdit(null)}
+                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition shadow-sm text-sm font-semibold cursor-pointer"
+                    >
+                        <Plus size={18} /> Novo Post
+                    </button>
+                </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -216,6 +226,11 @@ export function NewsControl() {
                 isOpen={isPreviewOpen}
                 onOpenChange={setIsPreviewOpen}
                 post={selectedPost}
+            />
+
+            <CategoryModal
+                isOpen={isCategoryModalOpen}
+                onOpenChange={setIsCategoryModalOpen}
             />
         </div>
     );

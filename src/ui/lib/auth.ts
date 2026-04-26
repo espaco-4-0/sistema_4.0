@@ -11,7 +11,6 @@ export function isAdmin(token: Token): boolean {
     return !!token && typeof token !== "string" && token.role === "ADMIN";
 }
 
-
 export async function requireAdmin(request: NextRequest): Promise<NextResponse | null> {
     const token = await getAuthToken(request);
 

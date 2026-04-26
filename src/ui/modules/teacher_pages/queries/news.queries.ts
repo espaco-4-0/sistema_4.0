@@ -1,8 +1,11 @@
 import {
+    createCategory,
     createPost,
+    deleteCategory,
     deletePost,
     getCategories,
     getPosts,
+    updateCategory,
     updatePost,
     updatePostStatus,
 } from "@/src/infra/modules/blog/blog.service";
@@ -122,6 +125,52 @@ export function useUpdatePost() {
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.error || "Erro ao atualizar post.");
+        },
+    });
+}
+
+export function useCreateCategory() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (name: string) => createCategory(name),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: newsKeys.categories(true) });
+            queryClient.invalidateQueries({ queryKey: newsKeys.categories(false) });
+            toast.success("Categoria criada com sucesso!");
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.error || "Erro ao criar categoria.");
+        },
+    });
+}
+
+export function useUpdateCategory() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, name }: { id: string; name: string }) => updateCategory(id, name),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: newsKeys.all });
+            toast.success("Categoria atualizada com sucesso!");
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.error || "Erro ao atualizar categoria.");
+        },
+    });
+}
+
+export function useDeleteCategory() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => deleteCategory(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: newsKeys.all });
+            toast.success("Categoria excluída com sucesso!");
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.error || "Erro ao excluir categoria.");
         },
     });
 }

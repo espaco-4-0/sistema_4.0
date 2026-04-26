@@ -83,14 +83,22 @@ export function normalizePostToCard(post: BlogPost): BlogCard {
 }
 
 export async function getCategories(includeAll = false) {
-    const res = await fetch(`/api/blog/categoria${includeAll ? "?includeAll=true" : ""}`);
+    const { data } = await api.get("/api/blog/categoria", {
+        params: { includeAll }
+    });
+    return data.data ?? [];
+}
 
-    if (!res.ok) {
-        throw new Error("Erro ao buscar categorias");
-    }
+export async function createCategory(name: string): Promise<void> {
+    await api.post("/api/blog/categoria", { name });
+}
 
-    const json = await res.json();
-    return json.data ?? [];
+export async function updateCategory(id: string, name: string): Promise<void> {
+    await api.patch(`/api/blog/categoria/${id}`, { name });
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+    await api.delete(`/api/blog/categoria/${id}`);
 }
 
 export async function toggleLike(postId: string, isLiked: boolean): Promise<void> {
