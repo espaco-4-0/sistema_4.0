@@ -96,6 +96,21 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         <p>
                             <strong>Status:</strong> {request.status}
                         </p>
+                        {request.paradas && request.paradas.length > 0 && (
+                            <div className="col-span-full mt-2">
+                                <p className="font-semibold mb-1">Roteiro desejado:</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {request.paradas.map((p) => (
+                                        <span
+                                            key={p.id}
+                                            className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-medium border border-blue-100"
+                                        >
+                                            {p.nome}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <span

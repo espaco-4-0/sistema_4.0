@@ -146,7 +146,7 @@ export default function ComeAndDiscover() {
                 >
                     {/* Botão Agendar: calendário gira e seta avança no hover, escala no click */}
                     <MotionLink
-                        href="/calendar"
+                        href="/visita"
                         variants={{
                             rest: { scale: 1 },
                             hover: { scale: 1.04 },

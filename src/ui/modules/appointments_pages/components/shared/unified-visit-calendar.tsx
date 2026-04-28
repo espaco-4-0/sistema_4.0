@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { Button } from "@/src/ui/components/ui/button";
-import { format, getDay, isSameDay, parse, startOfWeek } from "date-fns";
+import { format, getDay, isSameDay, isSameMonth, isToday, isWeekend, parse, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
@@ -19,12 +19,24 @@ type ToolbarProps = {
 };
 
 function Toolbar({ date, onNavigate }: ToolbarProps) {
+    const today = new Date();
     const month = format(date, "MMMM", { locale: ptBR });
     const year = format(date, "yyyy");
 
-    const handlePrev = useCallback(() => onNavigate("PREV"), [onNavigate]);
+    const isCurrentMonth = isSameMonth(date, today);
+
+    const maxYear = 2026;
+    const isMaxDate = date.getFullYear() >= maxYear && date.getMonth() === 11;
+
+    const handlePrev = useCallback(() => {
+        if (!isCurrentMonth) onNavigate("PREV");
+    }, [onNavigate, isCurrentMonth]);
+
     const handleToday = useCallback(() => onNavigate("TODAY"), [onNavigate]);
-    const handleNext = useCallback(() => onNavigate("NEXT"), [onNavigate]);
+
+    const handleNext = useCallback(() => {
+        if (!isMaxDate) onNavigate("NEXT");
+    }, [onNavigate, isMaxDate]);
 
     return (
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center px-2 pb-4 lg:pb-6 pt-1 gap-3 lg:gap-0">
@@ -43,7 +55,8 @@ function Toolbar({ date, onNavigate }: ToolbarProps) {
                 <Button
                     onClick={handlePrev}
                     variant="outline"
-                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
+                    disabled={isCurrentMonth}
+                    className={`h-9 lg:h-10 px-2 lg:px-4 ${isCurrentMonth ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
                     type="button"
                 >
                     <ChevronLeft className="size-4 lg:size-5" />
@@ -58,7 +71,8 @@ function Toolbar({ date, onNavigate }: ToolbarProps) {
                 <Button
                     onClick={handleNext}
                     variant="outline"
-                    className="h-9 lg:h-10 cursor-pointer px-2 lg:px-4"
+                    disabled={isMaxDate}
+                    className={`h-9 lg:h-10 px-2 lg:px-4 ${isMaxDate ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
                     type="button"
                 >
                     <ChevronRight className="size-4 lg:size-5" />
@@ -96,8 +110,13 @@ export function UnifiedVisitCalendar({
             date={viewDate}
             onNavigate={onViewDateChange}
             selectable
-            onSelectSlot={(slot) => onSelectDay(slot.start)}
+            onSelectSlot={(slot) => {
+                onSelectDay(slot.start);
+            }}
             onSelectEvent={(event) => {
+                if ((event as any).isHoliday) {
+                    return; // Não faz nada ao clicar no feriado
+                }
                 onSelectDay(event.start);
                 onSelectEvent?.(event as CalendarEvent);
             }}
@@ -108,23 +127,51 @@ export function UnifiedVisitCalendar({
             components={{ toolbar: Toolbar }}
             dayPropGetter={(date) => {
                 const hasEvents = events.filter((event) => isSameDay(event.start, date));
-                const isToday = isSameDay(date, new Date());
-                let classes = "transition-all cursor-pointer hover:opacity-80 ";
+                const isTodayDay = isToday(date);
+                const isWeekendDay = isWeekend(date);
+                const isPastDay = date < new Date(new Date().setHours(0, 0, 0, 0));
 
-                if (isSameDay(selectedDate, date)) classes += "!bg-blue-50 ";
-                else if (hasEvents.some((event) => event.type === "aprovado")) classes += "!bg-green-50 ";
-                else if (hasEvents.some((event) => event.type === "agendado")) classes += "!bg-amber-50 ";
-                else classes += "!bg-gray-50 ";
+                const holidayEvent = hasEvents.find((ev) => (ev as any).isHoliday);
+                const isHolidayDay = Boolean(holidayEvent);
 
-                if (isToday) classes += "!border-2 !border-yellow-primary";
-                return { className: classes };
+                let classes = "transition-all ";
+
+                if (isHolidayDay) {
+                    classes += "!bg-pink-50 text-pink-800 cursor-not-allowed ";
+                } else if (isWeekendDay || isPastDay) {
+                    classes += "!bg-gray-100 cursor-not-allowed ";
+                } else if (isSameDay(selectedDate, date)) {
+                    classes += "!bg-blue-100 cursor-pointer hover:opacity-80 ";
+                } else if (hasEvents.some((event) => event.type === "aprovado")) {
+                    classes += "!bg-green-100 cursor-pointer hover:opacity-80 ";
+                } else if (hasEvents.some((event) => event.type === "agendado")) {
+                    classes += "!bg-amber-100 cursor-pointer hover:opacity-80 ";
+                } else {
+                    classes += "!bg-white cursor-pointer hover:opacity-80 ";
+                }
+
+                if (isTodayDay) classes += "!border-2 !border-yellow-primary";
+
+                return {
+                    className: classes,
+                    style: {},
+                    ...(isHolidayDay ? { title: (holidayEvent as any)?.holidayName ?? "Feriado" } : {}),
+                };
             }}
-            eventPropGetter={(event) => ({
-                className:
-                    event.type === "agendado"
-                        ? "!bg-yellow-primary !text-black !text-[10px] font-bold border-none"
-                        : "!bg-green-500 !text-white !text-[10px] font-bold border-rounded-xl",
-            })}
+            eventPropGetter={(event) => {
+                const isHoliday = (event as any).isHoliday || (event as any).type === "holiday";
+                if (isHoliday) {
+                    return {
+                        className: "!bg-pink-400 !text-white !text-[10px] font-bold border-none rounded-md px-1",
+                    };
+                }
+                return {
+                    className:
+                        event.type === "agendado"
+                            ? "!bg-yellow-primary !text-black !text-[10px] font-bold border-none rounded-md px-1"
+                            : "!bg-green-500 !text-white !text-[10px] font-bold border-none rounded-md px-1",
+                };
+            }}
             messages={{ next: ">", previous: "<", today: "Hoje" }}
         />
     );
