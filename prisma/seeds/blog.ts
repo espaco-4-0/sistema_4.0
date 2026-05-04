@@ -366,19 +366,16 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
                 categoria: {
                     connect: { id: categoriasIds[0] },
                 },
+                foto: {
+                    create: {
+                        url: post.image,
+                        destaque: true,
+                    },
+                },
             },
             select: { id: true },
         });
 
-        await prisma.foto.create({
-            data: {
-                url: post.image,
-                postId: savedPost.id,
-                destaque: true,
-            },
-        });
-
-        // Adicionar Curtidas (Likes) - entre 5 e 20 por post
         const numLikes = Math.floor(Math.random() * 15) + 5;
         const shuffledUsersForLikes = [...users].sort(() => 0.5 - Math.random());
         const likers = shuffledUsersForLikes.slice(0, Math.min(numLikes, users.length));
@@ -397,11 +394,11 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
         if (i % 6 === 0) numComments = 12; // A cada 6 posts, um terá 12 comentários
 
         const shuffledCommenters = [...users].sort(() => 0.5 - Math.random());
-        
+
         for (let j = 0; j < numComments; j++) {
             const commenter = shuffledCommenters[j % users.length];
             const content = commentsPool[j % commentsPool.length];
-            
+
             await prisma.comentario.create({
                 data: {
                     conteudo: content,

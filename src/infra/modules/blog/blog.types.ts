@@ -19,8 +19,8 @@ export type BlogPost = {
     createdAt: Date;
     updatedAt: Date;
     autorId: string;
-    foto?: { url: string } | null;
-    categoria?: { nome: string } | null;
+    foto: { url: string };
+    categoria: { nome: string };
     autor: { nomeCompleto: string };
     likesCount: number;
     commentsCount: number;

@@ -43,7 +43,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
 
         const { id } = await params;
         const validatedId = postIdBlogSchema.safeParse(id);
-        if (!validatedId.success) return NextResponse.json({ error: "Dado inválido" }, { status: 500 });
+        if (!validatedId.success) return NextResponse.json({ error: "Dado inválido" }, { status: 422 });
 
         await prisma.postCategoria.delete({
             where: { id },
@@ -55,7 +55,10 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
             if (err.code === "P2025")
                 return NextResponse.json({ error: "Não há categoria com esse ID" }, { status: 404 });
             if (err.code === "P2003")
-                return NextResponse.json({ error: "Não é possível excluir uma categoria que possui posts vinculados" }, { status: 409 });
+                return NextResponse.json(
+                    { error: "Não é possível excluir uma categoria que possui posts vinculados" },
+                    { status: 409 }
+                );
         }
         console.error(err);
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });

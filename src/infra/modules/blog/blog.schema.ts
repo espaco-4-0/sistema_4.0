@@ -40,7 +40,7 @@ export const postBlogSchema = z.object({
         if (val === "false") return false;
         return val;
     }, z.boolean()),
-    category: z.string().trim().min(1).max(30).optional(),
+    category: z.string().trim().min(1).max(30),
     authorId: z.string().trim().min(1).max(36),
     file: imageSchema,
 });

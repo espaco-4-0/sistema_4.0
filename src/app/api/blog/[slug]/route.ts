@@ -1,12 +1,33 @@
+import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/infra/data/prisma";
-import { postSlugBlogSchema, updateBlogSchema, ALLOWED_TYPES } from "@/src/infra/modules/blog/blog.schema";
+import { ALLOWED_TYPES, postSlugBlogSchema, updateBlogSchema } from "@/src/infra/modules/blog/blog.schema";
+import { estimateReadingTimeInMinutes } from "@/src/lib/reading-time";
+import { storage } from "@/src/lib/storage";
+import { logger } from "@/src/ui/lib/logger";
+import { fileTypeFromBuffer } from "file-type";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { storage } from "@/src/lib/storage";
-import { fileTypeFromBuffer } from "file-type";
-import { estimateReadingTimeInMinutes } from "@/src/lib/reading-time";
-import { logger } from "@/src/ui/lib/logger";
+
+async function requireAdmin() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "ADMIN") {
+        return {
+            authorized: false as const,
+            response: NextResponse.json({ error: "Não autorizado" }, { status: 403 }),
+        };
+    }
+    return { authorized: true as const, session };
+}
+
+function handleError(err: unknown, context: string): NextResponse {
+    logger.error({ err }, context);
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        return NextResponse.json({ error: "Slug já existe" }, { status: 409 });
+    }
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+}
 
 export async function GET(_: Request, { params }: { params: Promise<{ slug: string }> }) {
     try {
@@ -22,28 +43,11 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
                 publicado: true,
             },
             include: {
-                foto: {
-                    select: { url: true },
-                },
-                categoria: {
-                    select: { nome: true },
-                },
-                autor: {
-                    select: { nomeCompleto: true },
-                },
-                _count: {
-                    select: { curtidas: true, comentarios: true },
-                },
-                curtidas: session?.user?.id
-                    ? {
-                        where: {
-                            userId: session.user.id,
-                        },
-                        select: {
-                            id: true,
-                        },
-                    }
-                    : false,
+                foto: { select: { url: true } },
+                categoria: { select: { nome: true } },
+                autor: { select: { nomeCompleto: true } },
+                _count: { select: { curtidas: true, comentarios: true } },
+                curtidas: session?.user?.id ? { where: { userId: session.user.id }, select: { id: true } } : false,
             },
         });
 
@@ -68,43 +72,29 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
 
         return NextResponse.json({ data }, { status: 200 });
     } catch (err) {
-        logger.error({ err }, "Erro interno no slug GET blog");
-        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+        return handleError(err, "Erro interno no slug GET blog");
     }
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ slug: string }> }) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
-            return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-        }
+        const guard = await requireAdmin();
+        if (!guard.authorized) return guard.response;
 
         const slug: string = (await params).slug;
-        const body = await req.json();
-        const { published } = body;
+        const { published } = await req.json();
 
-        const existingPost = await prisma.post.findUnique({
-            where: { slug },
-            include: { foto: true }
-        });
-
+        const existingPost = await prisma.post.findUnique({ where: { slug }, include: { foto: true } });
         if (!existingPost) {
             return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
         }
 
         const updatedPost = await prisma.$transaction(async (tx) => {
-            const post = await tx.post.update({
-                where: { slug },
-                data: { publicado: published },
-            });
+            const post = await tx.post.update({ where: { slug }, data: { publicado: published } });
 
             if (existingPost.publicado !== published && existingPost.foto) {
                 const result = await storage.changeVisibility(existingPost.foto.url, published);
-                await tx.foto.update({
-                    where: { id: existingPost.foto.id },
-                    data: { url: result.url || result.path }
-                });
+                await tx.foto.update({ where: { id: existingPost.foto.id }, data: { url: result.url || result.path } });
             }
 
             return post;
@@ -112,42 +102,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 
         return NextResponse.json({ data: updatedPost }, { status: 200 });
     } catch (err) {
-        logger.error({ err }, "Erro interno no PATCH blog");
-        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+        return handleError(err, "Erro interno no PATCH blog");
     }
 }
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ slug: string }> }) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
-            return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-        }
+        const guard = await requireAdmin();
+        if (!guard.authorized) return guard.response;
 
         const slug: string = (await params).slug;
-
-        await prisma.post.delete({
-            where: { slug },
-        });
+        await prisma.post.delete({ where: { slug } });
 
         return NextResponse.json({ message: "Post excluído com sucesso" }, { status: 200 });
     } catch (err) {
-        logger.error({ err }, "Erro interno no DELETE blog");
-        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+        return handleError(err, "Erro interno no DELETE blog");
     }
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ slug: string }> }) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
-            return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-        }
+        const guard = await requireAdmin();
+        if (!guard.authorized) return guard.response;
 
         const currentSlug: string = (await params).slug;
         const formData = await req.formData();
-        const dataObject = Object.fromEntries(formData.entries());
-        const validatedData = updateBlogSchema.safeParse(dataObject);
+        const validatedData = updateBlogSchema.safeParse(Object.fromEntries(formData.entries()));
 
         if (!validatedData.success) {
             return NextResponse.json({ error: "Dados inválidos", data: validatedData.error }, { status: 422 });
@@ -155,11 +135,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ slug: st
 
         const { title, slug: newSlug, content, published, file, summary, category, authorId } = validatedData.data;
 
-        const existingPost = await prisma.post.findUnique({
-            where: { slug: currentSlug },
-            include: { foto: true }
-        });
-
+        const existingPost = await prisma.post.findUnique({ where: { slug: currentSlug }, include: { foto: true } });
         if (!existingPost) {
             return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
         }
@@ -168,8 +144,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ slug: st
         let storagePath: string | null = null;
 
         if (file) {
-            const fileBytes = await file.arrayBuffer();
-            const fileBuffer = Buffer.from(fileBytes);
+            const fileBuffer = Buffer.from(await file.arrayBuffer());
             const detected = await fileTypeFromBuffer(fileBuffer);
 
             if (!detected || !ALLOWED_TYPES.includes(detected.mime)) {
@@ -198,45 +173,26 @@ export async function PUT(req: Request, { params }: { params: Promise<{ slug: st
                     publicado: published,
                     tempoDeLeitura: estimateReadingTimeInMinutes(content),
                     ...(category && {
-                        categoria: {
-                            connectOrCreate: {
-                                where: { nome: category },
-                                create: { nome: category },
-                            },
-                        },
+                        categoria: { connectOrCreate: { where: { nome: category }, create: { nome: category } } },
                     }),
-                    ...(authorId && {
-                        autor: {
-                            connect: { id: authorId },
-                        },
-                    }),
+                    ...(authorId && { autor: { connect: { id: authorId } } }),
                 },
             });
 
             if (file) {
-                await tx.foto.update({
-                    where: { postId: post.id },
-                    data: { url: fotoUrl },
-                });
+                await tx.foto.update({ where: { postId: post.id }, data: { url: fotoUrl } });
             }
 
             if (!file && existingPost.publicado !== published && existingPost.foto) {
                 const result = await storage.changeVisibility(existingPost.foto.url, published);
-                await tx.foto.update({
-                    where: { id: existingPost.foto.id },
-                    data: { url: result.url || result.path }
-                });
+                await tx.foto.update({ where: { id: existingPost.foto.id }, data: { url: result.url || result.path } });
             }
 
             return post;
         });
 
         return NextResponse.json({ data: updatedPost }, { status: 200 });
-    } catch (err: any) {
-        logger.error({ err }, "Erro interno no PUT blog");
-        if (err.code === "P2002") {
-            return NextResponse.json({ error: "Slug já existe" }, { status: 409 });
-        }
-        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    } catch (err) {
+        return handleError(err, "Erro interno no PUT blog");
     }
 }
