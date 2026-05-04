@@ -26,6 +26,7 @@ export function TextInput({
     onChange,
     placeholder,
     maxLength,
+    minLength,
     mono = false,
     className,
     ...props
@@ -34,9 +35,13 @@ export function TextInput({
     onChange: (v: string) => void;
     placeholder?: string;
     maxLength?: number;
+    minLength?: number;
     mono?: boolean;
     className?: string;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
+    const isBelowMin = minLength && value.length < minLength;
+    const isFull = maxLength && value.length >= maxLength;
+
     return (
         <div className={cn("relative group", className)}>
             <input
@@ -47,13 +52,19 @@ export function TextInput({
                 onChange={(e) => onChange(e.target.value)}
                 className={cn(
                     "w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-yellow-400 focus:bg-white transition-all text-gray-800 placeholder:text-gray-300 font-medium",
-                    mono && "font-mono text-xs py-3"
+                    mono && "font-mono text-xs py-3",
+                    isBelowMin && value.length > 0 && "border-orange-200"
                 )}
                 {...props}
             />
-            {maxLength && (
-                <span className="absolute right-4 bottom-4 text-[10px] font-bold text-gray-300 group-focus-within:text-yellow-500 transition-colors">
-                    {value.length}/{maxLength}
+            {(maxLength || minLength) && (
+                <span
+                    className={cn(
+                        "absolute right-4 bottom-4 text-[10px] font-bold transition-colors",
+                        isBelowMin ? "text-orange-400" : (isFull ? "text-red-400" : "text-gray-300 group-focus-within:text-yellow-500")
+                    )}
+                >
+                    {isBelowMin ? `${value.length} / mínimo ${minLength}` : `${value.length}${maxLength ? ` / ${maxLength}` : ""}`}
                 </span>
             )}
         </div>
@@ -65,6 +76,7 @@ export function TextArea({
     onChange,
     placeholder,
     maxLength,
+    minLength,
     minHeight = "100px",
     className,
     ...props
@@ -73,9 +85,13 @@ export function TextArea({
     onChange: (v: string) => void;
     placeholder?: string;
     maxLength?: number;
+    minLength?: number;
     minHeight?: string;
     className?: string;
 } & Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange">) {
+    const isBelowMin = minLength && value.length < minLength;
+    const isFull = maxLength && value.length >= maxLength;
+
     return (
         <div className={cn("relative group", className)}>
             <textarea
@@ -84,12 +100,20 @@ export function TextArea({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 style={{ minHeight }}
-                className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-yellow-400 focus:bg-white transition-all text-gray-800 placeholder:text-gray-300 font-medium resize-none"
+                className={cn(
+                    "w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-yellow-400 focus:bg-white transition-all text-gray-800 placeholder:text-gray-300 font-medium resize-none",
+                    isBelowMin && value.length > 0 && "border-orange-200"
+                )}
                 {...props}
             />
-            {maxLength && (
-                <span className="absolute right-4 bottom-4 text-[10px] font-bold text-gray-300 group-focus-within:text-yellow-500 transition-colors">
-                    {value.length}/{maxLength}
+            {(maxLength || minLength) && (
+                <span
+                    className={cn(
+                        "absolute right-4 bottom-4 text-[10px] font-bold transition-colors",
+                        isBelowMin ? "text-orange-400" : (isFull ? "text-red-400" : "text-gray-300 group-focus-within:text-yellow-500")
+                    )}
+                >
+                    {isBelowMin ? `${value.length} / mínimo ${minLength}` : `${value.length}${maxLength ? ` / ${maxLength}` : ""}`}
                 </span>
             )}
         </div>

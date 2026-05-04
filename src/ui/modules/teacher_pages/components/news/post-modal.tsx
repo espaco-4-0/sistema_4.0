@@ -117,6 +117,7 @@ export function PostModal({ isOpen, onOpenChange, postToEdit }: PostModalProps) 
                                     value={formData.titulo}
                                     placeholder="Ex: Novo Laboratório de Robótica..."
                                     maxLength={150}
+                                    minLength={10}
                                     onChange={(titulo) =>
                                         set({
                                             titulo,
@@ -245,6 +246,7 @@ export function PostModal({ isOpen, onOpenChange, postToEdit }: PostModalProps) 
                             onChange={(resumo) => set({ resumo })}
                             placeholder="Uma breve descrição que aparecerá nos cards da listagem..."
                             maxLength={500}
+                            minLength={20}
                         />
                     </Field>
 
@@ -255,6 +257,7 @@ export function PostModal({ isOpen, onOpenChange, postToEdit }: PostModalProps) 
                             placeholder="Conteúdo completo da notícia (suporta parágrafos)..."
                             maxLength={20000}
                             minHeight="400px"
+                            minLength={100}
                         />
                     </Field>
                 </div>
