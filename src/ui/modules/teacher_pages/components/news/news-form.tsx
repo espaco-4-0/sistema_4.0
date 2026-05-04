@@ -28,6 +28,7 @@ export function TextInput({
     maxLength,
     mono = false,
     className,
+    ...props
 }: {
     value: string;
     onChange: (v: string) => void;
@@ -35,7 +36,7 @@ export function TextInput({
     maxLength?: number;
     mono?: boolean;
     className?: string;
-}) {
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
     return (
         <div className={cn("relative group", className)}>
             <input
@@ -48,6 +49,7 @@ export function TextInput({
                     "w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-yellow-400 focus:bg-white transition-all text-gray-800 placeholder:text-gray-300 font-medium",
                     mono && "font-mono text-xs py-3"
                 )}
+                {...props}
             />
             {maxLength && (
                 <span className="absolute right-4 bottom-4 text-[10px] font-bold text-gray-300 group-focus-within:text-yellow-500 transition-colors">
@@ -65,6 +67,7 @@ export function TextArea({
     maxLength,
     minHeight = "100px",
     className,
+    ...props
 }: {
     value: string;
     onChange: (v: string) => void;
@@ -72,7 +75,7 @@ export function TextArea({
     maxLength?: number;
     minHeight?: string;
     className?: string;
-}) {
+} & Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange">) {
     return (
         <div className={cn("relative group", className)}>
             <textarea
@@ -82,6 +85,7 @@ export function TextArea({
                 onChange={(e) => onChange(e.target.value)}
                 style={{ minHeight }}
                 className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-yellow-400 focus:bg-white transition-all text-gray-800 placeholder:text-gray-300 font-medium resize-none"
+                {...props}
             />
             {maxLength && (
                 <span className="absolute right-4 bottom-4 text-[10px] font-bold text-gray-300 group-focus-within:text-yellow-500 transition-colors">

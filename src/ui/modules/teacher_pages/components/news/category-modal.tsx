@@ -1,15 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Plus, Tag, Trash2, Edit2, X, Check, Lock } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/src/ui/components/ui/dialog";
-import { toast } from "sonner";
-import { 
-    useCategories, 
-    useCreateCategory, 
-    useUpdateCategory, 
-    useDeleteCategory 
-} from "../../queries/news.queries";
+import { Check, Edit2, Loader2, Lock, Plus, Tag, Trash2, X } from "lucide-react";
+
+import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from "../../queries/news.queries";
 import { Field, TextInput } from "./news-form";
 
 interface CategoryModalProps {
@@ -32,26 +27,25 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
         createMutation.mutate(newCategory, {
             onSuccess: () => {
                 setNewCategory("");
-                toast.success("Categoria criada com sucesso!");
             },
         });
     };
 
     const handleUpdate = (id: string) => {
         if (!editingName.trim()) return;
-        updateMutation.mutate({ id, name: editingName }, {
-            onSuccess: () => {
-                setEditingId(null);
-                toast.success("Categoria atualizada!");
-            },
-        });
+        updateMutation.mutate(
+            { id, name: editingName },
+            {
+                onSuccess: () => {
+                    setEditingId(null);
+                },
+            }
+        );
     };
 
     const handleDelete = (id: string) => {
         if (confirm("Tem certeza que deseja excluir esta categoria?")) {
-            deleteMutation.mutate(id, {
-                onSuccess: () => toast.success("Categoria removida."),
-            });
+            deleteMutation.mutate(id);
         }
     };
 
@@ -70,7 +64,9 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
                         </div>
                         <div>
                             <DialogTitle className="text-xl font-bold">Gerenciar Categorias</DialogTitle>
-                            <p className="text-xs font-medium opacity-80 uppercase tracking-wider mt-0.5">Categorias do Blog</p>
+                            <p className="text-xs font-medium opacity-80 uppercase tracking-wider mt-0.5">
+                                Categorias do Blog
+                            </p>
                         </div>
                     </div>
                 </header>
@@ -85,7 +81,10 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
                             <p className="text-center text-gray-500 py-8 italic">Nenhuma categoria cadastrada.</p>
                         ) : (
                             categories.map((cat: any) => (
-                                <div key={cat.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl group hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
+                                <div
+                                    key={cat.id}
+                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl group hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200"
+                                >
                                     {editingId === cat.id ? (
                                         <div className="flex items-center gap-2 flex-1 mr-2">
                                             <input
@@ -99,13 +98,13 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
                                                     if (e.key === "Escape") setEditingId(null);
                                                 }}
                                             />
-                                            <button 
+                                            <button
                                                 onClick={() => handleUpdate(cat.id)}
                                                 className="p-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                                             >
                                                 <Check size={16} />
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => setEditingId(null)}
                                                 className="p-1.5 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                                             >
@@ -116,12 +115,14 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
                                         <>
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-gray-800 text-sm">{cat.nome}</span>
-                                                <span className={`text-[10px] font-bold uppercase ${(cat._count?.posts || 0) > 0 ? "text-yellow-600" : "text-gray-400"}`}>
+                                                <span
+                                                    className={`text-[10px] font-bold uppercase ${(cat._count?.posts || 0) > 0 ? "text-yellow-600" : "text-gray-400"}`}
+                                                >
                                                     {cat._count?.posts || 0} posts vinculados
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button 
+                                                <button
                                                     onClick={() => startEditing(cat.id, cat.nome)}
                                                     className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
                                                     title="Editar nome"
@@ -129,14 +130,14 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
                                                     <Edit2 size={16} />
                                                 </button>
                                                 {(cat._count?.posts || 0) > 0 ? (
-                                                    <div 
+                                                    <div
                                                         className="p-2 text-gray-300 cursor-not-allowed"
                                                         title="Esta categoria possui posts e não pode ser excluída"
                                                     >
                                                         <Lock size={16} />
                                                     </div>
                                                 ) : (
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleDelete(cat.id)}
                                                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                                         title="Excluir categoria"
@@ -165,9 +166,13 @@ export function CategoryModal({ isOpen, onOpenChange }: CategoryModalProps) {
                                 <button
                                     onClick={handleCreate}
                                     disabled={!newCategory.trim() || createMutation.isPending}
-                                    className="px-4 py-3 bg-yellow-400 text-gray-900 rounded-2xl font-bold hover:bg-yellow-500 transition-all shadow-md shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 h-[56px]"
+                                    className="cursor-pointer px-4 py-3 bg-yellow-400 text-gray-900 rounded-2xl font-bold hover:bg-yellow-500 transition-all shadow-md shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 h-[56px]"
                                 >
-                                    {createMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                                    {createMutation.isPending ? (
+                                        <Loader2 size={18} className="animate-spin" />
+                                    ) : (
+                                        <Plus size={18} />
+                                    )}
                                     <span className="hidden sm:inline">Adicionar</span>
                                 </button>
                             </div>
