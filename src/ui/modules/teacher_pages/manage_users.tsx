@@ -9,11 +9,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/src/ui/components/ui/dropdown-menu";
+import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus, Users } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus, Users } from "lucide-react";
 
 import NewUserModal from "../../components/modals/professor/usuarios/new-user-modal";
-import { useUsersProfile, userKeys } from "./queries/users.queries";
+import { useUsersList, userKeys } from "./queries/users.queries";
 
 type UserRole = "ADMIN" | "PROFESSOR" | "MONITOR" | "PESQUISADOR" | "VISITANTE";
 
@@ -46,20 +47,15 @@ function getRoleStyle(role: UserRole): string {
 }
 
 export default function ManageUsers() {
+    const { data: session, status } = useSession();
     const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
     const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
     const [typeFilter, setTypeFilter] = useState("Todos");
     const [searchTerm, setSearchTerm] = useState("");
     const queryClient = useQueryClient();
-
-    const { data: users = [], isLoading: isLoadingUsers } = useUsersProfile();
-
+    const { data: users = [], isLoading: isLoadingUsers } = useUsersList();
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
-
-    function handleUserCreated() {
-        queryClient.invalidateQueries({ queryKey: userKeys.all });
-    }
 
     const filteredUsers = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -107,6 +103,26 @@ export default function ManageUsers() {
         ],
         [users]
     );
+
+    function handleUserCreated() {
+        queryClient.invalidateQueries({ queryKey: userKeys.all });
+    }
+
+    if (status === "loading") return null;
+
+    if (!session || session.user.role !== "ADMIN") {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
+                <div className="bg-red-50 p-4 rounded-full">
+                    <AlertCircle className="w-12 h-12 text-red-500" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-800">Acesso Restrito</h1>
+                <p className="text-gray-500 max-w-md">
+                    Esta página e suas funcionalidades são exclusivas para administradores do sistema.
+                </p>
+            </div>
+        );
+    }
 
     const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;

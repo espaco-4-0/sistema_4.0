@@ -1,15 +1,17 @@
 import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/infra/data/prisma";
-import { getBlogSchema, postBlogSchema } from "@/src/infra/modules/blog/blog.schema";
+import { getBlogSchema, postBlogSchema, ALLOWED_TYPES } from "@/src/infra/modules/blog/blog.schema";
 import { estimateReadingTimeInMinutes } from "@/src/lib/reading-time";
 import { storage } from "@/src/lib/storage";
+import { logger } from "@/src/ui/lib/logger";
+import { getRequestInfo } from "@/src/ui/lib/errors";
 import { fileTypeFromBuffer } from "file-type";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "../auth/[...nextauth]/route";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
     try {
@@ -20,26 +22,19 @@ export async function GET(req: NextRequest) {
 
         const validatedData = getBlogSchema.safeParse(paramsOrUndefined);
         if (!validatedData.success)
-            return NextResponse.json({ error: "Dados inválidos", data: validatedData.error }, { status: 422 });
+            return NextResponse.json(
+                { error: "Dados inválidos", data: validatedData.error, input: paramsOrUndefined },
+                { status: 422 }
+            );
 
-        const { category, name, includeArchived, quantity } = validatedData.data;
+        const { category, name, includeArchived, quantity, page, limit, published } = validatedData.data;
 
-        if (category !== undefined) {
-            const categoryEntity = await prisma.postCategoria.findUnique({
-                where: {
-                    nome: category,
-                },
-            });
-
-            if (!categoryEntity) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
-        }
+        const session = await getServerSession(authOptions);
+        const isAdmin = session?.user?.role === "ADMIN";
 
         if (includeArchived === true) {
-            const session = await getServerSession(authOptions);
-
             if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-
-            if (session.user.role !== "ADMIN") return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+            if (!isAdmin) return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
         }
 
         const where: Prisma.PostWhereInput = {};
@@ -50,31 +45,68 @@ export async function GET(req: NextRequest) {
             };
 
         if (category)
-            where.categorias = {
-                some: {
-                    nome: category,
-                },
+            where.categoria = {
+                nome: category,
             };
 
-        if (includeArchived === false || includeArchived === undefined) where.publicado = true;
+        if (published !== undefined) {
+            where.publicado = published;
+        } else if (includeArchived === false || includeArchived === undefined) {
+            where.publicado = true;
+        }
 
-        const posts = await prisma.post.findMany({
-            take: quantity,
-            orderBy: { createdAt: "desc" },
-            where,
-            include: {
-                fotos: {
-                    select: { url: true },
+        const take = quantity ?? limit;
+        const skip = quantity ? 0 : (page - 1) * limit;
+
+        const [total, posts] = await prisma.$transaction([
+            prisma.post.count({ where }),
+            prisma.post.findMany({
+                take,
+                skip,
+                orderBy: { createdAt: "desc" },
+                where,
+                include: {
+                    foto: {
+                        select: { url: true },
+                    },
+                    categoria: {
+                        select: { nome: true },
+                    },
+                    autor: {
+                        select: {
+                            nomeCompleto: true,
+                        },
+                    },
                 },
-                categorias: {
-                    select: { nome: true },
+            }),
+        ]);
+
+        if (isAdmin) {
+            for (const post of posts) {
+                if (!post.publicado && post.foto) {
+                    try {
+                        post.foto.url = await storage.getPrivateUrl(post.foto.url);
+                    } catch (err) {
+                        logger.warn({ err, postId: post.id }, "Falha ao gerar URL assinada");
+                    }
+                }
+            }
+        }
+
+        return NextResponse.json(
+            {
+                data: posts,
+                meta: {
+                    total,
+                    page,
+                    limit: quantity ?? limit,
+                    totalPages: quantity ? 1 : Math.ceil(total / take),
                 },
             },
-        });
-
-        return NextResponse.json({ data: posts }, { status: 200 });
+            { status: 200 }
+        );
     } catch (err) {
-        console.error("Internal Error: ", err);
+        logger.error({ err, route: getRequestInfo(req) }, "Erro interno no blog");
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }
@@ -84,7 +116,7 @@ export async function POST(req: NextRequest) {
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
-        if (session.user.role === "VISITANTE") return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+        if (session.user.role !== "ADMIN") return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
 
         const formData = await req.formData();
         const dataObject = Object.fromEntries(formData.entries());
@@ -93,11 +125,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Dados inválidos", data: validatedData.error }, { status: 422 });
         }
 
-        const { title, slug, content, published, file, summary, category } = validatedData.data;
+        const { title, slug, content, published, file, summary, category, authorId } = validatedData.data;
 
-        if (category) {
-            const haveCategory = await prisma.postCategoria.findUnique({ where: { nome: category } });
-            if (!haveCategory) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
+        if (!category) {
+            return NextResponse.json({ error: "Categoria é obrigatória" }, { status: 422 });
         }
 
         let path: string | null = null;
@@ -110,10 +141,6 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: "Tipo de arquivo não permitido" }, { status: 415 });
 
             if (published) {
-                if (session.user.role !== "ADMIN") {
-                    return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-                }
-
                 ({ path, url } = await storage.uploadPublic(file, `posts/${slug}`, detected.mime));
             } else {
                 ({ path } = await storage.uploadPrivate(file, `posts/${slug}`, detected.mime));
@@ -125,36 +152,33 @@ export async function POST(req: NextRequest) {
                         titulo: title,
                         conteudo: content,
                         slug,
-                        autorId: session.user.id,
+                        autor: {
+                            connect: { id: authorId || session.user.id },
+                        },
                         publicado: published,
                         resumo: summary,
                         tempoDeLeitura: estimateReadingTimeInMinutes(content),
-                        categorias: category
-                            ? {
-                                  connect: { nome: category },
-                              }
-                            : undefined,
+                        categoria: {
+                            connectOrCreate: {
+                                where: { nome: category },
+                                create: { nome: category },
+                            },
+                        },
                     },
                 });
 
-                const foto = await tx.postFoto.create({
+                const foto = await tx.foto.create({
                     data: {
                         url: url ? url : path!,
                         postId: post.id,
                     },
                 });
 
-                await tx.post.update({
-                    where: { id: post.id },
-                    data: {
-                        capaImagemId: foto.id,
-                    },
-                });
             });
 
             return NextResponse.json({ message: "Post criado", ...(url && { url: url }) }, { status: 201 });
         } catch (err: any) {
-            console.error(err);
+            logger.error({ err, route: getRequestInfo(req) }, "Erro ao criar post");
 
             if (path) await storage.delete(path);
 
@@ -165,7 +189,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Erro interno" }, { status: 500 });
         }
     } catch (err) {
-        console.error(err);
+        logger.error({ err, route: getRequestInfo(req) }, "Erro interno no POST blog");
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }

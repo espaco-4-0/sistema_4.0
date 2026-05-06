@@ -1,3 +1,13 @@
+export type BlogComment = {
+    id: string;
+    conteudo: string;
+    createdAt: Date;
+    autor: {
+        id: string;
+        nomeCompleto: string;
+    };
+};
+
 export type BlogPost = {
     id: string;
     titulo: string;
@@ -6,14 +16,45 @@ export type BlogPost = {
     conteudo: string;
     tempoDeLeitura: number;
     publicado: boolean;
-    createdAt: string;
-    updatedAt: string;
-    capaImagemId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
     autorId: string;
-    fotos: { url: string }[];
-    categorias: { nome: string }[];
+    foto: { url: string };
+    categoria: { nome: string };
+    autor: { nomeCompleto: string };
+    likesCount: number;
+    commentsCount: number;
+    isLiked: boolean;
+};
+
+export type BlogCommentsResponse = {
+    data: BlogComment[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 };
 
 export type BlogListResponse = {
     data: BlogPost[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+};
+
+export type BlogCard = {
+    id: string;
+    slug: string;
+    category: string;
+    title: string;
+    image: string;
+    excerpt: string;
+    author: string;
+    readingTime: number;
+    createdAt: Date;
 };

@@ -50,31 +50,71 @@ export const supabaseStorage: StorageProvider = {
     async uploadPrivate(file, fileName, mimeType) {
         return await upload(file, fileName, PRIVATE_BUCKET, mimeType);
     },
-    async getPrivateUrl(path, expiresInSeconds = 3600) {
+    async getPrivateUrl(rawPath, expiresInSeconds = 3600) {
+        let path = rawPath;
+        if (rawPath.startsWith("http")) {
+            const marker = `${PRIVATE_BUCKET}/`;
+            const idx = rawPath.indexOf(marker);
+            if (idx !== -1) {
+                path = rawPath.slice(idx + marker.length);
+            }
+        }
+
         const { data, error } = await client.storage.from(PRIVATE_BUCKET).createSignedUrl(path, expiresInSeconds);
         if (error) throw new Error(error.message);
         return data.signedUrl;
     },
-    async delete(path, isPrivate = false) {
+    async delete(rawPath, isPrivate = false) {
         const bucket = isPrivate ? PRIVATE_BUCKET : PUBLIC_BUCKET;
+        let path = rawPath;
+        if (rawPath.startsWith("http")) {
+            const marker = `${bucket}/`;
+            const idx = rawPath.indexOf(marker);
+            if (idx !== -1) {
+                path = rawPath.slice(idx + marker.length);
+            }
+        }
+
         const { error } = await client.storage.from(bucket).remove([path]);
         if (error) throw new Error(error.message);
     },
-    async changeVisibility(rawPath: string, isPrivate: boolean) {
-        const fromBucket = isPrivate ? PRIVATE_BUCKET : PUBLIC_BUCKET;
-        const toBucket = isPrivate ? PUBLIC_BUCKET : PRIVATE_BUCKET;
+    async changeVisibility(rawPath: string, toPublic: boolean) {
+        const fromBucket = toPublic ? PRIVATE_BUCKET : PUBLIC_BUCKET;
+        const toBucket = toPublic ? PUBLIC_BUCKET : PRIVATE_BUCKET;
 
         let path = rawPath;
         if (rawPath.startsWith("http")) {
-            const marker = `${fromBucket}/`;
-            const idx = rawPath.indexOf(marker);
-            if (idx === -1) throw new Error(`URL não pertence ao bucket esperado (${fromBucket}): ${rawPath}`);
-            path = rawPath.slice(idx + marker.length);
+            const fromMarker = `${fromBucket}/`;
+            const toMarker = `${toBucket}/`;
+
+            const fromIdx = rawPath.indexOf(fromMarker);
+            const toIdx = rawPath.indexOf(toMarker);
+
+            if (fromIdx !== -1) {
+                path = rawPath.slice(fromIdx + fromMarker.length);
+            } else if (toIdx !== -1) {
+                const targetPath = rawPath.slice(toIdx + toMarker.length);
+                const url = toPublic ? client.storage.from(toBucket).getPublicUrl(targetPath).data.publicUrl : null;
+                return { path: targetPath, ...(url && { url }) };
+            } else {
+                throw new Error(
+                    `URL não pertence a nenhum dos buckets conhecidos (${fromBucket} ou ${toBucket}): ${rawPath}`
+                );
+            }
         }
 
         const { data: fileData, error: downloadError } = await client.storage.from(fromBucket).download(path);
 
         if (!fileData || downloadError) {
+            const { data: checkData } = await client.storage.from(toBucket).list("", {
+                search: path,
+            });
+
+            if (checkData && checkData.length > 0) {
+                const url = toPublic ? client.storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
+                return { path, ...(url && { url }) };
+            }
+
             throw new Error(`Falha ao baixar imagem (bucket: ${fromBucket}, path: ${path}): ${downloadError?.message}`);
         }
 
@@ -88,7 +128,7 @@ export const supabaseStorage: StorageProvider = {
 
         await client.storage.from(fromBucket).remove([path]);
 
-        const url = isPrivate ? client.storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
+        const url = toPublic ? client.storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
 
         return { path, ...(url && { url }) };
     },
