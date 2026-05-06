@@ -5,10 +5,16 @@ import { Button } from "@/src/ui/components/ui/button";
 import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
 import LeftSpaceDecoration from "@/src/ui/modules/auth_pages/left-space-decoration";
-import { ArrowLeft, CheckCircle, Eye, EyeOff, Lock } from "lucide-react";
+import { ArrowLeft, CheckCircle, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
+import { LockOpenIcon } from "../../components/ui/lock-open";
 
 export default function RecoveryPasswordForm() {
+    const searchParams = useSearchParams();
+    const token = searchParams.get("token");
+
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -16,8 +22,9 @@ export default function RecoveryPasswordForm() {
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState<"error" | "success">("error");
     const [passwordChanged, setPasswordChanged] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         setMessage("");
@@ -34,7 +41,37 @@ export default function RecoveryPasswordForm() {
             return;
         }
 
-        setPasswordChanged(true);
+        if (!token) {
+            setMessage("Token inválido ou ausente. Solicite um novo link de redefinição.");
+            setMessageType("error");
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+
+            const res = await fetch("/api/auth/reset", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, novaSenha: newPassword }),
+            });
+
+            if (!res.ok) {
+                const isJson = res.headers.get("content-type")?.includes("application/json");
+                const data = isJson ? await res.json() : null;
+
+                setMessage(data?.message || `Erro no servidor (Status: ${res.status}). Tente novamente.`);
+                setMessageType("error");
+                return;
+            }
+
+            setPasswordChanged(true);
+        } catch (error) {
+            setMessage("Erro de conexão. Verifique sua internet e tente novamente.");
+            setMessageType("error");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -42,7 +79,6 @@ export default function RecoveryPasswordForm() {
             <LeftSpaceDecoration />
 
             <div className="relative flex items-center justify-center px-6">
-                {/* Botão para voltar ao login */}
                 {!passwordChanged && (
                     <Link
                         href="/login"
@@ -67,27 +103,23 @@ export default function RecoveryPasswordForm() {
                             </p>
 
                             <Link href="/login" className="w-full max-w-md">
-                                <Button className="mb-6 w-full rounded-lg hover:cursor-pointer hover:bg-yellow-secondary bg-yellow-primary text-black h-12">
+                                <Button className="mb-6 w-full rounded-lg hover:cursor-pointer hover:bg-gray-950 bg-gray-900 text-yellow-primary h-12">
                                     VOLTAR PARA LOGIN
                                 </Button>
                             </Link>
                         </div>
                     ) : (
                         <>
-                            {/* Cabeçalho - Ícone, título e descrição */}
                             <div className="flex flex-col items-center gap-4 text-center">
-                                {/* Ícone de cadeado amarelo */}
-                                <div className="w-16 h-16 bg-yellow-primary rounded-lg flex items-center justify-center border-2 border-black">
-                                    <Lock className="h-8 w-8 text-black" />
+                                <div className="w-16 h-16 bg-yellow-primary rounded-lg flex items-center justify-center border border-black">
+                                    <LockOpenIcon className="h-8 w-8 text-black" />
                                 </div>
 
                                 <h1 className="text-2xl font-bold">Redefinir Senha</h1>
                                 <p className="text-muted-foreground text-sm">Digite sua nova senha abaixo</p>
                             </div>
 
-                            {/* Formulário principal */}
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Campo: Nova Senha */}
                                 <div className="space-y-2">
                                     <Label htmlFor="newPassword">Nova Senha</Label>
                                     <div className="relative">
@@ -100,7 +132,6 @@ export default function RecoveryPasswordForm() {
                                             className="pr-10"
                                             required
                                         />
-                                        {/* Botão para mostrar/esconder a senha */}
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -116,7 +147,6 @@ export default function RecoveryPasswordForm() {
                                     </div>
                                 </div>
 
-                                {/*  confirma a nova senha */}
                                 <div className="space-y-2">
                                     <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
                                     <div className="relative">
@@ -129,7 +159,6 @@ export default function RecoveryPasswordForm() {
                                             className="pr-10"
                                             required
                                         />
-                                        {/* mostra ou esconde a senha de confirmação */}
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -145,7 +174,6 @@ export default function RecoveryPasswordForm() {
                                     </div>
                                 </div>
 
-                                {/* mostra erro ou sucesso */}
                                 {message && (
                                     <div
                                         className={`p-3 rounded text-sm ${
@@ -158,12 +186,12 @@ export default function RecoveryPasswordForm() {
                                     </div>
                                 )}
 
-                                {/* botão de submit */}
                                 <Button
                                     type="submit"
-                                    className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-primary hover:bg-black/90"
+                                    disabled={isLoading}
+                                    className="w-full hover:cursor-pointer h-12 text-base font-semibold bg-black text-yellow-primary hover:bg-black/90 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    REDEFINIR SENHA
+                                    {isLoading ? "Redefinindo..." : "Redefinir a Senha"}
                                 </Button>
                             </form>
 
@@ -171,7 +199,7 @@ export default function RecoveryPasswordForm() {
                                 <p className="font-medium">Requisitos da senha:</p>
                                 <ul className="space-y-1">
                                     <li>• Mínimo de 6 caracteres</li>
-                                    <li>• As senhas devem coincidem</li>
+                                    <li>• As senhas devem coincidir</li>
                                 </ul>
                             </div>
                         </>

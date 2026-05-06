@@ -72,7 +72,7 @@ export function validateSlotForDate(
     }
 
     if (isHolidayOrWeekend(d)) {
-        const hName = getHolidayNameSafe(d); // ← agora vem do import, sem recursão
+        const hName = getHolidayNameSafe(d);
         const msg = hName
             ? `Data é feriado (${hName}). Não é permitido agendar.`
             : "Finais de semana ou feriados não estão disponíveis.";
