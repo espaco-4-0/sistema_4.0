@@ -1,10 +1,10 @@
 import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/infra/data/prisma";
-import { getBlogSchema, postBlogSchema, ALLOWED_TYPES } from "@/src/infra/modules/blog/blog.schema";
+import { ALLOWED_TYPES, getBlogSchema, postBlogSchema } from "@/src/infra/modules/blog/blog.schema";
 import { estimateReadingTimeInMinutes } from "@/src/lib/reading-time";
 import { storage } from "@/src/lib/storage";
-import { logger } from "@/src/ui/lib/logger";
 import { getRequestInfo } from "@/src/ui/lib/errors";
+import { logger } from "@/src/ui/lib/logger";
 import { fileTypeFromBuffer } from "file-type";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -58,26 +58,54 @@ export async function GET(req: NextRequest) {
         const take = quantity ?? limit;
         const skip = quantity ? 0 : (page - 1) * limit;
 
+        const isLite = validatedData.data.isLite;
+        const postSelect = isLite
+            ? {
+                  id: true,
+                  titulo: true,
+                  publicado: true,
+                  foto: {
+                      select: {
+                          url: true,
+                      },
+                  },
+              }
+            : {
+                  id: true,
+                  titulo: true,
+                  conteudo: true,
+                  createdAt: true,
+
+                  foto: {
+                      select: {
+                          url: true,
+                      },
+                  },
+
+                  categoria: {
+                      select: {
+                          nome: true,
+                      },
+                  },
+
+                  autor: {
+                      select: {
+                          nomeCompleto: true,
+                      },
+                  },
+              };
+
         const [total, posts] = await prisma.$transaction([
             prisma.post.count({ where }),
+
             prisma.post.findMany({
                 take,
                 skip,
-                orderBy: { createdAt: "desc" },
-                where,
-                include: {
-                    foto: {
-                        select: { url: true },
-                    },
-                    categoria: {
-                        select: { nome: true },
-                    },
-                    autor: {
-                        select: {
-                            nomeCompleto: true,
-                        },
-                    },
+                orderBy: {
+                    createdAt: "desc",
                 },
+                where,
+                select: postSelect,
             }),
         ]);
 
@@ -173,7 +201,6 @@ export async function POST(req: NextRequest) {
                         postId: post.id,
                     },
                 });
-
             });
 
             return NextResponse.json({ message: "Post criado", ...(url && { url: url }) }, { status: 201 });

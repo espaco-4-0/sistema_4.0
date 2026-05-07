@@ -1,0 +1,15 @@
+enum OriginTypes {
+  UPLOAD
+  POST
+}
+
+model GalleryItem {
+  id        String      @id @default(cuid())
+  title     String      @unique
+  url       String
+  isActive  Boolean     @default(true)
+  origin    OriginTypes
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
