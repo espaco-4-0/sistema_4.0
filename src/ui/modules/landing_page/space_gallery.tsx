@@ -1,15 +1,27 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { images } from "@/src/infra/modules/gallery/gallery_mock";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Minimize, X } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "../../components/ui/button";
 import { EmptyState } from "./empty_state";
+import { useLandingGallery } from "./queries/gallery.queries";
 
 export default function SpaceGallery() {
     const [selectedImage, setSelectedImage] = useState<number | null>(null);
     const [direction, setDirection] = useState(0);
+
+    const { data: galleryData } = useLandingGallery({
+        isActive: true,
+        limit: 6,
+    });
+
+    const images = galleryData?.data.map(item => ({
+        src: item.url,
+        title: item.title
+    })) || [];
 
     useEffect(() => {
         if (selectedImage === null) return;
@@ -154,7 +166,7 @@ export default function SpaceGallery() {
                                     width={1400}
                                     height={1000}
                                     alt={images[selectedImage].title}
-                                    className="w-full h-auto max-h-[80vh] object-cover rounded-2xl shadow-2xl"
+                                    className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
                                 />
                             </motion.div>
                         </AnimatePresence>
