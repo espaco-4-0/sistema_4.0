@@ -1,7 +1,8 @@
 "use client";
 
-import { Menu, User } from "lucide-react";
+import { Home, Menu, User } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Button } from "../../components/ui/button";
@@ -57,7 +58,14 @@ export default function StudentTopbar() {
                     </h1>
                     <p className="text-sm text-gray-600 lg:text-base">{current.description}</p>
                 </div>
-                <div className="hidden lg:flex absolute right-10 top-1/2 -translate-y-1/2  items-center gap-2.5">
+                <div className="hidden lg:flex absolute right-10 top-1/2 -translate-y-1/2 items-center gap-4">
+                    <Link
+                        href="/"
+                        className="flex items-center text-center text-sm font-medium text-gray-600 hover:text-gray-900"
+                    >
+                        <Home className="h-4" />
+                        Página Inicial
+                    </Link>
                     <div className="size-10 rounded-full bg-linear-to-br from-yellow-100 to-yellow-50 flex items-center justify-center ring-2 ring-yellow-200">
                         <User className="size-5 text-yellow-primary" strokeWidth={2.5} />
                     </div>

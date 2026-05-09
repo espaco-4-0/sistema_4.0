@@ -265,3 +265,28 @@ export async function sendEmailReceivedConfirmation(
         html,
     });
 }
+
+export async function sendResetPasswordEmail(to: string, nome: string, resetLink: string): Promise<void> {
+    const html = baseLayout(`
+      <h2 style="margin:0 0 8px;color:#111827;font-size:20px;">Recuperação de Senha 🔓</h2>
+      <p style="color:#4b5563;font-size:14px;margin:0 0 24px;">
+        Olá, <strong>${nome}</strong>! Confirmamos que você deseja redefinir a senha da sua conta.
+      </p>
+      <p style="color:#4b5563;font-size:14px;">
+        Clique no botão abaixo para criar uma nova senha. Este link é válido por tempo limitado.
+      </p>
+
+      ${primaryButton("Redefinir minha senha", resetLink)}
+
+      <p style="color:#6b7280;font-size:13px;margin-top:24px;">
+        Se você não solicitou a redefinição de senha, ignore este e-mail. Sua senha permanecerá a mesma.
+      </p>
+    `);
+
+    await transporter.sendMail({
+        from: FROM,
+        to,
+        subject: "🔓 Redefinição de senha — Espaço 4.0",
+        html,
+    });
+}
