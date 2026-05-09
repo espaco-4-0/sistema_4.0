@@ -63,14 +63,14 @@ export function GalleryUploadModal({ isOpen, onClose }: GalleryUploadModalProps)
                 showCloseButton={false}
                 className="max-w-2xl w-[95%] p-0 bg-white rounded-3xl overflow-hidden border-none shadow-2xl"
             >
-                <header className="bg-yellow-400 p-8 flex items-center justify-between text-slate-900">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/30 p-3 rounded-2xl">
-                            <Upload size={28} strokeWidth={2.5} />
+                <header className="bg-yellow-400 p-6 flex items-center justify-between text-slate-900">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white/30 p-2 rounded-xl">
+                            <Upload size={24} strokeWidth={2} />
                         </div>
                         <div>
-                            <DialogTitle className="text-2xl font-black tracking-tight">Novo Upload</DialogTitle>
-                            <p className="text-sm font-bold opacity-70 uppercase tracking-widest mt-0.5">
+                            <DialogTitle className="text-xl font-bold tracking-tight">Novo Upload</DialogTitle>
+                            <p className="text-xs font-medium opacity-80 uppercase tracking-wider mt-0.5">
                                 Galeria de Fotos
                             </p>
                         </div>
@@ -79,13 +79,13 @@ export function GalleryUploadModal({ isOpen, onClose }: GalleryUploadModalProps)
                         onClick={onClose}
                         className="p-2 hover:bg-black/5 rounded-full transition-colors cursor-pointer"
                     >
-                        <X size={24} />
+                        <X size={20} />
                     </button>
                 </header>
 
-                <div className="p-10 space-y-8">
+                <div className="p-8 space-y-6">
                     <div
-                        className={`relative h-64 rounded-3xl border-4 border-dashed transition-all overflow-hidden flex flex-col items-center justify-center gap-4 ${
+                        className={`relative h-60 rounded-3xl border-2 border-dashed transition-all overflow-hidden flex flex-col items-center justify-center gap-3 ${
                             previewUrl
                                 ? "border-yellow-400 bg-yellow-50/10"
                                 : "border-slate-200 bg-slate-50 hover:bg-slate-100/50 hover:border-yellow-400"
@@ -112,7 +112,7 @@ export function GalleryUploadModal({ isOpen, onClose }: GalleryUploadModalProps)
                                         alt="Preview"
                                         className="w-full h-full object-contain rounded-2xl"
                                     />
-                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-xs font-bold text-slate-800 border border-yellow-400">
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-[10px] font-bold text-slate-800 border border-yellow-400">
                                         Clique para trocar
                                     </div>
                                 </motion.div>
@@ -123,11 +123,11 @@ export function GalleryUploadModal({ isOpen, onClose }: GalleryUploadModalProps)
                                     animate={{ opacity: 1, y: 0 }}
                                     className="text-center"
                                 >
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm text-slate-300 mx-auto w-fit mb-4">
-                                        <ImageIcon size={48} strokeWidth={1.5} />
+                                    <div className="bg-white p-4 rounded-2xl shadow-sm text-slate-300 mx-auto w-fit mb-3">
+                                        <ImageIcon size={32} strokeWidth={1.5} />
                                     </div>
-                                    <p className="text-lg font-extrabold text-slate-800">Arraste ou clique aqui</p>
-                                    <p className="text-xs text-slate-400 uppercase font-black tracking-widest mt-1">
+                                    <p className="text-sm font-bold text-slate-800">Arraste ou clique aqui</p>
+                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">
                                         PNG, JPG ou WEBP até 5MB
                                     </p>
                                 </motion.div>
@@ -135,9 +135,9 @@ export function GalleryUploadModal({ isOpen, onClose }: GalleryUploadModalProps)
                         </AnimatePresence>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                         <div className="space-y-2">
-                            <label className="text-sm font-black text-slate-400 uppercase tracking-widest ml-4">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
                                 Título da Imagem
                             </label>
                             <input
@@ -145,45 +145,45 @@ export function GalleryUploadModal({ isOpen, onClose }: GalleryUploadModalProps)
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Dê um nome marcante para esta foto..."
-                                className="w-full px-8 py-4 bg-slate-50 border-2 border-transparent focus:border-yellow-400 focus:bg-white rounded-2xl text-slate-700 transition-all outline-none font-bold"
+                                className="w-full px-5 py-3 bg-slate-50 border-2 border-transparent focus:border-yellow-400 focus:bg-white rounded-xl text-slate-700 transition-all outline-none font-medium text-sm"
                             />
                         </div>
 
-                        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border-2 border-transparent hover:border-slate-100 transition-all">
-                            <div className="ml-4">
-                                <p className="text-slate-800 font-extrabold">Exibir na Landing Page?</p>
-                                <p className="text-xs text-slate-400 font-bold">
+                        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div>
+                                <p className="text-slate-800 font-bold text-sm">Exibir na Landing Page?</p>
+                                <p className="text-[11px] text-slate-400 font-medium">
                                     A imagem ficará visível imediatamente.
                                 </p>
                             </div>
                             <button
                                 onClick={() => setIsActive(!isActive)}
-                                className={`w-14 h-8 rounded-full transition-colors relative shadow-inner cursor-pointer ${
+                                className={`w-12 h-6 rounded-full transition-colors relative shadow-inner cursor-pointer ${
                                     isActive ? "bg-yellow-400" : "bg-slate-300"
                                 }`}
                             >
                                 <motion.div
-                                    animate={{ x: isActive ? 30 : 6 }}
-                                    className="absolute top-1.5 w-5 h-5 bg-white rounded-full shadow-sm"
+                                    animate={{ x: isActive ? 26 : 4 }}
+                                    className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
                                 />
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <footer className="p-8 bg-slate-50 flex items-center justify-between gap-4">
+                <footer className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-4">
                     <button
                         onClick={onClose}
-                        className="px-8 py-4 text-slate-400 font-extrabold hover:text-slate-800 transition-colors uppercase tracking-widest text-xs cursor-pointer"
+                        className="px-6 py-2 text-slate-500 font-bold hover:text-slate-800 transition-colors text-sm cursor-pointer"
                     >
                         Descartar
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isPending}
-                        className="flex items-center gap-3 px-10 py-4 bg-yellow-400 text-slate-900 rounded-2xl font-black hover:bg-yellow-500 transition-all shadow-xl shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="flex items-center gap-2 px-8 py-3 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition-all shadow-md shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm"
                     >
-                        {isPending && <Loader2 className="w-5 h-5 animate-spin" />}
+                        {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                         Finalizar Upload
                     </button>
                 </footer>

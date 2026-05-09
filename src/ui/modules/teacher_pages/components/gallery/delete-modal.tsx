@@ -27,44 +27,46 @@ export function GalleryDeleteModal({ isOpen, onClose, itemId }: GalleryDeleteMod
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent
                 showCloseButton={false}
-                className="max-w-md w-[90%] p-0 bg-white rounded-[3rem] overflow-hidden border-none shadow-2xl"
+                className="max-w-md w-[95%] p-0 bg-white rounded-3xl overflow-hidden border-none shadow-2xl"
             >
-                <div className="p-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-red-50 rounded-[2.5rem] flex items-center justify-center text-red-500 mb-8 shadow-inner shadow-red-100">
-                        <Trash2 size={48} strokeWidth={1.5} />
+                <DialogTitle className="sr-only">Confirmação de Exclusão</DialogTitle>
+                <div className="p-8 text-center space-y-4">
+                    <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500">
+                        <Trash2 size={32} strokeWidth={2} />
                     </div>
 
-                    <DialogTitle className="text-3xl font-black text-slate-800 tracking-tight mb-4">
-                        Tem certeza?
-                    </DialogTitle>
-                    <p className="text-slate-500 font-bold leading-relaxed mb-10">
-                        Você está prestes a excluir esta imagem da galeria. Esta ação é{" "}
-                        <span className="text-red-500 underline decoration-2 underline-offset-4">irreversível</span> e
-                        removerá o item permanentemente.
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-4 w-full">
-                        <button
-                            onClick={onClose}
-                            className="px-6 py-4 bg-slate-100 text-slate-500 rounded-[1.8rem] font-extrabold hover:bg-slate-200 hover:text-slate-700 transition-all uppercase tracking-widest text-xs cursor-pointer"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            disabled={isPending}
-                            className="flex items-center justify-center gap-2 px-6 py-4 bg-red-500 text-white rounded-[1.8rem] font-black hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs cursor-pointer"
-                        >
-                            {isPending ? <Loader2 size={18} className="animate-spin" /> : "Sim, Excluir"}
-                        </button>
+                    <div>
+                        <h3 className="text-xl font-bold text-gray-900">Excluir Imagem</h3>
+                        <p className="text-gray-500 mt-2 text-sm leading-relaxed">
+                            Você tem certeza que deseja excluir esta imagem? Esta ação é{" "}
+                            <span className="text-red-500 font-bold">irreversível</span>.
+                        </p>
                     </div>
+                </div>
+
+                <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+                    <button
+                        onClick={onClose}
+                        disabled={isPending}
+                        className="flex-1 py-3 text-gray-500 font-bold hover:text-gray-800 transition-colors cursor-pointer text-sm"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        disabled={isPending}
+                        className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-sm shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2 text-sm"
+                    >
+                        {isPending && <Loader2 size={16} className="animate-spin" />}
+                        Sim, Excluir
+                    </button>
                 </div>
 
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 p-2 text-slate-300 hover:text-slate-500 hover:bg-slate-50 rounded-full transition-all cursor-pointer"
+                    className="absolute top-4 right-4 p-2 text-slate-300 hover:text-slate-500 hover:bg-slate-50 rounded-full transition-all cursor-pointer"
                 >
-                    <X size={20} />
+                    <X size={18} />
                 </button>
             </DialogContent>
         </Dialog>

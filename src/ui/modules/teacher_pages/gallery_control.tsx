@@ -75,12 +75,12 @@ export function GalleryControl() {
 
     if (!session || session.user.role !== "ADMIN") {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-                <div className="bg-red-50 p-4 rounded-full">
-                    <AlertCircle className="w-12 h-12 text-red-500" />
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
+                <div className="bg-red-50 p-6 rounded-full mb-4">
+                    <AlertCircle size={48} className="text-red-400" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-800">Acesso Restrito</h1>
-                <p className="text-gray-500 max-w-md">
+                <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
+                <p className="text-gray-500 mt-2 max-w-xs text-sm">
                     Esta página e suas funcionalidades são exclusivas para administradores do sistema.
                 </p>
             </div>

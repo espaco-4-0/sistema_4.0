@@ -50,14 +50,14 @@ export function GalleryImportModal({ isOpen, onClose }: GalleryImportModalProps)
                 showCloseButton={false}
                 className="max-w-3xl w-[95%] p-0 bg-white rounded-3xl overflow-hidden border-none shadow-2xl flex flex-col max-h-[85vh]"
             >
-                <header className="bg-yellow-400 p-8 flex items-center justify-between text-gray-900 shrink-0">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/30 p-3 rounded-2xl">
-                            <Newspaper size={28} strokeWidth={2.5} />
+                <header className="bg-yellow-400 p-6 flex items-center justify-between text-gray-900 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white/30 p-2 rounded-xl">
+                            <Newspaper size={24} strokeWidth={2} />
                         </div>
                         <div>
-                            <DialogTitle className="text-2xl font-black tracking-tight">Importar de Post</DialogTitle>
-                            <p className="text-sm font-bold opacity-70 uppercase tracking-widest mt-0.5">
+                            <DialogTitle className="text-xl font-bold tracking-tight">Importar de Post</DialogTitle>
+                            <p className="text-xs font-medium opacity-80 uppercase tracking-wider mt-0.5">
                                 Selecione uma postagem
                             </p>
                         </div>
@@ -66,7 +66,7 @@ export function GalleryImportModal({ isOpen, onClose }: GalleryImportModalProps)
                         onClick={onClose}
                         className="p-2 hover:bg-black/5 rounded-full transition-colors cursor-pointer"
                     >
-                        <X size={24} />
+                        <X size={20} />
                     </button>
                 </header>
 
@@ -94,14 +94,17 @@ export function GalleryImportModal({ isOpen, onClose }: GalleryImportModalProps)
                             </p>
                         </div>
                     ) : newsData?.data?.length === 0 ? (
-                        <div className="text-center py-20 space-y-4">
-                            <div className="bg-gray-50 p-6 rounded-2xl w-fit mx-auto text-gray-300">
-                                <ImageIcon size={48} />
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div className="bg-gray-50 p-6 rounded-full mb-4">
+                                <ImageIcon size={48} className="text-gray-300" />
                             </div>
-                            <p className="text-gray-500 font-bold">Nenhum post encontrado</p>
+                            <h3 className="text-xl font-bold text-gray-900">Nenhum post encontrado</h3>
+                            <p className="text-gray-500 mt-2 max-w-xs text-sm">
+                                Tente ajustar sua busca para encontrar outras postagens.
+                            </p>
                             <button
                                 onClick={() => setSearchTerm("")}
-                                className="px-6 py-2 bg-gray-800 text-white rounded-lg text-xs font-bold cursor-pointer"
+                                className="mt-6 px-6 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all shadow-md cursor-pointer"
                             >
                                 Limpar Busca
                             </button>

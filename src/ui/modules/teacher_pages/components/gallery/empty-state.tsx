@@ -10,29 +10,26 @@ interface GalleryEmptyStateProps {
 export function GalleryEmptyState({ onReset }: GalleryEmptyStateProps) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center py-32 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100"
         >
-            <div className="relative mb-8">
-                <div className="absolute inset-0 bg-[#facc15]/10 blur-[60px] rounded-full scale-150" />
-                <div className="relative bg-white p-12 rounded-[3rem] shadow-2xl shadow-slate-200/50 text-slate-200">
-                    <ImageIcon size={100} strokeWidth={1} />
-                </div>
+            <div className="bg-gray-50 p-6 rounded-full mb-4">
+                <ImageIcon size={48} className="text-gray-300" />
             </div>
             
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">
-                Espaço Vazio
-            </h2>
-            <p className="text-slate-400 font-bold mb-10 max-w-sm mx-auto leading-relaxed">
-                Nenhuma imagem foi encontrada para os filtros aplicados. Tente ajustar sua busca ou limpar os filtros.
+            <h3 className="text-xl font-bold text-gray-900">
+                Nenhuma imagem encontrada
+            </h3>
+            <p className="text-gray-500 mt-2 max-w-xs text-center text-sm">
+                Tente ajustar sua busca ou limpar os filtros para ver outros itens.
             </p>
 
             <button
                 onClick={onReset}
-                className="flex items-center gap-3 px-10 py-4 bg-slate-800 text-white rounded-[2rem] font-black hover:bg-slate-900 transition-all shadow-xl shadow-slate-800/20 group cursor-pointer"
+                className="mt-8 flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-md group cursor-pointer text-sm"
             >
-                <RotateCcw size={20} className="group-hover:rotate-[-45deg] transition-transform" />
+                <RotateCcw size={16} className="group-hover:rotate-[-45deg] transition-transform" />
                 Resetar Filtros
             </button>
         </motion.div>
