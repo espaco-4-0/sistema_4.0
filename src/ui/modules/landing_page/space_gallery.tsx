@@ -40,7 +40,7 @@ export default function SpaceGallery() {
     }, [selectedImage]);
 
     const navigateImage = (dir: number) => {
-        if (selectedImage === null) return;
+        if (selectedImage === null || images.length === 0) return;
         setDirection(dir);
         const newIndex = (selectedImage + dir + images.length) % images.length;
         setSelectedImage(newIndex);
@@ -63,11 +63,15 @@ export default function SpaceGallery() {
                 </p>
 
                 {images.length > 0 ? (
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                    <div className={
+                        images.length === 1 ? "flex justify-center" :
+                        images.length === 2 ? "grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto" :
+                        "columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4"
+                    }>
                         {images.map((image, index) => (
                             <button
                                 key={`${image.title}-${index}`}
-                                className="relative overflow-hidden rounded-2xl  group cursor-pointer block w-full text-left"
+                                className={`relative overflow-hidden rounded-2xl  group cursor-pointer block text-left ${images.length === 1 ? 'max-w-3xl w-full' : 'w-full'}`}
                                 onClick={() => setSelectedImage(index)}
                                 aria-label={`Abrir imagem: ${image.title}`}
                             >
