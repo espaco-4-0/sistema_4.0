@@ -27,20 +27,26 @@ export async function GET(req: NextRequest) {
                 { status: 422 }
             );
 
-        const { isActive, wordFilter, page, limit, quantity } = validatedParams.data;
+        const { isActive, wordFilter, page, limit, quantity, origin } = validatedParams.data;
 
         const session = await getServerSession(authOptions);
         const isAdmin = session?.user?.role === "ADMIN";
 
-        if (isActive === false) {
-            if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-            if (!isAdmin) return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-        }
-
         const where: Prisma.GalleryItemWhereInput = {};
 
         if (isActive !== undefined) {
+            if (isActive === false && !isAdmin) {
+                return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+            }
             where.isActive = isActive;
+        } else {
+            if (!isAdmin) {
+                where.isActive = true;
+            }
+        }
+
+        if (origin) {
+            where.origin = origin as any;
         }
 
         if (wordFilter) {
@@ -67,7 +73,7 @@ export async function GET(req: NextRequest) {
 
         if (isAdmin) {
             for (const item of items) {
-                if (!item.isActive) {
+                if (!item.isActive && item.origin === "UPLOAD") {
                     try {
                         item.url = await storage.getPrivateUrl(item.url);
                     } catch (err) {

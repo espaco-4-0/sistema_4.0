@@ -32,10 +32,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             return NextResponse.json({ error: "Item da galeria não encontrado" }, { status: 404 });
         }
 
-        if (isActive === existingItem.isActive) {
-            return new NextResponse(null, { status: 204 });
-        }
-
         if (isActive) {
             const activeCount = await prisma.galleryItem.count({
                 where: { isActive: true },
@@ -47,21 +43,31 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         }
 
         const updatedItem = await prisma.$transaction(async (tx) => {
-            const result = await storage.changeVisibility(existingItem.url, isActive);
+            let finalUrl = existingItem.url;
+
+            if (existingItem.origin === "UPLOAD" && isActive !== existingItem.isActive) {
+                const result = await storage.changeVisibility(existingItem.url, isActive);
+                finalUrl = result.url || result.path;
+            }
 
             return await tx.galleryItem.update({
                 where: { id },
                 data: {
                     isActive,
                     title,
-                    url: result.url || result.path,
+                    url: finalUrl,
                 },
             });
         });
 
         return NextResponse.json({ data: updatedItem }, { status: 200 });
     } catch (err) {
-        logger.error({ err, route: getRequestInfo(req) }, "Erro ao atualizar status da imagem na galeria");
+        logger.error({ err, route: getRequestInfo(req) }, "Erro ao atualizar item da galeria");
+
+        if (err.code === "P2002") {
+            return NextResponse.json({ error: "Já existe uma imagem com este título" }, { status: 409 });
+        }
+
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }

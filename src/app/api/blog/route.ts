@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
 
         if (isAdmin) {
             for (const post of posts) {
-                if (!post.publicado && post.foto) {
+                if (!post.publicado && post.foto && !post.foto.url.startsWith("http")) {
                     try {
                         post.foto.url = await storage.getPrivateUrl(post.foto.url);
                     } catch (err) {

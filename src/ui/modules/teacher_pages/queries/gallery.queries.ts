@@ -7,15 +7,17 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { GetGalleryItemsParams } from "@/src/infra/modules/gallery/gallery.types";
+
 export const galleryKeys = {
     all: ["gallery"] as const,
-    list: (filters?: object) => [...galleryKeys.all, "list", filters] as const,
+    list: (filters?: GetGalleryItemsParams) => [...galleryKeys.all, "list", filters] as const,
 };
 
-export function useGallery(onlyActive?: boolean) {
+export function useGallery(params?: GetGalleryItemsParams) {
     return useQuery({
-        queryKey: galleryKeys.list({ isActive: onlyActive }),
-        queryFn: () => getGalleryItems({ isActive: onlyActive }),
+        queryKey: galleryKeys.list(params),
+        queryFn: () => getGalleryItems(params || {}),
         staleTime: 5 * 60 * 1000,
     });
 }
@@ -36,7 +38,7 @@ export function useToggleGalleryStatus() {
                 return {
                     ...old,
                     data: old.data.map((item: any) =>
-                        item.id === newItem.id ? { ...item, isActive: newItem.isActive } : item
+                        item.id === newItem.id ? { ...item, isActive: newItem.isActive, title: newItem.title } : item
                     ),
                 };
             });
@@ -49,13 +51,13 @@ export function useToggleGalleryStatus() {
                     queryClient.setQueryData(queryKey, oldData);
                 });
             }
-            toast.error(err.response?.data?.error || "Erro ao atualizar status.");
+            toast.error(err.response?.data?.error || "Erro ao atualizar item da galeria.");
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: galleryKeys.all });
         },
         onSuccess: () => {
-            toast.success("Status atualizado com sucesso!");
+            toast.success("Item da galeria atualizado!");
         },
     });
 }

@@ -19,12 +19,13 @@ export const getGalleryItemsSchema = z.object({
         if (val === "false") return false;
         return val;
     }, z.boolean().optional()),
-    wordFilter: z.string().trim().min(1).max(50).optional(),
+    wordFilter: z.string().trim().min(1).max(100).optional(),
+    origin: z.enum(["UPLOAD", "POST"]).optional(),
 });
 
 export const createGalleryItemSchema = z
     .object({
-        title: z.string().min(1).max(50),
+    title: z.string().min(1).max(100),
         isActive: z.preprocess((val) => {
             if (val === "true") return true;
             if (val === "false") return false;
@@ -51,5 +52,5 @@ export const updateGalleryActiveSchema = z.object({
         if (val === "false") return false;
         return val;
     }, z.boolean()),
-    title: z.string().min(1).max(50),
+    title: z.string().min(1).max(100),
 });
