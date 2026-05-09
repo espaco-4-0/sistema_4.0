@@ -6,6 +6,7 @@ import { Checkbox } from "@/src/ui/components/ui/checkbox";
 import { Label } from "@/src/ui/components/ui/label";
 import { UserLoginData, userLoginSchema } from "@/src/ui/forms/schemas/user-login-schema";
 import { InputText } from "@/src/ui/forms/ui/user-registration";
+import { getDashboardHref } from "@/src/ui/lib/role-routing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { getSession, signIn } from "next-auth/react";
@@ -13,14 +14,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-const roleRedirectMap: Record<string, string> = {
-    ADMIN: "/professor/gerenciar-usuarios",
-    PROFESSOR: "/professor/visao-geral",
-    MONITOR: "/professor/controle-presenca",
-    PESQUISADOR: "/professor/relatorios",
-    VISITANTE: "/estudante/profile",
-};
 
 export default function UserLoginForm() {
     const router = useRouter();
@@ -63,7 +56,7 @@ export default function UserLoginForm() {
 
             const session = await getSession();
             const role = (session?.user as { role?: string } | undefined)?.role;
-            const destination = role ? (roleRedirectMap[role] ?? "/") : "/";
+            const destination = getDashboardHref(role) ?? "/";
 
             router.push(destination);
             router.refresh();
