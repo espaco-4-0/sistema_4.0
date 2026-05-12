@@ -5,8 +5,8 @@ import { CatalogModal } from "@/src/ui/components/modals/professor/gamificacao/c
 import { CreateCampaignModal } from "@/src/ui/components/modals/professor/gamificacao/create-campaign-modal";
 import { NewMissionModal } from "@/src/ui/components/modals/professor/gamificacao/new-mission-modal";
 import { Button } from "@/src/ui/components/ui/button";
-import { AlertCircle, Crown, Flame, Gift, Medal, Star, Target, Trophy, Users } from "lucide-react";import { useSession } from "next-auth/react";
-\
+import { AlertCircle, Crown, Flame, Gift, Medal, Star, Target, Trophy, Users } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const highlights = [
     {
@@ -88,25 +88,25 @@ export default function Gamificacao() {
     const { data: session, status } = useSession();
     const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
     const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-	const [isNewMissionOpen, setIsNewMissionOpen] = useState(false);
+    const [isNewMissionOpen, setIsNewMissionOpen] = useState(false);
 
-	if (status === "loading") return null;
+    if (status === "loading") return null;
 
-if (!session || session.user.role !== "ADMIN") {
-    return (
-        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
-            <div className="bg-red-50 p-6 rounded-full mb-4">
-                <AlertCircle size={48} className="text-red-400" />
+    if (!session || session.user.role !== "ADMIN") {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
+                <div className="bg-red-50 p-6 rounded-full mb-4">
+                    <AlertCircle size={48} className="text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
+                <p className="text-gray-500 mt-2 max-w-xs text-sm">
+                    Esta página e suas funcionalidades são exclusivas para administradores do sistema.
+                </p>
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
-            <p className="text-gray-500 mt-2 max-w-xs text-sm">
-                Esta página e suas funcionalidades são exclusivas para administradores do sistema.
-            </p>
-        </div>
-    );
-}
+        );
+    }
 
-	return (
+    return (
         <div className="space-y-6">
             <div className="bg-linear-to-r bg-yellow-primary rounded-2xl p-8 text-white shadow-md">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
