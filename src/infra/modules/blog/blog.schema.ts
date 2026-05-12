@@ -28,6 +28,11 @@ export const getBlogSchema = z.object({
         if (val === "false") return false;
         return val;
     }, z.boolean().optional()),
+    isLite: z.preprocess((val) => {
+        if (val === "true") return true;
+        if (val === "false") return false;
+        return val;
+    }, z.boolean().optional()),
 });
 
 export const postBlogSchema = z.object({

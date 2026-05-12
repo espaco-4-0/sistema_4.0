@@ -1,15 +1,27 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { images } from "@/src/infra/modules/gallery/gallery_mock";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Minimize, X } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "../../components/ui/button";
 import { EmptyState } from "./empty_state";
+import { useLandingGallery } from "./queries/gallery.queries";
 
 export default function SpaceGallery() {
     const [selectedImage, setSelectedImage] = useState<number | null>(null);
     const [direction, setDirection] = useState(0);
+
+    const { data: galleryData } = useLandingGallery({
+        isActive: true,
+        limit: 6,
+    });
+
+    const images = galleryData?.data.map(item => ({
+        src: item.url,
+        title: item.title
+    })) || [];
 
     useEffect(() => {
         if (selectedImage === null) return;
@@ -28,7 +40,7 @@ export default function SpaceGallery() {
     }, [selectedImage]);
 
     const navigateImage = (dir: number) => {
-        if (selectedImage === null) return;
+        if (selectedImage === null || images.length === 0) return;
         setDirection(dir);
         const newIndex = (selectedImage + dir + images.length) % images.length;
         setSelectedImage(newIndex);
@@ -51,11 +63,15 @@ export default function SpaceGallery() {
                 </p>
 
                 {images.length > 0 ? (
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                    <div className={
+                        images.length === 1 ? "flex justify-center" :
+                        images.length === 2 ? "grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto" :
+                        "columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4"
+                    }>
                         {images.map((image, index) => (
                             <button
                                 key={`${image.title}-${index}`}
-                                className="relative overflow-hidden rounded-2xl  group cursor-pointer block w-full text-left"
+                                className={`relative overflow-hidden rounded-2xl  group cursor-pointer block text-left ${images.length === 1 ? 'max-w-3xl w-full' : 'w-full'}`}
                                 onClick={() => setSelectedImage(index)}
                                 aria-label={`Abrir imagem: ${image.title}`}
                             >
@@ -154,7 +170,7 @@ export default function SpaceGallery() {
                                     width={1400}
                                     height={1000}
                                     alt={images[selectedImage].title}
-                                    className="w-full h-auto max-h-[80vh] object-cover rounded-2xl shadow-2xl"
+                                    className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
                                 />
                             </motion.div>
                         </AnimatePresence>
