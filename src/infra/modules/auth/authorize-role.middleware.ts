@@ -1,60 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const USER_ROLES = ["ADMIN", "TEACHER", "MONITOR", "RESEARCHER", "VISITOR"] as const;
-export type UserRole = (typeof USER_ROLES)[number];
+// modificar quando alterar os nomes para ingles para realizar a confirmacao correta
 
-export const protectedRouteMatchers = [
-    "/admin/:path*",
-    "/courses/:path*",
-    "/classes/:path*",
-    "/search/:path*",
-    "/projects/:path*",
-    "/inventory/:path*",
-    "/blog/:path*",
-    "/presence/:path*",
-    "/cursos/:path*",
-    "/aulas/:path*",
-    "/pesquisa/:path*",
-    "/projetos/:path*",
-    "/inventario/:path*",
-    "/presenca/:path*",
-] as const;
+const USER_ROLES = ["ADMIN", "PROFESSOR", "MONITOR", "PESQUISADOR", "VISITANTE"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
 
 export const routePermissions: Record<string, UserRole[]> = {
     "/admin": ["ADMIN"],
-    "/courses": ["ADMIN", "TEACHER"],
-    "/classes": ["ADMIN", "TEACHER", "MONITOR"],
-    "/search": ["ADMIN", "RESEARCHER"],
-    "/projects": ["ADMIN", "TEACHER", "RESEARCHER"],
-    "/inventory": ["ADMIN", "TEACHER"],
-    "/blog": ["ADMIN", "TEACHER", "MONITOR", "RESEARCHER"],
-    "/presence": ["ADMIN", "VISITOR"],
-    "/cursos": ["ADMIN", "TEACHER"],
-    "/aulas": ["ADMIN", "TEACHER", "MONITOR"],
-    "/pesquisa": ["ADMIN", "RESEARCHER"],
-    "/projetos": ["ADMIN", "TEACHER", "RESEARCHER"],
-    "/inventario": ["ADMIN", "TEACHER"],
-    "/presenca": ["ADMIN", "VISITOR"],
+    "/professor": ["ADMIN", "PROFESSOR"],
+    "/aluno": ["ADMIN", "VISITANTE"],
+    "/courses": ["ADMIN", "PROFESSOR"],
+    "/classes": ["ADMIN", "PROFESSOR", "MONITOR"],
+    "/search": ["ADMIN", "PESQUISADOR"],
+    "/projects": ["ADMIN", "PROFESSOR", "PESQUISADOR"],
+    "/inventory": ["ADMIN", "PROFESSOR"],
+    "/blog": ["ADMIN", "PROFESSOR", "MONITOR", "PESQUISADOR"],
+    "/presence": ["ADMIN", "VISITANTE"],
+    "/cursos": ["ADMIN", "PROFESSOR"],
+    "/aulas": ["ADMIN", "PROFESSOR", "MONITOR"],
+    "/pesquisa": ["ADMIN", "PESQUISADOR"],
+    "/projetos": ["ADMIN", "PROFESSOR", "PESQUISADOR"],
+    "/inventario": ["ADMIN", "PROFESSOR"],
+    "/presenca": ["ADMIN", "VISITANTE"],
 };
-
 function isUserRole(value: unknown): value is UserRole {
     return USER_ROLES.includes(value as UserRole);
 }
 
 export function authorizeRole(req: NextRequest, role: unknown): NextResponse | undefined {
     const path = req.nextUrl.pathname;
-
     const matchedPath = Object.keys(routePermissions).find((p) => path.startsWith(p));
 
-    if (!matchedPath) {
-        return undefined;
-    }
+    if (!matchedPath) return undefined;
 
     if (!isUserRole(role) || !routePermissions[matchedPath].includes(role)) {
-        return new NextResponse(JSON.stringify({ message: "Acesso negado: privilégios insuficientes" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-        });
+        return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
     return undefined;

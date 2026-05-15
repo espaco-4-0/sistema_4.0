@@ -16,7 +16,8 @@ import {
 } from "@/src/ui/components/ui/dropdown-menu";
 import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
-import { Award, FileUp, Filter, PenLine, ShieldCheck, Star, Users } from "lucide-react";
+import { AlertCircle, Award, FileUp, Filter, PenLine, ShieldCheck, Star, Users } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 const stats = [
@@ -74,6 +75,7 @@ export default function Certificados() {
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("Todos");
+    const { data: session, status } = useSession();
 
     const handleSaveSignature = () => {
         toast.success("Assinatura salva com sucesso!");
@@ -92,6 +94,21 @@ export default function Certificados() {
         const matchesStatus = statusFilter === "Todos" || student.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
+    if (status === "loading") return null;
+
+    if (!session || session.user.role !== "ADMIN") {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
+                <div className="bg-red-50 p-6 rounded-full mb-4">
+                    <AlertCircle size={48} className="text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
+                <p className="text-gray-500 mt-2 max-w-xs text-sm">
+                    Esta página e suas funcionalidades são exclusivas para administradores do sistema.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 p-6">

@@ -8,7 +8,8 @@ import { EditSystemModal } from "@/src/ui/components/modals/professor/configurac
 import { Badge } from "@/src/ui/components/ui/badge";
 import { Button } from "@/src/ui/components/ui/button";
 import { Switch } from "@/src/ui/components/ui/switch";
-import { Lock, Settings, Shield, User } from "lucide-react";
+import { AlertCircle, Lock, Settings, Shield, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 type ModalType = "editProfile" | "editSystem" | "changePassword" | null;
@@ -33,6 +34,7 @@ function roleLabel(role: string): string {
 }
 
 export default function Configuracoes() {
+    const { data: session, status } = useSession();
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [profile, setProfile] = useState<ProfileData | null>(null);
 
@@ -66,6 +68,22 @@ export default function Configuracoes() {
             setActiveModal(null);
         }
     };
+
+    if (status === "loading") return null;
+
+    if (!session || session.user.role !== "ADMIN") {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
+                <div className="bg-red-50 p-6 rounded-full mb-4">
+                    <AlertCircle size={48} className="text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
+                <p className="text-gray-500 mt-2 max-w-xs text-sm">
+                    Esta página e suas funcionalidades são exclusivas para administradores do sistema.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
