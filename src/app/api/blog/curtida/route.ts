@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         const validatedPostId = postIdBlogSchema.safeParse(postId);
         if (!validatedPostId.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 422 });
 
-        await prisma.curtida.create({
+        await prisma.like.create({
             data: {
                 userId: session.user.id,
                 postId: validatedPostId.data,

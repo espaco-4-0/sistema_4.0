@@ -1,115 +1,113 @@
-enum StatusInscricao {
-  PENDENTE
-  CONFIRMADA
-  CANCELADA
+enum EnrollmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
 }
 
-model Local {
-  id         String   @id @default(cuid())
-  nome       String
-  descricao  String?
-  capacidade Int?
-  duracaoMin Int?
-  ativo      Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Location {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  capacity    Int?
+  durationMin Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  aulas Aula[]
-  visitas VisitLocal[]
+  Lesson        Lesson[]
+  VisitLocation VisitLocation[]
 }
 
-
-model Curso {
+model Course {
   id           String   @id @default(cuid())
-  titulo       String
-  descricao    String?
-  cargaHoraria Int? // em horas
-  ativo        Boolean  @default(true)
+  title        String
+  description  String?
+  workload     Int? // em horas
+  isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  professor   User   @relation("ProfessorCursos", fields: [professorId], references: [id])
+  professor   User   @relation(fields: [professorId], references: [id])
   professorId String
 
-  aulas        Aula[]
-  inscricoes   Inscricao[]
+  Lesson        Lesson[]
+  Enrollment    Enrollment[]
 
   @@index([professorId])
 }
 
-model Aula {
-  id             String   @id @default(cuid())
-  titulo         String?
-  dataHoraInicio DateTime
-  duracaoMin     Int // duração em minutos
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String?
+  startDate   DateTime
+  durationMin Int // duração em minutos
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  curso   Curso  @relation(fields: [cursoId], references: [id])
-  cursoId String
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String
 
   professor   User   @relation("ProfessorAulas", fields: [professorId], references: [id])
   professorId String
 
-  local   Local?  @relation(fields: [localId], references: [id])
-  localId String? // opcional: pode ser definido depois
+  location   Location? @relation(fields: [locationId], references: [id])
+  locationId String? // opcional: pode ser definido depois
 
-  monitores AulaMonitor[]
+  LessonMonitor LessonMonitor[]
+  Presence      Presence[]
 
-  presencas Presenca[]
-
-  @@index([cursoId])
+  @@index([courseId])
   @@index([professorId])
 }
 
-model AulaMonitor {
+model LessonMonitor {
   id        String @id @default(cuid())
-  aula      Aula   @relation(fields: [aulaId], references: [id], onDelete: Cascade)
-  aulaId    String
+  lesson    Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId  String
   monitor   User   @relation(fields: [monitorId], references: [id], onDelete: Cascade)
   monitorId String
 
   assignedAt DateTime @default(now())
 
-  @@unique([aulaId, monitorId])
+  @@unique([lessonId, monitorId])
   @@index([monitorId])
 }
 
-model Inscricao {
-  id            String          @id @default(cuid())
-  status        StatusInscricao @default(PENDENTE)
-  dataEscolhida DateTime? // data/hora preferida pelo visitante
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+model Enrollment {
+  id         String           @id @default(cuid())
+  status     EnrollmentStatus @default(PENDING)
+  chosenDate DateTime? // data/hora preferida pelo visitante
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  curso   Curso  @relation(fields: [cursoId], references: [id], onDelete: Cascade)
-  cursoId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
 
-  presencas Presenca[]
+  Presence Presence[]
 
-  @@unique([userId, cursoId])
-  @@index([cursoId])
+  @@unique([userId, courseId])
+  @@index([courseId])
 }
 
-model Presenca {
+model Presence {
   id          String    @id @default(cuid())
-  confirmada  Boolean   @default(false)
+  confirmed   Boolean   @default(false)
   confirmedAt DateTime?
   createdAt   DateTime  @default(now())
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  aula   Aula   @relation(fields: [aulaId], references: [id], onDelete: Cascade)
-  aulaId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String
 
-  inscricao   Inscricao? @relation(fields: [inscricaoId], references: [id])
-  inscricaoId String?
+  enrollment   Enrollment? @relation(fields: [enrollmentId], references: [id])
+  enrollmentId String?
 
-  @@unique([userId, aulaId])
-  @@index([aulaId])
-  @@index([inscricaoId])
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+  @@index([enrollmentId])
 }

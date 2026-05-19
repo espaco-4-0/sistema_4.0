@@ -40,14 +40,14 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
         const post = await prisma.post.findUnique({
             where: {
                 slug: validatedSlug.data,
-                publicado: true,
+                isPublished: true,
             },
             include: {
-                foto: { select: { url: true } },
-                categoria: { select: { nome: true } },
-                autor: { select: { nomeCompleto: true } },
-                _count: { select: { curtidas: true, comentarios: true } },
-                curtidas: session?.user?.id ? { where: { userId: session.user.id }, select: { id: true } } : false,
+                photo: { select: { url: true } },
+                category: { select: { name: true } },
+                author: { select: { fullName: true } },
+                _count: { select: { Like: true, Comment: true } },
+                Like: session?.user?.id ? { where: { userId: session.user.id }, select: { id: true } } : false,
             },
         });
 
@@ -55,19 +55,31 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
             return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
         }
 
-        if (!post.publicado && session?.user?.role === "ADMIN" && post.foto) {
+        if (!post.isPublished && session?.user?.role === "ADMIN" && post.photo) {
             try {
-                post.foto.url = await storage.getPrivateUrl(post.foto.url);
+                post.photo.url = await storage.getPrivateUrl(post.photo.url);
             } catch (err) {
                 logger.warn({ err, postId: post.id }, "Falha ao gerar URL assinada no slug GET");
             }
         }
 
         const data = {
-            ...post,
-            likesCount: post._count?.curtidas || 0,
-            commentsCount: post._count?.comentarios || 0,
-            isLiked: (post as any).curtidas?.length > 0,
+            id: post.id,
+            titulo: post.title,
+            slug: post.slug,
+            resumo: post.summary,
+            conteudo: post.content,
+            tempoDeLeitura: post.readingTime,
+            publicado: post.isPublished,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+            autorId: post.authorId,
+            foto: { url: post.photo?.url || "" },
+            categoria: { nome: post.category?.name || "Geral" },
+            autor: { nomeCompleto: post.author?.fullName || "Autor desconhecido" },
+            likesCount: post._count?.Like || 0,
+            commentsCount: post._count?.Comment || 0,
+            isLiked: (post as any).Like?.length > 0,
         };
 
         return NextResponse.json({ data }, { status: 200 });
@@ -84,17 +96,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
         const slug: string = (await params).slug;
         const { published } = await req.json();
 
-        const existingPost = await prisma.post.findUnique({ where: { slug }, include: { foto: true } });
+        const existingPost = await prisma.post.findUnique({ where: { slug }, include: { photo: true } });
         if (!existingPost) {
             return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
         }
 
         const updatedPost = await prisma.$transaction(async (tx) => {
-            const post = await tx.post.update({ where: { slug }, data: { publicado: published } });
+            const post = await tx.post.update({ where: { slug }, data: { isPublished: published } });
 
-            if (existingPost.publicado !== published && existingPost.foto) {
-                const result = await storage.changeVisibility(existingPost.foto.url, published);
-                await tx.foto.update({ where: { id: existingPost.foto.id }, data: { url: result.url || result.path } });
+            if (existingPost.isPublished !== published && existingPost.photo) {
+                const result = await storage.changeVisibility(existingPost.photo.url, published);
+                await tx.postPhoto.update({ where: { id: existingPost.photo.id }, data: { url: result.url || result.path } });
             }
 
             return post;
@@ -135,12 +147,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ slug: st
 
         const { title, slug: newSlug, content, published, file, summary, category, authorId } = validatedData.data;
 
-        const existingPost = await prisma.post.findUnique({ where: { slug: currentSlug }, include: { foto: true } });
+        const existingPost = await prisma.post.findUnique({ where: { slug: currentSlug }, include: { photo: true } });
         if (!existingPost) {
             return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
         }
 
-        let fotoUrl = existingPost.foto?.url;
+        let fotoUrl = existingPost.photo?.url;
         let storagePath: string | null = null;
 
         if (file) {
@@ -166,26 +178,26 @@ export async function PUT(req: Request, { params }: { params: Promise<{ slug: st
             const post = await tx.post.update({
                 where: { slug: currentSlug },
                 data: {
-                    titulo: title,
+                    title,
                     slug: newSlug,
-                    conteudo: content,
-                    resumo: summary,
-                    publicado: published,
-                    tempoDeLeitura: estimateReadingTimeInMinutes(content),
+                    content,
+                    summary,
+                    isPublished: published,
+                    readingTime: estimateReadingTimeInMinutes(content),
                     ...(category && {
-                        categoria: { connectOrCreate: { where: { nome: category }, create: { nome: category } } },
+                        category: { connectOrCreate: { where: { name: category }, create: { name: category } } },
                     }),
-                    ...(authorId && { autor: { connect: { id: authorId } } }),
+                    ...(authorId && { author: { connect: { id: authorId } } }),
                 },
             });
 
             if (file) {
-                await tx.foto.update({ where: { postId: post.id }, data: { url: fotoUrl } });
+                await tx.postPhoto.update({ where: { postId: post.id }, data: { url: fotoUrl } });
             }
 
-            if (!file && existingPost.publicado !== published && existingPost.foto) {
-                const result = await storage.changeVisibility(existingPost.foto.url, published);
-                await tx.foto.update({ where: { id: existingPost.foto.id }, data: { url: result.url || result.path } });
+            if (!file && existingPost.isPublished !== published && existingPost.photo) {
+                const result = await storage.changeVisibility(existingPost.photo.url, published);
+                await tx.postPhoto.update({ where: { id: existingPost.photo.id }, data: { url: result.url || result.path } });
             }
 
             return post;

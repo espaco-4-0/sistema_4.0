@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
             const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
-            await sendResetPasswordEmail(user.email, user.nomeCompleto ?? "Usuário", resetLink);
+            await sendResetPasswordEmail(user.email, user.fullName ?? "Usuário", resetLink);
         }
 
         return NextResponse.json(

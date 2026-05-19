@@ -24,9 +24,9 @@ function toSlug(value: string): string {
         .replaceAll(/-+/g, "-");
 }
 
-async function getCategoryIdByName(prisma: PrismaClient, nome: string): Promise<string> {
-    const existing = await prisma.postCategoria.findFirst({
-        where: { nome },
+async function getCategoryIdByName(prisma: PrismaClient, name: string): Promise<string> {
+    const existing = await prisma.postCategory.findFirst({
+        where: { name },
         select: { id: true },
     });
 
@@ -34,8 +34,8 @@ async function getCategoryIdByName(prisma: PrismaClient, nome: string): Promise<
         return existing.id;
     }
 
-    const created = await prisma.postCategoria.create({
-        data: { nome },
+    const created = await prisma.postCategory.create({
+        data: { name },
         select: { id: true },
     });
 
@@ -77,7 +77,7 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
             image: "https://rllnjjtrzwizgrndgfep.supabase.co/storage/v1/object/public/public-uploads/199e0e45-fd12-4f63-99bf-8ead18896051-postsoutraasdao.jpeg",
             date: "18 de Janeiro, 2026",
             author: "Karol",
-            about: "Karol é pesquisadora e acompanha iniciativas de sustentabilidade e projetos de impacto ambiental.",
+            about: "Karol é pesquisadora e acompanha initiatives de sustentabilidade e projetos de impacto ambiental.",
             content: [
                 "Um grupo de estudantes do Espaço 4.0 desenvolveu um sistema integrado de gestão de resíduos utilizando tecnologias de IoT.",
                 "O projeto inclui lixeiras inteligentes equipadas com sensores que monitoram o nível de preenchimento.",
@@ -307,13 +307,13 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
         },
     ];
 
-    await prisma.comentario.deleteMany();
-    await prisma.curtida.deleteMany();
+    await prisma.comment.deleteMany();
+    await prisma.like.deleteMany();
     await prisma.post.deleteMany();
-    await prisma.postCategoria.deleteMany();
+    await prisma.postCategory.deleteMany();
 
     const users = await prisma.user.findMany({
-        select: { id: true, nomeCompleto: true },
+        select: { id: true, fullName: true },
     });
 
     if (users.length === 0) {
@@ -350,26 +350,26 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
 
         const categoriasIds = await Promise.all(categoriasNomes.map((nome) => getCategoryIdByName(prisma, nome)));
 
-        const author = users.find((u) => u.nomeCompleto.includes(post.author)) || fallbackAuthor;
+        const author = users.find((u) => u.fullName.includes(post.author)) || fallbackAuthor;
 
         const savedPost = await prisma.post.create({
             data: {
-                titulo: post.title,
+                title: post.title,
                 slug,
-                resumo: post.about,
-                conteudo: conteudoCompleto,
-                tempoDeLeitura: estimateReadingTimeInMinutes(conteudoCompleto),
-                publicado: true,
-                autor: {
+                summary: post.about,
+                content: conteudoCompleto,
+                readingTime: estimateReadingTimeInMinutes(conteudoCompleto),
+                isPublished: true,
+                author: {
                     connect: { id: author.id },
                 },
-                categoria: {
+                category: {
                     connect: { id: categoriasIds[0] },
                 },
-                foto: {
+                photo: {
                     create: {
                         url: post.image,
-                        destaque: true,
+                        isFeatured: true,
                     },
                 },
             },
@@ -381,7 +381,7 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
         const likers = shuffledUsersForLikes.slice(0, Math.min(numLikes, users.length));
 
         for (const liker of likers) {
-            await prisma.curtida.create({
+            await prisma.like.create({
                 data: {
                     userId: liker.id,
                     postId: savedPost.id,
@@ -399,10 +399,10 @@ export async function seedBlog(prisma: PrismaClient): Promise<void> {
             const commenter = shuffledCommenters[j % users.length];
             const content = commentsPool[j % commentsPool.length];
 
-            await prisma.comentario.create({
+            await prisma.comment.create({
                 data: {
-                    conteudo: content,
-                    autorId: commenter.id,
+                    content: content,
+                    authorId: commenter.id,
                     postId: savedPost.id,
                 },
             });

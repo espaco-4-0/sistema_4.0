@@ -13,6 +13,7 @@ export type CalendarEvent = {
     quantidade?: string;
     isHoliday?: boolean;
     holidayName?: string | null;
+    image?: string;
 };
 
 export const calendarEventsMock: CalendarEvent[] = [];

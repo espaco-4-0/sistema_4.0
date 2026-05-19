@@ -11,31 +11,39 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const includeAll = searchParams.get("includeAll") === "true";
 
-        const categories = await prisma.postCategoria.findMany({
+        const categories = await prisma.postCategory.findMany({
             where: includeAll ? {} : {
-                posts: {
+                Post: {
                     some: {
-                        publicado: true,
+                        isPublished: true,
                     },
                 },
             },
             select: {
                 id: true,
-                nome: true,
+                name: true,
                 _count: {
                     select: {
-                        posts: {
-                            where: { publicado: true },
+                        Post: {
+                            where: { isPublished: true },
                         },
                     },
                 },
             },
             orderBy: {
-                nome: "asc"
+                name: "asc"
             }
         });
 
-        return NextResponse.json({ data: categories }, { status: 200 });
+        const mappedCategories = categories.map((cat: any) => ({
+            id: cat.id,
+            nome: cat.name,
+            _count: {
+                posts: cat._count.Post,
+            },
+        }));
+
+        return NextResponse.json({ data: mappedCategories }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
@@ -52,9 +60,9 @@ export async function POST(req: NextRequest) {
         const validatedBody = createCategorySchema.safeParse(name);
         if (!validatedBody.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 422 });
 
-        await prisma.postCategoria.create({
+        await prisma.postCategory.create({
             data: {
-                nome: validatedBody.data,
+                name: validatedBody.data,
             },
         });
 

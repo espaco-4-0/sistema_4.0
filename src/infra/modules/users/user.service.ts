@@ -9,10 +9,10 @@ const SALT_ROUNDS = 12;
 
 const USER_PUBLIC_SELECT = {
     id: true,
-    nomeCompleto: true,
+    fullName: true,
     email: true,
     role: true,
-    ativo: true,
+    isActive: true,
     createdAt: true,
 } satisfies Prisma.UserSelect;
 
@@ -43,11 +43,11 @@ export async function listUsers(filter: ListUsersFilter): Promise<ListUsersResul
 
     const where: Prisma.UserWhereInput = {
         ...(normalizedRole ? { role: normalizedRole } : {}),
-        ...(active !== null && active !== undefined ? { ativo: active === "true" } : {}),
+        ...(active !== null && active !== undefined ? { isActive: active === "true" } : {}),
         ...(search
             ? {
                   OR: [
-                      { nomeCompleto: { contains: search, mode: "insensitive" } },
+                      { fullName: { contains: search, mode: "insensitive" } },
                       { email: { contains: search, mode: "insensitive" } },
                   ],
               }
@@ -88,18 +88,18 @@ export async function createUser(data: CreateUserPayload): Promise<PublicUser> {
 
     const user = await prisma.user.create({
         data: {
-            nomeCompleto: data.nomeCompleto,
+            fullName: data.nomeCompleto,
             email: data.email,
-            senha: hashedPassword,
-            dataNascimento: new Date(data.dataNascimento),
-            telefone: data.telefone,
-            raca: data.raca,
-            educacao: data.educacao,
-            ifalAfiliacao: data.ifalAfiliacao,
-            deficiencia: data.deficiencia ?? null,
-            necessidadeEspecial: data.necessidadeEspecial ?? null,
-            role: data.role ?? "VISITANTE",
-            ativo: data.ativo ?? true,
+            password: hashedPassword,
+            birthDate: new Date(data.dataNascimento),
+            phone: data.telefone,
+            race: data.raca,
+            education: data.educacao,
+            ifalAffiliation: data.ifalAfiliacao,
+            disability: data.deficiencia ?? null,
+            specialNeed: data.necessidadeEspecial ?? null,
+            role: data.role ?? "VISITOR",
+            isActive: data.ativo ?? true,
         },
         select: USER_PUBLIC_SELECT,
     });

@@ -21,9 +21,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const validatedName = createCategorySchema.safeParse(name);
         if (!validatedName.success) return NextResponse.json({ error: "Nome inválido" }, { status: 422 });
 
-        await prisma.postCategoria.update({
+        await prisma.postCategory.update({
             where: { id },
-            data: { nome: validatedName.data },
+            data: { name: validatedName.data },
         });
 
         return NextResponse.json({ message: "Categoria atualizada com sucesso" }, { status: 200 });
@@ -45,7 +45,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
         const validatedId = postIdBlogSchema.safeParse(id);
         if (!validatedId.success) return NextResponse.json({ error: "Dado inválido" }, { status: 422 });
 
-        await prisma.postCategoria.delete({
+        await prisma.postCategory.delete({
             where: { id },
         });
 

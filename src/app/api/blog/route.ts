@@ -39,61 +39,41 @@ export async function GET(req: NextRequest) {
 
         const where: Prisma.PostWhereInput = {};
         if (name)
-            where.titulo = {
+            where.title = {
                 contains: name,
                 mode: "insensitive",
             };
 
         if (category)
-            where.categoria = {
-                nome: category,
+            where.category = {
+                name: category,
             };
 
         if (published !== undefined) {
-            where.publicado = published;
+            where.isPublished = published;
         } else if (includeArchived === false || includeArchived === undefined) {
-            where.publicado = true;
+            where.isPublished = true;
         }
 
         const take = quantity ?? limit;
         const skip = quantity ? 0 : (page - 1) * limit;
 
         const isLite = validatedData.data.isLite;
-        const postSelect = isLite
-            ? {
-                  id: true,
-                  titulo: true,
-                  publicado: true,
-                  foto: {
-                      select: {
-                          url: true,
-                      },
-                  },
-              }
-            : {
-                  id: true,
-                  titulo: true,
-                  conteudo: true,
-                  createdAt: true,
-
-                  foto: {
-                      select: {
-                          url: true,
-                      },
-                  },
-
-                  categoria: {
-                      select: {
-                          nome: true,
-                      },
-                  },
-
-                  autor: {
-                      select: {
-                          nomeCompleto: true,
-                      },
-                  },
-              };
+        const postSelect = {
+            id: true,
+            title: true,
+            slug: true,
+            summary: true,
+            content: true,
+            readingTime: true,
+            isPublished: true,
+            createdAt: true,
+            updatedAt: true,
+            authorId: true,
+            photo: { select: { url: true } },
+            category: { select: { name: true } },
+            author: { select: { fullName: true } },
+        };
 
         const [total, posts] = await prisma.$transaction([
             prisma.post.count({ where }),
@@ -111,9 +91,9 @@ export async function GET(req: NextRequest) {
 
         if (isAdmin) {
             for (const post of posts) {
-                if (!post.publicado && post.foto && !post.foto.url.startsWith("http")) {
+                if (!post.isPublished && post.photo && !post.photo.url.startsWith("http")) {
                     try {
-                        post.foto.url = await storage.getPrivateUrl(post.foto.url);
+                        post.photo.url = await storage.getPrivateUrl(post.photo.url);
                     } catch (err) {
                         logger.warn({ err, postId: post.id }, "Falha ao gerar URL assinada");
                     }
@@ -121,9 +101,25 @@ export async function GET(req: NextRequest) {
             }
         }
 
+        const mappedPosts = posts.map((post: any) => ({
+            id: post.id,
+            titulo: post.title,
+            slug: post.slug,
+            resumo: post.summary,
+            conteudo: post.content,
+            tempoDeLeitura: post.readingTime,
+            publicado: post.isPublished,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+            autorId: post.authorId,
+            foto: { url: post.photo?.url || "" },
+            categoria: { nome: post.category?.name || "Geral" },
+            autor: { nomeCompleto: post.author?.fullName || "Autor desconhecido" },
+        }));
+
         return NextResponse.json(
             {
-                data: posts,
+                data: mappedPosts,
                 meta: {
                     total,
                     page,
@@ -177,25 +173,25 @@ export async function POST(req: NextRequest) {
             await prisma.$transaction(async (tx) => {
                 const post = await tx.post.create({
                     data: {
-                        titulo: title,
-                        conteudo: content,
+                        title,
+                        content,
                         slug,
-                        autor: {
+                        author: {
                             connect: { id: authorId || session.user.id },
                         },
-                        publicado: published,
-                        resumo: summary,
-                        tempoDeLeitura: estimateReadingTimeInMinutes(content),
-                        categoria: {
+                        isPublished: published,
+                        summary,
+                        readingTime: estimateReadingTimeInMinutes(content),
+                        category: {
                             connectOrCreate: {
-                                where: { nome: category },
-                                create: { nome: category },
+                                where: { name: category },
+                                create: { name: category },
                             },
                         },
                     },
                 });
 
-                const foto = await tx.foto.create({
+                const photo = await tx.postPhoto.create({
                     data: {
                         url: url ? url : path!,
                         postId: post.id,

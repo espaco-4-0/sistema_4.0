@@ -1,28 +1,28 @@
-enum CategoriaInventario {
-  EQUIPAMENTO
+enum InventoryCategory {
+  EQUIPMENT
   MATERIAL
   SOFTWARE
-  OUTRO
+  OTHER
 }
 
-model InventarioItem {
-  id          String              @id @default(cuid())
-  nome        String
-  descricao   String?
-  categoria   CategoriaInventario @default(OUTRO)
-  quantidade  Int                 @default(1)
-  unidade     String? // ex: "un", "kg", "L"
-  localizacao String? // onde está guardado
-  ativo       Boolean             @default(true)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+model InventoryItem {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  category    InventoryCategory @default(OTHER)
+  quantity    Int               @default(1)
+  unit        String? // ex: "un", "kg", "L"
+  location    String? // onde está guardado
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
-  responsavel   User?   @relation(fields: [responsavelId], references: [id])
-  responsavelId String?
+  responsible   User?   @relation(fields: [responsibleId], references: [id])
+  responsibleId String?
 
-  projeto   Projeto? @relation(fields: [projetoId], references: [id])
-  projetoId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
 
-  @@index([responsavelId])
-  @@index([projetoId])
+  @@index([responsibleId])
+  @@index([projectId])
 }

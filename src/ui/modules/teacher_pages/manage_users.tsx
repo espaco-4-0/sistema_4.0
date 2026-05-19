@@ -12,27 +12,17 @@ import {
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, ChevronLeft, ChevronRight, Filter, MoreVertical, Search, Upload, UserPlus, Users } from "lucide-react";
+import { UserRole } from "@/src/generated/prisma/enums";
 
 import NewUserModal from "../../components/modals/professor/usuarios/new-user-modal";
 import { useUsersList, userKeys } from "./queries/users.queries";
-
-type UserRole = "ADMIN" | "PROFESSOR" | "MONITOR" | "PESQUISADOR" | "VISITANTE";
-
-type ApiUser = {
-    id: string;
-    nomeCompleto: string;
-    email: string;
-    role: UserRole;
-    ativo: boolean;
-    createdAt: string;
-};
 
 const roleLabel: Record<UserRole, string> = {
     ADMIN: "Administrador",
     PROFESSOR: "Professor",
     MONITOR: "Monitor",
-    PESQUISADOR: "Pesquisador",
-    VISITANTE: "Visitante",
+    RESEARCHER: "Pesquisador",
+    VISITOR: "Visitante",
 };
 
 function getRoleStyle(role: UserRole): string {
@@ -40,8 +30,8 @@ function getRoleStyle(role: UserRole): string {
         ADMIN: "bg-slate-100 text-slate-700 border-slate-200",
         PROFESSOR: "bg-red-50 text-red-700 border-red-100",
         MONITOR: "bg-orange-50 text-orange-700 border-orange-100",
-        PESQUISADOR: "bg-amber-50 text-amber-700 border-amber-100",
-        VISITANTE: "bg-yellow-50 text-yellow-700 border-yellow-100",
+        RESEARCHER: "bg-amber-50 text-amber-700 border-amber-100",
+        VISITOR: "bg-yellow-50 text-yellow-700 border-yellow-100",
     };
     return styles[role];
 }
@@ -64,7 +54,7 @@ export default function ManageUsers() {
             const matchFilter = typeFilter === "Todos" || roleLabel[user.role] === typeFilter;
             const matchSearch =
                 term.length === 0 ||
-                user.nomeCompleto.toLowerCase().includes(term) ||
+                user.fullName.toLowerCase().includes(term) ||
                 user.email.toLowerCase().includes(term);
             return matchFilter && matchSearch;
         });
@@ -81,7 +71,7 @@ export default function ManageUsers() {
             },
             {
                 title: "Visitantes",
-                value: String(users.filter((u) => u.role === "VISITANTE").length),
+                value: String(users.filter((u) => u.role === "VISITOR").length),
                 icon: Users,
                 color: "bg-blue-100",
                 iconColor: "text-blue-700",
@@ -258,9 +248,9 @@ export default function ManageUsers() {
                                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-yellow-400 text-black text-xs font-semibold flex items-center justify-center">
-                                                    {user.nomeCompleto.charAt(0).toUpperCase()}
+                                                    {user.fullName.charAt(0).toUpperCase()}
                                                 </div>
-                                                <span>{user.nomeCompleto}</span>
+                                                <span>{user.fullName}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
@@ -273,9 +263,9 @@ export default function ManageUsers() {
                                         </td>
                                         <td className="px-6 py-4 text-sm">
                                             <span
-                                                className={`px-3 py-1 rounded-full text-xs font-medium border ${user.ativo ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-700 border-red-100"}`}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium border ${user.isActive ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-700 border-red-100"}`}
                                             >
-                                                {user.ativo ? "Ativo" : "Inativo"}
+                                                {user.isActive ? "Ativo" : "Inativo"}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">

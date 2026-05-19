@@ -82,8 +82,8 @@ describe("Profile Service", () => {
 
             const mockUpdatedUser = {
                 id: mockUserId,
-                nomeCompleto: "Maria Silva",
-                updateAt: new Date(),
+                fullName: "Maria Silva",
+                updatedAt: new Date(),
             };
 
             vi.mocked(prisma.user.update).mockResolvedValue(mockUpdatedUser as any);
@@ -93,8 +93,8 @@ describe("Profile Service", () => {
             expect(prisma.user.update).toHaveBeenCalledWith({
                 where: { id: mockUserId },
                 data: {
-                    nomeCompleto: "Maria Silva",
-                    dataNascimento: new Date("1990-01-01T00:00:00.000Z"),
+                    fullName: "Maria Silva",
+                    birthDate: new Date("1990-01-01T00:00:00.000Z"),
                 },
                 select: expect.any(Object),
             });
@@ -115,7 +115,7 @@ describe("Profile Service", () => {
             expect(prisma.user.update).toHaveBeenCalledWith({
                 where: { id: mockUserId },
                 data: {
-                    telefone: "11999999999",
+                    phone: "11999999999",
                 },
                 select: expect.any(Object),
             });

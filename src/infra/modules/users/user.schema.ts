@@ -1,9 +1,10 @@
+import { Education, IfalAffiliation, Race, UserRole } from "@/src/generated/prisma/enums";
 import { differenceInYears, parseISO } from "date-fns";
 import { z } from "zod";
 
 export const MIN_AGE = 15;
 
-export const VALID_ROLES = ["ADMIN", "PROFESSOR", "MONITOR", "PESQUISADOR", "VISITANTE"] as const;
+export const VALID_ROLES = ["ADMIN", "PROFESSOR", "MONITOR", "RESEARCHER", "VISITOR"] as const;
 
 export type ValidRole = (typeof VALID_ROLES)[number];
 
@@ -19,16 +20,9 @@ export const createUserSchema = z.object({
             return age >= MIN_AGE;
         }, `Idade mínima de ${MIN_AGE} anos`),
     telefone: z.string().min(8, "Telefone inválido"),
-    raca: z.enum(["BRANCA", "PRETA", "PARDA", "AMARELA", "INDIGENA", "NAO_INFORMADA"]),
-    educacao: z.enum([
-        "FUNDAMENTAL_INCOMPLETO",
-        "FUNDAMENTAL_COMPLETO",
-        "MEDIO_CURSANDO",
-        "MEDIO_COMPLETO",
-        "SUPERIOR_CURSANDO",
-        "SUPERIOR_COMPLETO",
-    ]),
-    ifalAfiliacao: z.enum(["ALUNO", "EX_ALUNO", "NAO_ALUNO", "SERVIDOR"]),
+    raca: z.enum(Race),
+    educacao: z.enum(Education),
+    ifalAfiliacao: z.enum(IfalAffiliation),
     deficiencia: z.string().trim().max(255).nullable().optional(),
     necessidadeEspecial: z.string().trim().max(500).nullable().optional(),
     role: z.enum(VALID_ROLES).optional(),

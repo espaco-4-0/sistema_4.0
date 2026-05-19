@@ -4,6 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "../auth/[...nextauth]/route";
 
+export const mapLocationToFrontend = (loc: any) => ({
+    id: loc.id,
+    nome: loc.name,
+    descricao: loc.description,
+    capacidade: loc.capacity,
+    duracaoMin: loc.durationMin,
+    ativo: loc.isActive,
+    createdAt: loc.createdAt,
+    updatedAt: loc.updatedAt,
+});
+
 export async function GET(req: NextRequest) {
     try {
         const url = new URL(req.url);
@@ -18,27 +29,29 @@ export async function GET(req: NextRequest) {
         }
 
         const where: any = {};
-        if (!includeInactive) where.ativo = true;
+        if (!includeInactive) where.isActive = true;
         if (q) {
-            where.nome = { contains: q, mode: "insensitive" };
+            where.name = { contains: q, mode: "insensitive" };
         }
 
-        const locais = await prisma.local.findMany({
+        const locais = await prisma.location.findMany({
             where,
-            orderBy: { nome: "asc" },
+            orderBy: { name: "asc" },
             select: {
                 id: true,
-                nome: true,
-                descricao: true,
-                capacidade: true,
-                duracaoMin: true,
-                ativo: true,
+                name: true,
+                description: true,
+                capacity: true,
+                durationMin: true,
+                isActive: true,
                 createdAt: true,
                 updatedAt: true,
             },
         });
 
-        return NextResponse.json({ data: locais }, { status: 200 });
+        const mappedLocais = locais.map(mapLocationToFrontend);
+
+        return NextResponse.json({ data: mappedLocais }, { status: 200 });
     } catch (error) {
         console.error("[GET /api/locais]", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -60,27 +73,27 @@ export async function POST(req: NextRequest) {
 
         if (!nome) return NextResponse.json({ error: "Campo 'nome' é obrigatório" }, { status: 422 });
 
-        const created = await prisma.local.create({
+        const created = await prisma.location.create({
             data: {
-                nome,
-                descricao,
-                capacidade: Number.isFinite(capacidade) ? (capacidade as number) : undefined,
-                ...(typeof duracaoMin !== "undefined" ? { duracaoMin: duracaoMin } : {}),
-                ativo,
+                name: nome,
+                description: descricao,
+                capacity: Number.isFinite(capacidade) ? (capacidade as number) : undefined,
+                ...(typeof duracaoMin !== "undefined" ? { durationMin: duracaoMin } : {}),
+                isActive: ativo,
             },
             select: {
                 id: true,
-                nome: true,
-                descricao: true,
-                capacidade: true,
-                duracaoMin: true,
-                ativo: true,
+                name: true,
+                description: true,
+                capacity: true,
+                durationMin: true,
+                isActive: true,
                 createdAt: true,
                 updatedAt: true,
             },
         });
 
-        return NextResponse.json({ data: created }, { status: 201 });
+        return NextResponse.json({ data: mapLocationToFrontend(created) }, { status: 201 });
     } catch (error) {
         console.error("[POST /api/locais]", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -98,35 +111,35 @@ export async function PATCH(req: NextRequest) {
         if (!id) return NextResponse.json({ error: "Campo 'id' é obrigatório" }, { status: 422 });
 
         const dataToUpdate: any = {};
-        if (body.nome !== undefined) dataToUpdate.nome = String(body.nome);
+        if (body.nome !== undefined) dataToUpdate.name = String(body.nome);
         if (body.descricao !== undefined)
-            dataToUpdate.descricao = body.descricao === null ? null : String(body.descricao);
+            dataToUpdate.description = body.descricao === null ? null : String(body.descricao);
         if (body.capacidade !== undefined) {
             const cap = Number(body.capacidade);
-            dataToUpdate.capacidade = Number.isFinite(cap) ? cap : null;
+            dataToUpdate.capacity = Number.isFinite(cap) ? cap : null;
         }
         if (body.duracaoMin !== undefined) {
             const d = Number(body.duracaoMin);
-            dataToUpdate.duracaoMin = Number.isFinite(d) ? d : null;
+            dataToUpdate.durationMin = Number.isFinite(d) ? d : null;
         }
-        if (body.ativo !== undefined) dataToUpdate.ativo = Boolean(body.ativo);
+        if (body.ativo !== undefined) dataToUpdate.isActive = Boolean(body.ativo);
 
-        const updated = await prisma.local.update({
+        const updated = await prisma.location.update({
             where: { id },
             data: dataToUpdate,
             select: {
                 id: true,
-                nome: true,
-                descricao: true,
-                capacidade: true,
-                duracaoMin: true,
-                ativo: true,
+                name: true,
+                description: true,
+                capacity: true,
+                durationMin: true,
+                isActive: true,
                 createdAt: true,
                 updatedAt: true,
             },
         });
 
-        return NextResponse.json({ data: updated }, { status: 200 });
+        return NextResponse.json({ data: mapLocationToFrontend(updated) }, { status: 200 });
     } catch (error: any) {
         console.error("[PATCH /api/locais]", error);
         if (error?.code === "P2025") return NextResponse.json({ error: "Local não encontrado" }, { status: 404 });
@@ -144,7 +157,7 @@ export async function DELETE(req: NextRequest) {
         const id = url.searchParams.get("id");
         if (!id) return NextResponse.json({ error: "Parâmetro 'id' é obrigatório" }, { status: 422 });
 
-        await prisma.local.delete({ where: { id } });
+        await prisma.location.delete({ where: { id } });
 
         return NextResponse.json({ message: "Local removido com sucesso" }, { status: 200 });
     } catch (error: any) {

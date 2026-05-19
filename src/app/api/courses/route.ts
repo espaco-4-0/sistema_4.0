@@ -18,24 +18,24 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "Parâmetro 'ativo' inválido" }, { status: 400 });
         }
 
-        const courses = await prisma.curso.findMany({
+        const courses = await prisma.course.findMany({
             where: {
-                ...(q && { titulo: { contains: q, mode: "insensitive" } }),
+                ...(q && { title: { contains: q, mode: "insensitive" } }),
                 ...(professorId && { professorId }),
-                ...(typeof ativo === "boolean" && { ativo }),
+                ...(typeof ativo === "boolean" && { isActive: ativo }),
             },
             include: {
                 professor: {
                     select: {
                         id: true,
-                        nomeCompleto: true,
+                        fullName: true,
                         email: true,
                     },
                 },
                 _count: {
                     select: {
-                        aulas: true,
-                        inscricoes: true,
+                        Lesson: true,
+                        Enrollment: true,
                     },
                 },
             },
@@ -99,26 +99,26 @@ export async function POST(req: NextRequest) {
 
         const professor = await prisma.user.findUnique({
             where: { id: professorId },
-            select: { id: true, ativo: true },
+            select: { id: true, isActive: true },
         });
 
-        if (!professor || !professor.ativo) {
+        if (!professor || !professor.isActive) {
             return NextResponse.json({ message: "Professor responsável não encontrado" }, { status: 404 });
         }
 
-        const course = await prisma.curso.create({
+        const course = await prisma.course.create({
             data: {
-                titulo: parsed.data.titulo,
-                descricao: parsed.data.descricao,
-                cargaHoraria: parsed.data.cargaHoraria,
-                ativo: parsed.data.ativo ?? true,
+                title: parsed.data.titulo,
+                description: parsed.data.descricao,
+                workload: parsed.data.cargaHoraria,
+                isActive: parsed.data.ativo ?? true,
                 professorId,
             },
             include: {
                 professor: {
                     select: {
                         id: true,
-                        nomeCompleto: true,
+                        fullName: true,
                         email: true,
                     },
                 },

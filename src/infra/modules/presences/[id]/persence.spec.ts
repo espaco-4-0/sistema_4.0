@@ -6,7 +6,7 @@ import { buildPresenceUpdateData, findUserPresenceById, updatePresenceById } fro
 
 vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
-        presenca: {
+        presence: {
             findFirst: vi.fn(),
             update: vi.fn(),
         },
@@ -27,11 +27,11 @@ describe("Presence Service", () => {
 
     describe("findUserPresenceById", () => {
         it("deve retornar TRUE se a presença for encontrada para o usuário", async () => {
-            vi.mocked(prisma.presenca.findFirst).mockResolvedValue({ id: mockPresenceId } as any);
+            vi.mocked(prisma.presence.findFirst).mockResolvedValue({ id: mockPresenceId } as any);
 
             const result = await findUserPresenceById(mockPresenceId, mockUserId);
 
-            expect(prisma.presenca.findFirst).toHaveBeenCalledWith({
+            expect(prisma.presence.findFirst).toHaveBeenCalledWith({
                 where: {
                     id: mockPresenceId,
                     userId: mockUserId,
@@ -44,7 +44,7 @@ describe("Presence Service", () => {
         });
 
         it(" retornar FALSE se a presença nso for encontrada", async () => {
-            vi.mocked(prisma.presenca.findFirst).mockResolvedValue(null);
+            vi.mocked(prisma.presence.findFirst).mockResolvedValue(null);
 
             const result = await findUserPresenceById(mockPresenceId, mockUserId);
 
@@ -57,7 +57,7 @@ describe("Presence Service", () => {
             const result = buildPresenceUpdateData("pending");
 
             expect(result).toEqual({
-                confirmada: false,
+                confirmed: false,
                 confirmedAt: null,
             });
         });
@@ -66,7 +66,7 @@ describe("Presence Service", () => {
             const result = buildPresenceUpdateData("confirmed");
 
             expect(result).toEqual({
-                confirmada: true,
+                confirmed: true,
                 confirmedAt: expect.any(Date),
             });
         });
@@ -75,7 +75,7 @@ describe("Presence Service", () => {
             const result = buildPresenceUpdateData("absent");
 
             expect(result).toEqual({
-                confirmada: false,
+                confirmed: false,
                 confirmedAt: expect.any(Date),
             });
         });
@@ -83,20 +83,20 @@ describe("Presence Service", () => {
 
     describe("updatePresenceById", () => {
         it("deve atualizar a presença, invalidar o cache correto e retornar os dados", async () => {
-            const mockUpdateData = { confirmada: true, confirmedAt: new Date() };
+            const mockUpdateData = { confirmed: true, confirmedAt: new Date() };
             const mockUpdatedPresence = {
                 id: mockPresenceId,
-                confirmada: true,
+                confirmed: true,
                 confirmedAt: mockUpdateData.confirmedAt,
                 userId: mockUserId,
-                aulaId: "aula-456",
+                lessonId: "aula-456",
             };
 
-            vi.mocked(prisma.presenca.update).mockResolvedValue(mockUpdatedPresence as any);
+            vi.mocked(prisma.presence.update).mockResolvedValue(mockUpdatedPresence as any);
 
             const result = await updatePresenceById(mockPresenceId, mockUpdateData);
 
-            expect(prisma.presenca.update).toHaveBeenCalledWith({
+            expect(prisma.presence.update).toHaveBeenCalledWith({
                 where: { id: mockPresenceId },
                 data: mockUpdateData,
                 select: expect.any(Object),

@@ -67,12 +67,12 @@ export async function postHandlers(req: Request) {
         const existingEvents = await prisma.visit.findMany({
             where: {
                 AND: [
-                    { dataVisita: { gte: dateStart } },
-                    { dataVisita: { lt: dateNext } },
-                    { status: { not: "negado" } },
+                    { visitDate: { gte: dateStart } },
+                    { visitDate: { lt: dateNext } },
+                    { status: { not: "DENIED" } },
                 ],
             },
-            select: { horaInicio: true, horaFim: true },
+            select: { startTime: true, endTime: true },
         });
 
         const startMin = hhmmToMinutes(horaInicio);
@@ -80,8 +80,8 @@ export async function postHandlers(req: Request) {
         const minGap = 30;
 
         for (const ev of existingEvents) {
-            const evStart = hhmmToMinutes(ev.horaInicio);
-            const evEnd = hhmmToMinutes(ev.horaFim);
+            const evStart = hhmmToMinutes(ev.startTime);
+            const evEnd = hhmmToMinutes(ev.endTime);
 
             const startBoundary = evStart - minGap;
             const endBoundary = evEnd + minGap;
@@ -97,7 +97,7 @@ export async function postHandlers(req: Request) {
         const initialLog = [
             {
                 id: `log-${Date.now()}-1`,
-                stage: "aguardando_email",
+                stage: "WAITING_EMAIL",
                 description: `Solicitação enviada no portal. Horário: ${horaInicio} - ${horaFim}`,
                 createdAt: new Date().toISOString(),
             },
@@ -112,19 +112,19 @@ export async function postHandlers(req: Request) {
 
         const visit = await prisma.visit.create({
             data: {
-                instituicao,
-                responsavel,
+                institution: instituicao,
+                responsible: responsavel,
                 email,
                 whatsapp,
-                quantidade,
-                dataVisita: visitDate,
-                horaInicio,
-                horaFim,
-                mensagem: mensagem || null,
+                visitorCount: quantidade,
+                visitDate,
+                startTime: horaInicio,
+                endTime: horaFim,
+                message: mensagem || null,
                 processLog: initialLog,
-                paradas: {
+                VisitLocation: {
                     create: paradas.map((localId) => ({
-                        localId,
+                        locationId: localId,
                     })),
                 },
             },
@@ -159,7 +159,7 @@ export async function postHandlers(req: Request) {
         }
 
         if (documentosData.length > 0) {
-            await prisma.visitDocumento.createMany({
+            await prisma.visitDocument.createMany({
                 data: documentosData.map((d) => ({ ...d, visitId: visit.id })),
             });
         }
@@ -167,7 +167,7 @@ export async function postHandlers(req: Request) {
         const visitWithDocs = await prisma.visit.findUnique({
             where: { id: visit.id },
             include: {
-                documentos: {
+                VisitDocument: {
                     select: { id: true, fileName: true, fileType: true, fileSizeKb: true, uploadedAt: true },
                 },
             },

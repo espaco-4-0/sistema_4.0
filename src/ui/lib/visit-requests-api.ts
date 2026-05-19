@@ -16,37 +16,37 @@ export interface VisitPublicEvent {
 
 /** Converte o retorno da API (admin) para o tipo VisitRequest usado no frontend */
 export function apiVisitToRequest(visit: any): VisitRequest {
-    const dataISO: string = visit.dataVisita ?? visit.data ?? "";
+    const dataISO: string = visit.visitDate ?? visit.dataVisita ?? visit.data ?? "";
     const data = dataISO.length >= 10 ? dataISO.slice(0, 10) : dataISO;
 
     return {
         id: visit.id,
-        instituicao: visit.instituicao,
-        responsavel: visit.responsavel ?? "",
+        instituicao: visit.institution ?? visit.instituicao,
+        responsavel: visit.responsible ?? visit.responsavel ?? "",
         email: visit.email ?? "",
         whatsapp: visit.whatsapp ?? "",
-        quantidade: visit.quantidade ?? 0,
+        quantidade: visit.visitorCount ?? visit.quantidade ?? 0,
         data,
-        horaInicio: visit.horaInicio ?? "09:00",
-        horaFim: visit.horaFim ?? "10:00",
-        documentos: (visit.documentos ?? []).map((doc: any) => ({
+        horaInicio: visit.startTime ?? visit.horaInicio ?? "09:00",
+        horaFim: visit.endTime ?? visit.horaFim ?? "10:00",
+        documentos: (visit.VisitDocument ?? visit.documentos ?? []).map((doc: any) => ({
             id: String(doc.id),
             fileName: doc.fileName,
             fileType: doc.fileType,
             fileSizeKb: doc.fileSizeKb,
             uploadedAt: typeof doc.uploadedAt === "string" ? doc.uploadedAt : new Date(doc.uploadedAt).toISOString(),
         })),
-        paradas: (visit.paradas ?? []).map((p: any) => ({
+        paradas: (visit.VisitLocation ?? visit.paradas ?? []).map((p: any) => ({
             id: p.id,
-            localId: p.localId,
-            nome: p.local?.nome ?? "Desconhecido",
+            localId: p.locationId ?? p.localId,
+            nome: p.Location?.name ?? p.local?.nome ?? "Desconhecido",
         })),
-        mensagem: visit.mensagem ?? undefined,
+        mensagem: visit.message ?? visit.mensagem ?? undefined,
         status: visit.status ?? "pendente",
         processStage: visit.processStage ?? "aguardando_email",
         ifalStatus: visit.ifalStatus ?? "aguardando",
-        documentacaoStatus: visit.documentacaoStatus ?? "pendente",
-        motivoNegativa: visit.motivoNegativa ?? undefined,
+        documentacaoStatus: visit.documentationStatus ?? visit.documentacaoStatus ?? "pendente",
+        motivoNegativa: visit.rejectionReason ?? visit.motivoNegativa ?? undefined,
         createdAt: typeof visit.createdAt === "string" ? visit.createdAt : new Date(visit.createdAt).toISOString(),
         reviewedAt: visit.reviewedAt
             ? typeof visit.reviewedAt === "string"

@@ -13,7 +13,7 @@ export const EventList = ({
     date: Date;
     events: CalendarEvent[];
     onAdd: () => void;
-    onSelect: (id: number) => void;
+    onSelect: (id: string | number) => void;
     onClose: () => void;
 }) => (
     <>
