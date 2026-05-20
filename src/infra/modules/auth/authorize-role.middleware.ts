@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// modificar quando alterar os nomes para ingles para realizar a confirmacao correta
-
-const USER_ROLES = ["ADMIN", "PROFESSOR", "MONITOR", "PESQUISADOR", "VISITANTE"] as const;
+const USER_ROLES = ["ADMIN", "PROFESSOR", "MONITOR", "RESEARCHER", "VISITOR"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const routePermissions: Record<string, UserRole[]> = {
     "/admin": ["ADMIN"],
-    "/professor": ["ADMIN", "PROFESSOR"],
-    "/aluno": ["ADMIN", "VISITANTE"],
-    "/courses": ["ADMIN", "PROFESSOR"],
+    "/professor": ["ADMIN"],
+    "/courses": ["ADMIN", "PROFESSOR", "MONITOR", "RESEARCHER"],
     "/classes": ["ADMIN", "PROFESSOR", "MONITOR"],
-    "/search": ["ADMIN", "PESQUISADOR"],
-    "/projects": ["ADMIN", "PROFESSOR", "PESQUISADOR"],
+    "/search": ["ADMIN", "RESEARCHER"],
+    "/projects": ["ADMIN", "PROFESSOR", "RESEARCHER"],
     "/inventory": ["ADMIN", "PROFESSOR"],
-    "/blog": ["ADMIN", "PROFESSOR", "MONITOR", "PESQUISADOR"],
-    "/presence": ["ADMIN", "VISITANTE"],
-    "/cursos": ["ADMIN", "PROFESSOR"],
-    "/aulas": ["ADMIN", "PROFESSOR", "MONITOR"],
-    "/pesquisa": ["ADMIN", "PESQUISADOR"],
-    "/projetos": ["ADMIN", "PROFESSOR", "PESQUISADOR"],
-    "/inventario": ["ADMIN", "PROFESSOR"],
-    "/presenca": ["ADMIN", "VISITANTE"],
+    "/blog": ["ADMIN", "PROFESSOR", "MONITOR", "RESEARCHER"],
+    "/presence": ["ADMIN", "VISITOR"],
+    "/visita": ["ADMIN", "VISITOR"],
 };
+
 function isUserRole(value: unknown): value is UserRole {
     return USER_ROLES.includes(value as UserRole);
 }
@@ -34,7 +27,7 @@ export function authorizeRole(req: NextRequest, role: unknown): NextResponse | u
     if (!matchedPath) return undefined;
 
     if (!isUserRole(role) || !routePermissions[matchedPath].includes(role)) {
-        return NextResponse.redirect(new URL("/unauthorized", req.url));
+        return NextResponse.redirect(new URL("/login", req.url));
     }
 
     return undefined;

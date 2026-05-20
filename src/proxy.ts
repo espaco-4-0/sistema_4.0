@@ -3,7 +3,7 @@ import { authorizeRole } from "@/src/infra/modules/auth/authorize-role.middlewar
 import { withAuth } from "next-auth/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticateUser } from "./src/infra/modules/auth/authenticate-user.middleware";
+import { authenticateUser } from "./infra/modules/auth/authenticate-user.middleware";
 
 const securityHeaders = {
     "X-Frame-Options": "DENY",
@@ -21,15 +21,21 @@ function getClientIp(req: NextRequest): string {
     return realIp ?? "anonymous";
 }
 
+function applySecurityHeaders(response: NextResponse): NextResponse {
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+    });
+    return response;
+}
+
 export default withAuth(
     async function middleware(req) {
         const token = req.nextauth.token;
+
         if (!token) {
             const loginUrl = new URL("/login", req.url);
             loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
-            return NextResponse.redirect(loginUrl, {
-                headers: securityHeaders,
-            });
+            return applySecurityHeaders(NextResponse.redirect(loginUrl));
         }
 
         if (isRateLimitEnabled()) {
@@ -51,11 +57,16 @@ export default withAuth(
 
         const role = token?.role;
         const forbidden = authorizeRole(req, role);
-        if (forbidden) return forbidden;
+        if (forbidden) return applySecurityHeaders(forbidden);
+
+        return applySecurityHeaders(NextResponse.next());
     },
     {
         callbacks: {
             authorized: ({ token }) => authenticateUser(token),
+        },
+        pages: {
+            signIn: "/login",
         },
     }
 );
