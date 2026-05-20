@@ -1,10 +1,27 @@
 const isDev = process.env.NODE_ENV === "development";
 
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' ${isDev ? "'unsafe-eval' 'unsafe-inline'" : ""};
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: images.unsplash.com rllnjjtrzwizgrndgfep.supabase.co;
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    connect-src 'self' ${isDev ? "ws://localhost:3000 ws://0.0.0.0:3000" : ""};
+    upgrade-insecure-requests;
+`
+    .replace(/\s{2,}/g, " ")
+    .trim(); // Limpa espaços extras e quebras de linha
 
-const nextConfig: NextConfig = {
-    //futuro teste pra ci/cd
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // futuro teste pra ci/cd
     output: "standalone",
-    //Dps apagar issae quando pegar as images dos cursos via API
+
+    // Dps apagar issae quando pegar as images dos cursos via API
     images: {
         remotePatterns: [
             {
@@ -19,6 +36,7 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+
     async headers() {
         return [
             {
