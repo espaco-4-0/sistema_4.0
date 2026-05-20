@@ -34,14 +34,14 @@ export type CourseDetails = {
 
 export type ApiCourse = {
     id: string;
-    titulo: string;
-    descricao: string | null;
-    cargaHoraria: number | null;
+    title: string;
+    description: string | null;
+    workload: number | null;
     createdAt: string;
     professor: {
-        nomeCompleto: string;
+        fullName: string;
     } | null;
     _count?: {
-        inscricoes?: number;
+        Enrollment?: number;
     };
 };

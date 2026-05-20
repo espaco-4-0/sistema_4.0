@@ -9,10 +9,10 @@ const SALT_ROUNDS = 12;
 
 const USER_UPDATE_SELECT = {
     id: true,
-    nomeCompleto: true,
+    fullName: true,
     email: true,
     role: true,
-    ativo: true,
+    isActive: true,
     updatedAt: true,
 } satisfies Prisma.UserSelect;
 
@@ -53,15 +53,15 @@ export async function updateUserById(id: string, data: PatchUserPayload): Promis
     const updated = await prisma.user.update({
         where: { id },
         data: {
-            nomeCompleto: data.nomeCompleto,
+            fullName: data.nomeCompleto,
             email: data.email,
-            senha: hashedPassword,
-            telefone: data.telefone,
+            password: hashedPassword,
+            phone: data.telefone,
             role: data.role,
-            ativo: data.ativo,
+            isActive: data.ativo,
             avatarUrl: data.avatarUrl,
-            deficiencia: data.deficiencia,
-            necessidadeEspecial: data.necessidadeEspecial,
+            disability: data.deficiencia,
+            specialNeed: data.necessidadeEspecial,
         },
         select: USER_UPDATE_SELECT,
     });

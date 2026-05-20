@@ -18,19 +18,19 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
 
         if (!validatedCommentId.success) return NextResponse.json({ error: "Dado inválido" }, { status: 422 });
 
-        const comentario = await prisma.comentario.findUnique({
+        const comment = await prisma.comment.findUnique({
             where: { id: validatedCommentId.data },
         });
 
-        if (!comentario) return NextResponse.json({ error: "Comentário não encontrado" }, { status: 404 });
+        if (!comment) return NextResponse.json({ error: "Comentário não encontrado" }, { status: 404 });
 
         const isAdmin = session.user.role === "ADMIN";
-        const isOwner = comentario.autorId === session.user.id;
+        const isOwner = comment.authorId === session.user.id;
 
         if (!isAdmin && !isOwner)
             return NextResponse.json({ error: "Sem permissão para excluir este comentário" }, { status: 403 });
 
-        await prisma.comentario.delete({
+        await prisma.comment.delete({
             where: { id: validatedCommentId.data },
         });
 

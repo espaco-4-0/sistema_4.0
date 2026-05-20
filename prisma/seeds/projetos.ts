@@ -1,4 +1,4 @@
-import { PrismaClient, StatusProjeto, TipoProjeto } from "../../src/generated/prisma/client";
+import { PrismaClient, ProjectStatus, ProjectType } from "../../src/generated/prisma/client";
 
 export async function seedProjetos(prisma: PrismaClient) {
     const professor = await prisma.user.findUniqueOrThrow({ where: { email: "professor@ifal.edu.br" } });
@@ -8,26 +8,26 @@ export async function seedProjetos(prisma: PrismaClient) {
     const projetos = [
         {
             id: "proj-ext-01",
-            titulo: "Inclusão Digital nas Comunidades",
-            descricao: "Levar tecnologia e capacitação para comunidades rurais do Alagoas.",
-            tipo: TipoProjeto.EXTENSAO,
-            status: StatusProjeto.EM_ANDAMENTO,
-            dataInicio: new Date("2026-01-01"),
-            liderId: professor.id,
+            title: "Inclusão Digital nas Comunidades",
+            description: "Levar tecnologia e capacitação para comunidades rurais do Alagoas.",
+            type: ProjectType.EXTENSION,
+            status: ProjectStatus.IN_PROGRESS,
+            startDate: new Date("2026-01-01"),
+            leaderId: professor.id,
         },
         {
             id: "proj-pesq-01",
-            titulo: "IA Aplicada ao Ensino Técnico",
-            descricao: "Pesquisa sobre o uso de inteligência artificial em ambientes de ensino técnico.",
-            tipo: TipoProjeto.PESQUISA,
-            status: StatusProjeto.EM_ANDAMENTO,
-            dataInicio: new Date("2026-02-01"),
-            liderId: pesquisador.id,
+            title: "IA Aplicada ao Ensino Técnico",
+            description: "Pesquisa sobre o uso de inteligência artificial em ambientes de ensino técnico.",
+            type: ProjectType.RESEARCH,
+            status: ProjectStatus.IN_PROGRESS,
+            startDate: new Date("2026-02-01"),
+            leaderId: pesquisador.id,
         },
     ];
 
     for (const p of projetos) {
-        await prisma.projeto.upsert({
+        await prisma.project.upsert({
             where: { id: p.id },
             update: {},
             create: p,
@@ -35,32 +35,32 @@ export async function seedProjetos(prisma: PrismaClient) {
     }
 
     // Membros
-    await prisma.projetoMembro.upsert({
+    await prisma.projectMember.upsert({
         where: {
-            projetoId_userId: {
-                projetoId: "proj-ext-01",
+            projectId_userId: {
+                projectId: "proj-ext-01",
                 userId: monitor.id,
             },
         },
         update: {},
         create: {
-            projetoId: "proj-ext-01",
+            projectId: "proj-ext-01",
             userId: monitor.id,
-            funcao: "Monitor",
+            role: "Monitor",
         },
     });
-    await prisma.projetoMembro.upsert({
+    await prisma.projectMember.upsert({
         where: {
-            projetoId_userId: {
-                projetoId: "proj-pesq-01",
+            projectId_userId: {
+                projectId: "proj-pesq-01",
                 userId: professor.id,
             },
         },
         update: {},
         create: {
-            projetoId: "proj-pesq-01",
+            projectId: "proj-pesq-01",
             userId: professor.id,
-            funcao: "Colaborador",
+            role: "Colaborador",
         },
     });
 

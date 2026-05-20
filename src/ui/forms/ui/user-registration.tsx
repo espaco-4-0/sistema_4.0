@@ -22,26 +22,26 @@ import {
 type SelectOption<T = string> = { value: T; label: string };
 
 export const raceOptions: SelectOption<Race>[] = [
-    { value: Race.BRANCA, label: "Branco" },
-    { value: Race.PRETA, label: "Preto" },
-    { value: Race.PARDA, label: "Pardo" },
-    { value: Race.AMARELA, label: "Amarelo" },
-    { value: Race.INDIGENA, label: "Indígena" },
+    { value: Race.WHITE, label: "Branco" },
+    { value: Race.BLACK, label: "Preto" },
+    { value: Race.BROWN, label: "Pardo" },
+    { value: Race.YELLOW, label: "Amarelo" },
+    { value: Race.INDIGENOUS, label: "Indígena" },
 ];
 
 export const educationOptions: SelectOption<Education>[] = [
-    { value: Education.FUNDAMENTAL_INCOMPLETO, label: "Fundamental incompleto" },
-    { value: Education.FUNDAMENTAL_COMPLETO, label: "Fundamental completo" },
-    { value: Education.MEDIO_CURSANDO, label: "Ensino médio incompleto" },
-    { value: Education.MEDIO_COMPLETO, label: "Ensino médio completo" },
-    { value: Education.SUPERIOR_CURSANDO, label: "Superior incompleto" },
-    { value: Education.SUPERIOR_COMPLETO, label: "Superior completo" },
+    { value: Education.PRIMARY_INCOMPLETE, label: "Fundamental incompleto" },
+    { value: Education.PRIMARY_COMPLETE, label: "Fundamental completo" },
+    { value: Education.HIGH_SCHOOL_IN_PROGRESS, label: "Ensino médio incompleto" },
+    { value: Education.HIGH_SCHOOL_COMPLETE, label: "Ensino médio completo" },
+    { value: Education.HIGHER_EDUCATION_IN_PROGRESS, label: "Superior incompleto" },
+    { value: Education.HIGHER_EDUCATION_COMPLETE, label: "Superior completo" },
 ];
 
 export const ifalOptions: SelectOption<IfalAffiliation>[] = [
-    { value: IfalAffiliation.ALUNO, label: "Aluno" },
-    { value: IfalAffiliation.EX_ALUNO, label: "Ex-aluno" },
-    { value: IfalAffiliation.NAO_ALUNO, label: "Não aluno" },
+    { value: IfalAffiliation.STUDENT, label: "Aluno" },
+    { value: IfalAffiliation.ALUMNI, label: "Ex-aluno" },
+    { value: IfalAffiliation.NOT_STUDENT, label: "Não aluno" },
 ];
 
 const deficiencyOptions: SelectOption<DeficiencyOption>[] = Object.values(DeficiencyOption).map((value) => ({

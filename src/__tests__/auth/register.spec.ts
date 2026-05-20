@@ -32,9 +32,9 @@ const validRegistrationBody = {
     password: "Senha@123",
     dateOfBirth: "1995-01-01T00:00:00.000Z",
     telephone: "(82) 99999-9999",
-    race: Race.BRANCA,
-    education: Education.SUPERIOR_COMPLETO,
-    ifalAffiliation: IfalAffiliation.ALUNO,
+    race: Race.WHITE,
+    education: Education.HIGHER_EDUCATION_COMPLETE,
+    ifalAffiliation: IfalAffiliation.STUDENT,
 };
 
 // Helpers
@@ -98,7 +98,7 @@ describe("POST /api/auth/register", () => {
 
         const createCall = mockCreate.mock.calls[0][0].data;
         expect(bcrypt.default.hash).toHaveBeenCalledWith(validRegistrationBody.password, 12);
-        expect(createCall.senha).toBe("hashed_password");
-        expect(createCall.senha).not.toBe(validRegistrationBody.password);
+        expect(createCall.password).toBe("hashed_password");
+        expect(createCall.password).not.toBe(validRegistrationBody.password);
     });
 });

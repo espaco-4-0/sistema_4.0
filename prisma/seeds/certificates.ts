@@ -5,27 +5,29 @@ export async function seedCertificates(prisma: PrismaClient, cursoId: string, em
 
     const submissionId = "cert-sub-1";
 
-    await prisma.certificateSubmission.upsert({
+    await prisma.certificateTemplate.upsert({
         where: { id: submissionId },
         update: {},
         create: {
             id: submissionId,
-            titulo: "Certificado de Conclusão - Web Fullstack",
-            descricao: "Certificamos que o aluno concluiu com êxito o curso.",
-            cargaHoraria: 120,
-            arquivoUrl: "https://meubucket.com/templates/cert-base.pdf",
-            status: "ATIVO",
-            curso: cursoId,
-            emissor: { connect: { id: emissorId } },
+            title: "Certificado de Conclusão - Web Fullstack",
+            description: "Certificamos que o aluno concluiu com êxito o curso.",
+            workload: 120,
+            fileUrl: "https://meubucket.com/templates/cert-base.pdf",
+            status: "ACTIVE",
+            course: cursoId,
+            type: "DEFAULT",
+            layout: {},
+            emittedByUser: { connect: { id: emissorId } },
         },
     });
 
     const certificateId = "cert-emissao-1";
 
-    await prisma.certificate.upsert({
+    await prisma.certificateSubscription.upsert({
         where: {
-            certificateId_alunoId: {
-                certificateId: submissionId,
+            templateId_alunoId: {
+                templateId: submissionId,
                 alunoId: alunoId,
             },
         },
@@ -37,10 +39,10 @@ export async function seedCertificates(prisma: PrismaClient, cursoId: string, em
         },
     });
 
-    await prisma.certificateEmissionPermission.upsert({
+    await prisma.certificateEmission.upsert({
         where: {
-            certificateId_alunoId: {
-                certificateId: certificateId,
+            templateId_alunoId: {
+                templateId: submissionId,
                 alunoId: alunoId,
             },
         },
@@ -49,9 +51,10 @@ export async function seedCertificates(prisma: PrismaClient, cursoId: string, em
         },
         create: {
             id: "cert-perm-1",
-            arquivoUrl: "https://meubucket.com/certificados-gerados/aluno-1-web.pdf",
-            emitidoPor: emissorId,
-            certificate: { connect: { id: certificateId } },
+            fileUrl: "https://meubucket.com/certificados-gerados/aluno-1-web.pdf",
+            emittedBy: emissorId,
+            course: cursoId,
+            certificate: { connect: { id: submissionId } },
             aluno: { connect: { id: alunoId } },
         },
     });

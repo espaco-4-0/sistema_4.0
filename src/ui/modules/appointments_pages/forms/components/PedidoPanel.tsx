@@ -82,7 +82,7 @@ export const PedidoPanel: React.FC<PedidoPanelProps> = ({ methods, onNext, onCan
                 placeholder="Email"
             />
 
-            <RoteiroPicker control={methods.control} />
+            <RoteiroPicker control={methods.control} setValue={methods.setValue} />
 
             <textarea
                 {...methods.register("mensagem")}

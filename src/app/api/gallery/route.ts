@@ -123,14 +123,14 @@ export async function POST(req: NextRequest) {
             if (origin === "POST") {
                 const post = await prisma.post.findUnique({
                     where: { id: postId },
-                    include: { foto: true },
+                    include: { photo: true },
                 });
 
-                if (!post || !post.foto) {
+                if (!post || !post.photo) {
                     return NextResponse.json({ error: "Post ou foto não encontrada" }, { status: 404 });
                 }
 
-                finalUrl = post.foto.url;
+                finalUrl = post.photo.url;
             } else if (origin === "UPLOAD") {
                 const fileBytes = await (file as File).arrayBuffer();
                 const fileBuffer = Buffer.from(fileBytes);

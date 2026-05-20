@@ -32,9 +32,9 @@ function makeUserPayload(overrides = {}) {
         senha: "senha123",
         dataNascimento: "2000-01-01",
         telefone: "82999999999",
-        raca: "NAO_INFORMADA" as const,
-        educacao: "SUPERIOR_CURSANDO" as const,
-        ifalAfiliacao: "ALUNO" as const,
+        raca: "NOT_DECLARED" as const,
+        educacao: "HIGHER_EDUCATION_IN_PROGRESS" as const,
+        ifalAfiliacao: "STUDENT" as const,
         deficiencia: null,
         necessidadeEspecial: null,
         ...overrides,
@@ -44,10 +44,10 @@ function makeUserPayload(overrides = {}) {
 function makePublicUser(overrides = {}) {
     return {
         id: "user-id-1",
-        nomeCompleto: "Usuario Teste",
+        fullName: "Usuario Teste",
         email: "usuario@teste.com",
-        role: "VISITANTE",
-        ativo: true,
+        role: "VISITOR",
+        isActive: true,
         createdAt: new Date("2024-01-01"),
         ...overrides,
     };
@@ -77,7 +77,7 @@ describe("user.service", () => {
 
             expect(prisma.user.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    data: expect.objectContaining({ role: "VISITANTE" }),
+                    data: expect.objectContaining({ role: "VISITOR" }),
                 })
             );
         });
@@ -104,7 +104,7 @@ describe("user.service", () => {
             expect(bcrypt.hash).toHaveBeenCalledWith("senha123", 12);
             expect(prisma.user.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    data: expect.objectContaining({ senha: "hashed_senha" }),
+                    data: expect.objectContaining({ password: "hashed_senha" }),
                 })
             );
         });
@@ -117,7 +117,7 @@ describe("user.service", () => {
 
             expect(prisma.user.create).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    data: expect.objectContaining({ ativo: true }),
+                    data: expect.objectContaining({ isActive: true }),
                 })
             );
         });
@@ -223,7 +223,7 @@ describe("user.service", () => {
 
             expect(prisma.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    where: expect.objectContaining({ ativo: true }),
+                    where: expect.objectContaining({ isActive: true }),
                 })
             );
         });
@@ -238,7 +238,7 @@ describe("user.service", () => {
                 expect.objectContaining({
                     where: expect.objectContaining({
                         OR: [
-                            { nomeCompleto: { contains: "joao", mode: "insensitive" } },
+                            { fullName: { contains: "joao", mode: "insensitive" } },
                             { email: { contains: "joao", mode: "insensitive" } },
                         ],
                     }),

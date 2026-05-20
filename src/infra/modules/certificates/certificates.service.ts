@@ -1,6 +1,7 @@
 import { generatePdf } from "@/lib/pdf";
+import { prisma } from "@/src/infra/data/prisma";
+import { storage } from "@/src/lib/storage";
 
-//Adicionar o Supabase "uploadToStorage"
 import type {
     CertificateLayout,
     CreateTemplateSchema,
@@ -11,8 +12,8 @@ import type {
 
 type TemplateListItem = {
     id: string;
-    titulo: string;
-    tipo: string;
+    title: string;
+    type: string;
     layout: CertificateLayout;
     updatedAt: Date;
     _count: { emissoes: number };
@@ -30,27 +31,33 @@ type DownloadResponse = {
 };
 
 export async function createTemplate(data: CreateTemplateSchema, professorId: string) {
+    const { titulo, descricao, cargaHoraria, layout, tipo } = data;
     return prisma.certificateTemplate.create({
         data: {
-            ...data,
-            criadoPor: professorId,
+            title: titulo,
+            description: descricao,
+            workload: cargaHoraria,
+            layout: layout as any,
+            type: tipo,
+            emittedBy: professorId,
         },
     });
 }
 
 export async function listTemplates(professorId: string): Promise<TemplateListItem[]> {
-    return prisma.certificateTemplate.findMany({
-        where: { criadoPor: professorId, status: "ATIVO" },
+    const templates = await prisma.certificateTemplate.findMany({
+        where: { emittedBy: professorId, status: "ACTIVE" },
         orderBy: { updatedAt: "desc" },
         select: {
             id: true,
-            titulo: true,
-            tipo: true,
+            title: true,
+            type: true,
             layout: true,
             updatedAt: true,
             _count: { select: { emissoes: true } },
         },
     });
+    return templates as unknown as TemplateListItem[];
 }
 
 export async function updateTemplate(
@@ -64,13 +71,20 @@ export async function updateTemplate(
     });
 
     if (!template) throw new Error("Template não encontrado");
-    if (!isAdmin && template.criadoPor !== professorId) {
+    if (!isAdmin && template.emittedBy !== professorId) {
         throw new Error("Sem permissão para editar este template");
     }
 
+    const updateData: any = {};
+    if (data.titulo !== undefined) updateData.title = data.titulo;
+    if (data.descricao !== undefined) updateData.description = data.descricao;
+    if (data.cargaHoraria !== undefined) updateData.workload = data.cargaHoraria;
+    if (data.layout !== undefined) updateData.layout = data.layout;
+    if (data.tipo !== undefined) updateData.type = data.tipo;
+
     return prisma.certificateTemplate.update({
         where: { id: templateId },
-        data,
+        data: updateData,
     });
 }
 
@@ -83,7 +97,7 @@ export async function deleteTemplate(templateId: string) {
 
     return prisma.certificateTemplate.update({
         where: { id: templateId },
-        data: { status: "INATIVO" },
+        data: { status: "INACTIVE" },
     });
 }
 
@@ -93,30 +107,31 @@ export async function emitCertificate(data: EmitCertificateSchema, emitidoPor: s
     });
 
     if (!template) throw new Error("Template não encontrado");
-    if (template.status === "INATIVO") throw new Error("Template inativo");
+    if (template.status === "INACTIVE") throw new Error("Template inativo");
 
     const aluno = await prisma.user.findUnique({
         where: { id: data.alunoId },
-        select: { id: true, nome: true, email: true },
+        select: { id: true, fullName: true, email: true },
     });
 
     if (!aluno) throw new Error("Aluno não encontrado");
 
-    const layout = template.layout as CertificateLayout;
+    const layout = template.layout as unknown as CertificateLayout;
 
     const pdfBuffer = await generatePdf({
-        titulo: template.titulo,
-        descricao: template.descricao,
-        alunoNome: aluno.nome,
+        titulo: template.title,
+        descricao: template.description,
+        alunoNome: aluno.fullName,
         curso: data.curso,
-        cargaHoraria: template.cargaHoraria ?? undefined,
+        cargaHoraria: template.workload ?? undefined,
         validadeAte: data.validadeAte,
         emitidoEm: new Date(),
         layout,
     });
 
     const storagePath = `certificados/${data.templateId}/${aluno.id}.pdf`;
-    const arquivoUrl = await uploadToStorage(storagePath, pdfBuffer);
+    const uploadResult = await storage.uploadPrivate(pdfBuffer, storagePath, "application/pdf");
+    const fileUrl = uploadResult.path;
 
     return prisma.certificateEmission.upsert({
         where: {
@@ -126,19 +141,19 @@ export async function emitCertificate(data: EmitCertificateSchema, emitidoPor: s
             },
         },
         update: {
-            arquivoUrl,
-            emitidoEm: new Date(),
-            emitidoPor,
-            curso: data.curso,
-            validadeAte: data.validadeAte,
+            fileUrl,
+            emittedAt: new Date(),
+            emittedBy: emitidoPor,
+            course: data.curso,
+            validUntil: data.validadeAte,
         },
         create: {
             templateId: data.templateId,
             alunoId: aluno.id,
-            emitidoPor,
-            curso: data.curso,
-            arquivoUrl,
-            validadeAte: data.validadeAte,
+            emittedBy: emitidoPor,
+            course: data.curso,
+            fileUrl,
+            validUntil: data.validadeAte,
         },
     });
 }
@@ -152,34 +167,35 @@ export async function emitBatchCertificates(
     });
 
     if (!template) throw new Error("Template não encontrado");
-    if (template.status === "INATIVO") throw new Error("Template inativo");
+    if (template.status === "INACTIVE") throw new Error("Template inativo");
 
     const alunos = await prisma.user.findMany({
-        where: { id: { in: data.alunoIds }, role: "aluno" },
-        select: { id: true, nome: true },
+        where: { id: { in: data.alunoIds }, role: "VISITOR" },
+        select: { id: true, fullName: true },
     });
 
     if (alunos.length === 0) {
         throw new Error("Nenhum aluno válido encontrado");
     }
 
-    const layout = template.layout as CertificateLayout;
+    const layout = template.layout as unknown as CertificateLayout;
 
     const resultados = await Promise.allSettled(
         alunos.map(async (aluno) => {
             const pdfBuffer = await generatePdf({
-                titulo: template.titulo,
-                descricao: template.descricao,
-                alunoNome: aluno.nome,
+                titulo: template.title,
+                descricao: template.description,
+                alunoNome: aluno.fullName,
                 curso: data.curso,
-                cargaHoraria: template.cargaHoraria ?? undefined,
+                cargaHoraria: template.workload ?? undefined,
                 validadeAte: data.validadeAte,
                 emitidoEm: new Date(),
                 layout,
             });
 
             const storagePath = `certificados/${data.templateId}/${aluno.id}.pdf`;
-            const arquivoUrl = await uploadToStorage(storagePath, pdfBuffer);
+            const uploadResult = await storage.uploadPrivate(pdfBuffer, storagePath, "application/pdf");
+            const fileUrl = uploadResult.path;
 
             await prisma.certificateEmission.upsert({
                 where: {
@@ -189,19 +205,19 @@ export async function emitBatchCertificates(
                     },
                 },
                 update: {
-                    arquivoUrl,
-                    emitidoEm: new Date(),
-                    emitidoPor,
-                    curso: data.curso,
-                    validadeAte: data.validadeAte,
+                    fileUrl,
+                    emittedAt: new Date(),
+                    emittedBy: emitidoPor,
+                    course: data.curso,
+                    validUntil: data.validadeAte,
                 },
                 create: {
                     templateId: data.templateId,
                     alunoId: aluno.id,
-                    emitidoPor,
-                    curso: data.curso,
-                    arquivoUrl,
-                    validadeAte: data.validadeAte,
+                    emittedBy: emitidoPor,
+                    course: data.curso,
+                    fileUrl,
+                    validUntil: data.validadeAte,
                 },
             });
 
@@ -228,14 +244,12 @@ export async function downloadCertificate(templateId: string, alunoId: string): 
         throw new Error("Certificado ainda não foi emitido para este aluno");
     }
 
-    const signedUrl = await getSignedUrl(emission.arquivoUrl, {
-        expiresIn: 60 * 15,
-    });
+    const signedUrl = await storage.getPrivateUrl(emission.fileUrl, 60 * 15);
 
     await prisma.certificateEmission.update({
         where: { id: emission.id },
         data: {
-            ultimoDownload: new Date(),
+            lastDownloadedAt: new Date(),
             totalDownloads: { increment: 1 },
         },
     });
@@ -250,14 +264,14 @@ export async function listEmissionsForStudent(alunoId: string) {
     return prisma.certificateEmission.findMany({
         where: { alunoId },
         include: {
-            template: {
+            certificate: {
                 select: {
-                    titulo: true,
-                    tipo: true,
-                    cargaHoraria: true,
+                    title: true,
+                    type: true,
+                    workload: true,
                 },
             },
         },
-        orderBy: { emitidoEm: "desc" },
+        orderBy: { emittedAt: "desc" },
     });
 }

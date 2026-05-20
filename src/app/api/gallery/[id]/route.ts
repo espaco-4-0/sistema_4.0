@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         });
 
         return NextResponse.json({ data: updatedItem }, { status: 200 });
-    } catch (err) {
+    } catch (err: any) {
         logger.error({ err, route: getRequestInfo(req) }, "Erro ao atualizar item da galeria");
 
         if (err.code === "P2002") {

@@ -17,10 +17,10 @@ export const getAuthenticatedUser = async () => {
         where: { id: session.user.id },
         select: {
             id: true,
-            nomeCompleto: true,
+            fullName: true,
             email: true,
             role: true,
-            ativo: true,
+            isActive: true,
         },
     });
 
@@ -31,7 +31,7 @@ export const getAuthenticatedUser = async () => {
         };
     }
 
-    if (!user.ativo) {
+    if (!user.isActive) {
         return {
             user: null,
             error: NextResponse.json({ message: "Conta desativada" }, { status: 403 }),

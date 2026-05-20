@@ -16,11 +16,11 @@ export async function POST(req: NextRequest) {
         const validatedPost = postCommentSchema.safeParse(body);
         if (!validatedPost.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 422 });
 
-        await prisma.comentario.create({
+        await prisma.comment.create({
             data: {
-                autorId: session.user.id,
+                authorId: session.user.id,
                 postId: validatedPost.data.postId,
-                conteudo: validatedPost.data.comment,
+                content: validatedPost.data.comment,
             },
         });
 

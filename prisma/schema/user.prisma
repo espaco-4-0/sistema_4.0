@@ -2,83 +2,84 @@ enum UserRole {
   ADMIN // Administrador – acesso total ao sistema
   PROFESSOR // Define cursos, aulas, horários e locais
   MONITOR // Acompanha aulas; nível abaixo do professor
-  PESQUISADOR // Semelhante ao monitor; foco em pesquisa
-  VISITANTE // Escolhe curso/data/hora e confirma presença
+  RESEARCHER // Semelhante ao monitor; foco em pesquisa
+  VISITOR // Escolhe curso/data/hora e confirma presença
 }
 
 enum Race {
-  BRANCA
-  PRETA
-  PARDA
-  AMARELA
-  INDIGENA
-  NAO_INFORMADA
+  WHITE
+  BLACK
+  BROWN
+  YELLOW
+  INDIGENOUS
+  NOT_DECLARED
 }
 
 enum Education {
-  FUNDAMENTAL_INCOMPLETO
-  FUNDAMENTAL_COMPLETO
-  MEDIO_CURSANDO
-  MEDIO_COMPLETO
-  SUPERIOR_CURSANDO
-  SUPERIOR_COMPLETO
+  PRIMARY_INCOMPLETE
+  PRIMARY_COMPLETE
+  HIGH_SCHOOL_IN_PROGRESS
+  HIGH_SCHOOL_COMPLETE
+  HIGHER_EDUCATION_IN_PROGRESS
+  HIGHER_EDUCATION_COMPLETE
 }
 
 enum IfalAffiliation {
-  ALUNO
-  EX_ALUNO
-  NAO_ALUNO
-  SERVIDOR
+  STUDENT
+  ALUMNI
+  NOT_STUDENT
+  STAFF
 }
 
 model User {
   id                  String          @id @default(cuid())
-  nomeCompleto        String
+  fullName            String
   email               String          @unique
-  senha               String
-  dataNascimento      DateTime        @db.Date
-  telefone            String
-  raca                Race
-  educacao            Education
-  ifalAfiliacao       IfalAffiliation
-  deficiencia         String?
-  necessidadeEspecial String?
-  role                UserRole        @default(VISITANTE)
+  password            String
+  birthDate           DateTime        @db.Date
+  phone               String
+  race                Race
+  education           Education
+  ifalAffiliation     IfalAffiliation
+  disability          String?
+  specialNeed         String?
+  role                UserRole        @default(VISITOR)
   avatarUrl           String?
-  ativo               Boolean         @default(true)
+  isActive            Boolean         @default(true)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
-  resetToken 		  String?
+  resetToken          String?
   resetTokenExpiresAt DateTime?
+
   // Relações – Professor
-  cursosMinistrados Curso[] @relation("ProfessorCursos")
-  aulasMinistradas  Aula[]  @relation("ProfessorAulas")
+  Course              Course[]
+  Lesson              Lesson[]        @relation("ProfessorAulas")
 
   // Relações – Monitor / Pesquisador
-  monitoramentos AulaMonitor[]
+  LessonMonitor       LessonMonitor[]
 
   // Relações – Visitante
-  inscricoes Inscricao[]
-  presencas  Presenca[]
+  Enrollment          Enrollment[]
+  Presence            Presence[]
 
   // Inventário
-  itensInventario InventarioItem[]
+  InventoryItem       InventoryItem[]
 
   // Blog
-  posts       Post[]
-  comentarios Comentario[]
-  curtidas    Curtida[]
+  Post                Post[]
+  Comment             Comment[]
+  Like                Like[]
 
   // Projetos
-  projetosLiderados Projeto[]       @relation("LiderProjeto")
-  projetosMembro    ProjetoMembro[]
+  Project             Project[]       @relation("LiderProjeto")
+  ProjectMember       ProjectMember[]
 
   // Gamificação
-  gamificacao Gamificacao?
-  userBadges  UserBadge[]
+  Gamification        Gamification?
+  userBadges          UserBadge[]
 
   // Certificados
-  certificadosEmitidos  Certificate[]            @relation("ProfessorCertificados")
+  CertificateTemplate   CertificateTemplate[]   @relation("ProfessorCertificados")
   certificadosInscritos CertificateSubscription[]
   certificadosEmissoes  CertificateEmission[]
 }

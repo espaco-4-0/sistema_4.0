@@ -53,123 +53,123 @@ export async function patchHandlers(req: Request) {
 
         switch (action) {
             case "confirmEmail":
-                if (current.processStage !== "aguardando_email") {
+                if (current.processStage !== "WAITING_EMAIL") {
                     return NextResponse.json({ message: "Estágio inválido" }, { status: 400 });
                 }
                 updateData = {
-                    processStage: "email_recebido",
-                    processLog: appendLog("email_recebido", "Recebimento do e-mail confirmado pelo admin."),
+                    processStage: "EMAIL_RECEIVED",
+                    processLog: appendLog("EMAIL_RECEIVED", "Recebimento do e-mail confirmado pelo admin."),
                 };
-                emailTask = sendEmailReceivedConfirmation(current.email, current.responsavel, current.instituicao);
+                emailTask = sendEmailReceivedConfirmation(current.email, current.responsible, current.institution);
                 break;
 
             case "approveDocumentation":
-                if (!["email_recebido", "documentacao_em_analise"].includes(current.processStage)) {
+                if (!["EMAIL_RECEIVED", "DOCUMENTS_UNDER_REVIEW"].includes(current.processStage)) {
                     return NextResponse.json({ message: "Estágio inválido" }, { status: 400 });
                 }
                 updateData = {
-                    processStage: "documentacao_em_analise",
-                    documentacaoStatus: "conferida",
+                    processStage: "DOCUMENTS_UNDER_REVIEW",
+                    documentationStatus: "CHECKED",
                     processLog: appendLog(
-                        "documentacao_em_analise",
+                        "DOCUMENTS_UNDER_REVIEW",
                         "Documentação conferida pelo admin. Pronto para envio ao IFAL."
                     ),
                 };
                 break;
 
             case "markDocumentationIncomplete":
-                if (!["email_recebido", "documentacao_em_analise"].includes(current.processStage)) {
+                if (!["EMAIL_RECEIVED", "DOCUMENTS_UNDER_REVIEW"].includes(current.processStage)) {
                     return NextResponse.json({ message: "Estágio inválido" }, { status: 400 });
                 }
                 updateData = {
-                    processStage: "documentacao_em_analise",
-                    documentacaoStatus: "incompleta",
+                    processStage: "DOCUMENTS_UNDER_REVIEW",
+                    documentationStatus: "INCOMPLETE",
                     processLog: appendLog(
-                        "documentacao_em_analise",
+                        "DOCUMENTS_UNDER_REVIEW",
                         "Documentação marcada como incompleta. Necessário ajuste antes do envio ao IFAL."
                     ),
                 };
                 break;
 
             case "sendToIfal":
-                if (current.processStage !== "documentacao_em_analise" || current.documentacaoStatus !== "conferida") {
+                if (current.processStage !== "DOCUMENTS_UNDER_REVIEW" || current.documentationStatus !== "CHECKED") {
                     return NextResponse.json(
                         { message: "Documentação precisa estar conferida para enviar ao IFAL" },
                         { status: 400 }
                     );
                 }
                 updateData = {
-                    processStage: "aguardando_aprovacao_ifal",
-                    ifalStatus: "aguardando",
+                    processStage: "WAITING_IFAL_APPROVAL",
+                    ifalStatus: "PENDING",
                     processLog: appendLog(
-                        "aguardando_aprovacao_ifal",
+                        "WAITING_IFAL_APPROVAL",
                         "Processo encaminhado para aprovação institucional do IFAL."
                     ),
                 };
                 break;
 
             case "ifalApprove":
-                if (current.processStage !== "aguardando_aprovacao_ifal") {
+                if (current.processStage !== "WAITING_IFAL_APPROVAL") {
                     return NextResponse.json({ message: "Estágio inválido" }, { status: 400 });
                 }
                 updateData = {
-                    processStage: "aprovado_ifal",
-                    status: "aprovado",
-                    ifalStatus: "aprovado",
+                    processStage: "APPROVED_IFAL",
+                    status: "APPROVED",
+                    ifalStatus: "APPROVED",
                     reviewedAt: new Date(),
                     processLog: appendLog(
-                        "aprovado_ifal",
+                        "APPROVED_IFAL",
                         "IFAL aprovou a visita. Agendamento confirmado para a escola solicitante."
                     ),
                 };
                 emailTask = sendApprovalEmail(
                     current.email,
-                    current.responsavel,
-                    formatDate(current.dataVisita),
-                    current.horaInicio,
-                    current.horaFim,
-                    current.instituicao
+                    current.responsible,
+                    formatDate(current.visitDate),
+                    current.startTime,
+                    current.endTime,
+                    current.institution
                 );
                 break;
 
             case "ifalDeny":
-                if (current.processStage !== "aguardando_aprovacao_ifal") {
+                if (current.processStage !== "WAITING_IFAL_APPROVAL") {
                     return NextResponse.json({ message: "Estágio inválido" }, { status: 400 });
                 }
                 updateData = {
-                    processStage: "negado_ifal",
-                    status: "negado",
-                    ifalStatus: "negado",
+                    processStage: "DENIED_IFAL",
+                    status: "DENIED",
+                    ifalStatus: "DENIED",
                     reviewedAt: new Date(),
-                    motivoNegativa: reason?.trim() || "Processo negado na aprovação final do IFAL.",
+                    rejectionReason: reason?.trim() || "Processo negado na aprovação final do IFAL.",
                     processLog: appendLog(
-                        "negado_ifal",
+                        "DENIED_IFAL",
                         `IFAL negou a visita. ${reason?.trim() || "Sem detalhamento enviado."}`
                     ),
                 };
                 emailTask = sendDenialEmail(
                     current.email,
-                    current.responsavel,
-                    current.instituicao,
+                    current.responsible,
+                    current.institution,
                     reason?.trim() || "Processo negado na aprovação final do IFAL."
                 );
                 break;
 
             case "adminDeny":
-                if (current.status === "negado") {
+                if (current.status === "DENIED") {
                     return NextResponse.json({ message: "Visita já negada" }, { status: 400 });
                 }
                 if (!reason?.trim()) {
                     return NextResponse.json({ message: "Motivo da negativa é obrigatório" }, { status: 400 });
                 }
                 updateData = {
-                    processStage: "negado_admin",
-                    status: "negado",
+                    processStage: "DENIED_ADMIN",
+                    status: "DENIED",
                     reviewedAt: new Date(),
-                    motivoNegativa: reason.trim(),
-                    processLog: appendLog("negado_admin", `Solicitação negada pelo admin. ${reason.trim()}`),
+                    rejectionReason: reason.trim(),
+                    processLog: appendLog("DENIED_ADMIN", `Solicitação negada pelo admin. ${reason.trim()}`),
                 };
-                emailTask = sendDenialEmail(current.email, current.responsavel, current.instituicao, reason.trim());
+                emailTask = sendDenialEmail(current.email, current.responsible, current.institution, reason.trim());
                 break;
 
             default:
@@ -178,9 +178,9 @@ export async function patchHandlers(req: Request) {
 
         const updated = await prisma.visit.update({
             where: { id },
-            data: updateData,
+            data: updateData as any,
             include: {
-                documentos: {
+                VisitDocument: {
                     select: { id: true, fileName: true, fileType: true, fileSizeKb: true, uploadedAt: true },
                 },
             },

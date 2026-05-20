@@ -4,136 +4,136 @@ import { Education, IfalAffiliation, PrismaClient, Race, UserRole } from "../../
 
 interface UsuarioSeed {
     email: string;
-    nomeCompleto: string;
-    senha: string;
+    fullName: string;
+    password: string;
     role: keyof typeof UserRole;
-    dataNascimento: Date;
-    telefone: string;
-    raca: keyof typeof Race;
-    educacao: keyof typeof Education;
-    ifalAfiliacao: keyof typeof IfalAffiliation;
-    deficiencia?: string;
-    necessidadeEspecial?: string;
+    birthDate: Date;
+    phone: string;
+    race: keyof typeof Race;
+    education: keyof typeof Education;
+    ifalAffiliation: keyof typeof IfalAffiliation;
+    disability?: string;
+    specialNeed?: string;
 }
 
 const usuarios: UsuarioSeed[] = [
     {
         email: "admin@ifal.edu.br",
-        nomeCompleto: "Administrador do Sistema",
-        senha: "Admin@1234",
+        fullName: "Administrador do Sistema",
+        password: "Admin@1234",
         role: "ADMIN",
-        dataNascimento: new Date("1980-01-10"),
-        telefone: "+55 82 90000-0001",
-        raca: "BRANCA",
-        educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "EX_ALUNO",
+        birthDate: new Date("1980-01-10"),
+        phone: "+55 82 90000-0001",
+        race: "WHITE",
+        education: "HIGHER_EDUCATION_COMPLETE",
+        ifalAffiliation: "ALUMNI",
     },
 
     {
         email: "professor@ifal.edu.br",
-        nomeCompleto: "Prof. João Silva",
-        senha: "Professor@1234",
+        fullName: "Prof. João Silva",
+        password: "Professor@1234",
         role: "PROFESSOR",
-        dataNascimento: new Date("1975-04-22"),
-        telefone: "+55 82 90000-0002",
-        raca: "PARDA",
-        educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "EX_ALUNO",
+        birthDate: new Date("1975-04-22"),
+        phone: "+55 82 90000-0002",
+        race: "BROWN",
+        education: "HIGHER_EDUCATION_COMPLETE",
+        ifalAffiliation: "ALUMNI",
     },
 
     {
         email: "monitor@ifal.edu.br",
-        nomeCompleto: "Maria Monitor",
-        senha: "Monitor@1234",
+        fullName: "Maria Monitor",
+        password: "Monitor@1234",
         role: "MONITOR",
-        dataNascimento: new Date("1996-09-12"),
-        telefone: "+55 82 90000-0003",
-        raca: "PARDA",
-        educacao: "SUPERIOR_CURSANDO",
-        ifalAfiliacao: "ALUNO",
+        birthDate: new Date("1996-09-12"),
+        phone: "+55 82 90000-0003",
+        race: "BROWN",
+        education: "HIGHER_EDUCATION_IN_PROGRESS",
+        ifalAffiliation: "STUDENT",
     },
     {
         email: "tecnico@ifal.edu.br",
-        nomeCompleto: "Roberto Técnico",
-        senha: "Monitor@1234",
+        fullName: "Roberto Técnico",
+        password: "Monitor@1234",
         role: "MONITOR",
-        dataNascimento: new Date("1985-12-03"),
-        telefone: "+55 82 90000-0012",
-        raca: "BRANCA",
-        educacao: "MEDIO_COMPLETO",
-        ifalAfiliacao: "EX_ALUNO",
+        birthDate: new Date("1985-12-03"),
+        phone: "+55 82 90000-0012",
+        race: "WHITE",
+        education: "HIGH_SCHOOL_COMPLETE",
+        ifalAffiliation: "ALUMNI",
     },
 
     {
         email: "pesquisador@ifal.edu.br",
-        nomeCompleto: "Carlos Pesqueira",
-        senha: "Pesquisador@1234",
-        role: "PESQUISADOR",
-        dataNascimento: new Date("1988-06-30"),
-        telefone: "+55 82 90000-0004",
-        raca: "PARDA",
-        educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "EX_ALUNO",
+        fullName: "Carlos Pesqueira",
+        password: "Pesquisador@1234",
+        role: "RESEARCHER",
+        birthDate: new Date("1988-06-30"),
+        phone: "+55 82 90000-0004",
+        race: "BROWN",
+        education: "HIGHER_EDUCATION_COMPLETE",
+        ifalAffiliation: "ALUMNI",
     },
     {
         email: "pesquisa2@ifal.edu.br",
-        nomeCompleto: "Fernanda Lima",
-        senha: "Pesquisador@1234",
-        role: "PESQUISADOR",
-        dataNascimento: new Date("1983-03-18"),
-        telefone: "+55 82 90000-0013",
-        raca: "PRETA",
-        educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "NAO_ALUNO",
-        deficiencia: "VISUAL",
-        necessidadeEspecial: "LEITOR_DE_TELA",
+        fullName: "Fernanda Lima",
+        password: "Pesquisador@1234",
+        role: "RESEARCHER",
+        birthDate: new Date("1983-03-18"),
+        phone: "+55 82 90000-0013",
+        race: "BLACK",
+        education: "HIGHER_EDUCATION_COMPLETE",
+        ifalAffiliation: "NOT_STUDENT",
+        disability: "VISUAL",
+        specialNeed: "LEITOR_DE_TELA",
     },
 
     {
         email: "visitante@email.com",
-        nomeCompleto: "Ana Visitante",
-        senha: "Visitante@1234",
-        role: "VISITANTE",
-        dataNascimento: new Date("1992-11-05"),
-        telefone: "+55 82 90000-0005",
-        raca: "BRANCA",
-        educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "NAO_ALUNO",
+        fullName: "Ana Visitante",
+        password: "Visitante@1234",
+        role: "VISITOR",
+        birthDate: new Date("1992-11-05"),
+        phone: "+55 82 90000-0005",
+        race: "WHITE",
+        education: "HIGHER_EDUCATION_COMPLETE",
+        ifalAffiliation: "NOT_STUDENT",
     },
     {
         email: "aluno1@ifal.edu.br",
-        nomeCompleto: "Lucas Almeida",
-        senha: "Visitante@1234",
-        role: "VISITANTE",
-        dataNascimento: new Date("2000-02-14"),
-        telefone: "+55 82 90000-0010",
-        raca: "PARDA",
-        educacao: "SUPERIOR_CURSANDO",
-        ifalAfiliacao: "ALUNO",
+        fullName: "Lucas Almeida",
+        password: "Visitante@1234",
+        role: "VISITOR",
+        birthDate: new Date("2000-02-14"),
+        phone: "+55 82 90000-0010",
+        race: "BROWN",
+        education: "HIGHER_EDUCATION_IN_PROGRESS",
+        ifalAffiliation: "STUDENT",
     },
     {
         email: "aluno2@ifal.edu.br",
-        nomeCompleto: "Beatriz Costa",
-        senha: "Visitante@1234",
-        role: "VISITANTE",
-        dataNascimento: new Date("1999-07-21"),
-        telefone: "+55 82 90000-0011",
-        raca: "PRETA",
-        educacao: "MEDIO_COMPLETO",
-        ifalAfiliacao: "ALUNO",
-        deficiencia: "AUDITIVA",
-        necessidadeEspecial: "ACESSO_A_LEGENDAS",
+        fullName: "Beatriz Costa",
+        password: "Visitante@1234",
+        role: "VISITOR",
+        birthDate: new Date("1999-07-21"),
+        phone: "+55 82 90000-0011",
+        race: "BLACK",
+        education: "HIGH_SCHOOL_COMPLETE",
+        ifalAffiliation: "STUDENT",
+        disability: "AUDITIVA",
+        specialNeed: "ACESSO_A_LEGENDAS",
     },
     {
         email: "externo@ifal.edu.br",
-        nomeCompleto: "Rafael Externo",
-        senha: "Visitante@1234",
-        role: "VISITANTE",
-        dataNascimento: new Date("1991-08-09"),
-        telefone: "+55 82 90000-0014",
-        raca: "AMARELA",
-        educacao: "SUPERIOR_COMPLETO",
-        ifalAfiliacao: "NAO_ALUNO",
+        fullName: "Rafael Externo",
+        password: "Visitante@1234",
+        role: "VISITOR",
+        birthDate: new Date("1991-08-09"),
+        phone: "+55 82 90000-0014",
+        race: "YELLOW",
+        education: "HIGHER_EDUCATION_COMPLETE",
+        ifalAffiliation: "NOT_STUDENT",
     },
 ];
 
@@ -144,23 +144,23 @@ export async function seedUsuarios(prisma: PrismaClient): Promise<void> {
     let ignorados = 0;
 
     for (const u of usuarios) {
-        const senhaHash = await bcrypt.hash(u.senha, 12);
+        const senhaHash = await bcrypt.hash(u.password, 12);
 
         const resultado = await prisma.user.upsert({
             where: { email: u.email },
             update: {},
             create: {
                 email: u.email,
-                nomeCompleto: u.nomeCompleto,
-                senha: senhaHash,
+                fullName: u.fullName,
+                password: senhaHash,
                 role: UserRole[u.role],
-                dataNascimento: u.dataNascimento,
-                telefone: u.telefone,
-                raca: Race[u.raca],
-                educacao: Education[u.educacao],
-                ifalAfiliacao: IfalAffiliation[u.ifalAfiliacao],
-                deficiencia: u.deficiencia ?? null,
-                necessidadeEspecial: u.necessidadeEspecial ?? null,
+                birthDate: u.birthDate,
+                phone: u.phone,
+                race: Race[u.race],
+                education: Education[u.education],
+                ifalAffiliation: IfalAffiliation[u.ifalAffiliation],
+                disability: u.disability ?? null,
+                specialNeed: u.specialNeed ?? null,
             },
         });
 

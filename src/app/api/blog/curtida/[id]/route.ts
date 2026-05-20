@@ -15,7 +15,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
         const validatedPostId = postIdBlogSchema.safeParse(postId);
         if (!validatedPostId.success) return NextResponse.json({ error: "Dado inválido" }, { status: 422 });
 
-        await prisma.curtida.delete({
+        await prisma.like.delete({
             where: {
                 userId_postId: {
                     userId: session.user.id,

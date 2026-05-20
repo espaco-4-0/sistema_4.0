@@ -55,20 +55,20 @@ function buildTopics(category: CourseCategory): CourseDetails["topics"] {
 }
 
 export function adaptApiCourseToView(course: ApiCourse): CourseDetails {
-    const textBase = `${course.titulo} ${course.descricao ?? ""}`;
+    const textBase = `${course.title} ${course.description ?? ""}`;
     const category = inferCategory(textBase);
-    const cargaHoraria = course.cargaHoraria ?? 16;
+    const cargaHoraria = course.workload ?? 16;
     const durationWeeks = Math.max(1, Math.ceil(cargaHoraria / 4));
     const startDate = formatDate(course.createdAt);
 
     return {
         id: course.id,
-        title: course.titulo,
-        instructor: course.professor?.nomeCompleto ?? "Equipe Espaco 4.0",
-        description: course.descricao ?? "Curso disponivel no Espaco 4.0.",
-        longDescription: course.descricao ?? "Curso disponivel no Espaco 4.0.",
+        title: course.title,
+        instructor: course.professor?.fullName ?? "Equipe Espaco 4.0",
+        description: course.description ?? "Curso disponivel no Espaco 4.0.",
+        longDescription: course.description ?? "Curso disponivel no Espaco 4.0.",
         durationWeeks,
-        subscribes: course._count?.inscricoes ?? 0,
+        subscribes: course._count?.Enrollment ?? 0,
         maxSubscribes: 30,
         level: inferLevel(cargaHoraria),
         category,
@@ -79,7 +79,7 @@ export function adaptApiCourseToView(course: ApiCourse): CourseDetails {
         location: "Espaco 4.0",
         cardImage: categoryImages[category],
         gallery: [
-            { id: 1, url: categoryImages[category], alt: course.titulo },
+            { id: 1, url: categoryImages[category], alt: course.title },
             {
                 id: 2,
                 url: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",

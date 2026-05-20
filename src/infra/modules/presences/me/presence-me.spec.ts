@@ -6,7 +6,7 @@ import { listPresenceEventsByUser } from "./presence-me.service";
 
 vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
-        presenca: {
+        presence: {
             findMany: vi.fn(),
         },
     },
@@ -29,26 +29,28 @@ describe("listPresenceEventsByUser", () => {
     const createMockPresence = (overrides = {}) => ({
         id: "presence-1",
         userId: mockUserId,
-        confirmada: true,
+        confirmed: true,
         confirmedAt: new Date("2026-04-13T09:50:00Z"),
         createdAt: new Date("2026-04-10T10:00:00Z"),
-        aula: {
-            dataHoraInicio: baseDate,
-            duracaoMin: 120,
-            titulo: "Aula de TypeScript",
-            professor: { nomeCompleto: "Professor Silva" },
-            local: { nome: "Laboratório 1" },
-            curso: { titulo: "Desenvolvimento Web", descricao: "Curso completo" },
+        lessonId: "lesson-1",
+        enrollmentId: null,
+        lesson: {
+            startDate: baseDate,
+            durationMin: 120,
+            title: "Aula de TypeScript",
+            professor: { fullName: "Professor Silva" },
+            location: { name: "Laboratório 1" },
+            course: { title: "Desenvolvimento Web", description: "Curso completo" },
         },
         ...overrides,
     });
 
     it("retornar a lista de presenças formatada corretamente com todos os dados preenchidos", async () => {
-        vi.mocked(prisma.presenca.findMany).mockResolvedValue([createMockPresence()]);
+        vi.mocked(prisma.presence.findMany).mockResolvedValue([createMockPresence()]);
 
         const result = await listPresenceEventsByUser(mockUserId);
 
-        expect(prisma.presenca.findMany).toHaveBeenCalledWith({
+        expect(prisma.presence.findMany).toHaveBeenCalledWith({
             where: { userId: mockUserId },
             orderBy: { createdAt: "asc" },
             include: expect.any(Object),
@@ -70,17 +72,15 @@ describe("listPresenceEventsByUser", () => {
     });
 
     it("aplicar os fallbacks corretamente quando dados opcionais faltarem (Título, Descrição, Local)", async () => {
-        vi.mocked(prisma.presenca.findMany).mockResolvedValue([
+        vi.mocked(prisma.presence.findMany).mockResolvedValue([
             createMockPresence({
-                aula: {
-                    dataHoraInicio: baseDate,
-                    duracaoMin: 60,
-                    aulaId: "aula-id-1",
-                    incricaoId: null,
-                    titulo: null,
-                    professor: { nomeCompleto: "Professor Silva" },
-                    local: null,
-                    curso: { titulo: "Curso Básico", descricao: null },
+                lesson: {
+                    startDate: baseDate,
+                    durationMin: 60,
+                    title: null,
+                    professor: { fullName: "Professor Silva" },
+                    location: null,
+                    course: { title: "Curso Básico", description: null },
                 },
             }),
         ]);
@@ -94,24 +94,24 @@ describe("listPresenceEventsByUser", () => {
 
     describe("Cálculo da Situação (EventSituation)", () => {
         it('deve retornar "confirmed" se a presença estiver confirmada', async () => {
-            vi.mocked(prisma.presenca.findMany).mockResolvedValue([
-                createMockPresence({ confirmada: true, confirmedAt: new Date() }),
+            vi.mocked(prisma.presence.findMany).mockResolvedValue([
+                createMockPresence({ confirmed: true, confirmedAt: new Date() }),
             ]);
             const result = await listPresenceEventsByUser(mockUserId);
             expect(result[0].situation).toBe("confirmed");
         });
 
         it('deve retornar "absent" se a presença não estiver confirmada mas tiver data de registro (confirmedAt)', async () => {
-            vi.mocked(prisma.presenca.findMany).mockResolvedValue([
-                createMockPresence({ confirmada: false, confirmedAt: new Date() }),
+            vi.mocked(prisma.presence.findMany).mockResolvedValue([
+                createMockPresence({ confirmed: false, confirmedAt: new Date() }),
             ]);
             const result = await listPresenceEventsByUser(mockUserId);
             expect(result[0].situation).toBe("absent");
         });
 
         it('deve retornar "pending" se a presença não estiver confirmada e não tiver data de registro', async () => {
-            vi.mocked(prisma.presenca.findMany).mockResolvedValue([
-                createMockPresence({ confirmada: false, confirmedAt: null }),
+            vi.mocked(prisma.presence.findMany).mockResolvedValue([
+                createMockPresence({ confirmed: false, confirmedAt: null }),
             ]);
             const result = await listPresenceEventsByUser(mockUserId);
             expect(result[0].situation).toBe("pending");
@@ -119,7 +119,7 @@ describe("listPresenceEventsByUser", () => {
     });
 
     it(" utilizar a camada de cache passando os parametros corretos", async () => {
-        vi.mocked(prisma.presenca.findMany).mockResolvedValue([]);
+        vi.mocked(prisma.presence.findMany).mockResolvedValue([]);
 
         await listPresenceEventsByUser(mockUserId);
 

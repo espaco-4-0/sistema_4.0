@@ -49,16 +49,16 @@ export const authOptions: NextAuthOptions = {
                 });
 
                 if (!user) return null;
-                if (!user.ativo) return null;
+                if (!user.isActive) return null;
 
-                const isValid = await bcrypt.compare(password, user.senha);
+                const isValid = await bcrypt.compare(password, user.password);
 
                 if (!isValid) return null;
 
                 return {
                     id: user.id,
                     email: user.email,
-                    name: user.nomeCompleto,
+                    name: user.fullName,
                     image: user.avatarUrl,
                     role: user.role,
                     remember: remember === "true",

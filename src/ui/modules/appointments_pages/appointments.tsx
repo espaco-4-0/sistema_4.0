@@ -37,7 +37,7 @@ export default function AllCalendar() {
     const [viewDate, setViewDate] = useState<Date>(initialState.date);
     const [selectedDate, setSelectedDate] = useState<Date>(initialState.date);
     const [step, setStep] = useState(initialState.step);
-    const [selectedEventId, setSelectedEventId] = useState<number>(0);
+    const [selectedEventId, setSelectedEventId] = useState<string | number>(0);
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>("");
 

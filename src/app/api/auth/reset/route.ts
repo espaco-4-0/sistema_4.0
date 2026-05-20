@@ -30,7 +30,7 @@ export async function PATCH(req: NextRequest) {
         await prisma.user.update({
             where: { id: user.id },
             data: {
-                senha: senhaHash,
+                password: senhaHash,
                 resetToken: null,
                 resetTokenExpiresAt: null,
             },

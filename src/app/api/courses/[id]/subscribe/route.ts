@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "../../../auth/[...nextauth]/route";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function POST(_req: NextRequest, { params }: Params) {
     try {
@@ -12,29 +12,30 @@ export async function POST(_req: NextRequest, { params }: Params) {
         if (!session) {
             return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
         }
-        const courseId = params.id?.trim();
+        const { id: rawId } = await params;
+        const courseId = rawId?.trim();
         if (!courseId) {
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const course = await prisma.curso.findUnique({
+        const course = await prisma.course.findUnique({
             where: { id: courseId },
-            select: { id: true, ativo: true },
+            select: { id: true, isActive: true },
         });
 
         if (!course) {
             return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
         }
 
-        if (!course.ativo) {
+        if (!course.isActive) {
             return NextResponse.json({ message: "Curso inativo para inscrição" }, { status: 409 });
         }
 
-        const alreadySubscribed = await prisma.inscricao.findUnique({
+        const alreadySubscribed = await prisma.enrollment.findUnique({
             where: {
-                userId_cursoId: {
+                userId_courseId: {
                     userId: session.user.id,
-                    cursoId: courseId,
+                    courseId: courseId,
                 },
             },
         });
@@ -43,10 +44,10 @@ export async function POST(_req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Você já está inscrito neste curso" }, { status: 409 });
         }
 
-        const subscription = await prisma.inscricao.create({
+        const subscription = await prisma.enrollment.create({
             data: {
                 userId: session.user.id,
-                cursoId: courseId,
+                courseId: courseId,
             },
         });
 
@@ -64,16 +65,17 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
         }
 
-        const courseId = params.id?.trim();
+        const { id: rawId } = await params;
+        const courseId = rawId?.trim();
         if (!courseId) {
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const subscription = await prisma.inscricao.findUnique({
+        const subscription = await prisma.enrollment.findUnique({
             where: {
-                userId_cursoId: {
+                userId_courseId: {
                     userId: session.user.id,
-                    cursoId: courseId,
+                    courseId: courseId,
                 },
             },
         });
@@ -82,11 +84,11 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Você não está inscrito neste curso" }, { status: 404 });
         }
 
-        await prisma.inscricao.delete({
+        await prisma.enrollment.delete({
             where: {
-                userId_cursoId: {
+                userId_courseId: {
                     userId: session.user.id,
-                    cursoId: courseId,
+                    courseId: courseId,
                 },
             },
         });

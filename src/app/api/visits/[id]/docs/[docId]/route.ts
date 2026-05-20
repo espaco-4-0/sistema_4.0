@@ -26,7 +26,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const doc = await prisma.visitDocumento.findUnique({ where: { id: docId } });
+        const doc = await prisma.visitDocument.findUnique({ where: { id: docId } });
 
         if (!doc) {
             return NextResponse.json({ message: "Documento não encontrado" }, { status: 404 });

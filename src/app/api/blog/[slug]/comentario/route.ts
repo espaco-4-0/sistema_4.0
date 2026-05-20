@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
         const skip = (page - 1) * limit;
 
         const [comments, total] = await Promise.all([
-            prisma.comentario.findMany({
+            prisma.comment.findMany({
                 where: {
                     post: {
                         slug: validatedSlug.data,
@@ -22,12 +22,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
                 },
                 select: {
                     id: true,
-                    conteudo: true,
+                    content: true,
                     createdAt: true,
-                    autor: {
+                    author: {
                         select: {
                             id: true,
-                            nomeCompleto: true,
+                            fullName: true,
                         },
                     },
                 },
@@ -37,7 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
                 skip,
                 take: limit,
             }),
-            prisma.comentario.count({
+            prisma.comment.count({
                 where: {
                     post: {
                         slug: validatedSlug.data,
@@ -46,8 +46,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
             }),
         ]);
 
+        const mappedComments = comments.map((comment: any) => ({
+            id: comment.id,
+            conteudo: comment.content,
+            createdAt: comment.createdAt,
+            autor: {
+                id: comment.author.id,
+                nomeCompleto: comment.author.fullName,
+            },
+        }));
+
         return NextResponse.json({
-            data: comments,
+            data: mappedComments,
             meta: {
                 total,
                 page,

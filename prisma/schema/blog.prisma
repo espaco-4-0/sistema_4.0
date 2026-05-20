@@ -1,72 +1,72 @@
 model Post {
-  id             String   @id @default(cuid())
-  titulo         String
-  slug           String   @unique
-  resumo         String?
-  conteudo       String
-  tempoDeLeitura Int
-  publicado      Boolean  @default(false)
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  summary     String?
+  content     String
+  readingTime Int
+  isPublished Boolean  @default(false)
 
-  categoria   PostCategoria @relation(fields: [categoriaId], references: [id])
-  categoriaId String
+  category    PostCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
 
-  foto Foto?
+  photo       PostPhoto?
 
-  autor   User   @relation(fields: [autorId], references: [id])
-  autorId String
+  author      User     @relation(fields: [authorId], references: [id])
+  authorId    String
 
-  comentarios Comentario[]
-  curtidas    Curtida[]
+  Comment     Comment[]
+  Like        Like[]
 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([authorId])
+}
+
+model PostPhoto {
+  id         String   @id @default(cuid())
+  url        String
+
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     String   @unique
+
+  isFeatured Boolean  @default(false)
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([categoriaId])
-  @@index([autorId])
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+
+  @@index([authorId])
+  @@index([postId])
 }
 
-model Foto {
-  id     String @id @default(cuid())
-  url    String
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
 
-  destaque Boolean @default(false)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+
+  @@unique([userId, postId])
+  @@index([postId])
 }
 
-model Comentario {
-    id        String   @id @default(cuid())
-    conteudo  String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    autor   User   @relation(fields: [autorId], references: [id], onDelete: Cascade)
-    autorId String
-
-    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId String
-
-    @@index([autorId])
-    @@index([postId])
-}
-
-model Curtida {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId String
-
-    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId String
-
-    @@unique([userId, postId])
-    @@index([postId])
-}
-
-model PostCategoria {
-    id    String @id @default(cuid())
-    nome  String @unique
-    posts Post[]
+model PostCategory {
+  id    String @id @default(cuid())
+  name  String @unique
+  Post  Post[]
 }

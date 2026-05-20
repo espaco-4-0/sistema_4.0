@@ -1,25 +1,25 @@
-import { PrismaClient, StatusInscricao } from "@/src/generated/prisma/client";
+import { EnrollmentStatus, PrismaClient } from "@/src/generated/prisma/client";
 
 export async function seedInscricao(prisma: PrismaClient, userId: string, cursoId: string) {
     console.log("Semeando inscrição do aluno no curso...");
 
-    await prisma.inscricao.upsert({
+    await prisma.enrollment.upsert({
         where: {
-            userId_cursoId: {
+            userId_courseId: {
                 userId: userId,
-                cursoId: cursoId,
+                courseId: cursoId,
             },
         },
         update: {
-            status: StatusInscricao.CONFIRMADA,
+            status: EnrollmentStatus.CONFIRMED,
         },
         create: {
-            status: StatusInscricao.CONFIRMADA,
-            dataEscolhida: new Date(),
+            status: EnrollmentStatus.CONFIRMED,
+            chosenDate: new Date(),
             user: {
                 connect: { id: userId },
             },
-            curso: {
+            course: {
                 connect: { id: cursoId },
             },
         },

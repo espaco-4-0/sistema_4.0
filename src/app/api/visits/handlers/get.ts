@@ -53,13 +53,13 @@ export async function getHandlers() {
             const visits = await prisma.visit.findMany({
                 orderBy: { createdAt: "desc" },
                 include: {
-                    documentos: {
+                    VisitDocument: {
                         select: { id: true, fileName: true, fileType: true, fileSizeKb: true, uploadedAt: true },
                     },
-                    paradas: {
+                    VisitLocation: {
                         include: {
-                            local: {
-                                select: { nome: true },
+                            Location: {
+                                select: { name: true },
                             },
                         },
                     },
@@ -70,7 +70,7 @@ export async function getHandlers() {
 
         const visits = await prisma.visit.findMany({
             orderBy: { createdAt: "desc" },
-            select: { id: true, instituicao: true, dataVisita: true, horaInicio: true, horaFim: true, status: true },
+            select: { id: true, institution: true, visitDate: true, startTime: true, endTime: true, status: true },
         });
 
         const year = new Date().getFullYear();
@@ -94,16 +94,22 @@ export async function getHandlers() {
             return ev;
         });
 
+        const statusMap: Record<string, string> = {
+            PENDING: "pendente",
+            APPROVED: "aprovado",
+            DENIED: "negado",
+        };
+
         const normalizedVisits: CalendarEvent[] = visits.map((v) => {
-            const data = v.dataVisita;
+            const data = v.visitDate;
             const dateStr = data instanceof Date ? data.toISOString().slice(0, 10) : String(data).slice(0, 10);
             return {
                 id: v.id,
-                instituicao: v.instituicao,
+                instituicao: v.institution,
                 dataVisita: dateStr,
-                horaInicio: v.horaInicio ?? "00:00",
-                horaFim: v.horaFim ?? "00:00",
-                status: v.status ?? "pendente",
+                horaInicio: v.startTime ?? "00:00",
+                horaFim: v.endTime ?? "00:00",
+                status: v.status ? (statusMap[v.status] ?? "pendente") : "pendente",
             };
         });
 

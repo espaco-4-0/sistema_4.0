@@ -27,8 +27,8 @@ export const EventDetail = ({
             <h3 className="text-base font-bold text-gray-800 mt-2 mb-1">{event.title}</h3>
             <p className="text-[11px] text-gray-500 leading-relaxed mb-4">{event.description}</p>
             <div className="space-y-2.5 border-t pt-4">
-                <InfoRow icon={<Clock size={14} />} text={event.time} />
-                <InfoRow icon={<MapPin size={14} />} text={event.local} />
+                <InfoRow icon={<Clock size={14} />} text={event.time || ""} />
+                <InfoRow icon={<MapPin size={14} />} text={event.local || ""} />
                 {event.quantidade && <InfoRow icon={<Users size={14} />} text={`${event.quantidade} pessoas`} />}
                 {event.whatsapp && <InfoRow icon={<Phone size={14} />} text={event.whatsapp} />}
             </div>

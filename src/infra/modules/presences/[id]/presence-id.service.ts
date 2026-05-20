@@ -6,16 +6,16 @@ import { PresenceSituation } from "./presence-id.schema";
 
 const PRESENCE_UPDATE_SELECT = {
     id: true,
-    confirmada: true,
+    confirmed: true,
     confirmedAt: true,
     userId: true,
-    aulaId: true,
-} satisfies Prisma.PresencaSelect;
+    lessonId: true,
+} satisfies Prisma.PresenceSelect;
 
-export type UpdatedPresence = Prisma.PresencaGetPayload<{ select: typeof PRESENCE_UPDATE_SELECT }>;
+export type UpdatedPresence = Prisma.PresenceGetPayload<{ select: typeof PRESENCE_UPDATE_SELECT }>;
 
 export async function findUserPresenceById(id: string, userId: string): Promise<boolean> {
-    const current = await prisma.presenca.findFirst({
+    const current = await prisma.presence.findFirst({
         where: {
             id,
             userId,
@@ -28,20 +28,20 @@ export async function findUserPresenceById(id: string, userId: string): Promise<
     return !!current;
 }
 
-export function buildPresenceUpdateData(situation: PresenceSituation): Prisma.PresencaUpdateInput {
+export function buildPresenceUpdateData(situation: PresenceSituation): Prisma.PresenceUpdateInput {
     const now = new Date();
 
     const dataBySituation = {
-        pending: { confirmada: false, confirmedAt: null as Date | null },
-        confirmed: { confirmada: true, confirmedAt: now },
-        absent: { confirmada: false, confirmedAt: now },
+        pending: { confirmed: false, confirmedAt: null as Date | null },
+        confirmed: { confirmed: true, confirmedAt: now },
+        absent: { confirmed: false, confirmedAt: now },
     } as const;
 
     return dataBySituation[situation];
 }
 
-export async function updatePresenceById(id: string, data: Prisma.PresencaUpdateInput): Promise<UpdatedPresence> {
-    const updated = await prisma.presenca.update({
+export async function updatePresenceById(id: string, data: Prisma.PresenceUpdateInput): Promise<UpdatedPresence> {
+    const updated = await prisma.presence.update({
         where: { id },
         data,
         select: PRESENCE_UPDATE_SELECT,

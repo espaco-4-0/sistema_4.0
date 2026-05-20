@@ -10,9 +10,9 @@ const validRegistrationBody = {
     password: "Senha@123",
     dateOfBirth: "1995-01-01T00:00:00.000Z",
     telephone: "(82) 99999-9999",
-    race: Race.BRANCA,
-    education: Education.SUPERIOR_COMPLETO,
-    ifalAffiliation: IfalAffiliation.ALUNO,
+    race: Race.WHITE,
+    education: Education.HIGHER_EDUCATION_COMPLETE,
+    ifalAffiliation: IfalAffiliation.STUDENT,
 };
 
 const validLoginBody = {

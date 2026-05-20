@@ -34,16 +34,16 @@ export async function POST(request: NextRequest) {
 
         await prisma.user.create({
             data: {
-                nomeCompleto: data.completeName,
+                fullName: data.completeName,
                 email: data.email,
-                senha: hashedPassword,
-                dataNascimento: new Date(data.dateOfBirth),
-                telefone: data.telephone,
-                raca: data.race,
-                educacao: data.education,
-                ifalAfiliacao: data.ifalAffiliation,
-                deficiencia: data.deficiency ?? null,
-                necessidadeEspecial: data.deficiencyNeeds ?? null,
+                password: hashedPassword,
+                birthDate: new Date(data.dateOfBirth),
+                phone: data.telephone,
+                race: data.race,
+                education: data.education,
+                ifalAffiliation: data.ifalAffiliation,
+                disability: data.deficiency ?? null,
+                specialNeed: data.deficiencyNeeds ?? null,
             },
         });
 
