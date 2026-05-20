@@ -1,23 +1,10 @@
 const isDev = process.env.NODE_ENV === "development";
 
-const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://images.unsplash.com https://rllnjjtrzwizgrndgfep.supabase.co;
-    font-src 'self';
-    connect-src 'self' https://rllnjjtrzwizgrndgfep.supabase.co wss://rllnjjtrzwizgrndgfep.supabase.co;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;
-`
-    .replace(/\s+/g, " ")
-    .trim();
 
-const nextConfig = {
+const nextConfig: NextConfig = {
+    //futuro teste pra ci/cd
     output: "standalone",
+    //Dps apagar issae quando pegar as images dos cursos via API
     images: {
         remotePatterns: [
             {
