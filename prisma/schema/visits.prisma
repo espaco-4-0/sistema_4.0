@@ -1,11 +1,77 @@
+enum VisitStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum VisitProcessStage {
+  WAITING_EMAIL
+  EMAIL_RECEIVED
+  DOCUMENTS_UNDER_REVIEW
+  WAITING_IFAL_APPROVAL
+  APPROVED_IFAL
+  DENIED_ADMIN
+  DENIED_IFAL
+}
+
+enum VisitIfalStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum VisitDocumentationStatus {
+  PENDING
+  CHECKED
+  INCOMPLETE
+}
+
 model Visit {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  status    String   @default("pendente")
-  message   String
-  createdAt DateTime @default(now())
+  id                  Int                      @id @default(autoincrement())
+  institution         String
+  responsible         String
+  email               String
+  whatsapp            String
+  visitorCount        Int
+  visitDate           DateTime                 @db.Date
+  startTime           String
+  endTime             String
+  message             String?
+  status              VisitStatus              @default(PENDING)
+  processStage        VisitProcessStage        @default(WAITING_EMAIL)
+  ifalStatus          VisitIfalStatus          @default(PENDING)
+  documentationStatus VisitDocumentationStatus @default(PENDING)
+  rejectionReason     String?
+  processLog          Json                     @default("[]")
+  createdAt           DateTime                 @default(now())
+  reviewedAt          DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  VisitDocument       VisitDocument[]
+  VisitLocation       VisitLocation[]
+}
 
-  @@index([userId])
+model VisitLocation {
+  id         Int      @id @default(autoincrement())
+  visitId    Int
+  locationId String
+
+  Visit      Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  Location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([locationId])
+}
+
+model VisitDocument {
+  id          Int      @id @default(autoincrement())
+  visitId     Int
+  fileName    String
+  fileType    String
+  fileSizeKb  Int
+  storagePath String // caminho no bucket do Supabase Storage
+  uploadedAt  DateTime @default(now())
+
+  Visit      Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
 }

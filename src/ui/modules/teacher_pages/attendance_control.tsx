@@ -14,9 +14,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/src/ui/components/ui/dropdown-menu";
-import { Check, ChevronLeft, ChevronRight, Clock, Filter, Search, X } from "lucide-react";
+import { AlertCircle, Check, ChevronLeft, ChevronRight, Clock, Filter, Search, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Readonly<AttendanceTableProps>) {
+    const { data: session, status } = useSession();
     const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
     const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState("all");
@@ -67,6 +69,22 @@ export function AttendanceTable({ selectedDate, selectedClass, searchTerm }: Rea
             })
         );
     };
+
+    if (status === "loading") return null;
+
+    if (!session || session.user.role !== "ADMIN") {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
+                <div className="bg-red-50 p-6 rounded-full mb-4">
+                    <AlertCircle size={48} className="text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
+                <p className="text-gray-500 mt-2 max-w-xs text-sm">
+                    Esta página e suas funcionalidades são exclusivas para administradores do sistema.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-8 py-6">

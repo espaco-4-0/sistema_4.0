@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { VisitRequest } from "@/src/infra/modules/professor/agenda-visitas-mock";
 import {
     Dialog,
@@ -8,15 +9,17 @@ import {
     DialogTrigger,
 } from "@/src/ui/components/ui/dialog";
 import {
-    confirmEmailReceived,
-    denyByAdmin,
-    sendToIfalApproval,
-    setIfalDecision,
-    startDocumentationAnalysis,
-} from "@/src/ui/lib/visit-requests-storage";
+    apiAdminDeny,
+    apiApproveDocumentation,
+    apiConfirmEmail,
+    apiIfalApprove,
+    apiIfalDeny,
+    apiMarkDocumentationIncomplete,
+    apiSendToIfal,
+} from "@/src/ui/lib/visit-requests-api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { CheckCircle2, ChevronRight, FileCheck, MailCheck, ShieldCheck, ShieldX } from "lucide-react";
+import { CheckCircle2, ChevronRight, Download, FileCheck, MailCheck, ShieldCheck, ShieldX } from "lucide-react";
 
 import { stageBadge, stageLabels } from "./constants";
 
@@ -24,16 +27,28 @@ type Props = {
     request: VisitRequest;
     denyReason: string;
     setDenyReason: (text: string) => void;
-    refresh: (updater: () => VisitRequest[]) => void;
+    refresh: () => Promise<void>;
 };
 
 export function RequestCard({ request, denyReason, setDenyReason, refresh }: Props) {
+    const [actionLoading, setActionLoading] = useState(false);
     const visitDate = format(new Date(`${request.data}T00:00:00`), "dd/MM/yyyy", { locale: ptBR });
 
     const btnBase =
         "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none";
-
     const btnStatus = "disabled:opacity-50 disabled:cursor-not-allowed enabled:cursor-pointer";
+
+    async function handleAction(fn: () => Promise<any>) {
+        setActionLoading(true);
+        try {
+            await fn();
+            await refresh();
+        } catch (err) {
+            alert(err instanceof Error ? err.message : "Erro ao executar ação");
+        } finally {
+            setActionLoading(false);
+        }
+    }
 
     return (
         <Dialog>
@@ -57,7 +72,7 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                 <div className="px-6 py-5 border-b border-gray-100 shrink-0">
                     <DialogHeader>
                         <DialogTitle>{request.instituicao}</DialogTitle>
-                        <DialogDescription>{request.responsavel} • Painel do Admin (Professor)</DialogDescription>
+                        <DialogDescription>{request.responsavel} • Painel Administrativo</DialogDescription>
                     </DialogHeader>
                 </div>
 
@@ -81,6 +96,21 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         <p>
                             <strong>Status:</strong> {request.status}
                         </p>
+                        {request.paradas && request.paradas.length > 0 && (
+                            <div className="col-span-full mt-2">
+                                <p className="font-semibold mb-1">Roteiro desejado:</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {request.paradas.map((p) => (
+                                        <span
+                                            key={p.id}
+                                            className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-medium border border-blue-100"
+                                        >
+                                            {p.nome}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <span
@@ -100,8 +130,18 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         {request.documentos.length > 0 ? (
                             <ul className="space-y-1">
                                 {request.documentos.map((doc) => (
-                                    <li key={doc.id} className="text-xs text-gray-700">
-                                        {doc.fileName} ({doc.fileSizeKb} KB)
+                                    <li key={doc.id} className="text-xs text-gray-700 flex items-center gap-2">
+                                        <span>
+                                            {doc.fileName} ({doc.fileSizeKb} KB)
+                                        </span>
+                                        <a
+                                            href={`/api/visits/${request.id}/docs/${doc.id}`}
+                                            download={doc.fileName}
+                                            className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                                        >
+                                            <Download className="w-3 h-3" />
+                                            Baixar
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
@@ -121,7 +161,7 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                         <div className="space-y-1.5">
                             {request.processLog.map((entry) => (
                                 <p key={entry.id} className="text-xs text-gray-700">
-                                    {format(new Date(entry.createdAt), "dd/MM HH:mm", { locale: ptBR })} -{" "}
+                                    {format(new Date(entry.createdAt), "dd/MM HH:mm", { locale: ptBR })} —{" "}
                                     {entry.description}
                                 </p>
                             ))}
@@ -134,7 +174,7 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
 
                             <textarea
                                 value={denyReason}
-                                onChange={(event) => setDenyReason(event.target.value)}
+                                onChange={(e) => setDenyReason(e.target.value)}
                                 rows={2}
                                 placeholder="Motivo obrigatório para negar (admin/IFAL)"
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -143,11 +183,12 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                             <div className="flex flex-wrap gap-2">
                                 {request.processStage === "aguardando_email" && (
                                     <button
-                                        onClick={() => refresh(() => confirmEmailReceived(request.id))}
+                                        disabled={actionLoading}
+                                        onClick={() => handleAction(() => apiConfirmEmail(request.id))}
                                         className={`${btnBase} ${btnStatus} bg-amber-600 hover:bg-amber-700 text-white`}
                                     >
                                         <MailCheck className="w-4 h-4" />
-                                        Aprovar recebimento de e-mail
+                                        Confirmar recebimento de e-mail
                                     </button>
                                 )}
 
@@ -155,7 +196,8 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                                     request.processStage === "documentacao_em_analise") && (
                                     <>
                                         <button
-                                            onClick={() => refresh(() => startDocumentationAnalysis(request.id, true))}
+                                            disabled={actionLoading}
+                                            onClick={() => handleAction(() => apiApproveDocumentation(request.id))}
                                             className={`${btnBase} ${btnStatus} bg-blue-600 hover:bg-blue-700 text-white`}
                                         >
                                             <FileCheck className="w-4 h-4" />
@@ -163,29 +205,32 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                                         </button>
 
                                         <button
-                                            onClick={() => refresh(() => startDocumentationAnalysis(request.id, false))}
+                                            disabled={actionLoading}
+                                            onClick={() =>
+                                                handleAction(() => apiMarkDocumentationIncomplete(request.id))
+                                            }
                                             className={`${btnBase} ${btnStatus} bg-zinc-600 hover:bg-zinc-700 text-white`}
                                         >
                                             <ShieldX className="w-4 h-4" />
-                                            Marcar documentação incompleta
+                                            Documentação incompleta
                                         </button>
 
                                         <button
-                                            onClick={() => refresh(() => sendToIfalApproval(request.id))}
-                                            disabled={request.documentacaoStatus !== "conferida"}
+                                            disabled={actionLoading || request.documentacaoStatus !== "conferida"}
+                                            onClick={() => handleAction(() => apiSendToIfal(request.id))}
                                             className={`${btnBase} ${btnStatus} bg-indigo-600 hover:bg-indigo-700 text-white`}
                                         >
                                             <ShieldCheck className="w-4 h-4" />
-                                            Enviar para aprovação do IFAL
+                                            Enviar ao IFAL
                                         </button>
 
                                         <button
-                                            onClick={() => refresh(() => denyByAdmin(request.id, denyReason))}
-                                            disabled={!denyReason.trim()}
+                                            disabled={actionLoading || !denyReason.trim()}
+                                            onClick={() => handleAction(() => apiAdminDeny(request.id, denyReason))}
                                             className={`${btnBase} ${btnStatus} bg-red-600 hover:bg-red-700 text-white`}
                                         >
                                             <ShieldX className="w-4 h-4" />
-                                            Negar solicitação no admin
+                                            Negar solicitação
                                         </button>
                                     </>
                                 )}
@@ -193,17 +238,16 @@ export function RequestCard({ request, denyReason, setDenyReason, refresh }: Pro
                                 {request.processStage === "aguardando_aprovacao_ifal" && (
                                     <>
                                         <button
-                                            onClick={() => refresh(() => setIfalDecision(request.id, true))}
+                                            disabled={actionLoading}
+                                            onClick={() => handleAction(() => apiIfalApprove(request.id))}
                                             className={`${btnBase} ${btnStatus} bg-green-600 hover:bg-green-700 text-white`}
                                         >
                                             <CheckCircle2 className="w-4 h-4" />
                                             IFAL aprovou
                                         </button>
                                         <button
-                                            onClick={() =>
-                                                refresh(() => setIfalDecision(request.id, false, denyReason))
-                                            }
-                                            disabled={!denyReason.trim()}
+                                            disabled={actionLoading || !denyReason.trim()}
+                                            onClick={() => handleAction(() => apiIfalDeny(request.id, denyReason))}
                                             className={`${btnBase} ${btnStatus} bg-red-600 hover:bg-red-700 text-white`}
                                         >
                                             <ShieldX className="w-4 h-4" />

@@ -1,75 +1,75 @@
-enum TipoProjeto {
-  EXTENSAO
-  PESQUISA
+enum ProjectType {
+  EXTENSION
+  RESEARCH
 }
 
-enum StatusProjeto {
-  EM_ANDAMENTO
-  CONCLUIDO
-  CANCELADO
+enum ProjectStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
-model Projeto {
-  id         String        @id @default(cuid())
-  titulo     String
-  descricao  String?
-  tipo       TipoProjeto
-  status     StatusProjeto @default(EM_ANDAMENTO)
-  dataInicio DateTime?
-  dataFim    DateTime?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  type        ProjectType
+  status      ProjectStatus @default(IN_PROGRESS)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  lider   User   @relation("LiderProjeto", fields: [liderId], references: [id])
-  liderId String
+  leader   User   @relation("LiderProjeto", fields: [leaderId], references: [id])
+  leaderId String
 
-  membros    ProjetoMembro[]
-  fotos      ProjetoFoto[]
-  relatorios RelatorioProj[]
-  inventario InventarioItem[]
+  ProjectMember ProjectMember[]
+  ProjectPhoto  ProjectPhoto[]
+  ProjectReport ProjectReport[]
+  InventoryItem InventoryItem[]
 
-  @@index([liderId])
+  @@index([leaderId])
 }
 
-model ProjetoMembro {
+model ProjectMember {
   id       String   @id @default(cuid())
-  funcao   String? // ex: "pesquisador", "bolsista"
+  role     String? // ex: "pesquisador", "bolsista"
   joinedAt DateTime @default(now())
 
-  projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
-  projetoId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  @@unique([projetoId, userId])
+  @@unique([projectId, userId])
   @@index([userId])
 }
 
-model ProjetoFoto {
+model ProjectPhoto {
   id        String   @id @default(cuid())
   url       String
-  legenda   String?
-  ordem     Int      @default(0)
+  caption   String?
+  order     Int      @default(0)
   createdAt DateTime @default(now())
 
-  projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
-  projetoId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 
-  @@index([projetoId])
+  @@index([projectId])
 }
 
-model RelatorioProj {
+model ProjectReport {
   id          String    @id @default(cuid())
-  titulo      String
-  conteudo    String
-  arquivoUrl  String? // PDF ou outro anexo
-  publicadoEm DateTime?
+  title       String
+  content     String
+  fileUrl     String? // PDF ou outro anexo
+  publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  projeto   Projeto @relation(fields: [projetoId], references: [id], onDelete: Cascade)
-  projetoId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 
-  @@index([projetoId])
+  @@index([projectId])
 }

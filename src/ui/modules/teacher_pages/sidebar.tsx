@@ -30,7 +30,9 @@ export function Sidebar() {
                             height={42}
                             className="object-contain"
                             style={{ width: "auto", height: "auto" }}
-                        />
+                            priority
+                            loading="eager"
+                        />{" "}
                     </div>
                     <span className="text-xl font-bold text-gray-800 tracking-tight">Espaço 4.0</span>
                 </div>

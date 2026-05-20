@@ -1,32 +1,32 @@
 import { invalidateCacheNamespace, rememberCache } from "@/lib/cache";
 import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 
 import { UpdateProfilePayload } from "./profile-me.schema";
 
 const PROFILE_SELECT = {
     id: true,
-    nomeCompleto: true,
+    fullName: true,
     email: true,
     role: true,
     avatarUrl: true,
-    telefone: true,
-    dataNascimento: true,
-    raca: true,
-    educacao: true,
-    ifalAfiliacao: true,
-    deficiencia: true,
-    necessidadeEspecial: true,
+    phone: true,
+    birthDate: true,
+    race: true,
+    education: true,
+    ifalAffiliation: true,
+    disability: true,
+    specialNeed: true,
     createdAt: true,
 } satisfies Prisma.UserSelect;
 
 const UPDATED_PROFILE_SELECT = {
     id: true,
-    nomeCompleto: true,
+    fullName: true,
     email: true,
     role: true,
     avatarUrl: true,
-    telefone: true,
+    phone: true,
     updatedAt: true,
 } satisfies Prisma.UserSelect;
 
@@ -62,16 +62,16 @@ export async function updateProfileById(userId: string, payload: UpdateProfilePa
     const updated = await prisma.user.update({
         where: { id: userId },
         data: {
-            ...(payload.nomeCompleto !== undefined ? { nomeCompleto: payload.nomeCompleto } : {}),
+            ...(payload.nomeCompleto !== undefined ? { fullName: payload.nomeCompleto } : {}),
             ...(payload.email !== undefined ? { email: payload.email } : {}),
             ...(payload.avatarUrl !== undefined ? { avatarUrl: payload.avatarUrl } : {}),
-            ...(payload.telefone !== undefined ? { telefone: payload.telefone } : {}),
-            ...(payload.dataNascimento !== undefined ? { dataNascimento: new Date(payload.dataNascimento) } : {}),
-            ...(payload.raca !== undefined ? { raca: payload.raca } : {}),
-            ...(payload.educacao !== undefined ? { educacao: payload.educacao } : {}),
-            ...(payload.ifalAfiliacao !== undefined ? { ifalAfiliacao: payload.ifalAfiliacao } : {}),
-            ...(payload.deficiencia !== undefined ? { deficiencia: payload.deficiencia } : {}),
-            ...(payload.necessidadeEspecial !== undefined ? { necessidadeEspecial: payload.necessidadeEspecial } : {}),
+            ...(payload.telefone !== undefined ? { phone: payload.telefone } : {}),
+            ...(payload.dataNascimento !== undefined ? { birthDate: new Date(payload.dataNascimento) } : {}),
+            ...(payload.raca !== undefined ? { race: payload.raca } : {}),
+            ...(payload.educacao !== undefined ? { education: payload.educacao } : {}),
+            ...(payload.ifalAfiliacao !== undefined ? { ifalAffiliation: payload.ifalAfiliacao } : {}),
+            ...(payload.deficiencia !== undefined ? { disability: payload.deficiencia } : {}),
+            ...(payload.necessidadeEspecial !== undefined ? { specialNeed: payload.necessidadeEspecial } : {}),
         },
         select: UPDATED_PROFILE_SELECT,
     });

@@ -11,7 +11,8 @@ import {
 } from "@/src/infra/modules/professor/relatiorios-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/ui/components/ui/card";
-import { Download } from "lucide-react";
+import { AlertCircle, Download } from "lucide-react";
+import { useSession } from "next-auth/react";
 import {
     Area,
     AreaChart,
@@ -51,6 +52,22 @@ const ChartCard = ({ title, subtitle, children }: Readonly<ChartCardProps>) => (
 );
 
 export default function RelatoriosState() {
+    const { data: session, status } = useSession();
+    if (status === "loading") return null;
+
+    if (!session || session.user.role !== "ADMIN") {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center mx-6 mt-6">
+                <div className="bg-red-50 p-6 rounded-full mb-4">
+                    <AlertCircle size={48} className="text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Acesso Restrito</h3>
+                <p className="text-gray-500 mt-2 max-w-xs text-sm">
+                    Esta página e suas funcionalidades são exclusivas para administradores do sistema.
+                </p>
+            </div>
+        );
+    }
     return (
         <div className="p-8 space-y-8 bg-[#F9FAFB] min-h-screen">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

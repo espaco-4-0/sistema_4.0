@@ -1,33 +1,34 @@
 import { patchCourseSchema } from "@/src/infra/modules/courses/courses.schema";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
     try {
-        const id = params.id?.trim();
+        const { id: rawId } = await params;
+        const id = rawId?.trim();
         if (!id) {
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const course = await prisma.curso.findUnique({
+        const course = await prisma.course.findUnique({
             where: { id },
             include: {
                 professor: {
                     select: {
                         id: true,
-                        nomeCompleto: true,
+                        fullName: true,
                         email: true,
                     },
                 },
                 _count: {
                     select: {
-                        aulas: true,
-                        inscricoes: true,
+                        Lesson: true,
+                        Enrollment: true,
                     },
                 },
             },
@@ -57,12 +58,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Sem permissão para editar cursos" }, { status: 403 });
         }
 
-        const id = params.id?.trim();
+        const { id: rawId } = await params;
+        const id = rawId?.trim();
         if (!id) {
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const existingCourse = await prisma.curso.findUnique({
+        const existingCourse = await prisma.course.findUnique({
             where: { id },
             select: { id: true, professorId: true },
         });
@@ -94,23 +96,28 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Apenas admins podem trocar o professor" }, { status: 403 });
         }
 
-        const updated = await prisma.curso.update({
+        const updateData: any = {};
+        if (parsed.data.titulo !== undefined) updateData.title = parsed.data.titulo;
+        if (parsed.data.descricao !== undefined) updateData.description = parsed.data.descricao;
+        if (parsed.data.cargaHoraria !== undefined) updateData.workload = parsed.data.cargaHoraria;
+        if (parsed.data.ativo !== undefined) updateData.isActive = parsed.data.ativo;
+        if (parsed.data.professorId !== undefined) updateData.professorId = parsed.data.professorId;
+
+        const updated = await prisma.course.update({
             where: { id },
-            data: {
-                ...parsed.data,
-            },
+            data: updateData,
             include: {
                 professor: {
                     select: {
                         id: true,
-                        nomeCompleto: true,
+                        fullName: true,
                         email: true,
                     },
                 },
                 _count: {
                     select: {
-                        aulas: true,
-                        inscricoes: true,
+                        Lesson: true,
+                        Enrollment: true,
                     },
                 },
             },
@@ -134,17 +141,18 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Apenas admins podem excluir cursos" }, { status: 403 });
         }
 
-        const id = params.id?.trim();
+        const { id: rawId } = await params;
+        const id = rawId?.trim();
         if (!id) {
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const exists = await prisma.curso.findUnique({ where: { id } });
+        const exists = await prisma.course.findUnique({ where: { id } });
         if (!exists) {
             return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
         }
 
-        await prisma.curso.delete({ where: { id } });
+        await prisma.course.delete({ where: { id } });
 
         return new NextResponse(null, { status: 204 });
     } catch (error) {

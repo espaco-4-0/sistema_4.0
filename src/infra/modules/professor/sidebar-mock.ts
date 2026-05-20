@@ -5,6 +5,8 @@ import {
     FolderKanban,
     House,
     Medal,
+    Image,
+    Newspaper,
     Package,
     Settings,
     Trophy,
@@ -22,4 +24,6 @@ export const navItems = [
     { id: "recursos", name: "Recursos", icon: Package },
     { id: "configuracoes", name: "Configurações", icon: Settings },
     { id: "agenda", name: "Agenda De Visitas", icon: Calendar },
+    { id: "noticias", name: "Controle de Notícias", icon: Newspaper  },
+    { id: "galeria", name: "Galeria de Fotos", icon: Image },
 ];

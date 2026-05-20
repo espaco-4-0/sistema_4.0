@@ -1,4 +1,4 @@
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import bcrypt from "bcryptjs";
 import NextAuth, { DefaultSession, DefaultUser, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -49,16 +49,16 @@ export const authOptions: NextAuthOptions = {
                 });
 
                 if (!user) return null;
-                if (!user.ativo) return null;
+                if (!user.isActive) return null;
 
-                const isValid = await bcrypt.compare(password, user.senha);
+                const isValid = await bcrypt.compare(password, user.password);
 
                 if (!isValid) return null;
 
                 return {
                     id: user.id,
                     email: user.email,
-                    name: user.nomeCompleto,
+                    name: user.fullName,
                     image: user.avatarUrl,
                     role: user.role,
                     remember: remember === "true",

@@ -1,8 +1,8 @@
-model Gamificacao {
+model Gamification {
   id        String   @id @default(cuid())
   xp        Int      @default(0) // XP total acumulado (nunca diminui)
-  pontos    Int      @default(0) // saldo gastável (moeda interna; pode ser consumido)
-  nivel     Int      @default(1) // calculado a partir do XP
+  points    Int      @default(0) // saldo gastável (moeda interna; pode ser consumido)
+  level     Int      @default(1) // calculado a partir do XP
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -12,10 +12,10 @@ model Gamificacao {
 
 model Badge {
   id        String   @id @default(cuid())
-  nome      String   @unique
-  descricao String?
-  iconeUrl  String?
-  pontos    Int      @default(0) // pontos concedidos ao ganhar
+  name      String   @unique
+  description String?
+  iconUrl  String?
+  points    Int      @default(0) // pontos concedidos ao ganhar
   createdAt DateTime @default(now())
 
   userBadges UserBadge[]
@@ -23,7 +23,7 @@ model Badge {
 
 model UserBadge {
   id         String   @id @default(cuid())
-  ganhoBadge DateTime @default(now())
+  earnedAt DateTime @default(now())
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String

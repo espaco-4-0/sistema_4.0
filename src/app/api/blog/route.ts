@@ -1,15 +1,17 @@
 import { Prisma } from "@/src/generated/prisma/client";
-import { getBlogSchema, postBlogSchema } from "@/src/infra/modules/blog/blog.schema";
+import { prisma } from "@/src/infra/data/prisma";
+import { ALLOWED_TYPES, getBlogSchema, postBlogSchema } from "@/src/infra/modules/blog/blog.schema";
 import { estimateReadingTimeInMinutes } from "@/src/lib/reading-time";
 import { storage } from "@/src/lib/storage";
-import { prisma } from "@/src/ui/lib/prisma";
+import { getRequestInfo } from "@/src/ui/lib/errors";
+import { logger } from "@/src/ui/lib/logger";
 import { fileTypeFromBuffer } from "file-type";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "../auth/[...nextauth]/route";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
     try {
@@ -20,53 +22,115 @@ export async function GET(req: NextRequest) {
 
         const validatedData = getBlogSchema.safeParse(paramsOrUndefined);
         if (!validatedData.success)
-            return NextResponse.json({ error: "Dados inválidos", data: validatedData.error }, { status: 422 });
+            return NextResponse.json(
+                { error: "Dados inválidos", data: validatedData.error, input: paramsOrUndefined },
+                { status: 422 }
+            );
 
-        const { category, name, includeArchived, quantity } = validatedData.data;
+        const { category, name, includeArchived, quantity, page, limit, published } = validatedData.data;
 
-        if (category !== undefined) {
-            const categoryEntity = await prisma.postCategoria.findUnique({
-                where: {
-                    nome: category,
-                },
-            });
+        const session = await getServerSession(authOptions);
+        const isAdmin = session?.user?.role === "ADMIN";
 
-            if (!categoryEntity) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
-        }
-
-        if (includeArchived !== undefined) {
-            const session = await getServerSession(authOptions);
-
+        if (includeArchived === true) {
             if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-
-            if (session.user.role !== "ADMIN") return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+            if (!isAdmin) return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
         }
 
         const where: Prisma.PostWhereInput = {};
         if (name)
-            where.titulo = {
+            where.title = {
                 contains: name,
                 mode: "insensitive",
             };
 
         if (category)
-            where.categorias = {
-                some: {
-                    nome: category,
-                },
+            where.category = {
+                name: category,
             };
 
-        if (includeArchived !== undefined) where.publicado = includeArchived;
+        if (published !== undefined) {
+            where.isPublished = published;
+        } else if (includeArchived === false || includeArchived === undefined) {
+            where.isPublished = true;
+        }
 
-        const posts = await prisma.post.findMany({
-            take: quantity,
-            orderBy: { createdAt: "desc" },
-            where,
-        });
+        const take = quantity ?? limit;
+        const skip = quantity ? 0 : (page - 1) * limit;
 
-        return NextResponse.json({ data: posts }, { status: 200 });
+        const isLite = validatedData.data.isLite;
+        const postSelect = {
+            id: true,
+            title: true,
+            slug: true,
+            summary: true,
+            content: true,
+            readingTime: true,
+            isPublished: true,
+            createdAt: true,
+            updatedAt: true,
+            authorId: true,
+            photo: { select: { url: true } },
+            category: { select: { name: true } },
+            author: { select: { fullName: true } },
+        };
+
+        const [total, posts] = await prisma.$transaction([
+            prisma.post.count({ where }),
+
+            prisma.post.findMany({
+                take,
+                skip,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                where,
+                select: postSelect,
+            }),
+        ]);
+
+        if (isAdmin) {
+            for (const post of posts) {
+                if (!post.isPublished && post.photo && !post.photo.url.startsWith("http")) {
+                    try {
+                        post.photo.url = await storage.getPrivateUrl(post.photo.url);
+                    } catch (err) {
+                        logger.warn({ err, postId: post.id }, "Falha ao gerar URL assinada");
+                    }
+                }
+            }
+        }
+
+        const mappedPosts = posts.map((post: any) => ({
+            id: post.id,
+            titulo: post.title,
+            slug: post.slug,
+            resumo: post.summary,
+            conteudo: post.content,
+            tempoDeLeitura: post.readingTime,
+            publicado: post.isPublished,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+            autorId: post.authorId,
+            foto: { url: post.photo?.url || "" },
+            categoria: { nome: post.category?.name || "Geral" },
+            autor: { nomeCompleto: post.author?.fullName || "Autor desconhecido" },
+        }));
+
+        return NextResponse.json(
+            {
+                data: mappedPosts,
+                meta: {
+                    total,
+                    page,
+                    limit: quantity ?? limit,
+                    totalPages: quantity ? 1 : Math.ceil(total / take),
+                },
+            },
+            { status: 200 }
+        );
     } catch (err) {
-        console.error("Internal Error: ", err);
+        logger.error({ err, route: getRequestInfo(req) }, "Erro interno no blog");
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }
@@ -76,7 +140,7 @@ export async function POST(req: NextRequest) {
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
-        if (session.user.role === "VISITANTE") return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
+        if (session.user.role !== "ADMIN") return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
 
         const formData = await req.formData();
         const dataObject = Object.fromEntries(formData.entries());
@@ -85,11 +149,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Dados inválidos", data: validatedData.error }, { status: 422 });
         }
 
-        const { title, slug, content, published, file, summary, category } = validatedData.data;
+        const { title, slug, content, published, file, summary, category, authorId } = validatedData.data;
 
-        if (category) {
-            const haveCategory = await prisma.postCategoria.findUnique({ where: { nome: category } });
-            if (!haveCategory) return NextResponse.json({ error: "Categoria não encontrada" }, { status: 404 });
+        if (!category) {
+            return NextResponse.json({ error: "Categoria é obrigatória" }, { status: 422 });
         }
 
         let path: string | null = null;
@@ -102,10 +165,6 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: "Tipo de arquivo não permitido" }, { status: 415 });
 
             if (published) {
-                if (session.user.role !== "ADMIN") {
-                    return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
-                }
-
                 ({ path, url } = await storage.uploadPublic(file, `posts/${slug}`, detected.mime));
             } else {
                 ({ path } = await storage.uploadPrivate(file, `posts/${slug}`, detected.mime));
@@ -114,39 +173,35 @@ export async function POST(req: NextRequest) {
             await prisma.$transaction(async (tx) => {
                 const post = await tx.post.create({
                     data: {
-                        titulo: title,
-                        conteudo: content,
+                        title,
+                        content,
                         slug,
-                        autorId: session.user.id,
-                        publicado: published,
-                        resumo: summary,
-                        tempoDeLeitura: estimateReadingTimeInMinutes(content),
-                        categorias: category
-                            ? {
-                                  connect: { nome: category },
-                              }
-                            : undefined,
+                        author: {
+                            connect: { id: authorId || session.user.id },
+                        },
+                        isPublished: published,
+                        summary,
+                        readingTime: estimateReadingTimeInMinutes(content),
+                        category: {
+                            connectOrCreate: {
+                                where: { name: category },
+                                create: { name: category },
+                            },
+                        },
                     },
                 });
 
-                const foto = await tx.postFoto.create({
+                const photo = await tx.postPhoto.create({
                     data: {
                         url: url ? url : path!,
                         postId: post.id,
-                    },
-                });
-
-                await tx.post.update({
-                    where: { id: post.id },
-                    data: {
-                        capaImagemId: foto.id,
                     },
                 });
             });
 
             return NextResponse.json({ message: "Post criado", ...(url && { url: url }) }, { status: 201 });
         } catch (err: any) {
-            console.error(err);
+            logger.error({ err, route: getRequestInfo(req) }, "Erro ao criar post");
 
             if (path) await storage.delete(path);
 
@@ -157,7 +212,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Erro interno" }, { status: 500 });
         }
     } catch (err) {
-        console.error(err);
+        logger.error({ err, route: getRequestInfo(req) }, "Erro interno no POST blog");
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }

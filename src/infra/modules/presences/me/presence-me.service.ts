@@ -1,10 +1,10 @@
 import { rememberCache } from "@/lib/cache";
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 
 type EventSituation = "pending" | "confirmed" | "absent";
 
-function mapSituation(confirmada: boolean, confirmedAt: Date | null): EventSituation {
-    if (confirmada) return "confirmed";
+function mapSituation(confirmed: boolean, confirmedAt: Date | null): EventSituation {
+    if (confirmed) return "confirmed";
     if (confirmedAt) return "absent";
     return "pending";
 }
@@ -14,26 +14,26 @@ export async function listPresenceEventsByUser(userId: string) {
         "presences:me",
         userId,
         async () => {
-            const presences = await prisma.presenca.findMany({
+            const presences = await prisma.presence.findMany({
                 where: { userId },
                 orderBy: { createdAt: "asc" },
                 include: {
-                    aula: {
+                    lesson: {
                         include: {
                             professor: {
                                 select: {
-                                    nomeCompleto: true,
+                                    fullName: true,
                                 },
                             },
-                            local: {
+                            location: {
                                 select: {
-                                    nome: true,
+                                    name: true,
                                 },
                             },
-                            curso: {
+                            course: {
                                 select: {
-                                    titulo: true,
-                                    descricao: true,
+                                    title: true,
+                                    description: true,
                                 },
                             },
                         },
@@ -42,16 +42,16 @@ export async function listPresenceEventsByUser(userId: string) {
             });
 
             return presences.map((presence) => {
-                const start = presence.aula.dataHoraInicio;
-                const end = new Date(start.getTime() + presence.aula.duracaoMin * 60 * 1000);
-                const situation = mapSituation(presence.confirmada, presence.confirmedAt ?? null);
+                const start = presence.lesson.startDate;
+                const end = new Date(start.getTime() + presence.lesson.durationMin * 60 * 1000);
+                const situation = mapSituation(presence.confirmed, presence.confirmedAt ?? null);
 
                 return {
                     id: presence.id,
-                    title: presence.aula.titulo ?? presence.aula.curso.titulo,
-                    description: presence.aula.curso.descricao ?? "Atividade do Espaço 4.0",
-                    instructor: presence.aula.professor.nomeCompleto,
-                    location: presence.aula.local?.nome ?? "Local a definir",
+                    title: presence.lesson.title ?? presence.lesson.course.title,
+                    description: presence.lesson.course.description ?? "Atividade do Espaço 4.0",
+                    instructor: presence.lesson.professor.fullName,
+                    location: presence.lesson.location?.name ?? "Local a definir",
                     situation,
                     observation: "",
                     registeredAt: presence.confirmedAt,

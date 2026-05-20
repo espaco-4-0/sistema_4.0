@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/ui/components/ui/avatar";
 import { Button } from "@/src/ui/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/src/ui/components/ui/dropdown-menu";
+import { getDashboardHref } from "@/src/ui/lib/role-routing";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -9,7 +18,8 @@ import {
     NavigationMenuList,
 } from "@radix-ui/react-navigation-menu";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Menu, Play, User, X } from "lucide-react";
+import { Calendar, LogOut, Menu, Play, User, X } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,9 +28,10 @@ import { scrollToSection } from "../../lib/scroll";
 export default function NavBar() {
     const [open, setOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const { data: session } = useSession();
 
     useEffect(() => {
-        const hero = document.getElementById("welcome");
+        const hero = document.getElementById("hero");
 
         if (!hero) {
             setIsVisible(true);
@@ -53,31 +64,39 @@ export default function NavBar() {
 
     const menuItems = [
         { id: "hero", label: "Inicio" },
-        { id: "what-is", label: "Sobre" },
-        { id: "viewer_3d_section", label: "Tecnologias" },
         { id: "blog", label: "Notícias" },
+        { id: "what-is", label: "Sobre" },
+        { id: "viewer_3d_section", label: "Ambiente" },
         { id: "courses", label: "Cursos" },
         { id: "upcoming-events", label: "Eventos" },
         { id: "gallery", label: "Galeria" },
         { id: "footer", label: "Contato" },
     ];
 
+    const isAuthenticated = !!session?.user;
+    const userName = session?.user?.name ?? session?.user?.email ?? "Usuário";
+    const userImage = session?.user?.image ?? null;
+    const userInitial = userName.charAt(0).toUpperCase();
+
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    const dashboardHref = getDashboardHref(role);
+
     return (
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    className="fixed top-0 z-20 w-full"
+                    className="fixed top-0 z-20 w-full border border-b-gray-200"
                     initial={{ opacity: 0, y: -12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
                 >
                     <NavigationMenu className="w-full bg-white">
-                        <div className="relative mx-auto flex h-20 max-w-6xl items-center gap-6 px-4 lg:px-8">
+                        <div className="relative mx-auto flex h-20 justify-center items-center gap-6 px-4 lg:px-8">
                             <Button
                                 variant="ghost"
-                                className="flex items-center gap-3 p-0 cursor-pointer shrink-0"
-                                onClick={() => automaticScroll("welcome")}
+                                className="flex items-center gap-3 p-0 cursor-pointer shrink-0 hover:bg-white"
+                                onClick={() => automaticScroll("hero")}
                             >
                                 <Image
                                     src="/Icone-Espaco4.0.svg"
@@ -87,7 +106,7 @@ export default function NavBar() {
                                     style={{ width: "auto", height: "auto" }}
                                 />
                                 <div className="flex flex-col items-start leading-tight">
-                                    <span className="text-base font-bold text-black leading-none">Espaco 4.0</span>
+                                    <span className="text-base font-bold text-black leading-none">Espaço 4.0</span>
                                     <span className="text-xs font-semibold text-gray-400 leading-none">
                                         Tecnologia & Educação
                                     </span>
@@ -110,7 +129,7 @@ export default function NavBar() {
                                 ))}
                             </NavigationMenuList>
 
-                            <div className="ml-auto hidden lg:flex shrink-0 items-center gap-4">
+                            <div className="hidden lg:flex shrink-0 items-center gap-4">
                                 <Link
                                     href="/espaco-3D"
                                     className="flex items-center gap-2 text-[13px] font-semibold text-black/70 hover:text-black whitespace-nowrap"
@@ -118,18 +137,59 @@ export default function NavBar() {
                                     <Play className="h-5 w-5" /> Ver em 3D
                                 </Link>
                                 <Link
-                                    href="/calendar"
+                                    href="/visita"
                                     className="flex h-9 items-center gap-2 rounded-sm bg-yellow-400 px-3 text-[13px] font-semibold text-black hover:bg-yellow-500 transition-colors duration-300 ease-in-out whitespace-nowrap"
                                 >
                                     <Calendar className="h-5 w-5" /> Agendar Visita
                                 </Link>
                                 <div className="h-6 w-px bg-gray-300" />
-                                <Link
-                                    href="/login"
-                                    className="flex h-9 items-center justify-center gap-2 rounded-sm border-2 border-gray-300 px-3 text-[13px] font-semibold text-black whitespace-nowrap hover:border-black hover:bg-gray-50 transition-all duration-300 ease-in-out"
-                                >
-                                    <User className="h-5 w-5" /> Entrar
-                                </Link>
+
+                                {isAuthenticated ? (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="p-0 rounded-full">
+                                                <Avatar className="size-9 hover:cursor-pointer rounded-full">
+                                                    {userImage ? (
+                                                        <AvatarImage
+                                                            className="hover:cursor-pointer"
+                                                            src={userImage}
+                                                            alt={userName}
+                                                        />
+                                                    ) : (
+                                                        <AvatarFallback>{userInitial}</AvatarFallback>
+                                                    )}
+                                                </Avatar>
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent sideOffset={8} align="end">
+                                            <DropdownMenuItem asChild>
+                                                <Link
+                                                    href={dashboardHref}
+                                                    className="flex hover:cursor-pointer items-center gap-2 w-full"
+                                                >
+                                                    <User className="size-4" /> Painel
+                                                </Link>
+                                            </DropdownMenuItem>
+
+                                            <DropdownMenuSeparator />
+
+                                            <DropdownMenuItem
+                                                onClick={() => signOut({ callbackUrl: "/" })}
+                                                className="text-destructive hover:cursor-pointer"
+                                            >
+                                                <LogOut className="size-4" /> Sair
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        className="flex h-9 items-center justify-center gap-2 rounded-sm border-2 border-gray-300 px-3 text-[13px] font-semibold text-black whitespace-nowrap hover:border-black hover:bg-gray-50 transition-all duration-300 ease-in-out"
+                                    >
+                                        <User className="h-5 w-5" /> Entrar
+                                    </Link>
+                                )}
                             </div>
                             <Button
                                 variant="ghost"
@@ -174,17 +234,35 @@ export default function NavBar() {
                                                 <Play className="h-5 w-5" /> Ver em 3D
                                             </Link>
                                             <Link
-                                                href=""
+                                                href="/visita"
                                                 className="flex h-10 items-center justify-center gap-2 rounded-sm bg-yellow-400 text-sm font-semibold text-black"
                                             >
                                                 <Calendar className="h-5 w-5" /> Agendar Visita
                                             </Link>
-                                            <Link
-                                                href="/login"
-                                                className="flex h-10 items-center justify-center gap-2 rounded-sm border border-gray-300 text-sm font-semibold text-black"
-                                            >
-                                                <User className="h-5 w-5" /> Entrar
-                                            </Link>
+
+                                            {isAuthenticated ? (
+                                                <div>
+                                                    <Link
+                                                        href={dashboardHref}
+                                                        className="flex h-10 items-center justify-center gap-2 rounded-full hover:cursor-pointer border border-gray-300 text-sm font-semibold text-black"
+                                                    >
+                                                        <User className="h-5 w-5" /> Painel
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => signOut({ callbackUrl: "/" })}
+                                                        className="flex h-10 items-center justify-center gap-2 rounded-full hover:cursor-pointer border border-gray-300 text-sm font-semibold text-red-600"
+                                                    >
+                                                        <LogOut className="h-5 w-5 text-red-600" /> Sair
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <Link
+                                                    href="/login"
+                                                    className="flex h-10 items-center justify-center gap-2 rounded-sm border border-gray-300 text-sm font-semibold text-black"
+                                                >
+                                                    <User className="h-5 w-5" /> Entrar
+                                                </Link>
+                                            )}
                                         </div>
                                     </NavigationMenuList>
                                 </motion.div>

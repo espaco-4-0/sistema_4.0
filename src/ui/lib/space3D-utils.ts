@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export const BASE_DIST = 2.4;
 const INITIAL_CAMERA_HEIGHT = 0.4;
@@ -19,13 +19,10 @@ export const CAMERA = {
     dampingFactor: 0.08,
 } as const;
 export const MODEL = {
-    path: "/Container.FBX",
-    width: 2.5,
-    height: 1.2,
-    depth: 1.2,
-    color: 0xfcc700,
-    metalness: 0.2,
-    roughness: 0.4,
+    path: "/container_3d_.glb",
+    width: 5.0,
+    height: 2.4,
+    depth: 2.4,
 } as const;
 export const LIGHTS = { ambient: 1, directional: 2.2 } as const;
 export const ANIMATION = {
@@ -102,18 +99,10 @@ export function createControls(camera: THREE.PerspectiveCamera, element: HTMLCan
 }
 
 export async function loadContainerModel(): Promise<THREE.Object3D> {
-    const manager = new THREE.LoadingManager();
+    const loader = new GLTFLoader();
+    const gltf = await loader.loadAsync(MODEL.path);
+    const model = gltf.scene;
 
-    manager.setURLModifier((url) => {
-        if (/\.(png|jpe?g|webp|bmp)$/i.test(url)) {
-            return "data:,";
-        }
-
-        return url;
-    });
-
-    const loader = new FBXLoader(manager);
-    const model = await loader.loadAsync(MODEL.path);
     const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
     const scaleFactor = Math.min(MODEL.width / size.x, MODEL.height / size.y, MODEL.depth / size.z);
 
@@ -123,30 +112,12 @@ export async function loadContainerModel(): Promise<THREE.Object3D> {
 
     const centeredBox = new THREE.Box3().setFromObject(model);
     const center = centeredBox.getCenter(new THREE.Vector3());
-
     model.position.sub(center);
 
     model.traverse((child) => {
         if (!(child instanceof THREE.Mesh)) return;
-
         child.castShadow = false;
         child.receiveShadow = false;
-
-        const createYellowMaterial = () =>
-            new THREE.MeshStandardMaterial({
-                color: MODEL.color,
-                metalness: MODEL.metalness,
-                roughness: MODEL.roughness,
-            });
-
-        if (Array.isArray(child.material)) {
-            child.material.forEach((material) => material.dispose());
-            child.material = child.material.map(() => createYellowMaterial());
-            return;
-        }
-
-        child.material.dispose();
-        child.material = createYellowMaterial();
     });
 
     return model;

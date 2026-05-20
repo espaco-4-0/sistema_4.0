@@ -1,7 +1,9 @@
 "use client";
 
 import { viewTitles } from "@/src/infra/modules/professor/header-mock";
+import { Home } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function Header() {
@@ -22,6 +24,13 @@ export function Header() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <Link
+                        href="/"
+                        className="flex items-center text-center text-sm font-medium text-gray-600 hover:text-gray-900"
+                    >
+                        <Home className="h-4" /> Página Inicial
+                    </Link>
+
                     <div className="flex items-center gap-2 ml-2">
                         {userImage ? (
                             <img src={userImage} alt={userName} className="w-10 h-10 rounded-full object-cover" />

@@ -1,8 +1,8 @@
 import { invalidateCacheNamespace } from "@/lib/cache";
+import { prisma } from "@/src/infra/data/prisma";
 import { userRegistrationSchema } from "@/src/ui/forms/schemas/user-registration-schema";
 import { getErrorMessage, getRequestInfo } from "@/src/ui/lib/errors";
 import { logger } from "@/src/ui/lib/logger";
-import { prisma } from "@/src/ui/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -34,16 +34,16 @@ export async function POST(request: NextRequest) {
 
         await prisma.user.create({
             data: {
-                nomeCompleto: data.completeName,
+                fullName: data.completeName,
                 email: data.email,
-                senha: hashedPassword,
-                dataNascimento: new Date(data.dateOfBirth),
-                telefone: data.telephone,
-                raca: data.race,
-                educacao: data.education,
-                ifalAfiliacao: data.ifalAffiliation,
-                deficiencia: data.deficiency ?? null,
-                necessidadeEspecial: data.deficiencyNeeds ?? null,
+                password: hashedPassword,
+                birthDate: new Date(data.dateOfBirth),
+                phone: data.telephone,
+                race: data.race,
+                education: data.education,
+                ifalAffiliation: data.ifalAffiliation,
+                disability: data.deficiency ?? null,
+                specialNeed: data.deficiencyNeeds ?? null,
             },
         });
 

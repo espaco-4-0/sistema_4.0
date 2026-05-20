@@ -1,9 +1,9 @@
-import { prisma } from "@/src/ui/lib/prisma";
+import { prisma } from "@/src/infra/data/prisma";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getUserById } from "./user-id.service";
 
-vi.mock("@/src/ui/lib/prisma", () => ({
+vi.mock("@/src/infra/data/prisma", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),

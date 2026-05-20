@@ -4,32 +4,32 @@ export async function seedLocais(prisma: PrismaClient) {
     const locais = [
         {
             id: "local-lab-01",
-            nome: "Laboratório de Informática 01",
-            descricao: "30 computadores e projetor",
-            capacidade: 30,
+            name: "Laboratório de Informática 01",
+            description: "30 computadores e projetor",
+            capacity: 30,
         },
         {
             id: "local-lab-02",
-            nome: "Laboratório de Informática 02",
-            descricao: "25 computadores e projetor",
-            capacidade: 25,
+            name: "Laboratório de Informática 02",
+            description: "25 computadores e projetor",
+            capacity: 25,
         },
         {
             id: "local-audit",
-            nome: "Auditório",
-            descricao: "Espaço para eventos e palestras",
-            capacidade: 150,
+            name: "Auditório",
+            description: "Espaço para eventos e palestras",
+            capacity: 150,
         },
         {
             id: "local-sala-01",
-            nome: "Sala de Aula 01",
-            descricao: "Sala convencional com lousa",
-            capacidade: 40,
+            name: "Sala de Aula 01",
+            description: "Sala convencional com lousa",
+            capacity: 40,
         },
     ];
 
     for (const l of locais) {
-        await prisma.local.upsert({
+        await prisma.location.upsert({
             where: { id: l.id },
             update: {},
             create: l,

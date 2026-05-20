@@ -1,6 +1,7 @@
 import { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import {
     VisitDocument,
+    VisitParada,
     VisitProcessEntry,
     VisitProcessStage,
     VisitRequest,
@@ -60,6 +61,7 @@ function normalizeVisitRequest(request: Partial<VisitRequest>, index: number): V
         horaInicio: request.horaInicio ?? "09:00",
         horaFim: request.horaFim ?? "10:00",
         documentos: (request.documentos as VisitDocument[] | undefined) ?? [],
+        paradas: (request.paradas as VisitParada[] | undefined) ?? [],
         mensagem: request.mensagem,
         status,
         processStage,
@@ -123,6 +125,7 @@ export function createVisitRequest(
             },
         ],
         ...payload,
+        paradas: payload.paradas ?? [],
     };
 
     const updated = [newRequest, ...requests];

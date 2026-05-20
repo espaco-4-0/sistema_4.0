@@ -1,3 +1,4 @@
+import { UserRole } from "@/src/generated/prisma/enums";
 import { z } from "zod";
 
 export const patchUserSchema = z
@@ -6,7 +7,7 @@ export const patchUserSchema = z
         email: z.string().email("Email invalido").optional(),
         senha: z.string().min(6).max(64).optional(),
         telefone: z.string().min(8).optional(),
-        role: z.enum(["ADMIN", "PROFESSOR", "MONITOR", "PESQUISADOR", "VISITANTE"]).optional(),
+        role: z.enum(UserRole).optional(),
         ativo: z.boolean().optional(),
         avatarUrl: z.string().url("Avatar URL invalida").nullable().optional(),
         deficiencia: z.string().trim().max(255).nullable().optional(),

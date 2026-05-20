@@ -3,35 +3,35 @@ import { PrismaClient } from "../../src/generated/prisma/client";
 export async function seedBadges(prisma: PrismaClient) {
     const badges = [
         {
-            nome: "Primeira Presença",
-            descricao: "Confirmou presença pela primeira vez.",
-            pontos: 50,
+            name: "Primeira Presença",
+            description: "Confirmou presença pela primeira vez.",
+            points: 50,
         },
         {
-            nome: "Explorador",
-            descricao: "Se inscreveu em 3 ou mais cursos.",
-            pontos: 100,
+            name: "Explorador",
+            description: "Se inscreveu em 3 ou mais cursos.",
+            points: 100,
         },
         {
-            nome: "Colaborador",
-            descricao: "Participou de um projeto como membro.",
-            pontos: 150,
+            name: "Colaborador",
+            description: "Participou de um projeto como membro.",
+            points: 150,
         },
         {
-            nome: "Autor",
-            descricao: "Publicou o primeiro post no blog.",
-            pontos: 80,
+            name: "Autor",
+            description: "Publicou o primeiro post no blog.",
+            points: 80,
         },
         {
-            nome: "Certificado de Ouro",
-            descricao: "Concluiu 5 cursos com presença confirmada.",
-            pontos: 300,
+            name: "Certificado de Ouro",
+            description: "Concluiu 5 cursos com presença confirmada.",
+            points: 300,
         },
     ];
 
     for (const b of badges) {
         await prisma.badge.upsert({
-            where: { nome: b.nome },
+            where: { name: b.name },
             update: {},
             create: b,
         });

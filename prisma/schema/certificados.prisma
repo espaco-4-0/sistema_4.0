@@ -1,45 +1,50 @@
-model Certificate {
+model CertificateTemplate {
   id          String   @id @default(uuid())
-  titulo      String
-  descricao   String
-  cargaHoraria Int?
-  arquivoUrl  String
-  curso       String?
-  turmaId     String?
-  validadeAte DateTime?
-  status      String   @default("ATIVO")
-  emitidoPor  String
+  title       String
+  description String
+  type        String
+  workload    Int?
+  layout      Json
+  fileUrl     String?
+  course      String?
+  classId     String?
+  validUntil  DateTime?
+  status      String   @default("ACTIVE")
+  emittedBy   String
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  emissor     User     @relation("ProfessorCertificados", fields: [emitidoPor], references: [id])
-  inscricoes  CertificateSubscription[]
-  emissoes    CertificateEmission[]
+  emittedByUser User                    @relation("ProfessorCertificados", fields: [emittedBy], references: [id])
+  inscricoes    CertificateSubscription[]
+  emissoes      CertificateEmission[]
 }
 
 model CertificateSubscription {
-  id            String   @id @default(uuid())
-  certificateId String
-  alunoId       String
-  createdAt     DateTime @default(now())
+  id         String   @id @default(uuid())
+  templateId String
+  alunoId    String
+  createdAt  DateTime @default(now())
 
-  certificate   Certificate @relation(fields: [certificateId], references: [id])
-  aluno         User        @relation(fields: [alunoId], references: [id])
+  certificate CertificateTemplate @relation(fields: [templateId], references: [id])
+  aluno       User                @relation(fields: [alunoId], references: [id])
 
-  @@unique([certificateId, alunoId])
+  @@unique([templateId, alunoId])
 }
 
 model CertificateEmission {
-  id             String   @id @default(uuid())
-  certificateId  String
-  alunoId        String
-  arquivoUrl     String
-  emitidoEm      DateTime @default(now())
-  emitidoPor     String
-  ultimoDownload DateTime?
-  totalDownloads Int      @default(0)
+  id               String    @id @default(uuid())
+  templateId       String
+  alunoId          String
+  fileUrl          String
+  emittedAt        DateTime  @default(now())
+  emittedBy        String
+  validUntil       DateTime?
+  lastDownloadedAt DateTime?
+  totalDownloads   Int       @default(0)
+  course           String
 
-  certificate    Certificate @relation(fields: [certificateId], references: [id])
-  aluno          User        @relation(fields: [alunoId], references: [id])
+  certificate CertificateTemplate @relation(fields: [templateId], references: [id])
+  aluno       User                @relation(fields: [alunoId], references: [id])
 
-  @@unique([certificateId, alunoId])
+  @@unique([templateId, alunoId])
 }
