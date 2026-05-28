@@ -10,6 +10,7 @@ import { seedInventario } from "./seeds/inventario";
 import { seedLocais } from "./seeds/locais";
 import { seedProjetos } from "./seeds/projetos";
 import { seedUsuarios } from "./seeds/usuarios";
+import { seedVisits } from "./seeds/visits";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -23,6 +24,7 @@ async function main() {
     await seedInventario(prisma);
     await seedBadges(prisma);
     await seedBlog(prisma);
+    await seedVisits(prisma);
 
     console.log("\n Seed concluído!");
 }
