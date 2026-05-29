@@ -21,10 +21,27 @@ function getClientIp(req: NextRequest): string {
     return realIp ?? "anonymous";
 }
 
-function applySecurityHeaders(response: NextResponse): NextResponse {
+function applySecurityHeaders(request: NextRequest, response: NextResponse, nonce: string): NextResponse {
     Object.entries(securityHeaders).forEach(([key, value]) => {
         response.headers.set(key, value);
     });
+
+    const cspHeader = `
+        default-src 'self';
+        script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' blob: data:;
+        font-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+    `
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+    response.headers.set("Content-Security-Policy", cspHeader);
     return response;
 }
 
@@ -32,34 +49,46 @@ export default withAuth(
     async function middleware(req) {
         const token = req.nextauth.token;
 
+        const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+
+        const requestHeaders = new Headers(req.headers);
+        requestHeaders.set("x-nonce", nonce);
+
         if (!token) {
             const loginUrl = new URL("/login", req.url);
             loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
-            return applySecurityHeaders(NextResponse.redirect(loginUrl));
+            const redirectResponse = NextResponse.redirect(loginUrl);
+            return applySecurityHeaders(req, redirectResponse, nonce);
         }
 
         if (isRateLimitEnabled()) {
             const ip = getClientIp(req);
             const rate = await checkRateLimit(ip);
             if (!rate.success) {
-                return new NextResponse("Too Many Requests", {
+                const rateLimitResponse = new NextResponse("Too Many Requests", {
                     status: 429,
                     headers: {
                         "Retry-After": String(rate.retryAfter),
                         "X-RateLimit-Limit": String(rate.limit),
                         "X-RateLimit-Remaining": String(rate.remaining),
                         "X-RateLimit-Reset": String(rate.reset),
-                        ...securityHeaders,
                     },
                 });
+                return applySecurityHeaders(req, rateLimitResponse, nonce);
             }
         }
 
         const role = token?.role;
         const forbidden = authorizeRole(req, role);
-        if (forbidden) return applySecurityHeaders(forbidden);
+        if (forbidden) return applySecurityHeaders(req, forbidden, nonce);
 
-        return applySecurityHeaders(NextResponse.next());
+        const nextResponse = NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
+
+        return applySecurityHeaders(req, nextResponse, nonce);
     },
     {
         callbacks: {
