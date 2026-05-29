@@ -1,5 +1,14 @@
 packages:
   - .
+allowBuilds:
+  '@prisma/engines': true
+  core-js-pure: false
+  esbuild: true
+  msw: false
+  prisma: true
+  protobufjs: false
+  sharp: true
+  unrs-resolver: false
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
