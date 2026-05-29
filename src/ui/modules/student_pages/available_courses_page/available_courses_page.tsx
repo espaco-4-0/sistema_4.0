@@ -64,7 +64,15 @@ export default function AvailableCoursesPage() {
             return;
         }
 
-        if (values.includes("todos") && values.length > 1) {
+        const hadTodos = selectedCategories.includes("todos");
+        const hasTodos = values.includes("todos");
+
+        if (hasTodos && !hadTodos) {
+            setSelectedCategories(["todos"]);
+            return;
+        }
+
+        if (hasTodos && values.length > 1) {
             setSelectedCategories(values.filter((value) => value !== "todos"));
             return;
         }
@@ -89,7 +97,7 @@ export default function AvailableCoursesPage() {
             const haystack = `${course.title} ${course.instructor} ${course.description}`.toLowerCase();
             return haystack.includes(normalizedSearch);
         });
-    }, [search, selectedCategories]);
+    }, [courses, search, selectedCategories]);
 
     const visibleCounts = useMemo(() => {
         const categories = new Set(visibleCourses.map((course) => course.category)).size;
