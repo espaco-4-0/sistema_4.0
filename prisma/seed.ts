@@ -6,7 +6,6 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { seedBadges } from "./seeds/badges";
 import { seedBlog } from "./seeds/blog";
 import { seedCursos } from "./seeds/cursos";
-import { seedInventario } from "./seeds/inventario";
 import { seedLocais } from "./seeds/locais";
 import { seedProjetos } from "./seeds/projetos";
 import { seedUsuarios } from "./seeds/usuarios";
@@ -20,7 +19,6 @@ async function main() {
     await seedLocais(prisma);
     await seedCursos(prisma);
     await seedProjetos(prisma);
-    await seedInventario(prisma);
     await seedBadges(prisma);
     await seedBlog(prisma);
 
