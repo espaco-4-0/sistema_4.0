@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Download, FileText, X } from "lucide-react";
+import { Download, FileText, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useImportResources } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
 
 import { Button } from "../../../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog";
@@ -13,6 +14,9 @@ interface ImportarRecursosModalProps {
 export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecursosModalProps>) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+
+    const importMutation = useImportResources();
+    const isSubmitting = importMutation.isPending;
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -63,43 +67,68 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
     const handleFinalize = () => {
         if (!selectedFile) return;
 
-        const fileName = selectedFile.name;
-        onClose();
-        const toastId = toast.loading("Iniciando processamento...");
-
-        let progress = 0;
-
-        const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 15) + 5;
-
-            if (progress >= 100) {
-                clearInterval(interval);
-
-                toast.success("Importação concluída!", {
-                    id: toastId,
-                    description: `Todos os recursos de "${fileName}" foram processados.`,
-                });
-
-                setSelectedFile(null);
-            } else {
-                toast.loading(
-                    <div className="flex flex-col gap-2 w-full pr-4">
-                        <div className="flex justify-between items-center">
-                            <span className="font-medium text-sm text-gray-800">Processando arquivo...</span>
-                            <span className="text-xs font-bold text-yellow-600">{progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                            <div
-                                className="bg-yellow-400 h-full transition-all duration-300 ease-out"
-                                style={{ width: `${progress}%` }}
-                            />
-                        </div>
-                        <span className="text-[10px] text-gray-500 truncate">{fileName}</span>
-                    </div>,
-                    { id: toastId }
-                );
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target?.result as string;
+            const lines = text.split("\n");
+            if (lines.length <= 1) {
+                toast.error("O arquivo CSV está vazio.");
+                return;
             }
-        }, 400);
+
+            const resources = [];
+            // Parse headers
+            const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+            const nameIdx = headers.indexOf("nome");
+            const catIdx = headers.indexOf("categoria");
+            const qtyIdx = headers.indexOf("qtd_total");
+            const locIdx = headers.indexOf("localizacao");
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const values = line.split(",").map((v) => v.trim());
+
+                const name = nameIdx !== -1 ? values[nameIdx] : "";
+                const category = catIdx !== -1 ? values[catIdx] : "";
+                const quantity = qtyIdx !== -1 ? Number(values[qtyIdx]) : 0;
+                const location = locIdx !== -1 ? values[locIdx] : "Sem localização";
+
+                if (!name || !category) continue;
+
+                resources.push({
+                    name,
+                    category,
+                    quantity: isNaN(quantity) ? 0 : quantity,
+                    location,
+                    unit: "un",
+                    isActive: true,
+                });
+            }
+
+            if (resources.length === 0) {
+                toast.error("Nenhum recurso válido encontrado no CSV.");
+                return;
+            }
+
+            const toastId = toast.loading("Enviando e processando recursos...");
+            importMutation.mutate(resources, {
+                onSuccess: (data) => {
+                    toast.success("Importação concluída!", {
+                        id: toastId,
+                        description: `${data.imported} recursos importados com sucesso.`,
+                    });
+                    setSelectedFile(null);
+                    onClose();
+                },
+                onError: (error: any) => {
+                    toast.error(error.response?.data?.error || "Erro ao importar recursos.", {
+                        id: toastId,
+                    });
+                },
+            });
+        };
+        reader.readAsText(selectedFile);
     };
 
     const handleCancel = () => {
@@ -113,7 +142,8 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                 <div className="relative">
                     <button
                         onClick={onClose}
-                        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10"
+                        disabled={isSubmitting}
+                        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10 hover:cursor-pointer"
                     >
                         <X className="h-4 w-4" />
                         <span className="sr-only">Fechar</span>
@@ -149,16 +179,18 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                             </div>
 
                             <button
+                                disabled={isSubmitting}
                                 className={`
                                     relative border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer
                                     flex flex-col items-center justify-center gap-3 w-full
                                     ${isDragging ? "border-yellow-400 bg-yellow-50/50" : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"}
                                     ${selectedFile ? "border-green-200 bg-green-50/30" : ""}
+                                    ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
                                 `}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
-                                onClick={() => document.getElementById("file-upload")?.click()}
+                                onClick={() => !isSubmitting && document.getElementById("file-upload")?.click()}
                             >
                                 <div
                                     className={`p-3 rounded-full mb-2 transition-colors ${
@@ -190,6 +222,7 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                                         type="file"
                                         accept=".csv"
                                         className="hidden"
+                                        disabled={isSubmitting}
                                         onChange={handleFileSelect}
                                     />
                                 </div>
@@ -201,21 +234,23 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                         <Button
                             variant="ghost"
                             onClick={handleCancel}
+                            disabled={isSubmitting}
                             className="text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
                         >
                             Cancelar
                         </Button>
                         <Button
                             onClick={handleFinalize}
-                            disabled={!selectedFile}
-                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all hover:cursor-pointer shadow-lg
+                            disabled={!selectedFile || isSubmitting}
+                            className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all hover:cursor-pointer shadow-lg flex items-center gap-2
                                 ${
-                                    selectedFile
+                                    selectedFile && !isSubmitting
                                         ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95"
                                         : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                                 }
                             `}
                         >
+                            {isSubmitting && <Loader2 className="animate-spin h-4 w-4" />}
                             Finalizar Importação
                         </Button>
                     </div>
@@ -224,3 +259,4 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
         </Dialog>
     );
 }
+

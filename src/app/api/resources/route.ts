@@ -10,8 +10,7 @@ export async function GET(request: NextRequest) {
         const filters = listResourcesSchema.parse({
             page: searchParams.get("page") ?? 1,
             limit: searchParams.get("limit") ?? 10,
-            category_id: searchParams.get("category_id") ?? undefined,
-            product_id: searchParams.get("product_id") ?? undefined,
+            category: searchParams.get("category") ?? undefined,
             status: searchParams.get("status") ?? undefined,
             search: searchParams.get("search") ?? undefined,
         });

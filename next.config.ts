@@ -10,7 +10,7 @@ const cspHeader = `
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    connect-src 'self' ${isDev ? "ws://localhost:3000 ws://0.0.0.0:3000" : ""};
+    connect-src 'self' ${isDev ? "ws://localhost:3000 ws://0.0.0.0:3000 http://localhost:* http://127.0.0.1:*" : ""};
     upgrade-insecure-requests;
 `
     .replace(/\s{2,}/g, " ")
@@ -18,6 +18,9 @@ const cspHeader = `
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Evita que o Turbopack tente compilar o @vercel/otel internamente
+    serverExternalPackages: ["@vercel/otel"],
+
     // futuro teste pra ci/cd
     output: "standalone",
 

@@ -3,35 +3,6 @@ import { ZodError } from "zod";
 
 import { AppError } from "./AppError";
 
-export class AppError extends Error {
-    constructor(
-        public readonly message: string,
-        public readonly statusCode: number,
-        public readonly code?: string
-    ) {
-        super(message);
-        this.name = "AppError";
-    }
-}
-
-export class NotFoundError extends AppError {
-    constructor(resource: string, id?: string) {
-        super(id ? `${resource} with id "${id}" not found` : `${resource} not found`, 404, "NOT_FOUND");
-    }
-}
-
-export class ValidationError extends AppError {
-    constructor(message: string) {
-        super(message, 422, "VALIDATION_ERROR");
-    }
-}
-
-export class ConflictError extends AppError {
-    constructor(message: string) {
-        super(message, 409, "CONFLICT");
-    }
-}
-
 export function handleError(error: unknown): NextResponse {
     console.error("[API Error]", error);
 
@@ -44,7 +15,7 @@ export function handleError(error: unknown): NextResponse {
             {
                 error: "Validation failed",
                 code: "VALIDATION_ERROR",
-                details: error.errors.map((e) => ({
+                details: (error.issues ?? []).map((e) => ({
                     field: e.path.join("."),
                     message: e.message,
                 })),

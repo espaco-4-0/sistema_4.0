@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Loader2 } from "lucide-react";
+import { useCreateResource, useUpdateResource } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
 
 import { Button } from "../../../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog";
@@ -9,16 +10,47 @@ import { Label } from "../../../ui/label";
 interface ImportarRecursoProps {
     open: boolean;
     onClose: () => void;
+    resourceToEdit?: any;
 }
 
-export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps>) {
+export function ImportarRecurso({ open, onClose, resourceToEdit }: Readonly<ImportarRecursoProps>) {
     const [formData, setFormData] = useState({
         nome: "",
         categoria: "",
         qtdTotal: "",
         localizacao: "",
         disponivel: "",
+        description: "",
     });
+
+    const createMutation = useCreateResource();
+    const updateMutation = useUpdateResource();
+
+    const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+    useEffect(() => {
+        if (open) {
+            if (resourceToEdit) {
+                setFormData({
+                    nome: resourceToEdit.name || "",
+                    categoria: resourceToEdit.category || "",
+                    qtdTotal: String(resourceToEdit.quantity || 0),
+                    localizacao: resourceToEdit.location || "",
+                    disponivel: String(resourceToEdit.quantity || 0),
+                    description: resourceToEdit.description || "",
+                });
+            } else {
+                setFormData({
+                    nome: "",
+                    categoria: "",
+                    qtdTotal: "",
+                    localizacao: "",
+                    disponivel: "",
+                    description: "",
+                });
+            }
+        }
+    }, [resourceToEdit, open]);
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -26,35 +58,45 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Submitting resource:", formData);
-        onClose();
-        setFormData({
-            nome: "",
-            categoria: "",
-            qtdTotal: "",
-            localizacao: "",
-            disponivel: "",
-        });
+
+        const payload = {
+            name: formData.nome,
+            category: formData.categoria,
+            quantity: Number(formData.qtdTotal),
+            location: formData.localizacao,
+            description: formData.description || undefined,
+            unit: "un",
+        };
+
+        if (resourceToEdit) {
+            updateMutation.mutate(
+                { id: resourceToEdit.id, data: payload },
+                {
+                    onSuccess: () => {
+                        onClose();
+                    },
+                }
+            );
+        } else {
+            createMutation.mutate(payload, {
+                onSuccess: () => {
+                    onClose();
+                },
+            });
+        }
     };
 
     const handleCancel = () => {
-        setFormData({
-            nome: "",
-            categoria: "",
-            qtdTotal: "",
-            localizacao: "",
-            disponivel: "",
-        });
         onClose();
     };
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-125 p-0">
+            <DialogContent className="max-w-125 p-0 bg-white">
                 <div className="relative">
                     <button
                         onClick={onClose}
-                        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10"
+                        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10 hover:cursor-pointer"
                     >
                         <X className="h-4 w-4" />
                         <span className="sr-only">Fechar</span>
@@ -62,9 +104,13 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
 
                     <div className="p-6">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-semibold">Adicionar Novo Recurso</DialogTitle>
+                            <DialogTitle className="text-xl font-semibold">
+                                {resourceToEdit ? "Editar Recurso" : "Adicionar Novo Recurso"}
+                            </DialogTitle>
                             <p className="text-sm text-gray-500 mt-1">
-                                Preencha os dados para cadastrar um novo recurso no sistema.
+                                {resourceToEdit
+                                    ? "Modifique os dados do recurso abaixo."
+                                    : "Preencha os dados para cadastrar um novo recurso no sistema."}
                             </p>
                         </DialogHeader>
 
@@ -80,7 +126,7 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
                                     value={formData.nome}
                                     onChange={(e) => handleChange("nome", e.target.value)}
                                     required
-                                    className="w-full"
+                                    className="w-full border-gray-200"
                                 />
                             </div>
 
@@ -95,7 +141,7 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
                                     value={formData.categoria}
                                     onChange={(e) => handleChange("categoria", e.target.value)}
                                     required
-                                    className="w-full"
+                                    className="w-full border-gray-200"
                                 />
                             </div>
 
@@ -109,42 +155,42 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
                                         type="number"
                                         placeholder="0"
                                         value={formData.qtdTotal}
-                                        onChange={(e) => handleChange("qtdTotal", e.target.value)}
+                                        onChange={(e) => {
+                                            handleChange("qtdTotal", e.target.value);
+                                            handleChange("disponivel", e.target.value);
+                                        }}
                                         required
                                         min="0"
-                                        className="w-full"
+                                        className="w-full border-gray-200"
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="disponivel" className="text-sm font-medium text-gray-700">
-                                        Disponível *
+                                    <Label htmlFor="localizacao" className="text-sm font-medium text-gray-700">
+                                        Localização *
                                     </Label>
                                     <Input
-                                        id="disponivel"
-                                        type="number"
-                                        placeholder="0"
-                                        value={formData.disponivel}
-                                        onChange={(e) => handleChange("disponivel", e.target.value)}
+                                        id="localizacao"
+                                        type="text"
+                                        placeholder="Ex: Prateleira A1"
+                                        value={formData.localizacao}
+                                        onChange={(e) => handleChange("localizacao", e.target.value)}
                                         required
-                                        min="0"
-                                        className="w-full"
+                                        className="w-full border-gray-200"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="localizacao" className="text-sm font-medium text-gray-700">
-                                    Localização *
+                                <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                                    Descrição
                                 </Label>
-                                <Input
-                                    id="localizacao"
-                                    type="text"
-                                    placeholder="Ex: Prateleira A1"
-                                    value={formData.localizacao}
-                                    onChange={(e) => handleChange("localizacao", e.target.value)}
-                                    required
-                                    className="w-full"
+                                <textarea
+                                    id="description"
+                                    placeholder="Detalhes adicionais sobre o recurso..."
+                                    value={formData.description}
+                                    onChange={(e) => handleChange("description", e.target.value)}
+                                    className="w-full p-2 border border-gray-200 rounded-md text-sm outline-none focus:ring-2 focus:ring-yellow-400 min-h-20"
                                 />
                             </div>
 
@@ -162,6 +208,7 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
                             type="button"
                             variant="ghost"
                             onClick={handleCancel}
+                            disabled={isSubmitting}
                             className="text-gray-700 hover:cursor-pointer hover:bg-gray-100"
                         >
                             Cancelar
@@ -169,9 +216,11 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
                         <Button
                             type="submit"
                             onClick={handleSubmit}
-                            className="bg-[#FFC107] hover:bg-[#FFB300] hover:cursor-pointer text-gray-900 font-medium"
+                            disabled={isSubmitting}
+                            className="bg-[#FFC107] hover:bg-[#FFB300] hover:cursor-pointer text-gray-900 font-medium flex items-center gap-2"
                         >
-                            Adicionar Recurso
+                            {isSubmitting && <Loader2 className="animate-spin h-4 w-4" />}
+                            {resourceToEdit ? "Salvar Alterações" : "Adicionar Recurso"}
                         </Button>
                     </div>
                 </div>
@@ -179,3 +228,4 @@ export function ImportarRecurso({ open, onClose }: Readonly<ImportarRecursoProps
         </Dialog>
     );
 }
+

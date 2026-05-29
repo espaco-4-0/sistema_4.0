@@ -1,13 +1,14 @@
-import { prisma } from "@/lib/prisma";
-import { ResourceStatus } from "@prisma/client";
+import { prisma } from "@/src/infra/data/prisma";
+import { InventoryCategory } from "@/src/generated/prisma/client";
 
-import { NotFoundError, ValidationError } from "../errors/errorHandler";
+import { NotFoundError, ValidationError } from "../errors/AppError";
 import { resourceRepository } from "../repositories/resource.repository";
 import {
     CreateResourceDTO,
     ImportResourcesDTO,
     ListResourcesDTO,
     UpdateResourceDTO,
+    mapStringToCategory,
 } from "../validators/resource.validator";
 
 export const resourceService = {
@@ -22,14 +23,18 @@ export const resourceService = {
     },
 
     async create(data: CreateResourceDTO) {
-        const missingProducts = await resourceRepository.validateProductIds([data.productId]);
-        if (missingProducts.length > 0) {
-            throw new ValidationError(`Product "${data.productId}" does not exist`);
+        if (data.projectId) {
+            const projectExists = await prisma.project.findUnique({ where: { id: data.projectId } });
+            if (!projectExists) {
+                throw new ValidationError(`Project "${data.projectId}" does not exist`);
+            }
         }
 
-        const missingCategories = await resourceRepository.validateCategoryIds([data.categoryId]);
-        if (missingCategories.length > 0) {
-            throw new ValidationError(`Category "${data.categoryId}" does not exist`);
+        if (data.responsibleId) {
+            const userExists = await prisma.user.findUnique({ where: { id: data.responsibleId } });
+            if (!userExists) {
+                throw new ValidationError(`User "${data.responsibleId}" does not exist`);
+            }
         }
 
         return resourceRepository.create(data);
@@ -38,32 +43,49 @@ export const resourceService = {
     async bulkImport(dto: ImportResourcesDTO) {
         const { resources } = dto;
         let imported = 0;
-        let failed = 0;
+        const failed = 0;
         const errors: Array<{ index: number; reason: string }> = [];
 
-        const allProductIds = resources.map((r) => r.productId);
-        const missingProducts = await resourceRepository.validateProductIds(allProductIds);
-        if (missingProducts.length > 0) {
-            throw new ValidationError(`The following product IDs do not exist: ${missingProducts.join(", ")}`);
+        const allProjectIds = resources.map((r) => r.projectId).filter(Boolean) as string[];
+        if (allProjectIds.length > 0) {
+            const foundProjects = await prisma.project.findMany({
+                where: { id: { in: allProjectIds } },
+                select: { id: true },
+            });
+            const foundProjectSet = new Set(foundProjects.map((p) => p.id));
+            const missingProjects = allProjectIds.filter((id) => !foundProjectSet.has(id));
+            if (missingProjects.length > 0) {
+                throw new ValidationError(`The following project IDs do not exist: ${missingProjects.join(", ")}`);
+            }
         }
 
-        const allCategoryIds = resources.map((r) => r.categoryId);
-        const missingCategories = await resourceRepository.validateCategoryIds(allCategoryIds);
-        if (missingCategories.length > 0) {
-            throw new ValidationError(`The following category IDs do not exist: ${missingCategories.join(", ")}`);
+        const allUserIds = resources.map((r) => r.responsibleId).filter(Boolean) as string[];
+        if (allUserIds.length > 0) {
+            const foundUsers = await prisma.user.findMany({
+                where: { id: { in: allUserIds } },
+                select: { id: true },
+            });
+            const foundUserSet = new Set(foundUsers.map((u) => u.id));
+            const missingUsers = allUserIds.filter((id) => !foundUserSet.has(id));
+            if (missingUsers.length > 0) {
+                throw new ValidationError(`The following responsible user IDs do not exist: ${missingUsers.join(", ")}`);
+            }
         }
 
         await prisma.$transaction(async (tx) => {
             const records = resources.map((r) => ({
                 name: r.name,
-                quantityAdded: r.quantityAdded,
-                quantityInStock: r.quantityInStock ?? r.quantityAdded,
-                status: (r.status ?? "AVAILABLE") as ResourceStatus,
-                productId: r.productId,
-                categoryId: r.categoryId,
+                description: r.description ?? null,
+                category: mapStringToCategory(r.category) as InventoryCategory,
+                quantity: r.quantity,
+                unit: r.unit ?? "un",
+                location: r.location ?? "Sem localização",
+                isActive: r.isActive ?? true,
+                responsibleId: r.responsibleId ?? null,
+                projectId: r.projectId ?? null,
             }));
 
-            const result = await tx.resource.createMany({
+            const result = await tx.inventoryItem.createMany({
                 data: records,
                 skipDuplicates: false,
             });
@@ -78,17 +100,17 @@ export const resourceService = {
         const existing = await resourceRepository.findById(id);
         if (!existing) throw new NotFoundError("Resource", id);
 
-        if (data.productId) {
-            const missing = await resourceRepository.validateProductIds([data.productId]);
-            if (missing.length > 0) {
-                throw new ValidationError(`Product "${data.productId}" does not exist`);
+        if (data.projectId) {
+            const projectExists = await prisma.project.findUnique({ where: { id: data.projectId } });
+            if (!projectExists) {
+                throw new ValidationError(`Project "${data.projectId}" does not exist`);
             }
         }
 
-        if (data.categoryId) {
-            const missing = await resourceRepository.validateCategoryIds([data.categoryId]);
-            if (missing.length > 0) {
-                throw new ValidationError(`Category "${data.categoryId}" does not exist`);
+        if (data.responsibleId) {
+            const userExists = await prisma.user.findUnique({ where: { id: data.responsibleId } });
+            if (!userExists) {
+                throw new ValidationError(`User "${data.responsibleId}" does not exist`);
             }
         }
 
