@@ -1,3 +1,4 @@
+/*
 import { checkRateLimit, isRateLimitEnabled } from "@/src/infra/cache/rate-limit";
 import { authenticateUser } from "@/src/infra/modules/auth/authenticate-user.middleware";
 import { authorizeRole } from "@/src/infra/modules/auth/authorize-role.middleware";
@@ -29,7 +30,7 @@ function applySecurityHeaders(response: NextResponse, nonce: string): NextRespon
 
     /**
      * CSP compatível com Next.js + NextAuth
-     */
+
     const cspHeader = `
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval';
@@ -59,12 +60,12 @@ export default withAuth(
 
         /**
          * nonce apenas para rastreio/header
-         */
+
         const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
         /**
          * Rate limit
-         */
+
         if (isRateLimitEnabled()) {
             const ip = getClientIp(req);
 
@@ -87,18 +88,18 @@ export default withAuth(
 
         /**
          * Controle de permissões
-         */
-        const role = token?.role;
 
-        const forbidden = authorizeRole(req, role);
+const role = token?.role;
 
-        if (forbidden) {
-            return applySecurityHeaders(forbidden, nonce);
-        }
+const forbidden = authorizeRole(req, role);
 
-        /**
+if (forbidden) {
+    return applySecurityHeaders(forbidden, nonce);
+}
+
+/**
          * Continua request
-         */
+
         const response = NextResponse.next();
 
         return applySecurityHeaders(response, nonce);
@@ -138,3 +139,4 @@ export const config = {
         "/presenca/:path*",
     ],
 };
+*/
