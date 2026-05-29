@@ -75,3 +75,21 @@ model VisitDocument {
 
   @@index([visitId])
 }
+
+model VisitWeekdayRule {
+  id          Int      @id @default(autoincrement())
+  dayOfWeek   Int      @unique
+  isAvailable Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model VisitDateRule {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @unique @db.Date
+  isAvailable Boolean  
+  reason      String?  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
