@@ -29,7 +29,5 @@
         "^[./]"
     ],
 
-    "importOrderSeparation": true,
-    "importOrderSortSpecifiers": true,
     "importOrderCaseSensitive": true
 }

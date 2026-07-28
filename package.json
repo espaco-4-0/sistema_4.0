@@ -9,6 +9,9 @@
         "start": "next start",
         "test": "vitest",
         "lint": "eslint",
+        "typecheck": "tsc --noEmit",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
         "db:seed": "prisma db seed",
         "db:reset": "prisma migrate reset --force",
         "test:run": "vitest run"
