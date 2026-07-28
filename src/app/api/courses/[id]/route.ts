@@ -1,5 +1,12 @@
-import { patchCourseSchema } from "@/src/infra/modules/courses/courses.schema";
 import { prisma } from "@/src/infra/data/prisma";
+import {
+    COURSE_ADMIN_INCLUDE,
+    deleteCourse,
+    findInvalidScheduleLocations,
+    getCourseDeletionBlockers,
+    updateCourse,
+} from "@/src/infra/modules/courses/course-admin.service";
+import { patchCourseSchema } from "@/src/infra/modules/courses/courses.schema";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,21 +24,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
         const course = await prisma.course.findUnique({
             where: { id },
-            include: {
-                professor: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                    },
-                },
-                _count: {
-                    select: {
-                        Lesson: true,
-                        Enrollment: true,
-                    },
-                },
-            },
+            include: COURSE_ADMIN_INCLUDE,
         });
 
         if (!course) {
@@ -96,32 +89,36 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Apenas admins podem trocar o professor" }, { status: 403 });
         }
 
-        const updateData: any = {};
-        if (parsed.data.titulo !== undefined) updateData.title = parsed.data.titulo;
-        if (parsed.data.descricao !== undefined) updateData.description = parsed.data.descricao;
-        if (parsed.data.cargaHoraria !== undefined) updateData.workload = parsed.data.cargaHoraria;
-        if (parsed.data.ativo !== undefined) updateData.isActive = parsed.data.ativo;
-        if (parsed.data.professorId !== undefined) updateData.professorId = parsed.data.professorId;
+        if (parsed.data.professorId) {
+            const professor = await prisma.user.findUnique({
+                where: { id: parsed.data.professorId },
+                select: { id: true, isActive: true, role: true },
+            });
 
-        const updated = await prisma.course.update({
-            where: { id },
-            data: updateData,
-            include: {
-                professor: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                    },
-                },
-                _count: {
-                    select: {
-                        Lesson: true,
-                        Enrollment: true,
-                    },
-                },
-            },
-        });
+            if (!professor || !professor.isActive) {
+                return NextResponse.json({ message: "Professor responsável não encontrado" }, { status: 404 });
+            }
+
+            if (professor.role !== "PROFESSOR" && professor.role !== "ADMIN") {
+                return NextResponse.json(
+                    { message: "O responsável pelo curso deve ser um professor ou administrador" },
+                    { status: 422 }
+                );
+            }
+        }
+
+        if (parsed.data.agenda?.length) {
+            const invalidLocations = await findInvalidScheduleLocations(parsed.data.agenda);
+
+            if (invalidLocations.length > 0) {
+                return NextResponse.json(
+                    { message: "Local inválido ou inativo na agenda", errors: { agenda: invalidLocations } },
+                    { status: 422 }
+                );
+            }
+        }
+
+        const updated = await updateCourse(id, parsed.data, parsed.data.professorId);
 
         return NextResponse.json(updated, { status: 200 });
     } catch (error) {
@@ -130,7 +127,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
+export async function DELETE(req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);
         if (!session) {
@@ -147,12 +144,28 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "ID inválido" }, { status: 400 });
         }
 
-        const exists = await prisma.course.findUnique({ where: { id } });
+        const exists = await prisma.course.findUnique({ where: { id }, select: { id: true } });
         if (!exists) {
             return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
         }
 
-        await prisma.course.delete({ where: { id } });
+        // Excluir um curso com histórico apaga em cascata as matrículas dos alunos.
+        // Só permitimos com ?force=true; o caminho recomendado é inativar (PATCH { ativo: false }).
+        const force = req.nextUrl.searchParams.get("force") === "true";
+        const blockers = await getCourseDeletionBlockers(id);
+
+        if (!force && (blockers.lessons > 0 || blockers.enrollments > 0)) {
+            return NextResponse.json(
+                {
+                    message:
+                        "Curso possui aulas ou matrículas vinculadas. Inative-o (PATCH { ativo: false }) ou repita com ?force=true.",
+                    blockers,
+                },
+                { status: 409 }
+            );
+        }
+
+        await deleteCourse(id);
 
         return new NextResponse(null, { status: 204 });
     } catch (error) {

@@ -1,4 +1,9 @@
 import { prisma } from "@/src/infra/data/prisma";
+import {
+    COURSE_ADMIN_INCLUDE,
+    createCourse,
+    findInvalidScheduleLocations,
+} from "@/src/infra/modules/courses/course-admin.service";
 import { createCourseSchema } from "@/src/infra/modules/courses/courses.schema";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -24,21 +29,7 @@ export async function GET(req: NextRequest) {
                 ...(professorId && { professorId }),
                 ...(typeof ativo === "boolean" && { isActive: ativo }),
             },
-            include: {
-                professor: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                    },
-                },
-                _count: {
-                    select: {
-                        Lesson: true,
-                        Enrollment: true,
-                    },
-                },
-            },
+            include: COURSE_ADMIN_INCLUDE,
             orderBy: { createdAt: "desc" },
         });
 
@@ -99,31 +90,32 @@ export async function POST(req: NextRequest) {
 
         const professor = await prisma.user.findUnique({
             where: { id: professorId },
-            select: { id: true, isActive: true },
+            select: { id: true, isActive: true, role: true },
         });
 
         if (!professor || !professor.isActive) {
             return NextResponse.json({ message: "Professor responsável não encontrado" }, { status: 404 });
         }
 
-        const course = await prisma.course.create({
-            data: {
-                title: parsed.data.titulo,
-                description: parsed.data.descricao,
-                workload: parsed.data.cargaHoraria,
-                isActive: parsed.data.ativo ?? true,
-                professorId,
-            },
-            include: {
-                professor: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        email: true,
-                    },
-                },
-            },
-        });
+        if (professor.role !== "PROFESSOR" && professor.role !== "ADMIN") {
+            return NextResponse.json(
+                { message: "O responsável pelo curso deve ser um professor ou administrador" },
+                { status: 422 }
+            );
+        }
+
+        if (parsed.data.agenda?.length) {
+            const invalidLocations = await findInvalidScheduleLocations(parsed.data.agenda);
+
+            if (invalidLocations.length > 0) {
+                return NextResponse.json(
+                    { message: "Local inválido ou inativo na agenda", errors: { agenda: invalidLocations } },
+                    { status: 422 }
+                );
+            }
+        }
+
+        const course = await createCourse(parsed.data, professorId);
 
         return NextResponse.json(course, { status: 201 });
     } catch {
