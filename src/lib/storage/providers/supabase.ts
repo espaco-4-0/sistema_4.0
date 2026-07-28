@@ -1,13 +1,25 @@
 import { randomUUID } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 
 import { StorageProvider, UploadResult } from "../types";
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Supabase URL and Service Role Key must be set in environment variables.");
-}
+let cachedClient: SupabaseClient | null = null;
 
-const client = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+// Inicialização preguiçosa: rotas que apenas leem do banco não devem quebrar
+// no import só porque as credenciais do Supabase não estão configuradas.
+function client(): SupabaseClient {
+    if (cachedClient) return cachedClient;
+
+    const url = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !serviceRoleKey) {
+        throw new Error("Supabase URL and Service Role Key must be set in environment variables.");
+    }
+
+    cachedClient = createClient(url, serviceRoleKey);
+    return cachedClient;
+}
 
 const PUBLIC_BUCKET = "public-uploads";
 const PRIVATE_BUCKET = "private-uploads";
@@ -32,7 +44,7 @@ async function upload(file: File | Buffer, filePath: string, bucket: string, mim
         ? `${folder}/${randomUUID()}-${sanitized}` // mantém a pasta intacta
         : `${randomUUID()}-${sanitized}`;
 
-    const { data, error } = await client.storage.from(bucket).upload(uniqueName, buffer, {
+    const { data, error } = await client().storage.from(bucket).upload(uniqueName, buffer, {
         contentType: mimeType ?? "application/octet-stream",
         upsert: false,
     });
@@ -44,7 +56,7 @@ async function upload(file: File | Buffer, filePath: string, bucket: string, mim
 export const supabaseStorage: StorageProvider = {
     async uploadPublic(file, fileName, mimeType) {
         const result = await upload(file, fileName, PUBLIC_BUCKET, mimeType);
-        const { data } = client.storage.from(PUBLIC_BUCKET).getPublicUrl(result.path);
+        const { data } = client().storage.from(PUBLIC_BUCKET).getPublicUrl(result.path);
         return { path: result.path, url: data.publicUrl };
     },
     async uploadPrivate(file, fileName, mimeType) {
@@ -60,7 +72,7 @@ export const supabaseStorage: StorageProvider = {
             }
         }
 
-        const { data, error } = await client.storage.from(PRIVATE_BUCKET).createSignedUrl(path, expiresInSeconds);
+        const { data, error } = await client().storage.from(PRIVATE_BUCKET).createSignedUrl(path, expiresInSeconds);
         if (error) throw new Error(error.message);
         return data.signedUrl;
     },
@@ -75,7 +87,7 @@ export const supabaseStorage: StorageProvider = {
             }
         }
 
-        const { error } = await client.storage.from(bucket).remove([path]);
+        const { error } = await client().storage.from(bucket).remove([path]);
         if (error) throw new Error(error.message);
     },
     async changeVisibility(rawPath: string, toPublic: boolean) {
@@ -94,7 +106,7 @@ export const supabaseStorage: StorageProvider = {
                 path = rawPath.slice(fromIdx + fromMarker.length);
             } else if (toIdx !== -1) {
                 const targetPath = rawPath.slice(toIdx + toMarker.length);
-                const url = toPublic ? client.storage.from(toBucket).getPublicUrl(targetPath).data.publicUrl : null;
+                const url = toPublic ? client().storage.from(toBucket).getPublicUrl(targetPath).data.publicUrl : null;
                 return { path: targetPath, ...(url && { url }) };
             } else {
                 throw new Error(
@@ -103,22 +115,22 @@ export const supabaseStorage: StorageProvider = {
             }
         }
 
-        const { data: fileData, error: downloadError } = await client.storage.from(fromBucket).download(path);
+        const { data: fileData, error: downloadError } = await client().storage.from(fromBucket).download(path);
 
         if (!fileData || downloadError) {
-            const { data: checkData } = await client.storage.from(toBucket).list("", {
+            const { data: checkData } = await client().storage.from(toBucket).list("", {
                 search: path,
             });
 
             if (checkData && checkData.length > 0) {
-                const url = toPublic ? client.storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
+                const url = toPublic ? client().storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
                 return { path, ...(url && { url }) };
             }
 
             throw new Error(`Falha ao baixar imagem (bucket: ${fromBucket}, path: ${path}): ${downloadError?.message}`);
         }
 
-        const { error: uploadError } = await client.storage
+        const { error: uploadError } = await client().storage
             .from(toBucket)
             .upload(path, fileData, { upsert: true, contentType: fileData.type });
 
@@ -126,9 +138,9 @@ export const supabaseStorage: StorageProvider = {
             throw new Error(`Falha ao subir imagem: ${uploadError.message}`);
         }
 
-        await client.storage.from(fromBucket).remove([path]);
+        await client().storage.from(fromBucket).remove([path]);
 
-        const url = toPublic ? client.storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
+        const url = toPublic ? client().storage.from(toBucket).getPublicUrl(path).data.publicUrl : null;
 
         return { path, ...(url && { url }) };
     },
