@@ -102,7 +102,7 @@ model Project {
   ProjectMember ProjectMember[]
   ProjectPhoto  ProjectPhoto[]
   ProjectReport ProjectReport[]
-  InventoryItem InventoryItem[]
+  resources     Resource[]
   Task          Task[]
   ProjectFile   ProjectFile[]
 

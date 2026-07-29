@@ -117,7 +117,7 @@ export async function getOverviewAlerts() {
         prisma.projectRequest.count({ where: { status: "PENDING" } }),
         prisma.visit.count({ where: { status: "PENDING" } }),
         prisma.course.count({ where: { isActive: true, Lesson: { none: {} } } }),
-        prisma.inventoryItem.count({ where: { isActive: true, quantity: 0 } }),
+        prisma.resource.count({ where: { deletedAt: null, quantityInStock: 0 } }),
     ]);
 
     const alerts = [

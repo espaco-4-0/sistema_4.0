@@ -6,48 +6,53 @@ export async function seedInventario(prisma: PrismaClient) {
     const itens = [
         {
             name: "Notebook Dell Inspiron",
-            category: InventoryCategory.EQUIPMENT,
-            quantity: 30,
-            unit: "un",
-            location: "Laboratório 01",
+            quantityAdded: 30,
+            quantityInStock: 30,
+            status: "AVAILABLE",
+            categoryId: InventoryCategory.EQUIPMENT,
+            productId: "default",
             responsibleId: admin.id,
         },
         {
             name: "Projetor Epson X41+",
-            category: InventoryCategory.EQUIPMENT,
-            quantity: 5,
-            unit: "un",
-            location: "Almoxarifado",
+            quantityAdded: 5,
+            quantityInStock: 5,
+            status: "AVAILABLE",
+            categoryId: InventoryCategory.EQUIPMENT,
+            productId: "default",
             responsibleId: admin.id,
         },
         {
             name: "Cabo HDMI 2m",
-            category: InventoryCategory.MATERIAL,
-            quantity: 20,
-            unit: "un",
-            location: "Almoxarifado",
+            quantityAdded: 20,
+            quantityInStock: 20,
+            status: "AVAILABLE",
+            categoryId: InventoryCategory.MATERIAL,
+            productId: "default",
             responsibleId: admin.id,
         },
         {
             name: "Papel A4",
-            category: InventoryCategory.MATERIAL,
-            quantity: 10,
-            unit: "resmas",
-            location: "Secretaria",
+            quantityAdded: 10,
+            quantityInStock: 10,
+            status: "AVAILABLE",
+            categoryId: InventoryCategory.MATERIAL,
+            productId: "default",
             responsibleId: admin.id,
         },
         {
             name: "Licença Microsoft 365",
-            category: InventoryCategory.SOFTWARE,
-            quantity: 50,
-            unit: "lic.",
-            location: "Servidor",
+            quantityAdded: 50,
+            quantityInStock: 50,
+            status: "AVAILABLE",
+            categoryId: InventoryCategory.SOFTWARE,
+            productId: "default",
             responsibleId: admin.id,
         },
     ];
 
     for (const item of itens) {
-        await prisma.inventoryItem.create({ data: item }).catch(() => {});
+        await prisma.resource.create({ data: item }).catch(() => {});
     }
 
     console.log("Inventário criado Ame");

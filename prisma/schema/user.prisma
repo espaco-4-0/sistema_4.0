@@ -63,7 +63,7 @@ model User {
   Presence            Presence[]
 
   // Inventário
-  InventoryItem       InventoryItem[]
+  resources       	  Resource[]
 
   // Blog
   Post                Post[]

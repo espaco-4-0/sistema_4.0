@@ -39,6 +39,8 @@ jobs:
             DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sistema40_test
             NEXTAUTH_SECRET: ci-secret-nao-usar-em-producao
             NEXTAUTH_URL: http://localhost:3000
+            SUPABASE_URL: https://placeholder.supabase.co
+            SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
 
         steps:
             - uses: actions/checkout@v4
@@ -111,6 +113,8 @@ jobs:
             DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sistema40_build
             NEXTAUTH_SECRET: ci-secret-nao-usar-em-producao
             NEXTAUTH_URL: http://localhost:3000
+            SUPABASE_URL: https://placeholder.supabase.co
+            SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
 
         steps:
             - uses: actions/checkout@v4
