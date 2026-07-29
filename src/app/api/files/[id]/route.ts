@@ -9,7 +9,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 type Params = { params: Promise<{ id: string }> };
 
-/** Redireciona para uma URL assinada de curta duração em vez de servir os bytes. */
 export async function GET(_req: NextRequest, { params }: Params) {
     try {
         const { response } = await requireUser();

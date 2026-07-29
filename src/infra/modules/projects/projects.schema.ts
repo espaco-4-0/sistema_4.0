@@ -28,8 +28,6 @@ const membersSchema = z
         });
     });
 
-
-
 export const createProjectRequestSchema = z
     .object({
         titulo: z.string().trim().min(5, "Título deve ter no mínimo 5 caracteres").max(150),
@@ -56,10 +54,6 @@ export const rejectProjectRequestSchema = z
         observacoes: z.string().trim().max(2000).optional(),
     })
     .strict();
-
-// ---------------------------------------------------------------------------
-// Projetos
-// ---------------------------------------------------------------------------
 
 export const patchProjectSchema = z
     .object({
@@ -96,8 +90,7 @@ export const patchTaskSchema = createTaskSchema
 
 export const taskStatusSchema = z.object({ status: z.enum(TASK_STATUSES) }).strict();
 
-
-export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; 
+export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 export const ALLOWED_FILE_MIME_TYPES = [
     "application/pdf",

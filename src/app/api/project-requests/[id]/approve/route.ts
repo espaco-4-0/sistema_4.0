@@ -28,7 +28,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             );
         }
 
-        // Body é opcional: aprovar sem comentário é um caso legítimo.
         let comment: string | undefined;
         if (req.headers.get("content-length") && req.headers.get("content-length") !== "0") {
             const parsedBody = await readJsonBody(req);

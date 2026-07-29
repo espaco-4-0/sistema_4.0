@@ -17,7 +17,10 @@ export async function GET(req: NextRequest) {
         const limit = limitParam ? Number.parseInt(limitParam, 10) : 10;
 
         if (Number.isNaN(limit) || limit < 1 || limit > MAX_LIMIT) {
-            return NextResponse.json({ message: `Parâmetro 'limit' deve estar entre 1 e ${MAX_LIMIT}` }, { status: 400 });
+            return NextResponse.json(
+                { message: `Parâmetro 'limit' deve estar entre 1 e ${MAX_LIMIT}` },
+                { status: 400 }
+            );
         }
 
         const data = await getLeaderboard(limit);

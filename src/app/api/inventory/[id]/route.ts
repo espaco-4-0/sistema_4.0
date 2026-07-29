@@ -1,9 +1,9 @@
+import { patchInventoryItemSchema } from "@/src/infra/modules/inventory/inventory.schema";
 import {
     deleteInventoryItem,
     getInventoryItem,
     updateInventoryItem,
 } from "@/src/infra/modules/inventory/inventory.service";
-import { patchInventoryItemSchema } from "@/src/infra/modules/inventory/inventory.schema";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 

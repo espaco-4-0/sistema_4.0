@@ -1,6 +1,5 @@
 import { prisma } from "@/src/infra/data/prisma";
 
-/** Progressão quadrática: nível N exige XP_PER_LEVEL * N^2 de XP acumulado. */
 const XP_PER_LEVEL = 100;
 
 export function levelFromXp(xp: number): number {
@@ -23,13 +22,13 @@ export async function getLeaderboard(limit = 10) {
     });
 
     return rows.map((row, index) => ({
-        posicao: index + 1,
+        position: index + 1,
         userId: row.userId,
-        nome: row.user.fullName,
+        fullName: row.user.fullName,
         avatarUrl: row.user.avatarUrl,
         xp: row.xp,
-        pontos: row.points,
-        nivel: row.level,
+        points: row.points,
+        level: row.level,
     }));
 }
 
@@ -47,12 +46,10 @@ export async function getUserGamification(userId: string) {
         include: { badge: true },
     });
 
-    // Usuário sem registro ainda não pontuou; devolvemos o estado zerado em vez de 404
-    // para a tela não precisar tratar dois formatos de resposta.
     const xp = record?.xp ?? 0;
     const level = record?.level ?? levelFromXp(xp);
 
-    const posicao = record
+    const position = record
         ? (await prisma.gamification.count({
               where: { user: { isActive: true }, xp: { gt: record.xp } },
           })) + 1
@@ -61,18 +58,18 @@ export async function getUserGamification(userId: string) {
     return {
         userId,
         xp,
-        pontos: record?.points ?? 0,
-        nivel: level,
-        xpNivelAtual: xpForLevel(level),
-        xpProximoNivel: xpForLevel(level + 1),
-        posicao,
+        points: record?.points ?? 0,
+        level,
+        xpCurrentLevel: xpForLevel(level),
+        xpNextLevel: xpForLevel(level + 1),
+        position,
         badges: badges.map((userBadge) => ({
             id: userBadge.badge.id,
-            nome: userBadge.badge.name,
-            descricao: userBadge.badge.description,
+            name: userBadge.badge.name,
+            description: userBadge.badge.description,
             iconUrl: userBadge.badge.iconUrl,
-            pontos: userBadge.badge.points,
-            conquistadoEm: userBadge.earnedAt,
+            points: userBadge.badge.points,
+            earnedAt: userBadge.earnedAt,
         })),
     };
 }
@@ -84,7 +81,6 @@ export async function listBadges() {
     });
 }
 
-/** Credita XP e pontos, recalculando o nível. Cria o registro se ainda não existir. */
 export async function grantXp(userId: string, xpDelta: number, pointsDelta = xpDelta) {
     const current = await prisma.gamification.findUnique({ where: { userId } });
     const xp = Math.max(0, (current?.xp ?? 0) + xpDelta);

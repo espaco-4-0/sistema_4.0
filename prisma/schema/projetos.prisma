@@ -22,7 +22,6 @@ enum TaskStatus {
   CANCELLED
 }
 
-// Solicitação de projeto criada pelo aluno. Vira um Project quando aprovada.
 model ProjectRequest {
   id          String        @id @default(cuid())
   title       String
@@ -31,7 +30,6 @@ model ProjectRequest {
   category    ProjectType
   status      RequestStatus @default(PENDING)
 
-  // Preenchidos na análise do professor.
   rejectionReason String?
   reviewNotes     String?
   reviewedAt      DateTime?
@@ -98,7 +96,6 @@ model Project {
   leader   User   @relation("LiderProjeto", fields: [leaderId], references: [id])
   leaderId String
 
-  // Solicitação que originou o projeto (nulo para projetos criados direto pelo admin).
   request   ProjectRequest? @relation(fields: [requestId], references: [id])
   requestId String?         @unique
 
@@ -117,7 +114,7 @@ model Task {
   title       String
   description String?
   status      TaskStatus @default(TODO)
-  progress    Int        @default(0) // 0-100
+  progress    Int        @default(0)
   dueDate     DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

@@ -17,11 +17,11 @@ export async function GET() {
             {
                 data: badges.map((badge) => ({
                     id: badge.id,
-                    nome: badge.name,
-                    descricao: badge.description,
+                    name: badge.name,
+                    description: badge.description,
                     iconUrl: badge.iconUrl,
-                    pontos: badge.points,
-                    totalConquistas: badge._count.userBadges,
+                    points: badge.points,
+                    totalEarned: badge._count.userBadges,
                 })),
             },
             { status: 200 }

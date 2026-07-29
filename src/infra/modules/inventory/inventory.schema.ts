@@ -1,7 +1,12 @@
 import { InventoryCategory } from "@/src/generated/prisma/enums";
 import { z } from "zod";
 
-export const INVENTORY_CATEGORIES = ["EQUIPMENT", "MATERIAL", "SOFTWARE", "OTHER"] as const satisfies readonly InventoryCategory[];
+export const INVENTORY_CATEGORIES = [
+    "EQUIPMENT",
+    "MATERIAL",
+    "SOFTWARE",
+    "OTHER",
+] as const satisfies readonly InventoryCategory[];
 
 const inventoryBaseSchema = z
     .object({

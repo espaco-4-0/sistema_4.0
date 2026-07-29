@@ -1,6 +1,10 @@
 import { prisma } from "@/src/infra/data/prisma";
-import { createInventoryItem, getInventorySummary, listInventoryItems } from "@/src/infra/modules/inventory/inventory.service";
 import { INVENTORY_CATEGORIES, createInventoryItemSchema } from "@/src/infra/modules/inventory/inventory.schema";
+import {
+    createInventoryItem,
+    getInventorySummary,
+    listInventoryItems,
+} from "@/src/infra/modules/inventory/inventory.service";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 

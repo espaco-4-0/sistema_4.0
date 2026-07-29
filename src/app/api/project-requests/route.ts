@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "Parâmetro 'status' inválido" }, { status: 400 });
         }
 
-        // Quem não analisa solicitações só enxerga as próprias.
         const isReviewer = user.role === "ADMIN" || user.role === "PROFESSOR";
 
         const requests = await listProjectRequests({

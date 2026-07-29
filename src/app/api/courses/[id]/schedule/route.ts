@@ -34,7 +34,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 }
 
-/** Substitui a agenda inteira do curso. Enviar `{ agenda: [] }` limpa os horários. */
 export async function PUT(req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);

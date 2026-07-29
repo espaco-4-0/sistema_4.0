@@ -79,7 +79,6 @@ export async function deleteInventoryItem(id: string) {
     await prisma.inventoryItem.delete({ where: { id } });
 }
 
-/** Totais por categoria e itens em falta, para os cards da tela de recursos. */
 export async function getInventorySummary() {
     const [byCategory, total, outOfStock] = await Promise.all([
         prisma.inventoryItem.groupBy({
@@ -96,9 +95,9 @@ export async function getInventorySummary() {
         total,
         outOfStock,
         byCategory: byCategory.map((row) => ({
-            categoria: row.category,
-            itens: row._count._all,
-            quantidade: row._sum.quantity ?? 0,
+            category: row.category,
+            items: row._count._all,
+            quantity: row._sum.quantity ?? 0,
         })),
     };
 }

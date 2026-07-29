@@ -33,8 +33,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
         const enabledByResource = new Map(stored.map((entry) => [entry.resource, entry.enabled]));
 
-        // Recursos sem registro são reportados como bloqueados, para o painel
-        // sempre receber a lista completa e não precisar conhecer o enum.
         const data = COURSE_RESOURCES.map((resource) => ({
             recurso: resource,
             liberado: enabledByResource.get(resource) ?? false,

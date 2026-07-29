@@ -19,7 +19,6 @@ model Location {
   CourseSchedule CourseSchedule[]
 }
 
-// Recursos do sistema que podem ser liberados para os alunos matriculados em um curso.
 enum CourseResource {
   LESSONS
   PRESENCE
@@ -53,13 +52,11 @@ model Course {
   @@index([professorId])
 }
 
-// Agenda recorrente do curso: um registro por faixa de horário em um dia da semana.
-// Múltiplos horários no mesmo dia são representados por múltiplos registros.
 model CourseSchedule {
   id        String   @id @default(cuid())
-  dayOfWeek Int // 0 = domingo ... 6 = sábado (mesma convenção de VisitWeekdayRule)
-  startTime String // "HH:mm"
-  endTime   String // "HH:mm"
+  dayOfWeek Int
+  startTime String
+  endTime   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -74,7 +71,6 @@ model CourseSchedule {
   @@index([locationId])
 }
 
-// Controle de acesso granular: o que os alunos matriculados neste curso podem acessar.
 model CourseAccess {
   id        String         @id @default(cuid())
   resource  CourseResource
