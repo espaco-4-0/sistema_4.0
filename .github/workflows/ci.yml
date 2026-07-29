@@ -12,7 +12,7 @@ concurrency:
     cancel-in-progress: true
 
 env:
-    NODE_VERSION: "20"
+    NODE_VERSION: "22"
 
 jobs:
     quality:
@@ -128,7 +128,5 @@ jobs:
             - name: Gerar Prisma Client
               run: pnpm exec prisma generate
 
-            # `pnpm build` roda `migrate deploy` antes do next build; no CI não há banco
-            # de produção, então validamos apenas a compilação da aplicação.
             - name: Build
-              run: pnpm exec next build
+              run: pnpm build
