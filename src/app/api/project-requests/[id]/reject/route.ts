@@ -31,7 +31,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         const parsedBody = await readJsonBody(req);
         if (parsedBody.response) return parsedBody.response;
 
-        // `reason` é obrigatório por regra de negócio: o aluno precisa saber o que corrigir.
         const parsed = rejectProjectRequestSchema.safeParse(parsedBody.body);
         if (!parsed.success) {
             return NextResponse.json(

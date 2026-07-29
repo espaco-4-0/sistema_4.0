@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 type Params = { params: Promise<{ id: string }> };
 
-/** Atalho do quadro de tarefas: move o card sem enviar o restante dos campos. */
 export async function PATCH(req: NextRequest, { params }: Params) {
     try {
         const { user, response } = await requireUser();

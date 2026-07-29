@@ -5,10 +5,6 @@ import { NextResponse } from "next/server";
 
 import { authOptions } from "../../../auth/[...nextauth]/route";
 
-/**
- * Recursos que o usuário logado pode acessar, resultado da união dos acessos
- * configurados nos cursos ativos em que ele está matriculado.
- */
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);

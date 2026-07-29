@@ -40,7 +40,6 @@ export async function getProjectRequest(id: string) {
     return prisma.projectRequest.findUnique({ where: { id }, include: PROJECT_REQUEST_INCLUDE });
 }
 
-/** Retorna os ids que não correspondem a usuários ativos. */
 export async function findInvalidUserIds(userIds: string[]): Promise<string[]> {
     const unique = [...new Set(userIds)];
     if (unique.length === 0) return [];

@@ -84,7 +84,6 @@ export async function updateProject(id: string, payload: PatchProjectPayload) {
     });
 }
 
-/** Líder, membros, professores e admins podem mexer no projeto. */
 export async function canManageProject(projectId: string, userId: string, role: string): Promise<boolean> {
     if (role === "ADMIN" || role === "PROFESSOR") return true;
 

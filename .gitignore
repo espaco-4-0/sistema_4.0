@@ -29,7 +29,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-pnpm-lock.yaml
 
 # env files (can opt-in for committing if needed)
 .env
@@ -41,14 +40,7 @@ pnpm-lock.yaml
 *.tsbuildinfo
 next-env.d.ts
 
-# Client gerado: recriado por `prisma generate` em todo build.
 /src/generated/prisma
-
-# ATENÇÃO: /prisma/migrations NÃO deve ser ignorado.
-# O script de build roda `prisma migrate deploy`, que aplica exatamente os arquivos
-# versionados aqui. Sem eles no repositório o deploy não tem o que aplicar e os
-# ambientes saem de sincronia com o schema.
-
 
 observability/prometheus/credentials
 

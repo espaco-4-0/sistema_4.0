@@ -40,7 +40,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 }
 
-/** Edição/reenvio pelo autor. Solicitação aprovada não volta a ser editável. */
 export async function PATCH(req: NextRequest, { params }: Params) {
     try {
         const { user, response } = await requireUser();

@@ -60,7 +60,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             );
         }
 
-        // Trocar o líder do projeto é decisão de quem coordena, não do próprio time.
         if (parsed.data.liderId && user.role !== "ADMIN" && user.role !== "PROFESSOR") {
             return NextResponse.json(
                 { message: "Apenas admins e professores podem trocar o líder do projeto" },

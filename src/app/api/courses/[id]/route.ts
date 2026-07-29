@@ -149,8 +149,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
             return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
         }
 
-        // Excluir um curso com histórico apaga em cascata as matrículas dos alunos.
-        // Só permitimos com ?force=true; o caminho recomendado é inativar (PATCH { ativo: false }).
         const force = req.nextUrl.searchParams.get("force") === "true";
         const blockers = await getCourseDeletionBlockers(id);
 

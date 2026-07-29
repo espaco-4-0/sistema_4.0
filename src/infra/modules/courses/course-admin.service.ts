@@ -46,7 +46,6 @@ function toAccessCreateInput(acessos: CourseAccessPayload) {
     }));
 }
 
-/** Retorna os ids de local informados na agenda que não existem ou estão inativos. */
 export async function findInvalidScheduleLocations(agenda: CourseSchedulePayload[]): Promise<string[]> {
     const locationIds = [...new Set(agenda.map((slot) => slot.localId).filter((id): id is string => !!id))];
 
