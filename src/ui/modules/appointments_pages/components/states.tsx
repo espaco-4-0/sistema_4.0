@@ -80,3 +80,32 @@ export const PastState = ({ date }: { date: Date }) => {
         </div>
     );
 };
+
+export const BlockedState = ({ reason, onBack }: { reason?: string; onBack?: () => void }) => {
+    return (
+        <div className="flex flex-col items-center justify-center gap-3 p-4">
+            <div className="bg-red-50 p-3 rounded-full">
+                <XCircle size={32} className="text-red-500" />
+            </div>
+            <h3 className="text-gray-800 font-bold text-sm uppercase">Data Indisponível</h3>
+            <p className="text-gray-500 text-xs text-center leading-relaxed">
+                Esta data foi bloqueada pelo administrador do sistema.
+            </p>
+            {reason && (
+                <div className="bg-red-50/50 border border-red-100 rounded-lg p-3 w-full">
+                    <p className="text-[11px] font-semibold text-red-800 uppercase tracking-wider mb-1">Justificativa:</p>
+                    <p className="text-xs text-red-700 italic">"{reason}"</p>
+                </div>
+            )}
+            {onBack && (
+                <button
+                    onClick={onBack}
+                    className="mt-4 text-[10px] font-bold text-black border-b-2 border-yellow-400 uppercase"
+                >
+                    Voltar
+                </button>
+            )}
+        </div>
+    );
+};
+

@@ -2,13 +2,13 @@ packages:
   - .
 allowBuilds:
   '@prisma/engines': true
-  core-js-pure: false
+  core-js-pure: true
   esbuild: true
-  msw: false
+  msw: true
   prisma: true
-  protobufjs: false
+  protobufjs: true
   sharp: true
-  unrs-resolver: false
+  unrs-resolver: true
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
@@ -16,7 +16,10 @@ overrides:
   '@hono/node-server@<1.19.10': '>=1.19.10'
   '@hono/node-server@<1.19.13': '>=1.19.13'
   axios@>=1.0.0 <1.15.2: '>=1.15.2'
-  brace-expansion@<1.1.13: '>=1.1.13'
+  # O alvo precisa ficar preso ao 1.x: minimatch@3 depende de `^1.1.7` e a API
+  # mudou no 5.x (deixou de exportar a função por default), o que quebrava o ESLint
+  # com "expand is not a function". 1.1.16 é a linha de manutenção já corrigida.
+  brace-expansion@<1.1.13: '>=1.1.16 <2'
   brace-expansion@>=4.0.0 <5.0.5: '>=5.0.5'
   defu@<=6.1.4: '>=6.1.5'
   effect@<3.20.0: '>=3.20.0'

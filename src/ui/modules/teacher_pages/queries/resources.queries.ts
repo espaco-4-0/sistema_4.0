@@ -1,13 +1,20 @@
 import {
-    getResources,
-    createResource,
-    updateResource,
-    deleteResource,
-    importResources,
     GetResourcesParams,
+    ResourceItem,
+    createResource,
+    deleteResource,
+    getResources,
+    importResources,
+    updateResource,
 } from "@/src/infra/modules/professor/resources.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+type ApiErrorPayload = { response?: { data?: { error?: string } } };
+
+function apiErrorMessage(error: unknown, fallback: string): string {
+    return (error as ApiErrorPayload)?.response?.data?.error || fallback;
+}
 
 export const resourceKeys = {
     all: ["resources"] as const,
@@ -31,8 +38,8 @@ export function useCreateResource() {
             queryClient.invalidateQueries({ queryKey: resourceKeys.all });
             toast.success("Recurso adicionado com sucesso!");
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || "Erro ao adicionar recurso.");
+        onError: (error) => {
+            toast.error(apiErrorMessage(error, "Erro ao adicionar recurso."));
         },
     });
 }
@@ -41,13 +48,13 @@ export function useUpdateResource() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: any }) => updateResource(id, data),
+        mutationFn: ({ id, data }: { id: string; data: Partial<ResourceItem> }) => updateResource(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: resourceKeys.all });
             toast.success("Recurso atualizado com sucesso!");
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || "Erro ao atualizar recurso.");
+        onError: (error) => {
+            toast.error(apiErrorMessage(error, "Erro ao atualizar recurso."));
         },
     });
 }
@@ -61,8 +68,8 @@ export function useDeleteResource() {
             queryClient.invalidateQueries({ queryKey: resourceKeys.all });
             toast.success("Recurso removido com sucesso!");
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || "Erro ao excluir recurso.");
+        onError: (error) => {
+            toast.error(apiErrorMessage(error, "Erro ao excluir recurso."));
         },
     });
 }
@@ -76,8 +83,8 @@ export function useImportResources() {
             queryClient.invalidateQueries({ queryKey: resourceKeys.all });
             toast.success(`Importação concluída! ${data.imported} recursos importados.`);
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || "Erro ao importar recursos.");
+        onError: (error) => {
+            toast.error(apiErrorMessage(error, "Erro ao importar recursos."));
         },
     });
 }

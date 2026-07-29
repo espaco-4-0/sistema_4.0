@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Download, FileText, X, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { useImportResources } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
+import { Download, FileText, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "../../../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog";
@@ -121,10 +121,14 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
                     setSelectedFile(null);
                     onClose();
                 },
-                onError: (error: any) => {
-                    toast.error(error.response?.data?.error || "Erro ao importar recursos.", {
-                        id: toastId,
-                    });
+                onError: (error: unknown) => {
+                    toast.error(
+                        (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+                            "Erro ao importar recursos.",
+                        {
+                            id: toastId,
+                        }
+                    );
                 },
             });
         };
@@ -259,4 +263,3 @@ export function ImportarRecursosModal({ open, onClose }: Readonly<ImportarRecurs
         </Dialog>
     );
 }
-

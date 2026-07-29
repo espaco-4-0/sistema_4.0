@@ -46,7 +46,9 @@ export async function getResources(params: GetResourcesParams = {}): Promise<Res
     return data;
 }
 
-export async function createResource(data: Omit<ResourceItem, "id" | "createdAt" | "updatedAt" | "isActive">): Promise<ResourceItem> {
+export async function createResource(
+    data: Omit<ResourceItem, "id" | "createdAt" | "updatedAt" | "isActive">
+): Promise<ResourceItem> {
     const { data: response } = await api.post("/api/resources", data);
     return response;
 }
@@ -60,7 +62,10 @@ export async function deleteResource(id: string): Promise<void> {
     await api.delete(`/api/resources/${id}`);
 }
 
-export async function importResources(resources: any[]): Promise<{ imported: number; failed: number }> {
+export type ImportResourceInput = Pick<ResourceItem, "name"> &
+    Partial<Omit<ResourceItem, "id" | "createdAt" | "updatedAt">>;
+
+export async function importResources(resources: ImportResourceInput[]): Promise<{ imported: number; failed: number }> {
     const { data } = await api.post("/api/resources/import", { resources });
     return data;
 }

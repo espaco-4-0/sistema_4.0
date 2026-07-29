@@ -9,6 +9,79 @@ enum ProjectStatus {
   CANCELLED
 }
 
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+model ProjectRequest {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  objective   String
+  category    ProjectType
+  status      RequestStatus @default(PENDING)
+
+  rejectionReason String?
+  reviewNotes     String?
+  reviewedAt      DateTime?
+
+  reviewedBy   User?   @relation("RevisorSolicitacao", fields: [reviewedById], references: [id])
+  reviewedById String?
+
+  createdBy   User   @relation("AutorSolicitacao", fields: [createdById], references: [id], onDelete: Cascade)
+  createdById String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     ProjectRequestMember[]
+  attachments ProjectRequestFile[]
+  project     Project?
+
+  @@index([createdById])
+  @@index([status])
+}
+
+model ProjectRequestMember {
+  id   String  @id @default(cuid())
+  role String?
+
+  request   ProjectRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([requestId, userId])
+  @@index([userId])
+}
+
+model ProjectRequestFile {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  request   ProjectRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+
+  @@index([requestId])
+  @@index([uploadedById])
+}
+
 model Project {
   id          String        @id @default(cuid())
   title       String
@@ -23,12 +96,55 @@ model Project {
   leader   User   @relation("LiderProjeto", fields: [leaderId], references: [id])
   leaderId String
 
+  request   ProjectRequest? @relation(fields: [requestId], references: [id])
+  requestId String?         @unique
+
   ProjectMember ProjectMember[]
   ProjectPhoto  ProjectPhoto[]
   ProjectReport ProjectReport[]
-  resources 	Resource[]
+  resources     Resource[]
+  Task          Task[]
+  ProjectFile   ProjectFile[]
 
   @@index([leaderId])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  progress    Int        @default(0)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  assignedTo   User?   @relation("TarefaResponsavel", fields: [assignedToId], references: [id])
+  assignedToId String?
+
+  @@index([projectId])
+  @@index([assignedToId])
+}
+
+model ProjectFile {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  sizeKb    Int?
+  createdAt DateTime @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  uploadedBy   User   @relation("ArquivoEnviadoPor", fields: [uploadedById], references: [id])
+  uploadedById String
+
+  @@index([projectId])
+  @@index([uploadedById])
 }
 
 model ProjectMember {

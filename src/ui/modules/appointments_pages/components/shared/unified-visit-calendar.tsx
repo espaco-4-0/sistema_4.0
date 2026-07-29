@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { format, getDay, isSameDay, isSameMonth, isToday, isWeekend, parse, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { VisitAvailability } from "@/src/ui/lib/visit-requests-api";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -19,14 +20,20 @@ type ToolbarProps = {
 };
 
 function Toolbar({ date, onNavigate }: ToolbarProps) {
+    const [mounted, setMounted] = useState(false);
+    
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const today = new Date();
     const month = format(date, "MMMM", { locale: ptBR });
     const year = format(date, "yyyy");
 
-    const isCurrentMonth = isSameMonth(date, today);
+    const isCurrentMonth = mounted ? isSameMonth(date, today) : false;
 
     const maxYear = 2026;
-    const isMaxDate = date.getFullYear() >= maxYear && date.getMonth() === 11;
+    const isMaxDate = mounted ? (date.getFullYear() >= maxYear && date.getMonth() === 11) : false;
 
     const handlePrev = useCallback(() => {
         if (!isCurrentMonth) onNavigate("PREV");
@@ -91,6 +98,7 @@ type UnifiedVisitCalendarProps = {
     onSelectEvent?: (event: CalendarEvent) => void;
     height?: number;
     className?: string;
+    availability?: VisitAvailability;
 };
 
 export function UnifiedVisitCalendar({
@@ -102,6 +110,7 @@ export function UnifiedVisitCalendar({
     onSelectEvent,
     height = 520,
     className = "calendar-mobile",
+    availability,
 }: UnifiedVisitCalendarProps) {
     return (
         <Calendar
@@ -128,18 +137,48 @@ export function UnifiedVisitCalendar({
             dayPropGetter={(date) => {
                 const hasEvents = events.filter((event) => isSameDay(event.start, date));
                 const isTodayDay = isToday(date);
-                const isWeekendDay = isWeekend(date);
                 const isPastDay = date < new Date(new Date().setHours(0, 0, 0, 0));
 
                 const holidayEvent = hasEvents.find((ev) => (ev as any).isHoliday);
                 const isHolidayDay = Boolean(holidayEvent);
 
+                let isAvailable = true;
+                let isBlockedOverride = false;
+
+                if (isPastDay) {
+                    isAvailable = false;
+                } else if (availability) {
+                    const dateStr = format(date, "yyyy-MM-dd");
+                    const dateOverride = availability.dateRules.find((r) => r.date === dateStr);
+                    if (dateOverride) {
+                        isAvailable = dateOverride.isAvailable;
+                        isBlockedOverride = !dateOverride.isAvailable;
+                    } else if (isHolidayDay) {
+                        isAvailable = false;
+                    } else {
+                        const dayOfWeek = date.getDay();
+                        const weekdayRule = availability.weekdayRules.find((r) => r.dayOfWeek === dayOfWeek);
+                        if (weekdayRule) {
+                            isAvailable = weekdayRule.isAvailable;
+                        } else {
+                            isAvailable = dayOfWeek !== 0 && dayOfWeek !== 6;
+                        }
+                    }
+                } else {
+                    const isWeekendDay = isWeekend(date);
+                    isAvailable = !isPastDay && !isWeekendDay && !isHolidayDay;
+                }
+
                 let classes = "transition-all ";
 
                 if (isHolidayDay) {
                     classes += "!bg-pink-50 text-pink-800 cursor-not-allowed ";
-                } else if (isWeekendDay || isPastDay) {
-                    classes += "!bg-gray-100 cursor-not-allowed ";
+                } else if (!isAvailable) {
+                    if (isBlockedOverride) {
+                        classes += "!bg-red-50/40 text-red-800 border-l-2 border-red-300 cursor-not-allowed ";
+                    } else {
+                        classes += "!bg-gray-100 cursor-not-allowed ";
+                    }
                 } else if (isSameDay(selectedDate, date)) {
                     classes += "!bg-blue-100 cursor-pointer hover:opacity-80 ";
                 } else if (hasEvents.some((event) => event.type === "aprovado")) {
@@ -152,12 +191,22 @@ export function UnifiedVisitCalendar({
 
                 if (isTodayDay) classes += "!border-2 !border-yellow-primary";
 
+                let titleAttr = undefined;
+                if (isHolidayDay) {
+                    titleAttr = (holidayEvent as any)?.holidayName ?? "Feriado";
+                } else if (isBlockedOverride && availability) {
+                    const dateStr = format(date, "yyyy-MM-dd");
+                    const dateOverride = availability.dateRules.find((r) => r.date === dateStr);
+                    if (dateOverride?.reason) titleAttr = dateOverride.reason;
+                }
+
                 return {
                     className: classes,
                     style: {},
-                    ...(isHolidayDay ? { title: (holidayEvent as any)?.holidayName ?? "Feriado" } : {}),
+                    ...(titleAttr ? { title: titleAttr } : {}),
                 };
             }}
+
             eventPropGetter={(event) => {
                 const isHoliday = (event as any).isHoliday || (event as any).type === "holiday";
                 if (isHoliday) {

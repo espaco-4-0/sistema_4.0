@@ -1,21 +1,39 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { InventoryCategory } from "@/src/generated/prisma/enums";
+import { ResourceItem } from "@/src/infra/modules/professor/resources.service";
+import { mapCategoryToString } from "@/src/lib/validators/resource.validator";
 import { ImportarRecurso } from "@/src/ui/components/modals/professor/recursos/import-recurso-modal";
 import { ImportarRecursosModal } from "@/src/ui/components/modals/professor/recursos/import-recursos-modal";
-import { useResourcesList, useDeleteResource } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
-import { mapCategoryToString } from "@/src/lib/validators/resource.validator";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-    DropdownMenuItem,
 } from "@/src/ui/components/ui/dropdown-menu";
-import { AlertCircle, ChevronLeft, ChevronRight, Filter, MoreVertical, Plus, PlusCircle, Search, Package, CheckCircle2, AlertTriangle, XCircle, Loader2, Edit, Trash } from "lucide-react";
+import { useDeleteResource, useResourcesList } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
+import {
+    AlertCircle,
+    AlertTriangle,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    Edit,
+    Filter,
+    Loader2,
+    MoreVertical,
+    Package,
+    Plus,
+    PlusCircle,
+    Search,
+    Trash,
+    XCircle,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 function getStatusStyle(status: string) {
@@ -44,7 +62,7 @@ export default function Resources() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("Todos");
-    const [editingResource, setEditingResource] = useState<any | null>(null);
+    const [editingResource, setEditingResource] = useState<ResourceItem | null>(null);
 
     const itemsPerPage = 10;
 
@@ -64,9 +82,13 @@ export default function Resources() {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
 
-    useEffect(() => {
+    const filterKey = `${searchTerm}|${statusFilter}`;
+    const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+
+    if (filterKey !== lastFilterKey) {
+        setLastFilterKey(filterKey);
         setCurrentPage(1);
-    }, [searchTerm, statusFilter]);
+    }
 
     if (status === "loading") return null;
 
@@ -121,7 +143,7 @@ export default function Resources() {
         }
     };
 
-    const handleEdit = (resource: any) => {
+    const handleEdit = (resource: ResourceItem) => {
         setEditingResource(resource);
         setOpenImportar(true);
     };
@@ -253,9 +275,11 @@ export default function Resources() {
                                         const resStatus = getResourceStatus(item.quantity);
                                         return (
                                             <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">{item.name}</td>
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                                    {item.name}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm text-gray-600">
-                                                    {mapCategoryToString(item.category as any)}
+                                                    {mapCategoryToString(item.category as InventoryCategory)}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-600">{item.quantity}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-600">{item.quantity}</td>
@@ -277,10 +301,16 @@ export default function Resources() {
                                                             </button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end" className="bg-white">
-                                                            <DropdownMenuItem onClick={() => handleEdit(item)} className="hover:cursor-pointer flex items-center gap-2">
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleEdit(item)}
+                                                                className="hover:cursor-pointer flex items-center gap-2"
+                                                            >
                                                                 <Edit size={14} /> Editar
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleDelete(item.id)} className="text-red-600 focus:text-red-700 hover:cursor-pointer flex items-center gap-2">
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleDelete(item.id)}
+                                                                className="text-red-600 focus:text-red-700 hover:cursor-pointer flex items-center gap-2"
+                                                            >
                                                                 <Trash size={14} /> Excluir
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
@@ -296,12 +326,9 @@ export default function Resources() {
 
                     <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 bg-gray-50/50">
                         <p className="text-sm text-gray-500">
-                            Mostrando{" "}
-                            <span className="font-medium">{totalItems > 0 ? startIndex + 1 : 0}</span> a{" "}
-                            <span className="font-medium">
-                                {Math.min(startIndex + itemsPerPage, totalItems)}
-                            </span>{" "}
-                            de <span className="font-medium">{totalItems}</span> componentes
+                            Mostrando <span className="font-medium">{totalItems > 0 ? startIndex + 1 : 0}</span> a{" "}
+                            <span className="font-medium">{Math.min(startIndex + itemsPerPage, totalItems)}</span> de{" "}
+                            <span className="font-medium">{totalItems}</span> componentes
                         </p>
 
                         <div className="flex gap-2">
@@ -330,12 +357,12 @@ export default function Resources() {
             </div>
 
             <ImportarRecursosModal open={openRecursos} onClose={() => setOpenRecursos(false)} />
-            <ImportarRecurso 
-                open={openImportar} 
+            <ImportarRecurso
+                open={openImportar}
                 onClose={() => {
                     setOpenImportar(false);
                     setEditingResource(null);
-                }} 
+                }}
                 resourceToEdit={editingResource}
             />
         </>

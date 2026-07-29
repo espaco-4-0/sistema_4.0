@@ -177,3 +177,67 @@ export async function deleteVisit(id: number): Promise<void> {
         throw new Error((data as any).message || "Erro ao remover visita");
     }
 }
+
+// ─── AVAILABILITY ────────────────────────────────────────────────────────────
+
+export interface VisitAvailability {
+    weekdayRules: {
+        id: number;
+        dayOfWeek: number;
+        isAvailable: boolean;
+    }[];
+    dateRules: {
+        id: number;
+        date: string;
+        isAvailable: boolean;
+        reason: string | null;
+    }[];
+}
+
+export async function getVisitAvailability(): Promise<VisitAvailability> {
+    const res = await fetch("/api/visits/availability");
+    if (!res.ok) {
+        throw new Error("Erro ao obter regras de disponibilidade");
+    }
+    return res.json();
+}
+
+export async function saveWeekdayRules(rules: { dayOfWeek: number; isAvailable: boolean }[]): Promise<any> {
+    const res = await fetch("/api/visits/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "saveWeekdayRules", rules }),
+    });
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Erro ao salvar regras semanais");
+    }
+    return res.json();
+}
+
+export async function saveDateRule(dates: string[], isAvailable: boolean, reason?: string): Promise<any> {
+    const res = await fetch("/api/visits/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "saveDateRule", dates, isAvailable, reason }),
+    });
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Erro ao salvar exceções de data");
+    }
+    return res.json();
+}
+
+export async function deleteDateRule(date: string): Promise<any> {
+    const res = await fetch("/api/visits/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deleteDateRule", date }),
+    });
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Erro ao remover exceção de data");
+    }
+    return res.json();
+}
+

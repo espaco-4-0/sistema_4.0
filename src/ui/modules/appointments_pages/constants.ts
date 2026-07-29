@@ -26,7 +26,8 @@ export type Step =
     | "error"
     | "weekend"
     | "past"
-    | "holiday";
+    | "holiday"
+    | "blocked";
 
 export type InitialVisitState = {
     date: Date;

@@ -10,7 +10,7 @@ const cspHeader = `
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    connect-src 'self' ${isDev ? "ws://localhost:3000 ws://0.0.0.0:3000 http://localhost:* http://127.0.0.1:*" : ""};
+    connect-src 'self' blob: ${isDev ? "ws://localhost:3000 ws://0.0.0.0:3000 http://localhost:* http://127.0.0.1:*" : ""};
     upgrade-insecure-requests;
 `
     .replace(/\s{2,}/g, " ")

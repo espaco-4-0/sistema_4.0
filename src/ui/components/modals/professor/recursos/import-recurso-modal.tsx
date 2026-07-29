@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { X, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { ResourceItem } from "@/src/infra/modules/professor/resources.service";
 import { useCreateResource, useUpdateResource } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
+import { Loader2, X } from "lucide-react";
 
 import { Button } from "../../../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../ui/dialog";
@@ -10,47 +11,47 @@ import { Label } from "../../../ui/label";
 interface ImportarRecursoProps {
     open: boolean;
     onClose: () => void;
-    resourceToEdit?: any;
+    resourceToEdit?: ResourceItem | null;
 }
 
+const EMPTY_FORM = {
+    nome: "",
+    categoria: "",
+    qtdTotal: "",
+    localizacao: "",
+    disponivel: "",
+    description: "",
+};
+
 export function ImportarRecurso({ open, onClose, resourceToEdit }: Readonly<ImportarRecursoProps>) {
-    const [formData, setFormData] = useState({
-        nome: "",
-        categoria: "",
-        qtdTotal: "",
-        localizacao: "",
-        disponivel: "",
-        description: "",
-    });
+    const [formData, setFormData] = useState(EMPTY_FORM);
 
     const createMutation = useCreateResource();
     const updateMutation = useUpdateResource();
 
     const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-    useEffect(() => {
-        if (open) {
-            if (resourceToEdit) {
-                setFormData({
-                    nome: resourceToEdit.name || "",
-                    categoria: resourceToEdit.category || "",
-                    qtdTotal: String(resourceToEdit.quantity || 0),
-                    localizacao: resourceToEdit.location || "",
-                    disponivel: String(resourceToEdit.quantity || 0),
-                    description: resourceToEdit.description || "",
-                });
-            } else {
-                setFormData({
-                    nome: "",
-                    categoria: "",
-                    qtdTotal: "",
-                    localizacao: "",
-                    disponivel: "",
-                    description: "",
-                });
-            }
+    const formKey = open ? (resourceToEdit?.id ?? "new") : null;
+    const [lastFormKey, setLastFormKey] = useState<string | null>(null);
+
+    if (formKey !== lastFormKey) {
+        setLastFormKey(formKey);
+
+        if (formKey !== null) {
+            setFormData(
+                resourceToEdit
+                    ? {
+                          nome: resourceToEdit.name || "",
+                          categoria: resourceToEdit.category || "",
+                          qtdTotal: String(resourceToEdit.quantity || 0),
+                          localizacao: resourceToEdit.location || "",
+                          disponivel: String(resourceToEdit.quantity || 0),
+                          description: resourceToEdit.description || "",
+                      }
+                    : EMPTY_FORM
+            );
         }
-    }, [resourceToEdit, open]);
+    }
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -228,4 +229,3 @@ export function ImportarRecurso({ open, onClose, resourceToEdit }: Readonly<Impo
         </Dialog>
     );
 }
-
