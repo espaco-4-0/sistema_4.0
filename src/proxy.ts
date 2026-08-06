@@ -71,23 +71,8 @@ export default withAuth(
     }
 );
 
+// Só áreas autenticadas. `/`, `/blog`, `/courses`, `/espaco-3D` e as telas de
+// auth são públicas — incluí-las aqui mandava visitante anônimo para o /login.
 export const config = {
-    matcher: [
-        "/admin/:path*",
-        "/professor/:path*",
-        "/aluno/:path*",
-        "/courses/:path*",
-        "/classes/:path*",
-        "/search/:path*",
-        "/projects/:path*",
-        "/inventory/:path*",
-        "/blog/:path*",
-        "/presence/:path*",
-        "/cursos/:path*",
-        "/aulas/:path*",
-        "/pesquisa/:path*",
-        "/projetos/:path*",
-        "/inventario/:path*",
-        "/presenca/:path*",
-    ],
+    matcher: ["/admin/:path*", "/professor/:path*", "/estudante/:path*"],
 };

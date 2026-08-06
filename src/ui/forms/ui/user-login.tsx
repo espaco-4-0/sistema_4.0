@@ -11,12 +11,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { getSession, signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function UserLoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm<UserLoginData>({
@@ -54,9 +55,12 @@ export default function UserLoginForm() {
 
             toast.success("Login efetuado com sucesso!", { id, duration: 2000 });
 
+            const callbackUrl = searchParams.get("callbackUrl");
+
             const session = await getSession();
             const role = (session?.user as { role?: string } | undefined)?.role;
-            const destination = getDashboardHref(role) ?? "/";
+
+            const destination = callbackUrl ?? getDashboardHref(role) ?? "/";
 
             router.push(destination);
             router.refresh();

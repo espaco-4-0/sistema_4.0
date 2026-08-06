@@ -5,13 +5,12 @@ export type UserRole = (typeof USER_ROLES)[number];
 
 export const routePermissions: Record<string, UserRole[]> = {
     "/admin": ["ADMIN"],
-    "/professor": ["ADMIN"],
-    "/courses": ["ADMIN", "PROFESSOR", "MONITOR", "RESEARCHER"],
+    "/professor": ["ADMIN", "PROFESSOR", "MONITOR"],
+    "/estudante": ["ADMIN", "VISITOR"],
     "/classes": ["ADMIN", "PROFESSOR", "MONITOR"],
     "/search": ["ADMIN", "RESEARCHER"],
     "/projects": ["ADMIN", "PROFESSOR", "RESEARCHER"],
     "/inventory": ["ADMIN", "PROFESSOR"],
-    "/blog": ["ADMIN", "PROFESSOR", "MONITOR", "RESEARCHER"],
     "/presence": ["ADMIN", "VISITOR"],
     "/visita": ["ADMIN", "VISITOR"],
 };
@@ -27,7 +26,10 @@ export function authorizeRole(req: NextRequest, role: unknown): NextResponse | u
     if (!matchedPath) return undefined;
 
     if (!isUserRole(role) || !routePermissions[matchedPath].includes(role)) {
-        return NextResponse.redirect(new URL("/login", req.url));
+        // Não redirecionar para /login: o usuário já está autenticado neste ponto
+        // (o proxy só chama esta função com token). O /login manda usuário logado
+        // de volta para a callbackUrl, e o par vira um loop de redirect.
+        return NextResponse.redirect(new URL("/", req.url));
     }
 
     return undefined;
