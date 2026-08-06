@@ -11,13 +11,13 @@ jobs:
     check-base:
         name: Conferir branch de destino
         runs-on: ubuntu-latest
-        # `develop` é a branch de integração. Só release/* e hotfix/* podem ir para main.
+        # Só develop, release/* e hotfix/* podem ir para main.
         if: github.base_ref == 'main'
 
         steps:
             - name: Bloquear PR indevido para a main
-              if: ${{ !startsWith(github.head_ref, 'release/') && !startsWith(github.head_ref, 'hotfix/') }}
-              uses: actions/github-script@v7
+              if: ${{ github.head_ref != 'develop' && !startsWith(github.head_ref, 'release/') && !startsWith(github.head_ref, 'hotfix/') }}
+              uses: actions/github-script@v9
               with:
                   script: |
                       const head = context.payload.pull_request.head.ref;
@@ -34,7 +34,7 @@ jobs:
                           'O fluxo do projeto é:',
                           '',
                           '- toda feature/fix vai para **`develop`**;',
-                          '- só `release/*` e `hotfix/*` sobem de `develop` para `main`.',
+                          '- só `develop`, `release/*` e `hotfix/*` sobem para `main`.',
                           '',
                           'Troque a base deste PR para `develop` (botão **Edit** ao lado do título) e este check passa automaticamente.',
                         ].join('\n'),
