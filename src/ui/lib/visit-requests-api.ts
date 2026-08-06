@@ -1,5 +1,5 @@
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
-import type { VisitRequest } from "@/src/infra/modules/professor/agenda-visitas-mock";
+import type { VisitProcessStage, VisitRequest } from "@/src/infra/modules/professor/agenda-visitas-mock";
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 
@@ -12,16 +12,94 @@ export interface VisitPublicEvent {
     status: "pendente" | "aprovado" | "negado";
 }
 
+// ─── Formato bruto da API ─────────────────────────────────────────────────────
+// A API responde ora com as chaves do Prisma (inglês), ora com as do frontend
+// (português), por isso os dois nomes aparecem como opcionais.
+
+type DateLike = string | Date;
+
+interface ApiVisitDocument {
+    id: string | number;
+    fileName: string;
+    fileType: string;
+    fileSizeKb: number;
+    uploadedAt: DateLike;
+}
+
+interface ApiVisitLocation {
+    id: number;
+    locationId?: string;
+    localId?: string;
+    Location?: { name?: string };
+    local?: { nome?: string };
+}
+
+interface ApiProcessLogEntry {
+    id?: string;
+    stage: VisitProcessStage;
+    description: string;
+    createdAt: DateLike;
+}
+
+export interface ApiVisit {
+    id: number;
+    visitDate?: string;
+    dataVisita?: string;
+    data?: string;
+    institution?: string;
+    instituicao?: string;
+    responsible?: string;
+    responsavel?: string;
+    email?: string;
+    whatsapp?: string;
+    visitorCount?: number;
+    quantidade?: number;
+    startTime?: string;
+    horaInicio?: string;
+    endTime?: string;
+    horaFim?: string;
+    VisitDocument?: ApiVisitDocument[];
+    documentos?: ApiVisitDocument[];
+    VisitLocation?: ApiVisitLocation[];
+    paradas?: ApiVisitLocation[];
+    message?: string;
+    mensagem?: string;
+    status?: VisitRequest["status"];
+    processStage?: VisitRequest["processStage"];
+    ifalStatus?: VisitRequest["ifalStatus"];
+    documentationStatus?: VisitRequest["documentacaoStatus"];
+    documentacaoStatus?: VisitRequest["documentacaoStatus"];
+    rejectionReason?: string;
+    motivoNegativa?: string;
+    createdAt: DateLike;
+    reviewedAt?: DateLike | null;
+    processLog?: ApiProcessLogEntry[];
+}
+
+/** Metadados de feriado que a API anexa a pseudo-eventos do calendário. */
+interface ApiHolidayMeta {
+    isHoliday?: boolean;
+    holidayName?: string;
+}
+
+interface ApiErrorBody {
+    message?: string;
+}
+
+function toIso(value: DateLike): string {
+    return typeof value === "string" ? value : new Date(value).toISOString();
+}
+
 // ─── Helpers de mapeamento ────────────────────────────────────────────────────
 
 /** Converte o retorno da API (admin) para o tipo VisitRequest usado no frontend */
-export function apiVisitToRequest(visit: any): VisitRequest {
+export function apiVisitToRequest(visit: ApiVisit): VisitRequest {
     const dataISO: string = visit.visitDate ?? visit.dataVisita ?? visit.data ?? "";
     const data = dataISO.length >= 10 ? dataISO.slice(0, 10) : dataISO;
 
     return {
         id: visit.id,
-        instituicao: visit.institution ?? visit.instituicao,
+        instituicao: visit.institution ?? visit.instituicao ?? "",
         responsavel: visit.responsible ?? visit.responsavel ?? "",
         email: visit.email ?? "",
         whatsapp: visit.whatsapp ?? "",
@@ -29,16 +107,16 @@ export function apiVisitToRequest(visit: any): VisitRequest {
         data,
         horaInicio: visit.startTime ?? visit.horaInicio ?? "09:00",
         horaFim: visit.endTime ?? visit.horaFim ?? "10:00",
-        documentos: (visit.VisitDocument ?? visit.documentos ?? []).map((doc: any) => ({
+        documentos: (visit.VisitDocument ?? visit.documentos ?? []).map((doc) => ({
             id: String(doc.id),
             fileName: doc.fileName,
             fileType: doc.fileType,
             fileSizeKb: doc.fileSizeKb,
-            uploadedAt: typeof doc.uploadedAt === "string" ? doc.uploadedAt : new Date(doc.uploadedAt).toISOString(),
+            uploadedAt: toIso(doc.uploadedAt),
         })),
-        paradas: (visit.VisitLocation ?? visit.paradas ?? []).map((p: any) => ({
+        paradas: (visit.VisitLocation ?? visit.paradas ?? []).map((p) => ({
             id: p.id,
-            localId: p.locationId ?? p.localId,
+            localId: p.locationId ?? p.localId ?? "",
             nome: p.Location?.name ?? p.local?.nome ?? "Desconhecido",
         })),
         mensagem: visit.message ?? visit.mensagem ?? undefined,
@@ -47,17 +125,17 @@ export function apiVisitToRequest(visit: any): VisitRequest {
         ifalStatus: visit.ifalStatus ?? "aguardando",
         documentacaoStatus: visit.documentationStatus ?? visit.documentacaoStatus ?? "pendente",
         motivoNegativa: visit.rejectionReason ?? visit.motivoNegativa ?? undefined,
-        createdAt: typeof visit.createdAt === "string" ? visit.createdAt : new Date(visit.createdAt).toISOString(),
+        createdAt: toIso(visit.createdAt),
         reviewedAt: visit.reviewedAt
             ? typeof visit.reviewedAt === "string"
                 ? visit.reviewedAt
                 : new Date(visit.reviewedAt).toISOString()
             : undefined,
-        processLog: (visit.processLog ?? []).map((entry: any, idx: number) => ({
+        processLog: (visit.processLog ?? []).map((entry, idx) => ({
             id: entry.id ?? `${visit.id}-${idx}`,
             stage: entry.stage,
             description: entry.description,
-            createdAt: typeof entry.createdAt === "string" ? entry.createdAt : new Date(entry.createdAt).toISOString(),
+            createdAt: toIso(entry.createdAt),
         })),
     };
 }
@@ -81,9 +159,9 @@ export function publicVisitToCalendarEvent(visit: VisitPublicEvent): CalendarEve
 
     // Detect holiday pseudo-events coming from the API:
     // the backend may set `isHoliday: true`, or use status 'feriado', or include `holidayName`.
-    const apiAny = visit as any;
+    const apiAny = visit as VisitPublicEvent & ApiHolidayMeta;
     const isHoliday =
-        apiAny?.isHoliday === true || apiAny?.holidayName !== undefined || (visit.status as any) === "feriado";
+        apiAny?.isHoliday === true || apiAny?.holidayName !== undefined || (visit.status as string) === "feriado";
     const holidayName =
         apiAny?.holidayName ??
         (isHoliday && typeof visit.instituicao === "string"
@@ -111,16 +189,16 @@ export function publicVisitToCalendarEvent(visit: VisitPublicEvent): CalendarEve
 // ─── POST ─────────────────────────────────────────────────────────────────────
 
 /** Envia solicitação de visita (público, sem auth) */
-export async function submitVisitRequest(formData: FormData): Promise<any> {
+export async function submitVisitRequest(formData: FormData): Promise<VisitPublicEvent> {
     const res = await fetch("/api/visits", {
         method: "POST",
         body: formData,
     });
     if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error((data as any).message || "Erro ao enviar solicitação");
+        throw new Error((data as ApiErrorBody).message || "Erro ao enviar solicitação");
     }
-    return res.json();
+    return res.json() as Promise<VisitPublicEvent>;
 }
 
 export async function getPublicVisitEvents(): Promise<VisitPublicEvent[]> {
@@ -139,7 +217,7 @@ export async function getAdminVisits(): Promise<VisitRequest[]> {
         const res = await fetch("/api/visits");
         if (!res.ok) return [];
         const data = await res.json();
-        return (data as any[]).map(apiVisitToRequest);
+        return (data as ApiVisit[]).map(apiVisitToRequest);
     } catch {
         return [];
     }
@@ -147,7 +225,7 @@ export async function getAdminVisits(): Promise<VisitRequest[]> {
 
 // ─── PATCH actions ────────────────────────────────────────────────────────────
 
-async function visitAction(id: number, action: string, reason?: string): Promise<any> {
+async function visitAction(id: number, action: string, reason?: string): Promise<unknown> {
     const res = await fetch("/api/visits", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -155,7 +233,7 @@ async function visitAction(id: number, action: string, reason?: string): Promise
     });
     if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error((data as any).message || "Erro na ação");
+        throw new Error((data as ApiErrorBody).message || "Erro na ação");
     }
     return res.json();
 }
@@ -174,7 +252,7 @@ export async function deleteVisit(id: number): Promise<void> {
     const res = await fetch(`/api/visits?id=${id}`, { method: "DELETE" });
     if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error((data as any).message || "Erro ao remover visita");
+        throw new Error((data as ApiErrorBody).message || "Erro ao remover visita");
     }
 }
 
@@ -202,7 +280,7 @@ export async function getVisitAvailability(): Promise<VisitAvailability> {
     return res.json();
 }
 
-export async function saveWeekdayRules(rules: { dayOfWeek: number; isAvailable: boolean }[]): Promise<any> {
+export async function saveWeekdayRules(rules: { dayOfWeek: number; isAvailable: boolean }[]): Promise<unknown> {
     const res = await fetch("/api/visits/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -215,7 +293,7 @@ export async function saveWeekdayRules(rules: { dayOfWeek: number; isAvailable: 
     return res.json();
 }
 
-export async function saveDateRule(dates: string[], isAvailable: boolean, reason?: string): Promise<any> {
+export async function saveDateRule(dates: string[], isAvailable: boolean, reason?: string): Promise<unknown> {
     const res = await fetch("/api/visits/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -228,7 +306,7 @@ export async function saveDateRule(dates: string[], isAvailable: boolean, reason
     return res.json();
 }
 
-export async function deleteDateRule(date: string): Promise<any> {
+export async function deleteDateRule(date: string): Promise<unknown> {
     const res = await fetch("/api/visits/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -240,4 +318,3 @@ export async function deleteDateRule(date: string): Promise<any> {
     }
     return res.json();
 }
-

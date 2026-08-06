@@ -93,8 +93,10 @@ export const BlockedState = ({ reason, onBack }: { reason?: string; onBack?: () 
             </p>
             {reason && (
                 <div className="bg-red-50/50 border border-red-100 rounded-lg p-3 w-full">
-                    <p className="text-[11px] font-semibold text-red-800 uppercase tracking-wider mb-1">Justificativa:</p>
-                    <p className="text-xs text-red-700 italic">"{reason}"</p>
+                    <p className="text-[11px] font-semibold text-red-800 uppercase tracking-wider mb-1">
+                        Justificativa:
+                    </p>
+                    <p className="text-xs text-red-700 italic">&ldquo;{reason}&rdquo;</p>
                 </div>
             )}
             {onBack && (
@@ -108,4 +110,3 @@ export const BlockedState = ({ reason, onBack }: { reason?: string; onBack?: () 
         </div>
     );
 };
-

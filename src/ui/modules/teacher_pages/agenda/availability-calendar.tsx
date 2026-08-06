@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, isSameDay, eachDayOfInterval } from "date-fns";
-import { ptBR } from "date-fns/locale/pt-BR";
-import { Button } from "@/src/ui/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { VisitAvailability } from "@/src/ui/lib/visit-requests-api";
-import { DateRuleModal } from "./date-rule-modal";
-import { toast } from "sonner";
 import { buildHolidayMap } from "@/src/lib/visits/holiday-utils";
+import { Button } from "@/src/ui/components/ui/button";
+import { VisitAvailability } from "@/src/ui/lib/visit-requests-api";
+import { format, getDay, isSameDay, parse, startOfWeek } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { toast } from "sonner";
+
+import { DateRuleModal } from "./date-rule-modal";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -103,10 +104,10 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
 
         const dayOfWeek = date.getDay();
         const weekdayRule = availability.weekdayRules.find((r) => r.dayOfWeek === dayOfWeek);
-        
+
         return {
             isOverride: false,
-            isAvailable: weekdayRule ? weekdayRule.isAvailable : (dayOfWeek !== 0 && dayOfWeek !== 6),
+            isAvailable: weekdayRule ? weekdayRule.isAvailable : dayOfWeek !== 0 && dayOfWeek !== 6,
             reason: null,
             rule: null,
         };
@@ -114,18 +115,18 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
 
     const getBaseAvailability = (date: Date) => {
         const dateStr = format(date, "yyyy-MM-dd");
-        
+
         const holidayMap = buildHolidayMap(date.getFullYear());
         if (holidayMap.has(dateStr)) {
             return false;
         }
-        
+
         const dayOfWeek = date.getDay();
         const weekdayRule = availability.weekdayRules.find((r) => r.dayOfWeek === dayOfWeek);
         if (weekdayRule) {
             return weekdayRule.isAvailable;
         }
-        
+
         return dayOfWeek !== 0 && dayOfWeek !== 6;
     };
 
@@ -133,14 +134,13 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
         const parsedDate = new Date(`${rule.date}T00:00:00`);
         return {
             id: rule.id,
-            title: rule.isAvailable 
-                ? "✓ Liberado (Exceção)" 
-                : `✗ Bloqueado: ${rule.reason || "Sem justificativa"}`,
+            title: rule.isAvailable ? "✓ Liberado (Exceção)" : `✗ Bloqueado: ${rule.reason || "Sem justificativa"}`,
             start: parsedDate,
             end: parsedDate,
             allDay: true,
             isAvailable: rule.isAvailable,
             isOverride: true,
+            isHoliday: false,
             reason: rule.reason,
         };
     });
@@ -166,18 +166,18 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
     const handleSelectSlot = (slotInfo: { start: Date; end: Date; action: "select" | "click" | "doubleClick" }) => {
         const start = new Date(slotInfo.start);
         start.setHours(0, 0, 0, 0);
-        
+
         const end = new Date(slotInfo.end);
         end.setHours(0, 0, 0, 0);
-        
+
         const diffMs = Math.abs(end.getTime() - start.getTime());
         const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays > 1) {
             toast.error("Para configurar um período, utilize a seção 'Período Especial' na barra lateral.");
             return;
         }
-        
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         if (start < today) {
@@ -210,7 +210,7 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
                 onSelectEvent={(event) => {
                     const eventDate = new Date(event.start);
                     eventDate.setHours(0, 0, 0, 0);
-                    
+
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     if (eventDate < today) {
@@ -218,13 +218,13 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
                         return;
                     }
 
-                    if ((event as any).isHoliday) {
+                    if (event.isHoliday) {
                         const dayOfWeek = eventDate.getDay();
                         if (dayOfWeek === 0 || dayOfWeek === 6) {
                             toast.error("Feriados em finais de semana não são passíveis de liberação.");
                             return;
                         }
-                        
+
                         setSelectedDates([eventDate]);
                         const status = getDateStatus(eventDate);
                         if (status.isOverride && status.rule) {
@@ -236,7 +236,7 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
                         setIsModalOpen(true);
                         return;
                     }
-                    
+
                     setSelectedDates([eventDate]);
                     setExistingRule({ isAvailable: event.isAvailable, reason: event.reason });
                     setDefaultIsAvailable(getBaseAvailability(eventDate));
@@ -249,7 +249,7 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
                 dayPropGetter={(date) => {
                     const status = getDateStatus(date);
                     const isTodayDate = isSameDay(date, new Date());
-                    
+
                     let classes = "transition-all cursor-pointer ";
 
                     if (status.isAvailable) {
@@ -267,9 +267,10 @@ export function AvailabilityCalendar({ availability, onRefresh }: AvailabilityCa
                     };
                 }}
                 eventPropGetter={(event) => {
-                    if ((event as any).isHoliday) {
+                    if (event.isHoliday) {
                         return {
-                            className: "!bg-pink-600 !text-white !text-[11px] font-semibold border-none rounded-md px-1 shadow-sm truncate",
+                            className:
+                                "!bg-pink-600 !text-white !text-[11px] font-semibold border-none rounded-md px-1 shadow-sm truncate",
                         };
                     }
                     return {

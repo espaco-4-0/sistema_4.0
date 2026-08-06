@@ -1,7 +1,6 @@
 import { PrismaClient } from "../../src/generated/prisma/client";
 
 export async function seedVisits(prisma: PrismaClient) {
-    
     const weekdayRules = [
         { dayOfWeek: 0, isAvailable: false },
         { dayOfWeek: 1, isAvailable: true },

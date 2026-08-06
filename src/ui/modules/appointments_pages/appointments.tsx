@@ -2,19 +2,25 @@
 
 import React, { useEffect, useState } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
-import { getPublicVisitEvents, publicVisitToCalendarEvent, submitVisitRequest, getVisitAvailability, VisitAvailability } from "@/src/ui/lib/visit-requests-api";
+import {
+    VisitAvailability,
+    getPublicVisitEvents,
+    getVisitAvailability,
+    publicVisitToCalendarEvent,
+    submitVisitRequest,
+} from "@/src/ui/lib/visit-requests-api";
 import { EventDetail } from "@/src/ui/modules/appointments_pages/components/event-detail";
 import { EventList } from "@/src/ui/modules/appointments_pages/components/event-list";
 import { PanelWrapper } from "@/src/ui/modules/appointments_pages/components/panel-wrapper";
 import { UnifiedVisitCalendar } from "@/src/ui/modules/appointments_pages/components/shared/unified-visit-calendar";
 import {
+    BlockedState,
     ErrorState,
     IdleState,
     LoadingState,
     PastState,
     SuccessState,
     WeekendState,
-    BlockedState,
 } from "@/src/ui/modules/appointments_pages/components/states";
 import { useInitialVisitState } from "@/src/ui/modules/appointments_pages/constants";
 import { BookingForm } from "@/src/ui/modules/appointments_pages/forms/booking-form";
@@ -82,7 +88,7 @@ export default function AllCalendar() {
                         type: "holiday",
                         isHoliday: true,
                         holidayName: name,
-                    } as any;
+                    } satisfies CalendarEvent;
                 });
 
                 setEvents([...converted, ...holidayEvents]);
@@ -124,7 +130,11 @@ export default function AllCalendar() {
             if (weekdayRule.isAvailable) {
                 return { isAvailable: true, reason: "" };
             } else {
-                return { isAvailable: false, reason: "weekday", text: "Este dia da semana não está disponível para visitação." };
+                return {
+                    isAvailable: false,
+                    reason: "weekday",
+                    text: "Este dia da semana não está disponível para visitação.",
+                };
             }
         }
 
@@ -277,7 +287,9 @@ export default function AllCalendar() {
                             {step === "idle" && <IdleState />}
                             {step === "weekend" && <WeekendState target={selectedDate} />}
                             {step === "past" && <PastState date={selectedDate} />}
-                            {step === "blocked" && <BlockedState reason={blockedReason} onBack={() => setStep("idle")} />}
+                            {step === "blocked" && (
+                                <BlockedState reason={blockedReason} onBack={() => setStep("idle")} />
+                            )}
 
                             {step === "holiday" && (
                                 <div className="flex flex-col items-center justify-center h-full text-center p-6">

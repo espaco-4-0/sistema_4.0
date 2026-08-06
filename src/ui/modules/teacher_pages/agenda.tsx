@@ -4,20 +4,26 @@ import { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsList, TabsPanel, TabsPanels, TabsTab } from "@/src/components/animate-ui/components/base/tabs";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { VisitRequest } from "@/src/infra/modules/professor/agenda-visitas-mock";
-import { buildUnifiedCalendarEvents } from "@/src/ui/lib/unified-calendar-events";
-import { getAdminVisits, getVisitAvailability, saveWeekdayRules, VisitAvailability, saveDateRule } from "@/src/ui/lib/visit-requests-api";
-import { format, isSameDay, eachDayOfInterval } from "date-fns";
-import { ClipboardList, Clock3, MapPin, CalendarRange, ClipboardCheck, Info } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { Switch } from "@/src/ui/components/ui/switch";
+import { buildUnifiedCalendarEvents } from "@/src/ui/lib/unified-calendar-events";
+import {
+    VisitAvailability,
+    getAdminVisits,
+    getVisitAvailability,
+    saveDateRule,
+    saveWeekdayRules,
+} from "@/src/ui/lib/visit-requests-api";
+import { eachDayOfInterval, format, isSameDay } from "date-fns";
+import { CalendarRange, ClipboardCheck, ClipboardList, Clock3, MapPin } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { UnifiedVisitCalendar } from "../appointments_pages/components/shared/unified-visit-calendar";
+import { AvailabilityCalendar } from "./agenda/availability-calendar";
 import { LocalQuickList } from "./agenda/local-card";
 import { MetricsCards } from "./agenda/metrics-cards";
 import { RequestCard } from "./agenda/request-card";
 import { LocalFormModal } from "./locais";
-import { AvailabilityCalendar } from "./agenda/availability-calendar";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -58,7 +64,6 @@ export function AgendaVisitasAdmin() {
     const [localsVersion, setLocalsVersion] = useState(0);
 
     async function loadData() {
-        setIsLoading(true);
         try {
             const fetched = await getAdminVisits();
             setRequests(fetched);
@@ -90,11 +95,11 @@ export function AgendaVisitasAdmin() {
             }));
             await saveWeekdayRules(rulesPayload);
             toast.success("Regras semanais de agendamento atualizadas!");
-            
+
             const avail = await getVisitAvailability();
             setAvailability(avail);
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao salvar regras semanais");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Erro ao salvar regras semanais");
         } finally {
             setIsSavingWeekdays(false);
         }
@@ -131,18 +136,18 @@ export function AgendaVisitasAdmin() {
         try {
             const days = eachDayOfInterval({ start, end });
             const dateStrings = days.map((d) => format(d, "yyyy-MM-dd"));
-            
+
             await saveDateRule(dateStrings, periodAvailable, periodAvailable ? undefined : periodReason.trim());
             toast.success("Disponibilidade do período atualizada com sucesso!");
-            
+
             setPeriodStart("");
             setPeriodEnd("");
             setPeriodReason("");
-            
+
             const avail = await getVisitAvailability();
             setAvailability(avail);
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao aplicar regras de período.");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Erro ao aplicar regras de período.");
         } finally {
             setIsApplyingPeriod(false);
         }
@@ -178,16 +183,18 @@ export function AgendaVisitasAdmin() {
         return sortedRequests.slice(start, start + ITEMS_PER_PAGE);
     }, [sortedRequests, currentPage]);
 
-    useEffect(() => {
-        if (currentPage > totalPages) setCurrentPage(totalPages);
-    }, [currentPage, totalPages]);
+    if (currentPage > totalPages) {
+        setCurrentPage(totalPages);
+    }
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Agenda de Visitações</h2>
-                    <p className="text-sm text-gray-500">Gerencie solicitações de visitas e a disponibilidade do calendário</p>
+                    <p className="text-sm text-gray-500">
+                        Gerencie solicitações de visitas e a disponibilidade do calendário
+                    </p>
                 </div>
 
                 {session?.user?.role === "ADMIN" && (
@@ -303,7 +310,9 @@ export function AgendaVisitasAdmin() {
 
                                     <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-xs">
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-semibold text-gray-700">Data de Início</label>
+                                            <label className="text-xs font-semibold text-gray-700">
+                                                Data de Início
+                                            </label>
                                             <input
                                                 type="date"
                                                 value={periodStart}
@@ -325,16 +334,17 @@ export function AgendaVisitasAdmin() {
                                         </div>
 
                                         <div className="flex items-center justify-between py-1 mt-2">
-                                            <span className="text-xs font-semibold text-gray-700">Disponível para visitas</span>
-                                            <Switch
-                                                checked={periodAvailable}
-                                                onCheckedChange={setPeriodAvailable}
-                                            />
+                                            <span className="text-xs font-semibold text-gray-700">
+                                                Disponível para visitas
+                                            </span>
+                                            <Switch checked={periodAvailable} onCheckedChange={setPeriodAvailable} />
                                         </div>
 
                                         {!periodAvailable && (
                                             <div className="space-y-1.5 pt-1">
-                                                <label className="text-xs font-semibold text-gray-700">Justificativa *</label>
+                                                <label className="text-xs font-semibold text-gray-700">
+                                                    Justificativa *
+                                                </label>
                                                 <input
                                                     type="text"
                                                     placeholder="Ex: Recesso escolar"
@@ -366,7 +376,9 @@ export function AgendaVisitasAdmin() {
 
                                 <Tabs
                                     value={sideTab}
-                                    onValueChange={(value: string) => setSideTab(value as "solicitacoes" | "dia" | "locais")}
+                                    onValueChange={(value: string) =>
+                                        setSideTab(value as "solicitacoes" | "dia" | "locais")
+                                    }
                                 >
                                     <div className="relative mb-3">
                                         <TabsList className="grid grid-cols-3 gap-2 items-center w-full h-10 bg-gray-100 rounded-lg  overflow-hidden">
@@ -405,7 +417,9 @@ export function AgendaVisitasAdmin() {
                                     <TabsPanels>
                                         <TabsPanel value="solicitacoes">
                                             {isLoading ? (
-                                                <div className="text-xs text-gray-500 py-4 text-center">Carregando...</div>
+                                                <div className="text-xs text-gray-500 py-4 text-center">
+                                                    Carregando...
+                                                </div>
                                             ) : (
                                                 <>
                                                     <div className="text-xs text-gray-500 px-0.5">
@@ -442,7 +456,9 @@ export function AgendaVisitasAdmin() {
                                                     <div className="flex items-center justify-between gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                                                            onClick={() =>
+                                                                setCurrentPage((prev) => Math.max(1, prev - 1))
+                                                            }
                                                             disabled={currentPage === 1}
                                                             className="px-3 py-2 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 disabled:opacity-40 hover:cursor-pointer disabled:hover:cursor-not-allowed hover:border-yellow-400"
                                                         >
@@ -472,7 +488,9 @@ export function AgendaVisitasAdmin() {
                                                     Visitas do dia {format(selectedDate, "dd/MM/yyyy")}
                                                 </p>
                                                 {dayEvents.length === 0 ? (
-                                                    <p className="text-sm text-gray-500">Nenhuma visita registrada neste dia</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        Nenhuma visita registrada neste dia
+                                                    </p>
                                                 ) : (
                                                     <ul className="space-y-2">
                                                         {dayEvents.map((event) => (
@@ -481,7 +499,8 @@ export function AgendaVisitasAdmin() {
                                                                 className="text-sm text-gray-700 border-l-4 border-yellow-primary pl-2"
                                                             >
                                                                 <span className="font-medium">{event.title}</span> -{" "}
-                                                                {format(event.start, "HH:mm")} às {format(event.end, "HH:mm")}
+                                                                {format(event.start, "HH:mm")} às{" "}
+                                                                {format(event.end, "HH:mm")}
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -492,7 +511,9 @@ export function AgendaVisitasAdmin() {
                                         <TabsPanel value="locais" className="">
                                             <div className="rounded-xl r">
                                                 <div className="flex items-center justify-between">
-                                                    <h4 className="text-sm font-semibold text-gray-800">Locais cadastrados</h4>
+                                                    <h4 className="text-sm font-semibold text-gray-800">
+                                                        Locais cadastrados
+                                                    </h4>
                                                     {session?.user?.role === "ADMIN" ? (
                                                         <LocalFormModal
                                                             onSuccess={() => {

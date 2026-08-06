@@ -30,7 +30,6 @@ export async function validateUpload(file: File): Promise<FileValidationError | 
 }
 
 export async function storeProjectFile(params: { projectId: string; file: File; uploadedById: string }) {
-
     const { storage } = await import("@/src/lib/storage");
 
     const buffer = Buffer.from(await params.file.arrayBuffer());

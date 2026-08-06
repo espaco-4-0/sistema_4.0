@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale/pt-BR";
+import { useState } from "react";
 import { Button } from "@/src/ui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/ui/components/ui/dialog";
 import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
 import { Switch } from "@/src/ui/components/ui/switch";
-import { saveDateRule, deleteDateRule } from "@/src/ui/lib/visit-requests-api";
+import { deleteDateRule, saveDateRule } from "@/src/ui/lib/visit-requests-api";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
+import { AlertTriangle, CalendarDays, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { CalendarDays, AlertTriangle, Trash2 } from "lucide-react";
 
 interface DateRuleModalProps {
     isOpen: boolean;
@@ -36,17 +36,19 @@ export function DateRuleModal({
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        if (isOpen) {
-            if (existingRule) {
-                setIsAvailable(existingRule.isAvailable);
-                setReason(existingRule.reason || "");
-            } else {
-                setIsAvailable(defaultIsAvailable);
-                setReason("");
-            }
+    // Ajuste durante o render em vez de efeito: sincronizar estado com props num
+    // useEffect dispara uma segunda renderizacao a cada abertura do modal.
+    const formKey = isOpen ? JSON.stringify(existingRule ?? defaultIsAvailable) : null;
+    const [lastFormKey, setLastFormKey] = useState<string | null>(null);
+
+    if (formKey !== lastFormKey) {
+        setLastFormKey(formKey);
+
+        if (formKey !== null) {
+            setIsAvailable(existingRule ? existingRule.isAvailable : defaultIsAvailable);
+            setReason(existingRule?.reason ?? "");
         }
-    }, [isOpen, existingRule, defaultIsAvailable]);
+    }
 
     const formattedPeriod = () => {
         if (selectedDates.length === 0) return "";
@@ -75,8 +77,8 @@ export function DateRuleModal({
             toast.success("Regras de data atualizadas com sucesso!");
             onSaved();
             onClose();
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao salvar regras.");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Erro ao salvar regras.");
         } finally {
             setIsSaving(false);
         }
@@ -91,8 +93,8 @@ export function DateRuleModal({
             toast.success("Regra de data removida com sucesso!");
             onSaved();
             onClose();
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao remover regra.");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Erro ao remover regra.");
         } finally {
             setIsDeleting(false);
         }
@@ -125,11 +127,7 @@ export function DateRuleModal({
                                     : "Este dia estará bloqueado no portal"}
                             </p>
                         </div>
-                        <Switch
-                            id="available-switch"
-                            checked={isAvailable}
-                            onCheckedChange={setIsAvailable}
-                        />
+                        <Switch id="available-switch" checked={isAvailable} onCheckedChange={setIsAvailable} />
                     </div>
 
                     {!isAvailable && (

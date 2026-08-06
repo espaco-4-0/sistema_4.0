@@ -44,10 +44,12 @@ async function upload(file: File | Buffer, filePath: string, bucket: string, mim
         ? `${folder}/${randomUUID()}-${sanitized}` // mantém a pasta intacta
         : `${randomUUID()}-${sanitized}`;
 
-    const { data, error } = await client().storage.from(bucket).upload(uniqueName, buffer, {
-        contentType: mimeType ?? "application/octet-stream",
-        upsert: false,
-    });
+    const { data, error } = await client()
+        .storage.from(bucket)
+        .upload(uniqueName, buffer, {
+            contentType: mimeType ?? "application/octet-stream",
+            upsert: false,
+        });
 
     if (error) throw new Error(error.message);
     return { path: data.path };
@@ -130,8 +132,8 @@ export const supabaseStorage: StorageProvider = {
             throw new Error(`Falha ao baixar imagem (bucket: ${fromBucket}, path: ${path}): ${downloadError?.message}`);
         }
 
-        const { error: uploadError } = await client().storage
-            .from(toBucket)
+        const { error: uploadError } = await client()
+            .storage.from(toBucket)
             .upload(path, fileData, { upsert: true, contentType: fileData.type });
 
         if (uploadError) {

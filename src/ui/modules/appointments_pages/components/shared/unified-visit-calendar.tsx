@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
 import { Button } from "@/src/ui/components/ui/button";
+import { VisitAvailability } from "@/src/ui/lib/visit-requests-api";
 import { format, getDay, isSameDay, isSameMonth, isToday, isWeekend, parse, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { VisitAvailability } from "@/src/ui/lib/visit-requests-api";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -20,10 +20,12 @@ type ToolbarProps = {
 };
 
 function Toolbar({ date, onNavigate }: ToolbarProps) {
+    // Evita divergencia de hidratacao ao comparar com a data de hoje no cliente.
     const [mounted, setMounted] = useState(false);
-    
+
     useEffect(() => {
-        setMounted(true);
+        const id = requestAnimationFrame(() => setMounted(true));
+        return () => cancelAnimationFrame(id);
     }, []);
 
     const today = new Date();
@@ -33,7 +35,7 @@ function Toolbar({ date, onNavigate }: ToolbarProps) {
     const isCurrentMonth = mounted ? isSameMonth(date, today) : false;
 
     const maxYear = 2026;
-    const isMaxDate = mounted ? (date.getFullYear() >= maxYear && date.getMonth() === 11) : false;
+    const isMaxDate = mounted ? date.getFullYear() >= maxYear && date.getMonth() === 11 : false;
 
     const handlePrev = useCallback(() => {
         if (!isCurrentMonth) onNavigate("PREV");
@@ -123,7 +125,7 @@ export function UnifiedVisitCalendar({
                 onSelectDay(slot.start);
             }}
             onSelectEvent={(event) => {
-                if ((event as any).isHoliday) {
+                if (event.isHoliday) {
                     return; // Não faz nada ao clicar no feriado
                 }
                 onSelectDay(event.start);
@@ -139,7 +141,7 @@ export function UnifiedVisitCalendar({
                 const isTodayDay = isToday(date);
                 const isPastDay = date < new Date(new Date().setHours(0, 0, 0, 0));
 
-                const holidayEvent = hasEvents.find((ev) => (ev as any).isHoliday);
+                const holidayEvent = hasEvents.find((ev) => ev.isHoliday);
                 const isHolidayDay = Boolean(holidayEvent);
 
                 let isAvailable = true;
@@ -193,7 +195,7 @@ export function UnifiedVisitCalendar({
 
                 let titleAttr = undefined;
                 if (isHolidayDay) {
-                    titleAttr = (holidayEvent as any)?.holidayName ?? "Feriado";
+                    titleAttr = holidayEvent?.holidayName ?? "Feriado";
                 } else if (isBlockedOverride && availability) {
                     const dateStr = format(date, "yyyy-MM-dd");
                     const dateOverride = availability.dateRules.find((r) => r.date === dateStr);
@@ -208,7 +210,7 @@ export function UnifiedVisitCalendar({
             }}
 
             eventPropGetter={(event) => {
-                const isHoliday = (event as any).isHoliday || (event as any).type === "holiday";
+                const isHoliday = event.isHoliday || event.type === "holiday";
                 if (isHoliday) {
                     return {
                         className: "!bg-pink-400 !text-white !text-[10px] font-bold border-none rounded-md px-1",

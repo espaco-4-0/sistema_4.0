@@ -1,6 +1,7 @@
 import { prisma } from "@/src/infra/data/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+
 import { authOptions } from "../../auth/[...nextauth]/route";
 
 async function getSessionUser() {
@@ -20,9 +21,8 @@ export async function GET() {
         });
 
         const formattedDateRules = dateRules.map((rule) => {
-            const dateStr = rule.date instanceof Date 
-                ? rule.date.toISOString().slice(0, 10) 
-                : String(rule.date).slice(0, 10);
+            const dateStr =
+                rule.date instanceof Date ? rule.date.toISOString().slice(0, 10) : String(rule.date).slice(0, 10);
             return {
                 id: rule.id,
                 date: dateStr,
@@ -64,7 +64,10 @@ export async function POST(req: Request) {
             for (const rule of rules) {
                 const day = parseInt(String(rule.dayOfWeek), 10);
                 if (isNaN(day) || day < 0 || day > 6) {
-                    return NextResponse.json({ message: "Dia da semana inválido (deve ser entre 0 e 6)" }, { status: 400 });
+                    return NextResponse.json(
+                        { message: "Dia da semana inválido (deve ser entre 0 e 6)" },
+                        { status: 400 }
+                    );
                 }
 
                 await prisma.visitWeekdayRule.upsert({
@@ -75,8 +78,8 @@ export async function POST(req: Request) {
             }
 
             return NextResponse.json({ message: "Regras semanais atualizadas com sucesso" });
-        } 
-        
+        }
+
         if (action === "saveDateRule") {
             const { dates, isAvailable, reason } = body;
             if (!Array.isArray(dates) || dates.length === 0) {
@@ -84,7 +87,10 @@ export async function POST(req: Request) {
             }
 
             if (dates.length > 366) {
-                return NextResponse.json({ message: "Intervalo de datas limite excedido (máximo de 1 ano)" }, { status: 400 });
+                return NextResponse.json(
+                    { message: "Intervalo de datas limite excedido (máximo de 1 ano)" },
+                    { status: 400 }
+                );
             }
 
             const today = new Date();
@@ -97,7 +103,10 @@ export async function POST(req: Request) {
                 if (isNaN(parsedDate.getTime())) continue;
 
                 if (parsedDate < today) {
-                    return NextResponse.json({ message: "Não é possível alterar a disponibilidade de datas passadas" }, { status: 400 });
+                    return NextResponse.json(
+                        { message: "Não é possível alterar a disponibilidade de datas passadas" },
+                        { status: 400 }
+                    );
                 }
 
                 await prisma.visitDateRule.upsert({
@@ -124,7 +133,10 @@ export async function POST(req: Request) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (parsedDate < today) {
-                return NextResponse.json({ message: "Não é possível alterar a disponibilidade de datas passadas" }, { status: 400 });
+                return NextResponse.json(
+                    { message: "Não é possível alterar a disponibilidade de datas passadas" },
+                    { status: 400 }
+                );
             }
 
             await prisma.visitDateRule.deleteMany({

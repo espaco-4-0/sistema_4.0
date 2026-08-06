@@ -82,12 +82,8 @@ export async function postHandlers(req: Request) {
         }
 
         if (!isAvailable) {
-            return NextResponse.json(
-                { message: blockedReason },
-                { status: 400 }
-            );
+            return NextResponse.json({ message: blockedReason }, { status: 400 });
         }
-
 
         const dateStart = new Date(visitDate);
         dateStart.setHours(0, 0, 0, 0);
