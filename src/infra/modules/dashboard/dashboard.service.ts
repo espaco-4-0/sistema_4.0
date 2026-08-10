@@ -132,7 +132,7 @@ export async function getOverviewAlerts() {
             id: "courses-without-lessons",
             title: "Cursos ativos sem aulas cadastradas",
             count: coursesWithoutLessons,
-            href: "/professor/visao-geral",
+            href: "/professor/cursos",
         },
         { id: "inventory", title: "Itens de inventário zerados", count: outOfStock, href: "/professor/recursos" },
     ];

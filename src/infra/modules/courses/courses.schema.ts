@@ -89,6 +89,7 @@ const courseBaseSchema = z
         titulo: z.string().trim().min(3).max(150),
         descricao: z.string().trim().min(10).max(2000).optional(),
         cargaHoraria: z.number().int().positive().optional(),
+        vagas: z.number().int().positive("Vagas deve ser maior que zero").nullable().optional(),
         dataInicio: dateSchema.nullable().optional(),
         dataFim: dateSchema.nullable().optional(),
         ativo: z.boolean().optional(),

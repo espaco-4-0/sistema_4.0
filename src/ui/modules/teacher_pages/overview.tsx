@@ -1,97 +1,60 @@
-import { AlertCircle, Clock, FolderKanban, Package, TrendingUp, Users } from "lucide-react";
+"use client";
+
+import { OverviewAlert } from "@/src/infra/modules/professor/dashboard.service";
+import { useOverview } from "@/src/ui/modules/teacher_pages/queries/dashboard.queries";
+import {
+    AlertCircle,
+    CalendarClock,
+    CheckCircle2,
+    ClipboardList,
+    FolderKanban,
+    Loader2,
+    Package,
+    TrendingDown,
+    TrendingUp,
+    Users,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const metricsData = [
-    {
-        title: "Total de Estudantes",
-        value: "127",
-        change: "+12%",
-        trend: "up",
-        subtitle: "Desde o último mês",
-        icon: Users,
-        color: "bg-blue-100",
-        iconColor: "text-blue-700",
-    },
-    {
-        title: "Projetos Ativos",
-        value: "34",
-        change: "+8%",
-        trend: "up",
-        subtitle: "Em desenvolvimento",
-        icon: FolderKanban,
-        color: "bg-yellow-100",
-        iconColor: "text-yellow-700",
-    },
-    {
-        title: "Taxa de Conclusão",
-        value: "87%",
-        change: "+5%",
-        trend: "up",
-        subtitle: "Últimos 3 meses",
-        icon: TrendingUp,
-        color: "bg-green-100",
-        iconColor: "text-green-700",
-    },
-    {
-        title: "Pendências",
-        value: "7",
-        change: "-2%",
-        trend: "down",
-        subtitle: "Requerem atenção",
-        icon: AlertCircle,
-        color: "bg-red-100",
-        iconColor: "text-red-700",
-    },
-];
+const ALERT_ICONS: Record<string, typeof AlertCircle> = {
+    "project-requests": ClipboardList,
+    visits: CalendarClock,
+    "courses-without-lessons": FolderKanban,
+    inventory: Package,
+};
 
-const chartData = [
-    { month: "Jan", Estudantes: 78, Projetos: 42 },
-    { month: "Fev", Estudantes: 98, Projetos: 45 },
-    { month: "Mar", Estudantes: 110, Projetos: 48 },
-    { month: "Abr", Estudantes: 102, Projetos: 58 },
-    { month: "Mai", Estudantes: 140, Projetos: 52 },
-    { month: "Jun", Estudantes: 142, Projetos: 88 },
-];
+function alertSeverity(alert: OverviewAlert) {
+    // Solicitações paradas travam alunos; as demais são avisos de organização.
+    const urgente = alert.id === "project-requests" || alert.id === "visits";
 
-const alerts = [
-    {
-        id: 1,
-        title: "Projeto sem orientador",
-        description: "Braço Robótico IoT precisa de orientação",
-        time: "2h atrás",
-        priority: "Urgente",
-        priorityColor: "bg-red-100 text-red-700",
-        icon: AlertCircle,
-        iconBg: "bg-red-100",
-        iconColor: "text-red-600",
-    },
-    {
-        id: 2,
-        title: "Prazo próximo",
-        description: "Sistema de Automação vence em 3 dias",
-        time: "5h atrás",
-        priority: "Aviso",
-        priorityColor: "bg-yellow-100 text-yellow-700",
-        icon: Clock,
-        iconBg: "bg-yellow-100",
-        iconColor: "text-yellow-600",
-    },
-    {
-        id: 3,
-        title: "Material pendente",
-        description: "Arduino Mega necessário para o projeto",
-        time: "1 dia atrás",
-        priority: "Aviso",
-        priorityColor: "bg-yellow-100 text-yellow-700",
-        icon: Package,
-        iconBg: "bg-yellow-100",
-        iconColor: "text-yellow-600",
-    },
-];
+    return urgente
+        ? { label: "Urgente", badge: "bg-red-100 text-red-700", bg: "bg-red-100", icon: "text-red-600" }
+        : { label: "Aviso", badge: "bg-yellow-100 text-yellow-700", bg: "bg-yellow-100", icon: "text-yellow-600" };
+}
+
+function TrendLabel({ changePercent }: Readonly<{ changePercent: number | null }>) {
+    if (changePercent === null) {
+        return <p className="text-xs text-gray-400 mt-1">Sem base de comparação</p>;
+    }
+
+    const positivo = changePercent >= 0;
+    const Icon = positivo ? TrendingUp : TrendingDown;
+
+    return (
+        <p className={`text-xs mt-1 flex items-center gap-1 ${positivo ? "text-green-600" : "text-red-600"}`}>
+            <Icon className="w-3 h-3" />
+            {positivo ? "+" : ""}
+            {changePercent}% vs. mês anterior
+        </p>
+    );
+}
 
 export function VisaoGeral() {
     const { data: session, status } = useSession();
+    const { data: overview, isLoading, isError } = useOverview();
+
     if (status === "loading") return null;
 
     if (!session || session.user.role !== "ADMIN") {
@@ -107,10 +70,69 @@ export function VisaoGeral() {
             </div>
         );
     }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-24 text-gray-400 gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" /> Carregando indicadores...
+            </div>
+        );
+    }
+
+    if (isError || !overview) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 text-center">
+                <AlertCircle size={40} className="text-red-400 mb-3" />
+                <h3 className="text-lg font-semibold text-gray-900">Não foi possível carregar os indicadores</h3>
+                <p className="text-gray-500 mt-1 text-sm">Tente recarregar a página.</p>
+            </div>
+        );
+    }
+
+    const { metrics, series, alerts } = overview;
+
+    const metricCards = [
+        {
+            title: "Total de Estudantes",
+            value: String(metrics.students.total),
+            changePercent: metrics.students.changePercent,
+            subtitle: `${metrics.students.newThisMonth} novo(s) neste mês`,
+            icon: Users,
+            color: "bg-blue-100",
+            iconColor: "text-blue-700",
+        },
+        {
+            title: "Projetos Ativos",
+            value: String(metrics.activeProjects.total),
+            changePercent: metrics.activeProjects.changePercent,
+            subtitle: `${metrics.activeProjects.newThisMonth} criado(s) neste mês`,
+            icon: FolderKanban,
+            color: "bg-yellow-100",
+            iconColor: "text-yellow-700",
+        },
+        {
+            title: "Taxa de Presença",
+            value: `${metrics.attendanceRate.percent}%`,
+            changePercent: null,
+            subtitle: `${metrics.attendanceRate.confirmed} de ${metrics.attendanceRate.total} presenças`,
+            icon: CheckCircle2,
+            color: "bg-green-100",
+            iconColor: "text-green-700",
+        },
+        {
+            title: "Pendências",
+            value: String(metrics.pending.total),
+            changePercent: null,
+            subtitle: "Requerem atenção",
+            icon: AlertCircle,
+            color: "bg-red-100",
+            iconColor: "text-red-700",
+        },
+    ];
+
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {metricsData.map((metric) => {
+                {metricCards.map((metric) => {
                     const Icon = metric.icon;
 
                     return (
@@ -122,6 +144,11 @@ export function VisaoGeral() {
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">{metric.title}</p>
                                     <h3 className="text-3xl font-bold">{metric.value}</h3>
+                                    {metric.changePercent === null ? (
+                                        <p className="text-xs text-gray-400 mt-1">{metric.subtitle}</p>
+                                    ) : (
+                                        <TrendLabel changePercent={metric.changePercent} />
+                                    )}
                                 </div>
 
                                 <div className={`${metric.color} p-3 rounded-lg`}>
@@ -141,7 +168,7 @@ export function VisaoGeral() {
                     </div>
 
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={chartData}>
+                        <BarChart data={series}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="month" />
                             <YAxis />
@@ -159,32 +186,46 @@ export function VisaoGeral() {
                         <p className="text-sm text-gray-500">Itens que requerem atenção</p>
                     </div>
 
-                    <div className="space-y-4">
-                        {alerts.map((alert) => {
-                            const Icon = alert.icon;
+                    {alerts.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                            <CheckCircle2 className="w-10 h-10 text-green-500 mb-2" />
+                            <p className="text-sm text-gray-600 font-medium">Nada pendente</p>
+                            <p className="text-xs text-gray-400 mt-1">Tudo em dia por aqui.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {alerts.map((alert) => {
+                                const Icon = ALERT_ICONS[alert.id] ?? AlertCircle;
+                                const severity = alertSeverity(alert);
 
-                            return (
-                                <div key={alert.id} className="border border-gray-100 rounded-lg p-4">
-                                    <div className="flex gap-3">
-                                        <div className={`${alert.iconBg} p-2 rounded-lg h-fit`}>
-                                            <Icon className={`w-5 h-5 ${alert.iconColor}`} />
-                                        </div>
-
-                                        <div className="flex-1">
-                                            <div className="flex items-start justify-between mb-1">
-                                                <h4 className="font-medium text-sm">{alert.title}</h4>
-                                                <span className={`text-xs px-2 py-1 rounded ${alert.priorityColor}`}>
-                                                    {alert.priority}
-                                                </span>
+                                return (
+                                    <Link
+                                        key={alert.id}
+                                        href={alert.href}
+                                        className="block border border-gray-100 rounded-lg p-4 hover:border-gray-300 transition"
+                                    >
+                                        <div className="flex gap-3">
+                                            <div className={`${severity.bg} p-2 rounded-lg h-fit`}>
+                                                <Icon className={`w-5 h-5 ${severity.icon}`} />
                                             </div>
-                                            <p className="text-xs text-gray-600 mb-2">{alert.description}</p>
-                                            <p className="text-xs text-gray-400">{alert.time}</p>
+
+                                            <div className="flex-1">
+                                                <div className="flex items-start justify-between mb-1">
+                                                    <h4 className="font-medium text-sm">{alert.title}</h4>
+                                                    <span className={`text-xs px-2 py-1 rounded ${severity.badge}`}>
+                                                        {severity.label}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-gray-600">
+                                                    {alert.count} {alert.count === 1 ? "item" : "itens"}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

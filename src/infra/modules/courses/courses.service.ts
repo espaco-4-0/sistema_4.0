@@ -1,4 +1,4 @@
-import { ApiCourse, CourseCategory, CourseDetails } from "./courses.types";
+import { ApiCourse, ApiCourseSchedule, CourseCategory, CourseDetails } from "./courses.types";
 
 const categoryImages: Record<CourseCategory, string> = {
     progamacao: "https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80",
@@ -54,12 +54,35 @@ function buildTopics(category: CourseCategory): CourseDetails["topics"] {
     ];
 }
 
+const WEEKDAY_NAMES = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+/** Agrupa os horários por faixa para não repetir "14:00 - 16:00" em cada dia. */
+function buildScheduleLabel(schedule: ApiCourseSchedule[]): string {
+    if (schedule.length === 0) return "A definir";
+
+    const ranges = [...new Set(schedule.map((slot) => `${slot.startTime} - ${slot.endTime}`))];
+    return ranges.join(" / ");
+}
+
+function buildWeekDays(schedule: ApiCourseSchedule[]): string[] {
+    if (schedule.length === 0) return ["A definir"];
+
+    const days = [...new Set(schedule.map((slot) => slot.dayOfWeek))].sort((a, b) => a - b);
+    return days.map((day) => WEEKDAY_NAMES[day] ?? "A definir");
+}
+
 export function adaptApiCourseToView(course: ApiCourse): CourseDetails {
     const textBase = `${course.title} ${course.description ?? ""}`;
     const category = inferCategory(textBase);
     const cargaHoraria = course.workload ?? 16;
     const durationWeeks = Math.max(1, Math.ceil(cargaHoraria / 4));
-    const startDate = formatDate(course.createdAt);
+    const schedule = course.CourseSchedule ?? [];
+
+    // Sem período cadastrado, cai para a data de criação para não exibir vazio.
+    const startDate = formatDate(course.startDate ?? course.createdAt);
+    const endDate = course.endDate ? formatDate(course.endDate) : startDate;
+
+    const location = schedule.find((slot) => slot.location?.name)?.location?.name ?? "Espaco 4.0";
 
     return {
         id: course.id,
@@ -69,14 +92,15 @@ export function adaptApiCourseToView(course: ApiCourse): CourseDetails {
         longDescription: course.description ?? "Curso disponivel no Espaco 4.0.",
         durationWeeks,
         subscribes: course._count?.Enrollment ?? 0,
-        maxSubscribes: 30,
+        // Sem capacidade definida, tratamos como turma aberta.
+        maxSubscribes: course.capacity ?? Number.POSITIVE_INFINITY,
         level: inferLevel(cargaHoraria),
         category,
         startDate,
-        endDate: startDate,
-        weekDays: ["A definir"],
-        schedule: "A definir",
-        location: "Espaco 4.0",
+        endDate,
+        weekDays: buildWeekDays(schedule),
+        schedule: buildScheduleLabel(schedule),
+        location,
         cardImage: categoryImages[category],
         gallery: [
             { id: 1, url: categoryImages[category], alt: course.title },

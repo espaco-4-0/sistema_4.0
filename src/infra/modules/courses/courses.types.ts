@@ -32,15 +32,26 @@ export type CourseDetails = {
     }[];
 };
 
+export type ApiCourseSchedule = {
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    location?: { id: string; name: string } | null;
+};
+
 export type ApiCourse = {
     id: string;
     title: string;
     description: string | null;
     workload: number | null;
+    capacity?: number | null;
+    startDate?: string | null;
+    endDate?: string | null;
     createdAt: string;
     professor: {
         fullName: string;
     } | null;
+    CourseSchedule?: ApiCourseSchedule[];
     _count?: {
         Enrollment?: number;
     };

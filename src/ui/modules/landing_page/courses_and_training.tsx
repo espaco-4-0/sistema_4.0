@@ -120,7 +120,9 @@ export default function CoursesAndTraining() {
 
                                                 <div className="mt-4 flex items-center gap-1.5 text-sm text-black font-medium">
                                                     <Users className="h-4 w-4 text-yellow-600" />
-                                                    {course.maxSubscribes - course.subscribes} vagas
+                                                    {Number.isFinite(course.maxSubscribes)
+                                                        ? `${Math.max(0, course.maxSubscribes - course.subscribes)} de ${course.maxSubscribes} vagas`
+                                                        : `${course.subscribes} inscritos`}
                                                 </div>
                                             </div>
                                         </CardContent>

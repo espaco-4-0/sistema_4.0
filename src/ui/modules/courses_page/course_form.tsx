@@ -101,13 +101,22 @@ export default function CourseForm({ course, courseId, setCloseCourse }: CourseF
 
         return (
             <form
-                onSubmit={handleSubmit(async (data) => {
+                onSubmit={handleSubmit(async () => {
                     try {
                         setLoading(true);
 
                         const response = await fetch(`/api/courses/${courseId}/subscribe`, {
                             method: "POST",
                         });
+
+                        // A landing é pública: quem não tem sessão precisa ser levado ao
+                        // login e devolvido para cá, em vez de receber um erro sem saída.
+                        if (response.status === 401) {
+                            toast.info("Faça login para concluir sua inscrição.");
+                            const callbackUrl = encodeURIComponent(globalThis.location.pathname);
+                            globalThis.location.href = `/login?callbackUrl=${callbackUrl}`;
+                            return;
+                        }
 
                         if (!response.ok) {
                             const payload = (await response.json().catch(() => ({}))) as { message?: string };

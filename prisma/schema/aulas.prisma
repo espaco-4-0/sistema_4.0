@@ -35,6 +35,7 @@ model Course {
   title       String
   description String?
   workload    Int? // em horas
+  capacity    Int? // vagas totais; null = sem limite
   startDate   DateTime? @db.Date
   endDate     DateTime? @db.Date
   isActive    Boolean   @default(true)

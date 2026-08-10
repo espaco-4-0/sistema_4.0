@@ -1,11 +1,12 @@
 import {
     BarChart3,
+    BookOpen,
     Calendar,
     ClipboardCheck,
     FolderKanban,
     House,
-    Medal,
     Image,
+    Medal,
     Newspaper,
     Package,
     Settings,
@@ -15,6 +16,7 @@ import {
 
 export const navItems = [
     { id: "visao-geral", name: "Visão Geral", icon: House },
+    { id: "cursos", name: "Configurar Cursos", icon: BookOpen },
     { id: "gerenciar-projetos", name: "Gerenciar Projetos", icon: FolderKanban },
     { id: "gerenciar-usuarios", name: "Gerenciar Usuários", icon: Users },
     { id: "relatorios", name: "Relatórios", icon: BarChart3 },
@@ -24,6 +26,6 @@ export const navItems = [
     { id: "recursos", name: "Recursos", icon: Package },
     { id: "configuracoes", name: "Configurações", icon: Settings },
     { id: "agenda", name: "Agenda De Visitas", icon: Calendar },
-    { id: "noticias", name: "Controle de Notícias", icon: Newspaper  },
+    { id: "noticias", name: "Controle de Notícias", icon: Newspaper },
     { id: "galeria", name: "Galeria de Fotos", icon: Image },
 ];

@@ -67,6 +67,7 @@ export async function createCourse(payload: CreateCoursePayload, professorId: st
             title: payload.titulo,
             description: payload.descricao,
             workload: payload.cargaHoraria,
+            capacity: payload.vagas ?? null,
             startDate: toDateOnly(payload.dataInicio) ?? null,
             endDate: toDateOnly(payload.dataFim) ?? null,
             isActive: payload.ativo ?? true,
@@ -92,6 +93,7 @@ export async function updateCourse(
     if (payload.titulo !== undefined) data.title = payload.titulo;
     if (payload.descricao !== undefined) data.description = payload.descricao;
     if (payload.cargaHoraria !== undefined) data.workload = payload.cargaHoraria;
+    if (payload.vagas !== undefined) data.capacity = payload.vagas;
     if (payload.dataInicio !== undefined) data.startDate = toDateOnly(payload.dataInicio);
     if (payload.dataFim !== undefined) data.endDate = toDateOnly(payload.dataFim);
     if (payload.ativo !== undefined) data.isActive = payload.ativo;
