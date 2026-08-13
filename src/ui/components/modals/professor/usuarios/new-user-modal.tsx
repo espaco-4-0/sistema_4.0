@@ -12,6 +12,7 @@ import {
 } from "@/src/ui/components/ui/dialog";
 import { Input } from "@/src/ui/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/ui/components/ui/select";
+import { educationOptions, ifalOptions, raceOptions } from "@/src/ui/forms/ui/user-registration";
 import { Lock, Mail, User, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,13 +23,17 @@ interface NewUserModalProps {
     onUserCreated?: () => void;
 }
 
+// Os valores precisam bater com o enum UserRole do Prisma — o backend valida com
+// z.enum(VALID_ROLES) e rejeita qualquer outra coisa.
 const roleOptions = [
     { value: "PROFESSOR", label: "Professor" },
-    { value: "PESQUISADOR", label: "Pesquisador" },
+    { value: "RESEARCHER", label: "Pesquisador" },
     { value: "MONITOR", label: "Monitor" },
-    { value: "VISITANTE", label: "Visitante" },
+    { value: "VISITOR", label: "Visitante" },
     { value: "ADMIN", label: "Administrador" },
 ] as const;
+
+const MIN_AGE = 15;
 
 export default function NewUserModal({
     isOpen,
@@ -38,7 +43,12 @@ export default function NewUserModal({
 }: Readonly<NewUserModalProps>) {
     const [nomeCompleto, setNomeCompleto] = useState("");
     const [email, setEmail] = useState("");
-    const [role, setRole] = useState<(typeof roleOptions)[number]["value"]>("VISITANTE");
+    const [role, setRole] = useState<(typeof roleOptions)[number]["value"]>("VISITOR");
+    const [dataNascimento, setDataNascimento] = useState("");
+    const [telefone, setTelefone] = useState("");
+    const [raca, setRaca] = useState<string>("");
+    const [educacao, setEducacao] = useState<string>("");
+    const [ifalAfiliacao, setIfalAfiliacao] = useState<string>("");
     const [senha, setSenha] = useState("");
     const [confirmSenha, setConfirmSenha] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +56,12 @@ export default function NewUserModal({
     function resetForm() {
         setNomeCompleto("");
         setEmail("");
-        setRole("VISITANTE");
+        setRole("VISITOR");
+        setDataNascimento("");
+        setTelefone("");
+        setRaca("");
+        setEducacao("");
+        setIfalAfiliacao("");
         setSenha("");
         setConfirmSenha("");
     }
@@ -54,6 +69,17 @@ export default function NewUserModal({
     async function handleCreateUser() {
         if (!nomeCompleto.trim() || !email.trim() || !senha || !confirmSenha) {
             toast.error("Preencha todos os campos obrigatórios");
+            return;
+        }
+
+        if (!dataNascimento || !telefone.trim() || !raca || !educacao || !ifalAfiliacao) {
+            toast.error("Preencha os dados sociodemográficos");
+            return;
+        }
+
+        const idade = (Date.now() - new Date(dataNascimento).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+        if (idade < MIN_AGE) {
+            toast.error(`Idade mínima de ${MIN_AGE} anos`);
             return;
         }
 
@@ -69,11 +95,11 @@ export default function NewUserModal({
                 email: email.trim(),
                 senha,
                 role,
-                dataNascimento: "2000-01-01",
-                telefone: "(00) 00000-0000",
-                raca: "NAO_INFORMADA",
-                educacao: "MEDIO_COMPLETO",
-                ifalAfiliacao: "NAO_ALUNO",
+                dataNascimento,
+                telefone: telefone.trim(),
+                raca,
+                educacao,
+                ifalAfiliacao,
                 ativo: true,
             };
 
@@ -158,6 +184,78 @@ export default function NewUserModal({
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-700">Data de Nascimento</p>
+                            <Input
+                                type="date"
+                                className="h-11"
+                                value={dataNascimento}
+                                onChange={(e) => setDataNascimento(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-700">Telefone</p>
+                            <Input
+                                className="h-11"
+                                placeholder="(82) 90000-0000"
+                                value={telefone}
+                                onChange={(e) => setTelefone(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-700">Raça/Cor</p>
+                            <Select value={raca} onValueChange={setRaca}>
+                                <SelectTrigger className="h-11">
+                                    <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {raceOptions.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-700">Escolaridade</p>
+                            <Select value={educacao} onValueChange={setEducacao}>
+                                <SelectTrigger className="h-11">
+                                    <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {educationOptions.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium text-gray-700">Vínculo com o IFAL</p>
+                            <Select value={ifalAfiliacao} onValueChange={setIfalAfiliacao}>
+                                <SelectTrigger className="h-11">
+                                    <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ifalOptions.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -1,4 +1,5 @@
 import { DragEvent, useRef, useState } from "react";
+import { IMPORT_COLUMNS } from "@/src/infra/modules/users/user-import.constants";
 import {
     Dialog,
     DialogContent,
@@ -7,8 +8,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/src/ui/components/ui/dialog";
+import { downloadCsv, parseCsv, toCsv } from "@/src/ui/lib/csv";
 import { Download, FileText, UploadCloud, X } from "lucide-react";
 import { toast } from "sonner";
+
+type ImportResponse = {
+    message?: string;
+    importados?: number;
+    falhas?: { linha: number; email: string; motivo: string }[];
+};
 
 interface ImportCSVModalProps {
     isOpen: boolean;
@@ -19,67 +27,109 @@ interface ImportCSVModalProps {
 export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: Readonly<ImportCSVModalProps>) {
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDownloadTemplate = () => {
         toast.success("Download do modelo iniciado!");
 
-        const headers = ["Nome", "E-mail", "Tipo", "Status"];
-        const exampleRow = ["Maria Silva", "maria@exemplo.com", "Aluno", "Ativo"];
-        const csvContent = [headers.join(","), exampleRow.join(",")].join("\n");
-        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+        // Os cabe\u00E7alhos precisam bater com as chaves de importRowSchema, e os
+        // valores de enum s\u00E3o os do Prisma \u2014 qualquer outra grafia \u00E9 rejeitada.
+        const exemplos = [
+            [
+                "Maria Silva Santos",
+                "maria.silva@ifal.edu.br",
+                "Senha@1234",
+                "2003-05-14",
+                "(82) 90000-0001",
+                "BROWN",
+                "HIGH_SCHOOL_COMPLETE",
+                "STUDENT",
+                "VISITOR",
+            ],
+            [
+                "Joao Pereira Lima",
+                "joao.pereira@ifal.edu.br",
+                "Senha@1234",
+                "1990-11-02",
+                "(82) 90000-0002",
+                "WHITE",
+                "HIGHER_EDUCATION_COMPLETE",
+                "ALUMNI",
+                "PROFESSOR",
+            ],
+        ];
 
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "modelo_importacao_usuarios.csv");
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
+        downloadCsv("modelo_importacao_usuarios.csv", toCsv([...IMPORT_COLUMNS], exemplos));
     };
 
-    const handleImportSubmit = () => {
-        if (!file) return;
+    const handleImportSubmit = async () => {
+        if (!file || isImporting) return;
 
         const fileName = file.name;
-        onClose();
-        const toastId = toast.loading("Iniciando processamento...");
+        const toastId = toast.loading(`Lendo "${fileName}"...`);
+        setIsImporting(true);
 
-        let progress = 0;
+        try {
+            const usuarios = parseCsv(await file.text());
 
-        const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 15) + 5;
+            if (usuarios.length === 0) {
+                toast.error("O arquivo não tem nenhuma linha de dados.", { id: toastId });
+                return;
+            }
 
-            if (progress >= 100) {
-                clearInterval(interval);
+            toast.loading(`Importando ${usuarios.length} usuário(s)...`, { id: toastId });
 
-                toast.success("Importação concluída!", {
+            const response = await fetch("/api/users/import", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usuarios }),
+            });
+
+            const body = (await response.json().catch(() => null)) as ImportResponse | null;
+
+            if (!response.ok) {
+                toast.error(body?.message ?? "Não foi possível importar", { id: toastId });
+                return;
+            }
+
+            const importados = body?.importados ?? 0;
+            const falhas = body?.falhas ?? [];
+
+            if (falhas.length === 0) {
+                toast.success(`${importados} usuário(s) importado(s).`, { id: toastId });
+            } else {
+                // Mostra as primeiras falhas; o CSV de erros traz a lista completa.
+                const resumo = falhas
+                    .slice(0, 3)
+                    .map((f) => `${f.email || `linha ${f.linha}`}: ${f.motivo}`)
+                    .join(" · ");
+
+                toast.warning(`${importados} importado(s), ${falhas.length} com erro.`, {
                     id: toastId,
-                    description: `Todos os usuários de "${fileName}" foram processados.`,
+                    description: resumo + (falhas.length > 3 ? ` · +${falhas.length - 3}` : ""),
+                    duration: 10_000,
                 });
 
-                onImportSuccess?.();
-                setFile(null);
-            } else {
-                toast.loading(
-                    <div className="flex flex-col gap-2 w-full pr-4">
-                        <div className="flex justify-between items-center">
-                            <span className="font-medium text-sm text-gray-800">Processando arquivo...</span>
-                            <span className="text-xs font-bold text-yellow-600">{progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                            <div
-                                className="bg-yellow-400 h-full transition-all duration-300 ease-out"
-                                style={{ width: `${progress}%` }}
-                            />
-                        </div>
-                        <span className="text-[10px] text-gray-500 truncate">{fileName}</span>
-                    </div>,
-                    { id: toastId }
+                downloadCsv(
+                    "erros_importacao.csv",
+                    toCsv(
+                        ["linha", "email", "motivo"],
+                        falhas.map((f) => [f.linha, f.email, f.motivo])
+                    )
                 );
             }
-        }, 400);
+
+            if (importados > 0) onImportSuccess?.();
+
+            setFile(null);
+            onClose();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Erro ao processar o arquivo";
+            toast.error(message, { id: toastId });
+        } finally {
+            setIsImporting(false);
+        }
     };
 
     const handleOpenChange = (open: boolean) => {
@@ -214,16 +264,16 @@ export function ImportCSVModal({ isOpen, onClose, onImportSuccess }: Readonly<Im
                     <button
                         type="button"
                         onClick={handleImportSubmit}
-                        disabled={!file}
+                        disabled={!file || isImporting}
                         className={`flex-1 sm:flex-none px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg hover:cursor-pointer
                             ${
-                                file
+                                file && !isImporting
                                     ? "bg-gray-900 text-white hover:bg-black hover:shadow-xl active:scale-95 cursor-pointer"
                                     : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                             }
                         `}
                     >
-                        Finalizar Importação
+                        {isImporting ? "Importando..." : "Finalizar Importação"}
                     </button>
                 </DialogFooter>
             </DialogContent>

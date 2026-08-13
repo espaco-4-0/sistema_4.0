@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getStudentOptions } from "@/src/infra/modules/professor/students.service";
 import { GenerateBatchModal } from "@/src/ui/components/modals/professor/certificados/generate-batch-modal";
 import { GenerateSingleModal } from "@/src/ui/components/modals/professor/certificados/generate-single-modal";
 import { TemplateBuilderModal } from "@/src/ui/components/modals/professor/certificados/template-builder-modal";
@@ -16,6 +17,11 @@ import {
 } from "@/src/ui/components/ui/dropdown-menu";
 import { Input } from "@/src/ui/components/ui/input";
 import { Label } from "@/src/ui/components/ui/label";
+import {
+    useCertificateTemplates,
+    useEmitCertificate,
+} from "@/src/ui/modules/teacher_pages/queries/certificates.queries";
+import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Award, FileUp, Filter, PenLine, ShieldCheck, Star, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -55,20 +61,6 @@ const stats = [
     },
 ];
 
-const students = [
-    { name: "Larissa Mendes", course: "Robótica Educacional", status: "Concluído" },
-    { name: "Pedro Alves", course: "Pesquisa Aplicada", status: "Em andamento" },
-    { name: "Camila Rocha", course: "Projeto Integrador", status: "Concluído" },
-    { name: "Tiago Luz", course: "Monitoria de Sistemas", status: "Concluído" },
-    { name: "Ana Pereira", course: "Design de Serviços", status: "Em espera" },
-];
-
-const templates = [
-    { name: "Participação Geral", type: "Participação", updated: "14/01/2026", preview: "bg-yellow-100" },
-    { name: "Conclusão Avançada", type: "Conclusão", updated: "08/01/2026", preview: "bg-yellow-50" },
-    { name: "Excelência Acadêmica", type: "Excelência", updated: "02/01/2026", preview: "bg-yellow-200" },
-];
-
 export default function Certificados() {
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [isSingleModalOpen, setIsSingleModalOpen] = useState(false);
@@ -77,21 +69,26 @@ export default function Certificados() {
     const [statusFilter, setStatusFilter] = useState("Todos");
     const { data: session, status } = useSession();
 
+    const { data: templates = [] } = useCertificateTemplates();
+    const { data: students = [] } = useQuery({
+        queryKey: ["students", "options"],
+        queryFn: getStudentOptions,
+        staleTime: 5 * 60 * 1000,
+    });
+    const emitMutation = useEmitCertificate();
+
     const handleSaveSignature = () => {
         toast.success("Assinatura salva com sucesso!");
     };
 
-    const statusStyles: Record<string, string> = {
-        Concluído: "bg-green-50 text-green-700 border-green-200",
-        "Em andamento": "bg-blue-50 text-blue-700 border-blue-200",
-        "Em espera": "bg-yellow-50 text-yellow-700 border-yellow-200",
-    };
-
     const filteredStudents = students.filter((student) => {
+        const termo = searchQuery.toLowerCase();
         const matchesSearch =
-            student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.course.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === "Todos" || student.status === statusFilter;
+            !termo || student.fullName.toLowerCase().includes(termo) || student.email.toLowerCase().includes(termo);
+        const matchesStatus =
+            statusFilter === "Todos" ||
+            (statusFilter === "Ativo" && student.isActive) ||
+            (statusFilter === "Inativo" && !student.isActive);
         return matchesSearch && matchesStatus;
     });
     if (status === "loading") return null;
@@ -161,15 +158,20 @@ export default function Certificados() {
                     <div className="space-y-3">
                         {templates.map((item) => (
                             <div
-                                key={item.name}
+                                key={item.id}
                                 className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border rounded-xl p-4"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-20 h-12 rounded-lg border border-yellow-200 ${item.preview}`} />
+                                    <div
+                                        className="w-20 h-12 rounded-lg border border-yellow-200"
+                                        style={{
+                                            backgroundColor: (item.layout?.corFundo as string | undefined) ?? "#FFFDF0",
+                                        }}
+                                    />
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-900">{item.name}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{item.title}</p>
                                         <p className="text-xs text-gray-500">
-                                            {item.type} • Atualizado em {item.updated}
+                                            {item.type} • {item._count?.emissoes ?? 0} emissão(ões)
                                         </p>
                                     </div>
                                 </div>
@@ -295,23 +297,34 @@ export default function Certificados() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {filteredStudents.map((student) => (
-                                <tr key={student.name} className="hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{student.name}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{student.course}</td>
+                                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{student.fullName}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">{student.email}</td>
                                     <td className="px-6 py-4 text-sm">
                                         <span
                                             className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                                                statusStyles[student.status] ??
-                                                "bg-gray-50 text-gray-700 border-gray-200"
+                                                student.isActive
+                                                    ? "bg-green-50 text-green-700 border-green-200"
+                                                    : "bg-gray-50 text-gray-700 border-gray-200"
                                             }`}
                                         >
-                                            {student.status}
+                                            {student.isActive ? "Ativo" : "Inativo"}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">Participação Geral</td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {templates[0]?.title ?? "Sem template"}
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-right">
                                         <Button
                                             variant="secondary"
+                                            disabled={templates.length === 0 || emitMutation.isPending}
+                                            onClick={() =>
+                                                emitMutation.mutate({
+                                                    templateId: templates[0].id,
+                                                    alunoId: student.id,
+                                                    curso: templates[0].title,
+                                                })
+                                            }
                                             className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:cursor-pointer"
                                         >
                                             Emitir
@@ -328,15 +341,15 @@ export default function Certificados() {
                 isOpen={isBatchModalOpen}
                 onOpenChange={setIsBatchModalOpen}
                 onClose={() => setIsBatchModalOpen(false)}
-                templates={templates}
+                templates={templates.map((t) => ({ name: t.title }))}
             />
 
             <GenerateSingleModal
                 isOpen={isSingleModalOpen}
                 onOpenChange={setIsSingleModalOpen}
                 onClose={() => setIsSingleModalOpen(false)}
-                templates={templates}
-                students={students}
+                templates={templates.map((t) => ({ name: t.title }))}
+                students={students.map((s) => ({ name: s.fullName, course: s.email }))}
             />
 
             <TemplateBuilderModal

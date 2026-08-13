@@ -1,0 +1,136 @@
+name: CI
+
+on:
+    pull_request:
+        branches: [develop, main]
+    push:
+        branches: [develop, main]
+
+# Um push novo no mesmo PR cancela a execução anterior.
+concurrency:
+    group: ci-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    NODE_VERSION: "22"
+
+jobs:
+    quality:
+        name: Lint, tipos e testes
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+
+        services:
+            postgres:
+                image: postgres:16-alpine
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: sistema40_test
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        env:
+            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sistema40_test
+            NEXTAUTH_SECRET: ci-secret-nao-usar-em-producao
+            NEXTAUTH_URL: http://localhost:3000
+            SUPABASE_URL: https://placeholder.supabase.co
+            SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  # Histórico completo para conseguir diffar contra a branch base.
+                  fetch-depth: 0
+
+            - uses: pnpm/action-setup@v6
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+
+            - name: Instalar dependências
+              run: pnpm install --frozen-lockfile
+
+            - name: Gerar Prisma Client
+              run: pnpm exec prisma generate
+
+            - name: Validar schema do Prisma
+              run: pnpm exec prisma validate
+
+            - name: Aplicar migrations
+              run: pnpm exec prisma migrate deploy
+
+            # Depois de aplicar as migrations, o banco tem de bater exatamente com o
+            # schema. Diferença aqui = PR alterou prisma/schema sem gerar a migration.
+            # `--exit-code` devolve 2 quando há diferença, o que reprova o job.
+            - name: Conferir migrations x schema
+              run: pnpm exec prisma migrate diff --from-config-datasource --to-schema ./prisma/schema --exit-code
+
+            # O repositório carrega dívida legada: ~140 erros de lint (a maioria
+            # `no-explicit-any`) e 87 arquivos fora do padrão Prettier. Em vez de
+            # travar todo mundo ou afrouxar as regras, exigimos qualidade apenas no
+            # que o PR toca — a dívida é quitada por área, sem regressão.
+            - name: Formatação e lint (arquivos alterados)
+              if: github.event_name == 'pull_request'
+              run: |
+                  git fetch --no-tags origin "${{ github.base_ref }}"
+                  BASE="origin/${{ github.base_ref }}"
+
+                  FILES=$(git diff --name-only --diff-filter=ACMR "$BASE...HEAD" -- '*.ts' '*.tsx' '*.mjs' | tr '\n' ' ')
+                  if [ -z "$FILES" ]; then
+                    echo "Nenhum arquivo TypeScript alterado."
+                    exit 0
+                  fi
+
+                  echo "Analisando: $FILES"
+                  pnpm exec prettier --check $FILES
+                  pnpm exec eslint --max-warnings 0 $FILES
+
+            - name: Lint do repositório (informativo)
+              continue-on-error: true
+              run: pnpm lint
+
+            - name: Checagem de tipos
+              run: pnpm typecheck
+
+            - name: Testes
+              run: pnpm test:run
+
+    build:
+        name: Build de produção
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        needs: quality
+
+        env:
+            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sistema40_build
+            NEXTAUTH_SECRET: ci-secret-nao-usar-em-producao
+            NEXTAUTH_URL: http://localhost:3000
+            SUPABASE_URL: https://placeholder.supabase.co
+            SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: pnpm/action-setup@v6
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: pnpm
+
+            - name: Instalar dependências
+              run: pnpm install --frozen-lockfile
+
+            - name: Gerar Prisma Client
+              run: pnpm exec prisma generate
+
+            - name: Build
+              run: pnpm build

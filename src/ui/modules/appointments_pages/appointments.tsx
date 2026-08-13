@@ -2,12 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import type { CalendarEvent } from "@/src/infra/modules/calendar/calendar-mock";
-import { getPublicVisitEvents, publicVisitToCalendarEvent, submitVisitRequest } from "@/src/ui/lib/visit-requests-api";
+import {
+    VisitAvailability,
+    getPublicVisitEvents,
+    getVisitAvailability,
+    publicVisitToCalendarEvent,
+    submitVisitRequest,
+} from "@/src/ui/lib/visit-requests-api";
 import { EventDetail } from "@/src/ui/modules/appointments_pages/components/event-detail";
 import { EventList } from "@/src/ui/modules/appointments_pages/components/event-list";
 import { PanelWrapper } from "@/src/ui/modules/appointments_pages/components/panel-wrapper";
 import { UnifiedVisitCalendar } from "@/src/ui/modules/appointments_pages/components/shared/unified-visit-calendar";
 import {
+    BlockedState,
     ErrorState,
     IdleState,
     LoadingState,
@@ -42,6 +49,8 @@ export default function AllCalendar() {
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     const [holidayName, setHolidayName] = useState<string>("");
+    const [availability, setAvailability] = useState<VisitAvailability | null>(null);
+    const [blockedReason, setBlockedReason] = useState<string>("");
 
     const formMethods = useForm<CalendarFormInput>({
         defaultValues: {
@@ -60,7 +69,7 @@ export default function AllCalendar() {
     });
 
     useEffect(() => {
-        async function loadEvents() {
+        async function loadData() {
             try {
                 const visitEvents = await getPublicVisitEvents();
                 const converted = visitEvents.filter((v) => v.status !== "negado").map(publicVisitToCalendarEvent);
@@ -79,16 +88,63 @@ export default function AllCalendar() {
                         type: "holiday",
                         isHoliday: true,
                         holidayName: name,
-                    } as any;
+                    } satisfies CalendarEvent;
                 });
 
                 setEvents([...converted, ...holidayEvents]);
+
+                const avail = await getVisitAvailability();
+                setAvailability(avail);
             } catch (err) {
-                console.error("Erro ao carregar eventos:", err);
+                console.error("Erro ao carregar dados:", err);
             }
         }
-        loadEvents();
+        loadData();
     }, []);
+
+    const checkDateAvailability = (date: Date) => {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        if (date < todayStart) {
+            return { isAvailable: false, reason: "past" };
+        }
+
+        const dateStr = format(date, "yyyy-MM-dd");
+        const dateOverride = availability?.dateRules.find((r) => r.date === dateStr);
+        if (dateOverride) {
+            if (dateOverride.isAvailable) {
+                return { isAvailable: true, reason: "" };
+            } else {
+                return { isAvailable: false, reason: "blocked", text: dateOverride.reason || "Data indisponível." };
+            }
+        }
+
+        const holiday = getHolidayNameSafe(date);
+        if (holiday) {
+            return { isAvailable: false, reason: "holiday", text: holiday };
+        }
+
+        const dayOfWeek = date.getDay();
+        const weekdayRule = availability?.weekdayRules.find((r) => r.dayOfWeek === dayOfWeek);
+        if (weekdayRule) {
+            if (weekdayRule.isAvailable) {
+                return { isAvailable: true, reason: "" };
+            } else {
+                return {
+                    isAvailable: false,
+                    reason: "weekday",
+                    text: "Este dia da semana não está disponível para visitação.",
+                };
+            }
+        }
+
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        if (isWeekend) {
+            return { isAvailable: false, reason: "weekend", text: "Finais de semana não permitidos." };
+        }
+
+        return { isAvailable: true, reason: "" };
+    };
 
     const handleFormSubmit = async (data: CalendarFormInput) => {
         setErrorMessage("");
@@ -199,27 +255,24 @@ export default function AllCalendar() {
                             selectedDate={selectedDate}
                             viewDate={viewDate}
                             onViewDateChange={setViewDate}
+                            availability={availability || undefined}
                             onSelectDay={(date) => {
                                 setSelectedDate(date);
 
-                                const todayStart = new Date();
-                                todayStart.setHours(0, 0, 0, 0);
-                                const isPast = date < todayStart;
+                                const availStatus = checkDateAvailability(date);
 
-                                const holiday = getHolidayNameSafe(date);
-                                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-
-                                if (isWeekend) {
-                                    setStep("weekend");
-                                    return;
-                                }
-                                if (isPast) {
-                                    setStep("past");
-                                    return;
-                                }
-                                if (holiday) {
-                                    setHolidayName(holiday);
-                                    setStep("holiday");
+                                if (!availStatus.isAvailable) {
+                                    if (availStatus.reason === "past") {
+                                        setStep("past");
+                                    } else if (availStatus.reason === "weekend" || availStatus.reason === "weekday") {
+                                        setStep("weekend");
+                                    } else if (availStatus.reason === "holiday") {
+                                        setHolidayName(availStatus.text || "");
+                                        setStep("holiday");
+                                    } else {
+                                        setBlockedReason(availStatus.text || "Data indisponível.");
+                                        setStep("blocked");
+                                    }
                                     return;
                                 }
 
@@ -234,6 +287,9 @@ export default function AllCalendar() {
                             {step === "idle" && <IdleState />}
                             {step === "weekend" && <WeekendState target={selectedDate} />}
                             {step === "past" && <PastState date={selectedDate} />}
+                            {step === "blocked" && (
+                                <BlockedState reason={blockedReason} onBack={() => setStep("idle")} />
+                            )}
 
                             {step === "holiday" && (
                                 <div className="flex flex-col items-center justify-center h-full text-center p-6">

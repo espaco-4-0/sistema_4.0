@@ -1,14 +1,28 @@
-import { createClient } from "@supabase/supabase-js";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+let cachedClient: SupabaseClient | null = null;
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-    },
-});
+// Init preguiçoso: criar o client no topo do módulo quebra `next build`, porque o
+// Next avalia o módulo ao coletar as rotas e as credenciais não existem no build.
+export function supabaseAdmin(): SupabaseClient {
+    if (cachedClient) return cachedClient;
+
+    const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !serviceKey) {
+        throw new Error("SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY precisam estar definidos.");
+    }
+
+    cachedClient = createClient(url, serviceKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+        },
+    });
+
+    return cachedClient;
+}
 
 export const VISIT_DOCS_BUCKET = "visit-documents";
 
@@ -21,13 +35,17 @@ export async function uploadVisitDocument(visitId: number, file: File): Promise<
     const buffer = Buffer.from(arrayBuffer);
 
     console.log(`[supabase] uploading ${storagePath} (${buffer.byteLength} bytes) to bucket ${VISIT_DOCS_BUCKET}`);
-    console.log(`[supabase] URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
 
-    const { data, error } = await supabaseAdmin.storage.from(VISIT_DOCS_BUCKET).upload(storagePath, buffer, {
+    // `duplex` não está no tipo FileOptions do supabase-js, mas é repassado ao fetch.
+    const uploadOptions = {
         contentType: file.type || "application/octet-stream",
         duplex: "half",
         upsert: false,
-    } as any);
+    } satisfies Record<string, unknown>;
+
+    const { data, error } = await supabaseAdmin()
+        .storage.from(VISIT_DOCS_BUCKET)
+        .upload(storagePath, buffer, uploadOptions);
 
     if (error) {
         console.error(`[supabase] upload error:`, error);
@@ -39,7 +57,9 @@ export async function uploadVisitDocument(visitId: number, file: File): Promise<
 }
 
 export async function getSignedDownloadUrl(storagePath: string): Promise<string> {
-    const { data, error } = await supabaseAdmin.storage.from(VISIT_DOCS_BUCKET).createSignedUrl(storagePath, 60 * 60); // 1 hora
+    const { data, error } = await supabaseAdmin()
+        .storage.from(VISIT_DOCS_BUCKET)
+        .createSignedUrl(storagePath, 60 * 60); // 1 hora
 
     if (error || !data?.signedUrl) {
         throw new Error(`Falha ao gerar URL de download: ${error?.message ?? "URL vazia"}`);
@@ -49,5 +69,5 @@ export async function getSignedDownloadUrl(storagePath: string): Promise<string>
 }
 
 export async function deleteVisitDocument(storagePath: string): Promise<void> {
-    await supabaseAdmin.storage.from(VISIT_DOCS_BUCKET).remove([storagePath]);
+    await supabaseAdmin().storage.from(VISIT_DOCS_BUCKET).remove([storagePath]);
 }

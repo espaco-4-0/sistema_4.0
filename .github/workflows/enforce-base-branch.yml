@@ -1,0 +1,43 @@
+name: Base branch
+
+on:
+    pull_request_target:
+        types: [opened, edited, reopened, synchronize]
+
+permissions:
+    pull-requests: write
+
+jobs:
+    check-base:
+        name: Conferir branch de destino
+        runs-on: ubuntu-latest
+        # Só develop, release/* e hotfix/* podem ir para main.
+        if: github.base_ref == 'main'
+
+        steps:
+            - name: Bloquear PR indevido para a main
+              if: ${{ github.head_ref != 'develop' && !startsWith(github.head_ref, 'release/') && !startsWith(github.head_ref, 'hotfix/') }}
+              uses: actions/github-script@v9
+              with:
+                  script: |
+                      const head = context.payload.pull_request.head.ref;
+
+                      await github.rest.issues.createComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                        body: [
+                          '### PR apontando para a `main`',
+                          '',
+                          `A branch \`${head}\` não pode ser mesclada diretamente na \`main\`.`,
+                          '',
+                          'O fluxo do projeto é:',
+                          '',
+                          '- toda feature/fix vai para **`develop`**;',
+                          '- só `develop`, `release/*` e `hotfix/*` sobem para `main`.',
+                          '',
+                          'Troque a base deste PR para `develop` (botão **Edit** ao lado do título) e este check passa automaticamente.',
+                        ].join('\n'),
+                      });
+
+                      core.setFailed(`PR de '${head}' para 'main' não é permitido. Use 'develop' como base.`);

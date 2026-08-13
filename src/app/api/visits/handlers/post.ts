@@ -48,14 +48,41 @@ export async function postHandlers(req: Request) {
         }
 
         const dayOfWeek = visitDate.getDay();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const holidayName = getHolidayNameSafe(visitDate);
+        const dateStr = visitDate.toISOString().slice(0, 10);
 
-        if (isWeekend || holidayName) {
-            return NextResponse.json(
-                { message: holidayName ? `Feriado: ${holidayName}` : "Finais de semana não permitidos" },
-                { status: 400 }
-            );
+        const dateOverride = await prisma.visitDateRule.findUnique({
+            where: { date: new Date(`${dateStr}T00:00:00`) },
+        });
+
+        let isAvailable = true;
+        let blockedReason = "";
+
+        if (dateOverride) {
+            isAvailable = dateOverride.isAvailable;
+            blockedReason = dateOverride.reason || "Data bloqueada para visitação.";
+        } else {
+            const holidayName = getHolidayNameSafe(visitDate);
+            if (holidayName) {
+                isAvailable = false;
+                blockedReason = `Feriado: ${holidayName}`;
+            } else {
+                const weekdayRule = await prisma.visitWeekdayRule.findUnique({
+                    where: { dayOfWeek },
+                });
+                if (weekdayRule) {
+                    isAvailable = weekdayRule.isAvailable;
+                } else {
+                    isAvailable = dayOfWeek !== 0 && dayOfWeek !== 6;
+                }
+
+                if (!isAvailable) {
+                    blockedReason = "Finais de semana ou dias não permitidos.";
+                }
+            }
+        }
+
+        if (!isAvailable) {
+            return NextResponse.json({ message: blockedReason }, { status: 400 });
         }
 
         const dateStart = new Date(visitDate);

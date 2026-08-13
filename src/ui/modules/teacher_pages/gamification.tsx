@@ -5,56 +5,9 @@ import { CatalogModal } from "@/src/ui/components/modals/professor/gamificacao/c
 import { CreateCampaignModal } from "@/src/ui/components/modals/professor/gamificacao/create-campaign-modal";
 import { NewMissionModal } from "@/src/ui/components/modals/professor/gamificacao/new-mission-modal";
 import { Button } from "@/src/ui/components/ui/button";
-import { AlertCircle, Crown, Flame, Gift, Medal, Star, Target, Trophy, Users } from "lucide-react";
+import { useBadges, useLeaderboard } from "@/src/ui/modules/teacher_pages/queries/gamification.queries";
+import { AlertCircle, Crown, Flame, Gift, Loader2, Medal, Star, Target, Trophy, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
-
-const highlights = [
-    {
-        title: "Alunos engajados",
-        value: "1.248",
-        detail: "+12% na última semana",
-        icon: Users,
-        color: "text-blue-700",
-        bgColor: "bg-blue-100",
-    },
-    {
-        title: "Prêmios resgatados",
-        value: "312",
-        detail: "Taxa de resgate 78%",
-        icon: Gift,
-        color: "text-green-700",
-        bgColor: "bg-green-100",
-    },
-    {
-        title: "Pontuação média",
-        value: "865 pts",
-        detail: "Meta 900 pts",
-        icon: Star,
-        color: "text-yellow-700",
-        bgColor: "bg-yellow-100",
-    },
-];
-
-const rewards = [
-    {
-        title: "Kit Maker Lab",
-        points: "1.200 pts",
-        detail: "Ideal para projetos IoT",
-        icon: Trophy,
-    },
-    {
-        title: "Curso Premium",
-        points: "900 pts",
-        detail: "Acesso por 6 meses",
-        icon: Medal,
-    },
-    {
-        title: "Mentoria Individual",
-        points: "700 pts",
-        detail: "Sessão de 1h",
-        icon: Crown,
-    },
-];
 
 const missions = [
     {
@@ -77,18 +30,16 @@ const missions = [
     },
 ];
 
-const leaderboard = [
-    { name: "Larissa Mendes", points: "1.540 pts", badge: "Top 1" },
-    { name: "Pedro Alves", points: "1.430 pts", badge: "Top 2" },
-    { name: "Camila Rocha", points: "1.380 pts", badge: "Top 3" },
-    { name: "Tiago Luz", points: "1.240 pts", badge: "Top 4" },
-];
+const REWARD_ICONS = [Trophy, Medal, Crown];
 
 export default function Gamificacao() {
     const { data: session, status } = useSession();
     const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
     const [isCatalogOpen, setIsCatalogOpen] = useState(false);
     const [isNewMissionOpen, setIsNewMissionOpen] = useState(false);
+
+    const { data: leaderboard = [], isLoading: loadingRanking } = useLeaderboard(10);
+    const { data: badges = [], isLoading: loadingBadges } = useBadges();
 
     if (status === "loading") return null;
 
@@ -105,6 +56,39 @@ export default function Gamificacao() {
             </div>
         );
     }
+
+    const totalConquistas = badges.reduce((sum, badge) => sum + badge.totalEarned, 0);
+    const pontuacaoMedia =
+        leaderboard.length === 0
+            ? 0
+            : Math.round(leaderboard.reduce((sum, entry) => sum + entry.points, 0) / leaderboard.length);
+
+    const highlights = [
+        {
+            title: "Alunos pontuando",
+            value: String(leaderboard.length),
+            detail: leaderboard.length === 0 ? "Ninguém pontuou ainda" : "No ranking atual",
+            icon: Users,
+            color: "text-blue-700",
+            bgColor: "bg-blue-100",
+        },
+        {
+            title: "Conquistas concedidas",
+            value: String(totalConquistas),
+            detail: `${badges.length} badge(s) no catálogo`,
+            icon: Gift,
+            color: "text-green-700",
+            bgColor: "bg-green-100",
+        },
+        {
+            title: "Pontuação média",
+            value: `${pontuacaoMedia} pts`,
+            detail: leaderboard.length === 0 ? "Sem dados" : `Top 1 com ${leaderboard[0].points} pts`,
+            icon: Star,
+            color: "text-yellow-700",
+            bgColor: "bg-yellow-100",
+        },
+    ];
 
     return (
         <div className="space-y-6">
@@ -167,26 +151,36 @@ export default function Gamificacao() {
                         <p className="text-gray-500 text-sm">Itens mais desejados pelos alunos</p>
                     </div>
                     <div className="space-y-4">
-                        {rewards.map((reward) => {
-                            const Icon = reward.icon;
-                            return (
-                                <div
-                                    key={reward.title}
-                                    className="flex items-center justify-between gap-4 border rounded-xl p-4"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-                                            <Icon className="w-5 h-5 text-yellow-600" />
+                        {loadingBadges ? (
+                            <div className="flex items-center gap-2 text-sm text-gray-400 py-6 justify-center">
+                                <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
+                            </div>
+                        ) : badges.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-6">Nenhuma recompensa cadastrada.</p>
+                        ) : (
+                            badges.slice(0, 3).map((badge, index) => {
+                                const Icon = REWARD_ICONS[index % REWARD_ICONS.length];
+                                return (
+                                    <div
+                                        key={badge.id}
+                                        className="flex items-center justify-between gap-4 border rounded-xl p-4"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center">
+                                                <Icon className="w-5 h-5 text-yellow-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">{badge.name}</p>
+                                                <p className="text-xs text-gray-500">
+                                                    {badge.description ?? `${badge.totalEarned} conquista(s)`}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-900">{reward.title}</p>
-                                            <p className="text-xs text-gray-500">{reward.detail}</p>
-                                        </div>
+                                        <span className="text-sm font-semibold text-gray-900">{badge.points} pts</span>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900">{reward.points}</span>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                     <div className="flex items-center justify-end">
                         <Button
@@ -205,17 +199,27 @@ export default function Gamificacao() {
                         <p className="text-gray-500 text-sm">Top alunos por pontuação</p>
                     </div>
                     <div className="space-y-3">
-                        {leaderboard.map((student, index) => (
-                            <div key={student.name} className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {index + 1}. {student.name}
-                                    </p>
-                                    <p className="text-xs text-gray-500">{student.badge}</p>
-                                </div>
-                                <span className="text-xs font-semibold text-yellow-600">{student.points}</span>
+                        {loadingRanking ? (
+                            <div className="flex items-center gap-2 text-sm text-gray-400 py-6 justify-center">
+                                <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
                             </div>
-                        ))}
+                        ) : leaderboard.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-6">Nenhum aluno pontuou ainda.</p>
+                        ) : (
+                            leaderboard.map((student) => (
+                                <div key={student.userId} className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900">
+                                            {student.position}. {student.fullName}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            Nível {student.level} · {student.xp} XP
+                                        </p>
+                                    </div>
+                                    <span className="text-xs font-semibold text-yellow-600">{student.points} pts</span>
+                                </div>
+                            ))
+                        )}
                     </div>
                     <div className="flex items-center justify-end">
                         <Button variant="secondary">Ver ranking completo</Button>

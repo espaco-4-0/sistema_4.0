@@ -14,26 +14,76 @@ model Location {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  Lesson        Lesson[]
-  VisitLocation VisitLocation[]
+  Lesson         Lesson[]
+  VisitLocation  VisitLocation[]
+  CourseSchedule CourseSchedule[]
+}
+
+enum CourseResource {
+  LESSONS
+  PRESENCE
+  CERTIFICATES
+  GALLERY
+  BLOG
+  PROJECTS
+  INVENTORY
+  GAMIFICATION
 }
 
 model Course {
-  id           String   @id @default(cuid())
-  title        String
-  description  String?
-  workload     Int? // em horas
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  workload    Int? // em horas
+  capacity    Int? // vagas totais; null = sem limite
+  startDate   DateTime? @db.Date
+  endDate     DateTime? @db.Date
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   professor   User   @relation(fields: [professorId], references: [id])
   professorId String
 
-  Lesson        Lesson[]
-  Enrollment    Enrollment[]
+  Lesson         Lesson[]
+  Enrollment     Enrollment[]
+  CourseSchedule CourseSchedule[]
+  CourseAccess   CourseAccess[]
 
   @@index([professorId])
+}
+
+model CourseSchedule {
+  id        String   @id @default(cuid())
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  location   Location? @relation(fields: [locationId], references: [id])
+  locationId String?
+
+  @@unique([courseId, dayOfWeek, startTime])
+  @@index([courseId])
+  @@index([locationId])
+}
+
+model CourseAccess {
+  id        String         @id @default(cuid())
+  resource  CourseResource
+  enabled   Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  @@unique([courseId, resource])
+  @@index([courseId])
 }
 
 model Lesson {

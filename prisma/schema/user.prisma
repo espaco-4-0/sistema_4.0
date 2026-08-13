@@ -63,7 +63,7 @@ model User {
   Presence            Presence[]
 
   // Inventário
-  InventoryItem       InventoryItem[]
+  resources       	  Resource[]
 
   // Blog
   Post                Post[]
@@ -73,6 +73,14 @@ model User {
   // Projetos
   Project             Project[]       @relation("LiderProjeto")
   ProjectMember       ProjectMember[]
+  Task                Task[]          @relation("TarefaResponsavel")
+  ProjectFile         ProjectFile[]   @relation("ArquivoEnviadoPor")
+
+  // Solicitações de projeto
+  ProjectRequestCreated  ProjectRequest[]       @relation("AutorSolicitacao")
+  ProjectRequestReviewed ProjectRequest[]       @relation("RevisorSolicitacao")
+  ProjectRequestMember   ProjectRequestMember[]
+  ProjectRequestFile     ProjectRequestFile[]
 
   // Gamificação
   Gamification        Gamification?

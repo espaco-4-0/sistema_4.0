@@ -20,7 +20,12 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
         const course = await prisma.course.findUnique({
             where: { id: courseId },
-            select: { id: true, isActive: true },
+            select: {
+                id: true,
+                isActive: true,
+                capacity: true,
+                _count: { select: { Enrollment: true } },
+            },
         });
 
         if (!course) {
@@ -42,6 +47,14 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
         if (alreadySubscribed) {
             return NextResponse.json({ message: "Você já está inscrito neste curso" }, { status: 409 });
+        }
+
+        // `capacity` nulo significa turma sem limite de vagas.
+        if (course.capacity !== null && course._count.Enrollment >= course.capacity) {
+            return NextResponse.json(
+                { message: "As vagas para este curso estão esgotadas", vagasTotais: course.capacity },
+                { status: 409 }
+            );
         }
 
         const subscription = await prisma.enrollment.create({

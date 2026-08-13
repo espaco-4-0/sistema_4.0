@@ -1,0 +1,40 @@
+version: 2
+
+updates:
+    - package-ecosystem: npm
+      directory: "/"
+      schedule:
+          interval: weekly
+          day: monday
+      # PRs de dependência entram pela develop, como qualquer outra mudança.
+      target-branch: develop
+      open-pull-requests-limit: 5
+      labels:
+          - dependencies
+      groups:
+          # Agrupa atualizações de patch/minor para não abrir dezenas de PRs.
+          minor-e-patch:
+              update-types:
+                  - minor
+                  - patch
+      ignore:
+          # Next, React e Prisma sobem de major manualmente: exigem migração revisada.
+          - dependency-name: next
+            update-types: [version-update:semver-major]
+          - dependency-name: react
+            update-types: [version-update:semver-major]
+          - dependency-name: react-dom
+            update-types: [version-update:semver-major]
+          - dependency-name: prisma
+            update-types: [version-update:semver-major]
+          - dependency-name: "@prisma/client"
+            update-types: [version-update:semver-major]
+
+    - package-ecosystem: github-actions
+      directory: "/"
+      schedule:
+          interval: monthly
+      target-branch: develop
+      labels:
+          - dependencies
+          - ci

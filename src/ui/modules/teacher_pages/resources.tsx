@@ -1,19 +1,39 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { inventoryData, statsEstoque } from "@/src/infra/modules/professor/recursos-mock";
+import React, { useState } from "react";
+import { InventoryCategory } from "@/src/generated/prisma/enums";
+import { ResourceItem } from "@/src/infra/modules/professor/resources.service";
+import { mapCategoryToString } from "@/src/lib/validators/resource.validator";
 import { ImportarRecurso } from "@/src/ui/components/modals/professor/recursos/import-recurso-modal";
 import { ImportarRecursosModal } from "@/src/ui/components/modals/professor/recursos/import-recursos-modal";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/src/ui/components/ui/dropdown-menu";
-import { AlertCircle, ChevronLeft, ChevronRight, Filter, MoreVertical, Plus, PlusCircle, Search } from "lucide-react";
+import { useDeleteResource, useResourcesList } from "@/src/ui/modules/teacher_pages/queries/resources.queries";
+import {
+    AlertCircle,
+    AlertTriangle,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    Edit,
+    Filter,
+    Loader2,
+    MoreVertical,
+    Package,
+    Plus,
+    PlusCircle,
+    Search,
+    Trash,
+    XCircle,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 function getStatusStyle(status: string) {
@@ -29,6 +49,12 @@ function getStatusStyle(status: string) {
     }
 }
 
+function getResourceStatus(quantity: number): string {
+    if (quantity === 0) return "Esgotado";
+    if (quantity <= 5) return "Estoque Baixo";
+    return "Disponível";
+}
+
 export default function Resources() {
     const { data: session, status } = useSession();
     const [openImportar, setOpenImportar] = useState(false);
@@ -36,22 +62,33 @@ export default function Resources() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("Todos");
+    const [editingResource, setEditingResource] = useState<ResourceItem | null>(null);
 
     const itemsPerPage = 10;
 
-    const filteredData = inventoryData.filter((item) => {
-        const matchesSearch = item.nome.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === "Todos" || item.status === statusFilter;
-        return matchesSearch && matchesStatus;
+    const { data: listResponse, isLoading } = useResourcesList({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm || undefined,
+        status: statusFilter !== "Todos" ? statusFilter : undefined,
     });
 
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredData.slice(startIndex, startIndex + itemsPerPage);
+    const deleteMutation = useDeleteResource();
 
-    useEffect(() => {
+    const resources = listResponse?.data ?? [];
+    const totalItems = listResponse?.meta?.total ?? 0;
+    const totalPages = listResponse?.meta?.totalPages ?? 1;
+    const statsData = listResponse?.meta?.stats ?? { total: 0, available: 0, lowStock: 0, outOfStock: 0 };
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+
+    const filterKey = `${searchTerm}|${statusFilter}`;
+    const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+
+    if (filterKey !== lastFilterKey) {
+        setLastFilterKey(filterKey);
         setCurrentPage(1);
-    }, [searchTerm, statusFilter]);
+    }
 
     if (status === "loading") return null;
 
@@ -69,6 +106,48 @@ export default function Resources() {
         );
     }
 
+    const statsEstoque = [
+        {
+            title: "Total de itens",
+            value: statsData.total,
+            icon: Package,
+            color: "bg-blue-50",
+            iconColor: "text-blue-600",
+        },
+        {
+            title: "Disponíveis",
+            value: statsData.available,
+            icon: CheckCircle2,
+            color: "bg-green-50",
+            iconColor: "text-green-600",
+        },
+        {
+            title: "Estoque Baixo",
+            value: statsData.lowStock,
+            icon: AlertTriangle,
+            color: "bg-yellow-50",
+            iconColor: "text-yellow-600",
+        },
+        {
+            title: "Esgotados",
+            value: statsData.outOfStock,
+            icon: XCircle,
+            color: "bg-red-50",
+            iconColor: "text-red-600",
+        },
+    ];
+
+    const handleDelete = (id: string) => {
+        if (confirm("Tem certeza de que deseja excluir este recurso?")) {
+            deleteMutation.mutate(id);
+        }
+    };
+
+    const handleEdit = (resource: ResourceItem) => {
+        setEditingResource(resource);
+        setOpenImportar(true);
+    };
+
     return (
         <>
             <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -77,7 +156,10 @@ export default function Resources() {
 
                     <div className="flex gap-3">
                         <button
-                            onClick={() => setOpenImportar(true)}
+                            onClick={() => {
+                                setEditingResource(null);
+                                setOpenImportar(true);
+                            }}
                             className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg transition shadow-sm border hover:cursor-pointer hover:bg-gray-50 text-sm font-medium"
                         >
                             <Plus size={18} /> Adicionar Recurso
@@ -173,48 +255,87 @@ export default function Resources() {
                             </thead>
 
                             <tbody className="divide-y divide-gray-100">
-                                {currentItems.map((item) => (
-                                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{item.nome}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{item.categoria}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{item.total}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{item.disponivel}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{item.localizacao}</td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-[11px] font-bold border ${getStatusStyle(
-                                                    item.status
-                                                )}`}
-                                            >
-                                                {item.status.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <button className="text-orange-400 hover:text-orange-600">
-                                                <MoreVertical />
-                                            </button>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Loader2 className="animate-spin text-yellow-500" />
+                                                <span>Carregando recursos...</span>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                ) : resources.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                            Nenhum recurso encontrado.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    resources.map((item) => {
+                                        const resStatus = getResourceStatus(item.quantity);
+                                        return (
+                                            <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                                    {item.name}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">
+                                                    {mapCategoryToString(item.category as InventoryCategory)}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{item.quantity}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{item.quantity}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{item.location}</td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-[11px] font-bold border ${getStatusStyle(
+                                                            resStatus
+                                                        )}`}
+                                                    >
+                                                        {resStatus.toUpperCase()}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button className="text-orange-400 hover:text-orange-600 hover:cursor-pointer">
+                                                                <MoreVertical />
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="bg-white">
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleEdit(item)}
+                                                                className="hover:cursor-pointer flex items-center gap-2"
+                                                            >
+                                                                <Edit size={14} /> Editar
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleDelete(item.id)}
+                                                                className="text-red-600 focus:text-red-700 hover:cursor-pointer flex items-center gap-2"
+                                                            >
+                                                                <Trash size={14} /> Excluir
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
 
                     <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 bg-gray-50/50">
                         <p className="text-sm text-gray-500">
-                            Mostrando{" "}
-                            <span className="font-medium">{filteredData.length > 0 ? startIndex + 1 : 0}</span> a{" "}
-                            <span className="font-medium">
-                                {Math.min(startIndex + itemsPerPage, filteredData.length)}
-                            </span>{" "}
-                            de <span className="font-medium">{filteredData.length}</span> componentes
+                            Mostrando <span className="font-medium">{totalItems > 0 ? startIndex + 1 : 0}</span> a{" "}
+                            <span className="font-medium">{Math.min(startIndex + itemsPerPage, totalItems)}</span> de{" "}
+                            <span className="font-medium">{totalItems}</span> componentes
                         </p>
 
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="p-2 border border-gray-300 rounded-lg bg-white disabled:opacity-50"
+                                className="p-2 border border-gray-300 rounded-lg bg-white disabled:opacity-50 hover:cursor-pointer"
                             >
                                 <ChevronLeft size={18} />
                             </button>
@@ -226,7 +347,7 @@ export default function Resources() {
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages || totalPages === 0}
-                                className="p-2 border border-gray-300 rounded-lg bg-white disabled:opacity-50"
+                                className="p-2 border border-gray-300 rounded-lg bg-white disabled:opacity-50 hover:cursor-pointer"
                             >
                                 <ChevronRight size={18} />
                             </button>
@@ -236,7 +357,14 @@ export default function Resources() {
             </div>
 
             <ImportarRecursosModal open={openRecursos} onClose={() => setOpenRecursos(false)} />
-            <ImportarRecurso open={openImportar} onClose={() => setOpenImportar(false)} />
+            <ImportarRecurso
+                open={openImportar}
+                onClose={() => {
+                    setOpenImportar(false);
+                    setEditingResource(null);
+                }}
+                resourceToEdit={editingResource}
+            />
         </>
     );
 }

@@ -1,0 +1,18 @@
+# Donos do código. Toda alteração exige review de alguém desta lista.
+# Combinado com "Require review from Code Owners" na proteção de branch, isso
+# garante que só os owners aprovam (e portanto liberam) um merge.
+
+* @Alberth-Farias @gustavo-lola @JoaoGSantiago
+
+# Áreas sensíveis: mudança aqui afeta todo mundo e quebra ambiente.
+/.github/                 @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/prisma/                  @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/prisma/migrations/       @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/next.config.ts           @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/package.json             @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/pnpm-lock.yaml           @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/.gitignore               @Alberth-Farias @gustavo-lola @JoaoGSantiago
+
+# Autenticação e autorização.
+/src/app/api/auth/        @Alberth-Farias @gustavo-lola @JoaoGSantiago
+/src/infra/modules/auth/  @Alberth-Farias @gustavo-lola @JoaoGSantiago

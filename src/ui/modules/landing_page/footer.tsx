@@ -1,3 +1,5 @@
+"use client";
+
 import {
     BookOpen,
     CalendarDays,
@@ -14,6 +16,7 @@ import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { scrollToSection } from "../../lib/scroll";
 
@@ -71,7 +74,7 @@ export default function Footer() {
                 >
                     <h4 className="text-yellow-primary font-semibold mb-8 text-lg">Navegação</h4>
                     <ul className="space-y-6">
-                        <FooterItem icon={Home} title="Início" desc="Página inicial" href="/#welcome" />
+                        <FooterItem icon={Home} title="Início" desc="Página inicial" href="/#hero" />
                         <FooterItem icon={Info} title="Sobre" desc="Conheça o espaço" href="/#what-is" />
                         <FooterItem icon={Users} title="Blog" desc="Novidades e publicações" href="/#blog" />
                         <FooterItem icon={BookOpen} title="Cursos" desc="Capacitações oferecidas" href="/#courses" />
@@ -104,7 +107,7 @@ export default function Footer() {
                             desc="Como levar minha turma?"
                             href="/#come-and-discover"
                         />
-                        <FooterItem icon={LayoutGrid} title="Galeria" desc="Fotos do espaço" href="/#space_gallery" />
+                        <FooterItem icon={LayoutGrid} title="Galeria" desc="Fotos do espaço" href="/#gallery" />
                     </ul>
                 </motion.div>
 
@@ -154,8 +157,15 @@ type FooterItemProps = Readonly<{
 }>;
 
 function FooterItem({ icon: Icon, title, desc, href, external = false }: FooterItemProps) {
+    const pathname = usePathname();
+
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         if (!href.includes("#")) return;
+
+        // Fora da home a seção não existe nesta página: deixa o Link navegar para
+        // "/" com a âncora em vez de cancelar o clique e não fazer nada.
+        if (pathname !== "/") return;
+
         e.preventDefault();
         const id = href.slice(2);
         scrollToSection(id, "start");
