@@ -1,4 +1,5 @@
 import { generatePdf } from "@/lib/pdf";
+import { Prisma } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/infra/data/prisma";
 import { storage } from "@/src/lib/storage";
 
@@ -37,7 +38,7 @@ export async function createTemplate(data: CreateTemplateSchema, professorId: st
             title: titulo,
             description: descricao,
             workload: cargaHoraria,
-            layout: layout as any,
+            layout: layout as Prisma.InputJsonValue,
             type: tipo,
             emittedBy: professorId,
         },
@@ -46,7 +47,7 @@ export async function createTemplate(data: CreateTemplateSchema, professorId: st
 
 export async function listTemplates(professorId: string): Promise<TemplateListItem[]> {
     const templates = await prisma.certificateTemplate.findMany({
-        where: { emittedBy: professorId, status: "ACTIVE" },
+        where: { emittedBy: professorId, isActive: true },
         orderBy: { updatedAt: "desc" },
         select: {
             id: true,
@@ -75,7 +76,7 @@ export async function updateTemplate(
         throw new Error("Sem permissão para editar este template");
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.CertificateTemplateUpdateInput = {};
     if (data.titulo !== undefined) updateData.title = data.titulo;
     if (data.descricao !== undefined) updateData.description = data.descricao;
     if (data.cargaHoraria !== undefined) updateData.workload = data.cargaHoraria;
@@ -97,7 +98,7 @@ export async function deleteTemplate(templateId: string) {
 
     return prisma.certificateTemplate.update({
         where: { id: templateId },
-        data: { status: "INACTIVE" },
+        data: { isActive: false },
     });
 }
 
@@ -107,7 +108,7 @@ export async function emitCertificate(data: EmitCertificateSchema, emitidoPor: s
     });
 
     if (!template) throw new Error("Template não encontrado");
-    if (template.status === "INACTIVE") throw new Error("Template inativo");
+    if (!template.isActive) throw new Error("Template inativo");
 
     const aluno = await prisma.user.findUnique({
         where: { id: data.alunoId },
@@ -167,7 +168,7 @@ export async function emitBatchCertificates(
     });
 
     if (!template) throw new Error("Template não encontrado");
-    if (template.status === "INACTIVE") throw new Error("Template inativo");
+    if (!template.isActive) throw new Error("Template inativo");
 
     const alunos = await prisma.user.findMany({
         where: { id: { in: data.alunoIds }, role: "VISITOR" },
