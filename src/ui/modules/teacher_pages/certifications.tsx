@@ -5,6 +5,7 @@ import {
     CERTIFICATE_TYPE_LABELS,
     ISSUANCE_STATUS_LABELS,
     ISSUANCE_STATUS_STYLES,
+    type CertificateTemplateItem,
 } from "@/src/infra/modules/professor/certificates.service";
 import { SignatureModal } from "@/src/ui/components/modals/professor/certificados/signature-modal";
 import { TemplateFormModal } from "@/src/ui/components/modals/professor/certificados/template-form-modal";
@@ -46,6 +47,7 @@ export default function Certificados() {
     const [templateId, setTemplateId] = useState<string>("");
     const [selected, setSelected] = useState<string[]>([]);
     const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+    const [editingTemplate, setEditingTemplate] = useState<CertificateTemplateItem | null>(null);
     const [isSignatureOpen, setIsSignatureOpen] = useState(false);
 
     const { data: metrics } = useCertificateMetrics();
@@ -162,7 +164,10 @@ export default function Certificados() {
                         </Button>
                         <Button
                             className="gap-2 bg-yellow-400 text-gray-900 hover:bg-yellow-500"
-                            onClick={() => setIsTemplateOpen(true)}
+                            onClick={() => {
+                                setEditingTemplate(null);
+                                setIsTemplateOpen(true);
+                            }}
                         >
                             <Plus size={16} /> Novo template
                         </Button>
@@ -203,7 +208,15 @@ export default function Certificados() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {templates.map((template) => (
-                                <div key={template.id} className="border rounded-xl p-4 flex items-center gap-3">
+                                <button
+                                    key={template.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingTemplate(template);
+                                        setIsTemplateOpen(true);
+                                    }}
+                                    className="border rounded-xl p-4 flex items-center gap-3 text-left hover:border-gray-300 transition"
+                                >
                                     <div
                                         className="w-16 h-10 rounded-lg border border-yellow-200 shrink-0"
                                         style={{
@@ -218,7 +231,7 @@ export default function Certificados() {
                                             {template._count?.emissoes ?? 0} emissão(ões)
                                         </p>
                                     </div>
-                                </div>
+                                </button>
                             ))}
                         </div>
                     )}
@@ -411,7 +424,11 @@ export default function Certificados() {
                 </div>
             </div>
 
-            <TemplateFormModal isOpen={isTemplateOpen} onClose={() => setIsTemplateOpen(false)} />
+            <TemplateFormModal
+                isOpen={isTemplateOpen}
+                onClose={() => setIsTemplateOpen(false)}
+                templateToEdit={editingTemplate}
+            />
             <SignatureModal
                 isOpen={isSignatureOpen}
                 onClose={() => setIsSignatureOpen(false)}

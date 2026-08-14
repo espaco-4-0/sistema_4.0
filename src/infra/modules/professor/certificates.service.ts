@@ -58,7 +58,7 @@ export interface IssuancesPage {
 
 export interface CreateTemplateInput {
     titulo: string;
-    descricao: string;
+    descricao?: string;
     tipo: string;
     cargaHoraria?: number;
     layout: Record<string, string>;
@@ -125,4 +125,15 @@ export async function emitSingle(issuanceId: string, templateId: string) {
 export async function emitBulk(issuanceIds: string[], templateId: string) {
     const { data } = await api.post("/api/certificates/issuances/emit-bulk", { issuanceIds, templateId });
     return data;
+}
+
+/** Sobe a imagem de fundo do template e devolve a URL pública. */
+export async function uploadBackground(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const { data } = await api.post("/api/certificates/background", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data.url;
 }
