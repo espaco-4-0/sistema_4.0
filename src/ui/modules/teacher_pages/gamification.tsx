@@ -1,42 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { CatalogModal } from "@/src/ui/components/modals/professor/gamificacao/catalog-modal";
-import { CreateCampaignModal } from "@/src/ui/components/modals/professor/gamificacao/create-campaign-modal";
-import { NewMissionModal } from "@/src/ui/components/modals/professor/gamificacao/new-mission-modal";
+import type { BadgeAdminItem } from "@/src/infra/modules/professor/gamification-admin.service";
+import { BadgeFormModal } from "@/src/ui/components/modals/professor/gamificacao/badge-form-modal";
+import { RulesModal } from "@/src/ui/components/modals/professor/gamificacao/rules-modal";
 import { Button } from "@/src/ui/components/ui/button";
 import { useBadges, useLeaderboard } from "@/src/ui/modules/teacher_pages/queries/gamification.queries";
-import { AlertCircle, Crown, Flame, Gift, Loader2, Medal, Star, Target, Trophy, Users } from "lucide-react";
+import { AlertCircle, Crown, Gift, Loader2, Medal, Star, Trophy, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
-
-const missions = [
-    {
-        title: "Projeto colaborativo",
-        progress: "8/10 tarefas",
-        detail: "Liberar badge Equipe",
-        icon: Target,
-    },
-    {
-        title: "Trilha de pesquisa",
-        progress: "3/5 entregas",
-        detail: "Libera 150 pts",
-        icon: Flame,
-    },
-    {
-        title: "Desafio semanal",
-        progress: "Concluído",
-        detail: "Bônus 80 pts",
-        icon: Star,
-    },
-];
 
 const REWARD_ICONS = [Trophy, Medal, Crown];
 
 export default function Gamificacao() {
     const { data: session, status } = useSession();
-    const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState(false);
-    const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-    const [isNewMissionOpen, setIsNewMissionOpen] = useState(false);
+    const [isRulesOpen, setIsRulesOpen] = useState(false);
+    const [isBadgeFormOpen, setIsBadgeFormOpen] = useState(false);
+    const [editingBadge, setEditingBadge] = useState<BadgeAdminItem | null>(null);
 
     const { data: leaderboard = [], isLoading: loadingRanking } = useLeaderboard(10);
     const { data: badges = [], isLoading: loadingBadges } = useBadges();
@@ -104,16 +83,16 @@ export default function Gamificacao() {
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             className="bg-white hover:cursor-pointer text-black hover:bg-yellow-50"
-                            onClick={() => setIsCreateCampaignOpen(true)}
+                            onClick={() => setIsRulesOpen(true)}
                         >
-                            Criar campanha
+                            Regras de pontuação
                         </Button>
                         <Button
                             variant="secondary"
                             className="bg-white/20 hover:cursor-pointer text-black hover:bg-white/30"
-                            onClick={() => setIsCatalogOpen(true)}
+                            onClick={() => setIsBadgeFormOpen(true)}
                         >
-                            Ver catálogo
+                            Nova badge
                         </Button>
                     </div>
                 </div>
@@ -186,7 +165,7 @@ export default function Gamificacao() {
                         <Button
                             variant="secondary"
                             className="hover:cursor-pointer"
-                            onClick={() => setIsCatalogOpen(true)}
+                            onClick={() => setIsBadgeFormOpen(true)}
                         >
                             Gerenciar prêmios
                         </Button>
@@ -228,53 +207,56 @@ export default function Gamificacao() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
-                <div>
-                    <h3 className="text-lg font-semibold">Missões e Desafios</h3>
-                    <p className="text-gray-500 text-sm">Defina metas para cursos, monitores e pesquisadores</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {missions.map((mission) => {
-                        const Icon = mission.icon;
-                        return (
-                            <div key={mission.title} className="border rounded-xl p-4 space-y-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                                        <Icon className="w-4 h-4 text-blue-600" />
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-900">{mission.title}</p>
-                                </div>
-                                <p className="text-xs text-gray-500">{mission.detail}</p>
-                                <p className="text-sm font-semibold text-gray-900">{mission.progress}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-semibold">Badges</h3>
+                        <p className="text-gray-500 text-sm">
+                            Conquistas do sistema. As de critério automático são concedidas sozinhas.
+                        </p>
+                    </div>
                     <Button
                         className="bg-yellow-primary text-black hover:bg-yellow-secondary hover:cursor-pointer"
-                        onClick={() => setIsNewMissionOpen(true)}
+                        onClick={() => {
+                            setEditingBadge(null);
+                            setIsBadgeFormOpen(true);
+                        }}
                     >
-                        Nova missão
+                        Nova badge
                     </Button>
                 </div>
+
+                {loadingBadges ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-400 py-6 justify-center">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Carregando...
+                    </div>
+                ) : badges.length === 0 ? (
+                    <p className="text-sm text-gray-400 text-center py-6 border border-dashed rounded-lg">
+                        Nenhuma badge cadastrada.
+                    </p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {badges.map((badge) => (
+                            <div key={badge.id} className="border rounded-xl p-4 space-y-2">
+                                <div className="flex items-center justify-between gap-2">
+                                    <p className="text-sm font-semibold text-gray-900">{badge.name}</p>
+                                    <span className="text-xs font-semibold text-yellow-600 shrink-0">
+                                        {badge.points} pts
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500">{badge.description ?? "Sem descrição"}</p>
+                                <p className="text-xs text-gray-400">{badge.totalEarned} conquista(s)</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            <CreateCampaignModal
-                isOpen={isCreateCampaignOpen}
-                onOpenChange={setIsCreateCampaignOpen}
-                onClose={() => setIsCreateCampaignOpen(false)}
-            />
+            <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
 
-            <CatalogModal
-                isOpen={isCatalogOpen}
-                onOpenChange={setIsCatalogOpen}
-                onClose={() => setIsCatalogOpen(false)}
-            />
-
-            <NewMissionModal
-                isOpen={isNewMissionOpen}
-                onOpenChange={setIsNewMissionOpen}
-                onClose={() => setIsNewMissionOpen(false)}
+            <BadgeFormModal
+                isOpen={isBadgeFormOpen}
+                onClose={() => setIsBadgeFormOpen(false)}
+                badgeToEdit={editingBadge}
             />
         </div>
     );

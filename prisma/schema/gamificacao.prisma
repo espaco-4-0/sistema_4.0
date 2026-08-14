@@ -10,13 +10,47 @@ model Gamification {
   userId String @unique
 }
 
+// Eventos do sistema que podem pontuar. A professora define quanto vale cada um.
+enum GamificationEvent {
+  PRESENCE_CONFIRMED
+  COURSE_ENROLLED
+  COURSE_COMPLETED
+  TASK_COMPLETED
+  PROJECT_APPROVED
+  BLOG_POST_PUBLISHED
+}
+
+model GamificationRule {
+  id        String            @id @default(cuid())
+  event     GamificationEvent @unique
+  xp        Int               @default(0)
+  points    Int               @default(0)
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+// Critério que concede a badge automaticamente.
+enum BadgeCriteria {
+  MANUAL
+  XP_TOTAL
+  PRESENCE_COUNT
+  COURSE_COUNT
+  PROJECT_COUNT
+  TASK_COUNT
+}
+
 model Badge {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  description String?
-  iconUrl  String?
-  points    Int      @default(0) // pontos concedidos ao ganhar
-  createdAt DateTime @default(now())
+  id            String        @id @default(cuid())
+  name          String        @unique
+  description   String?
+  iconUrl       String?
+  points        Int           @default(0) // pontos concedidos ao ganhar
+  criteria      BadgeCriteria @default(MANUAL)
+  criteriaValue Int? // limiar para o critério (ex.: 10 presenças)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   userBadges UserBadge[]
 }

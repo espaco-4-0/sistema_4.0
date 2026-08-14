@@ -1,3 +1,4 @@
+import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
 import { approveProjectRequest, getProjectRequest } from "@/src/infra/modules/projects/project-requests.service";
 import { approveProjectRequestSchema } from "@/src/infra/modules/projects/projects.schema";
 import { REVIEWER_ROLES, readJsonBody, requireUser } from "@/src/infra/modules/projects/session";
@@ -44,6 +45,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         }
 
         const { request, project } = await approveProjectRequest(id, user.id, comment);
+
+        // Pontua o autor e todos os integrantes vinculados ao projeto criado.
+        const beneficiados = [...new Set([request.createdById, ...request.members.map((m) => m.userId)])];
+        await Promise.all(beneficiados.map((userId) => awardForEvent(userId, "PROJECT_APPROVED")));
 
         return NextResponse.json({ message: "Solicitação aprovada", request, project }, { status: 200 });
     } catch (error) {

@@ -1,4 +1,5 @@
 import { prisma } from "@/src/infra/data/prisma";
+import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -64,7 +65,12 @@ export async function POST(_req: NextRequest, { params }: Params) {
             },
         });
 
-        return NextResponse.json({ message: "Inscrição realizada com sucesso", subscription }, { status: 201 });
+        const gamification = await awardForEvent(session.user.id, "COURSE_ENROLLED");
+
+        return NextResponse.json(
+            { message: "Inscrição realizada com sucesso", subscription, gamification },
+            { status: 201 }
+        );
     } catch (error) {
         console.error("[POST /api/courses/[id]/subscribe]", error);
         return NextResponse.json({ message: "Erro interno" }, { status: 500 });
