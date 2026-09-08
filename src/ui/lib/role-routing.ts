@@ -2,8 +2,8 @@ export const roleRedirectMap: Record<string, string> = {
     ADMIN: "/professor/configuracoes",
     PROFESSOR: "/professor/configuracoes",
     MONITOR: "/monitor/controle-presenca",
-    PESQUISADOR: "/pesquisador/relatorios",
-    VISITANTE: "/estudante/profile",
+    RESEARCHER: "/pesquisador/relatorios",
+    VISITOR: "/estudante/profile",
 };
 
 export function getDashboardHref(role?: string | null): string {
