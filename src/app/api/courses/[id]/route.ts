@@ -1,12 +1,15 @@
-import { prisma } from "@/src/infra/data/prisma";
-import {
-    COURSE_ADMIN_INCLUDE,
+﻿import {
     deleteCourse,
+    findCourseById,
+    findCourseForEdit,
     findInvalidScheduleLocations,
+    findUserForValidation,
     getCourseDeletionBlockers,
     updateCourse,
 } from "@/src/infra/modules/courses/course-admin.service";
 import { patchCourseSchema } from "@/src/infra/modules/courses/courses.schema";
+import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, ValidationError } from "@/src/lib/errors/AppError";
+import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -18,103 +21,65 @@ export async function GET(_req: NextRequest, { params }: Params) {
     try {
         const { id: rawId } = await params;
         const id = rawId?.trim();
-        if (!id) {
-            return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-        }
+        if (!id) throw new ValidationError("ID invalido");
 
-        const course = await prisma.course.findUnique({
-            where: { id },
-            include: COURSE_ADMIN_INCLUDE,
-        });
-
-        if (!course) {
-            return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
-        }
+        const course = await findCourseById(id);
+        if (!course) throw new NotFoundError("Curso", id);
 
         return NextResponse.json(course, { status: 200 });
     } catch (error) {
-        console.error("[GET /api/courses/[id]]", error);
-        return NextResponse.json({ message: "Erro interno" }, { status: 500 });
+        return handleError(error);
     }
 }
 
-// pelo que entendi quando estava lendo na doc: o PATCH serve para que atualize parcialmente ao inves de ter que ir atualizando tudo
+// PATCH atualiza parcialmente — sem sobrescrever campos nao enviados
 export async function PATCH(req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
-        }
+        if (!session) throw new UnauthorizedError();
 
         const allowedRoles = ["ADMIN", "PROFESSOR"];
         if (!allowedRoles.includes(session.user.role)) {
-            return NextResponse.json({ message: "Sem permissão para editar cursos" }, { status: 403 });
+            throw new ForbiddenError("Sem permissão para editar cursos");
         }
 
         const { id: rawId } = await params;
         const id = rawId?.trim();
-        if (!id) {
-            return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-        }
+        if (!id) throw new ValidationError("ID invalido");
 
-        const existingCourse = await prisma.course.findUnique({
-            where: { id },
-            select: { id: true, professorId: true },
-        });
-        if (!existingCourse) {
-            return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
-        }
+        const existingCourse = await findCourseForEdit(id);
+        if (!existingCourse) throw new NotFoundError("Curso", id);
 
         if (session.user.role === "PROFESSOR" && existingCourse.professorId !== session.user.id) {
-            return NextResponse.json({ message: "Sem permissão para editar este curso" }, { status: 403 });
+            throw new ForbiddenError("Sem permissão para editar este curso");
         }
 
         let body: unknown;
         try {
             body = await req.json();
         } catch {
-            return NextResponse.json({ message: "Body inválido" }, { status: 400 });
+            throw new ValidationError("Body invalido");
         }
 
         const parsed = patchCourseSchema.safeParse(body);
-
-        if (!parsed.success) {
-            return NextResponse.json(
-                { message: "Dados inválidos", errors: parsed.error.flatten().fieldErrors },
-                { status: 422 }
-            );
-        }
+        if (!parsed.success) throw parsed.error;
 
         if (parsed.data.professorId && session.user.role !== "ADMIN") {
-            return NextResponse.json({ message: "Apenas admins podem trocar o professor" }, { status: 403 });
+            throw new ForbiddenError("Apenas admins podem trocar o professor");
         }
 
         if (parsed.data.professorId) {
-            const professor = await prisma.user.findUnique({
-                where: { id: parsed.data.professorId },
-                select: { id: true, isActive: true, role: true },
-            });
-
-            if (!professor || !professor.isActive) {
-                return NextResponse.json({ message: "Professor responsável não encontrado" }, { status: 404 });
-            }
-
+            const professor = await findUserForValidation(parsed.data.professorId);
+            if (!professor || !professor.isActive) throw new NotFoundError("Professor responsavel");
             if (professor.role !== "PROFESSOR" && professor.role !== "ADMIN") {
-                return NextResponse.json(
-                    { message: "O responsável pelo curso deve ser um professor ou administrador" },
-                    { status: 422 }
-                );
+                throw new ValidationError("O responsavel pelo curso deve ser um professor ou administrador");
             }
         }
 
         if (parsed.data.agenda?.length) {
             const invalidLocations = await findInvalidScheduleLocations(parsed.data.agenda);
-
             if (invalidLocations.length > 0) {
-                return NextResponse.json(
-                    { message: "Local inválido ou inativo na agenda", errors: { agenda: invalidLocations } },
-                    { status: 422 }
-                );
+                throw new ValidationError("Local invalido ou inativo na agenda");
             }
         }
 
@@ -122,44 +87,31 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
         return NextResponse.json(updated, { status: 200 });
     } catch (error) {
-        console.error("[PATCH /api/courses/[id]]", error);
-        return NextResponse.json({ message: "Erro interno" }, { status: 500 });
+        return handleError(error);
     }
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
-        }
+        if (!session) throw new UnauthorizedError();
 
-        if (session.user.role !== "ADMIN") {
-            return NextResponse.json({ message: "Apenas admins podem excluir cursos" }, { status: 403 });
-        }
+        if (session.user.role !== "ADMIN") throw new ForbiddenError("Apenas admins podem excluir cursos");
 
         const { id: rawId } = await params;
         const id = rawId?.trim();
-        if (!id) {
-            return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-        }
+        if (!id) throw new ValidationError("ID invalido");
 
-        const exists = await prisma.course.findUnique({ where: { id }, select: { id: true } });
-        if (!exists) {
-            return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
-        }
+        const exists = await findCourseForEdit(id);
+        if (!exists) throw new NotFoundError("Curso", id);
 
         const force = req.nextUrl.searchParams.get("force") === "true";
         const blockers = await getCourseDeletionBlockers(id);
 
         if (!force && (blockers.lessons > 0 || blockers.enrollments > 0)) {
-            return NextResponse.json(
-                {
-                    message:
-                        "Curso possui aulas ou matrículas vinculadas. Inative-o (PATCH { ativo: false }) ou repita com ?force=true.",
-                    blockers,
-                },
-                { status: 409 }
+            throw new ConflictError(
+                `Curso possui ${blockers.lessons} aula(s) e ${blockers.enrollments} matricula(s). ` +
+                    "Inative-o (PATCH { ativo: false }) ou repita com ?force=true."
             );
         }
 
@@ -167,7 +119,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
         return new NextResponse(null, { status: 204 });
     } catch (error) {
-        console.error("[DELETE /api/courses/[id]]", error);
-        return NextResponse.json({ message: "Erro interno" }, { status: 500 });
+        return handleError(error);
     }
 }
