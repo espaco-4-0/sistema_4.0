@@ -1,5 +1,7 @@
-import { prisma } from "@/src/infra/data/prisma";
-import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
+﻿import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
+import { enrollUser, unenrollUser } from "@/src/infra/modules/courses/enrollment.service";
+import { UnauthorizedError, ValidationError } from "@/src/lib/errors/AppError";
+import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,111 +12,37 @@ type Params = { params: Promise<{ id: string }> };
 export async function POST(_req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
-        }
+        if (!session) throw new UnauthorizedError();
+
         const { id: rawId } = await params;
         const courseId = rawId?.trim();
-        if (!courseId) {
-            return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-        }
+        if (!courseId) throw new ValidationError("ID invalido");
 
-        const course = await prisma.course.findUnique({
-            where: { id: courseId },
-            select: {
-                id: true,
-                isActive: true,
-                capacity: true,
-                _count: { select: { Enrollment: true } },
-            },
-        });
-
-        if (!course) {
-            return NextResponse.json({ message: "Curso não encontrado" }, { status: 404 });
-        }
-
-        if (!course.isActive) {
-            return NextResponse.json({ message: "Curso inativo para inscrição" }, { status: 409 });
-        }
-
-        const alreadySubscribed = await prisma.enrollment.findUnique({
-            where: {
-                userId_courseId: {
-                    userId: session.user.id,
-                    courseId: courseId,
-                },
-            },
-        });
-
-        if (alreadySubscribed) {
-            return NextResponse.json({ message: "Você já está inscrito neste curso" }, { status: 409 });
-        }
-
-        // `capacity` nulo significa turma sem limite de vagas.
-        if (course.capacity !== null && course._count.Enrollment >= course.capacity) {
-            return NextResponse.json(
-                { message: "As vagas para este curso estão esgotadas", vagasTotais: course.capacity },
-                { status: 409 }
-            );
-        }
-
-        const subscription = await prisma.enrollment.create({
-            data: {
-                userId: session.user.id,
-                courseId: courseId,
-            },
-        });
-
+        const subscription = await enrollUser(session.user.id, courseId);
         const gamification = await awardForEvent(session.user.id, "COURSE_ENROLLED");
 
         return NextResponse.json(
-            { message: "Inscrição realizada com sucesso", subscription, gamification },
+            { message: "Inscricao realizada com sucesso", subscription, gamification },
             { status: 201 }
         );
     } catch (error) {
-        console.error("[POST /api/courses/[id]/subscribe]", error);
-        return NextResponse.json({ message: "Erro interno" }, { status: 500 });
+        return handleError(error);
     }
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
-        }
+        if (!session) throw new UnauthorizedError();
 
         const { id: rawId } = await params;
         const courseId = rawId?.trim();
-        if (!courseId) {
-            return NextResponse.json({ message: "ID inválido" }, { status: 400 });
-        }
+        if (!courseId) throw new ValidationError("ID invalido");
 
-        const subscription = await prisma.enrollment.findUnique({
-            where: {
-                userId_courseId: {
-                    userId: session.user.id,
-                    courseId: courseId,
-                },
-            },
-        });
-
-        if (!subscription) {
-            return NextResponse.json({ message: "Você não está inscrito neste curso" }, { status: 404 });
-        }
-
-        await prisma.enrollment.delete({
-            where: {
-                userId_courseId: {
-                    userId: session.user.id,
-                    courseId: courseId,
-                },
-            },
-        });
+        await unenrollUser(session.user.id, courseId);
 
         return new NextResponse(null, { status: 204 });
     } catch (error) {
-        console.error("[DELETE /api/courses/[id]/subscribe]", error);
-        return NextResponse.json({ message: "Erro interno" }, { status: 500 });
+        return handleError(error);
     }
 }
