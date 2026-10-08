@@ -1,6 +1,7 @@
-import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/infra/data/prisma";
+import { createLike } from "@/src/infra/modules/blog/blog-interaction.service";
 import { postIdBlogSchema } from "@/src/infra/modules/blog/blog.schema";
+import { UnauthorizedError, ValidationError } from "@/src/lib/errors/AppError";
+import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,30 +10,16 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+        if (!session) throw new UnauthorizedError("Não autenticado");
 
         const { postId } = await req.json();
         const validatedPostId = postIdBlogSchema.safeParse(postId);
-        if (!validatedPostId.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 422 });
+        if (!validatedPostId.success) throw new ValidationError("Dados inválidos");
 
-        await prisma.like.create({
-            data: {
-                userId: session.user.id,
-                postId: validatedPostId.data,
-            },
-        });
+        await createLike(session.user.id, validatedPostId.data);
 
         return NextResponse.json({ message: "Post curtido com sucesso" }, { status: 200 });
     } catch (err) {
-        console.error(err);
-
-        if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            if (err.code === "P2003")
-                return NextResponse.json({ error: "Usuário ou Post não encontrado" }, { status: 409 });
-
-            if (err.code === "P2002") return NextResponse.json({ error: "Post já foi curtido" }, { status: 409 });
-        }
-
-        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+        return handleError(err);
     }
 }
