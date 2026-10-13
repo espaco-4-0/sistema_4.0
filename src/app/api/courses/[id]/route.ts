@@ -8,7 +8,13 @@
     updateCourse,
 } from "@/src/infra/modules/courses/course-admin.service";
 import { patchCourseSchema } from "@/src/infra/modules/courses/courses.schema";
-import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, ValidationError } from "@/src/lib/errors/AppError";
+import {
+    ConflictError,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+    ValidationError,
+} from "@/src/lib/errors/AppError";
 import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
