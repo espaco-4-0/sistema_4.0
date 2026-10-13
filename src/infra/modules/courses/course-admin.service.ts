@@ -166,3 +166,50 @@ export async function listEnabledResourcesForUser(userId: string): Promise<Cours
 
     return accesses.map((access) => access.resource);
 }
+
+export async function findCourseById(id: string): Promise<AdminCourse | null> {
+    return prisma.course.findUnique({ where: { id }, include: COURSE_ADMIN_INCLUDE });
+}
+
+/** Seleciona apenas id + professorId — campos suficientes para checar ownership antes de editar. */
+export async function findCourseForEdit(id: string): Promise<{ id: string; professorId: string } | null> {
+    return prisma.course.findUnique({ where: { id }, select: { id: true, professorId: true } });
+}
+
+export async function findCourseSchedule(courseId: string) {
+    return prisma.courseSchedule.findMany({
+        where: { courseId },
+        orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+        include: { location: { select: { id: true, name: true } } },
+    });
+}
+
+export async function findCourseAccess(courseId: string) {
+    return prisma.courseAccess.findMany({
+        where: { courseId },
+        select: { resource: true, enabled: true },
+    });
+}
+
+export async function findUserForValidation(userId: string) {
+    return prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, isActive: true, role: true },
+    });
+}
+
+export async function listCourses(filters: {
+    q?: string;
+    professorId?: string;
+    isActive?: boolean;
+}): Promise<AdminCourse[]> {
+    return prisma.course.findMany({
+        where: {
+            ...(filters.q && { title: { contains: filters.q, mode: "insensitive" } }),
+            ...(filters.professorId && { professorId: filters.professorId }),
+            ...(typeof filters.isActive === "boolean" && { isActive: filters.isActive }),
+        },
+        include: COURSE_ADMIN_INCLUDE,
+        orderBy: { createdAt: "desc" },
+    });
+}
