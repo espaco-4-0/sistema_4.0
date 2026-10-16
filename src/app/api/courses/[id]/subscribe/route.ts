@@ -1,5 +1,5 @@
-﻿import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
-import { enrollUser, unenrollUser } from "@/src/infra/modules/courses/enrollment.service";
+﻿import { enrollUser, unenrollUser } from "@/src/infra/modules/courses/enrollment.service";
+import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
 import { UnauthorizedError, ValidationError } from "@/src/lib/errors/AppError";
 import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
