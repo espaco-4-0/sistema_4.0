@@ -229,7 +229,8 @@ export async function findPostBySlug(slug: string, userId?: string, isAdmin = fa
         }
     }
 
-    const isLiked = Array.isArray((post as any).Like) && (post as any).Like.length > 0;
+    const postWithLike = post as typeof post & { Like?: { id: string }[] };
+    const isLiked = Array.isArray(postWithLike.Like) && postWithLike.Like.length > 0;
 
     return {
         id: post.id,

@@ -28,8 +28,7 @@ vi.mock("@/src/lib/storage", () => ({
 }));
 
 const { prisma } = await import("@/src/infra/data/prisma");
-const { listPosts, createPost, findPostBySlug, updatePostVisibility, deletePostBySlug } =
-    await import("./blog-post.service");
+const { listPosts, createPost, findPostBySlug, deletePostBySlug } = await import("./blog-post.service");
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -55,7 +54,7 @@ describe("blog-post.service", () => {
                 author: { fullName: "Professor Xavier" },
             };
 
-            vi.mocked(prisma.$transaction).mockResolvedValue([1, [mockPost]] as any);
+            vi.mocked(prisma.$transaction).mockResolvedValue([1, [mockPost]] as never);
 
             const result = await listPosts({ page: 1, limit: 10 });
 
@@ -75,12 +74,14 @@ describe("blog-post.service", () => {
     describe("createPost", () => {
         it("cria post em transação com sucesso", async () => {
             const created = { id: "p-new", slug: "novo-post" };
-            vi.mocked(prisma.$transaction).mockImplementation(async (cb: any) => {
+            vi.mocked(prisma.$transaction).mockImplementation((async (
+                cb: (tx: { post: { create: unknown }; postPhoto: { create: unknown } }) => unknown
+            ) => {
                 return cb({
                     post: { create: vi.fn().mockResolvedValue(created) },
                     postPhoto: { create: vi.fn().mockResolvedValue({ id: "photo-1" }) },
                 });
-            });
+            }) as never);
 
             const res = await createPost({
                 title: "Novo Post",
@@ -133,7 +134,7 @@ describe("blog-post.service", () => {
             vi.mocked(prisma.post.findUnique).mockResolvedValue({
                 id: "p-1",
                 isPublished: false,
-            } as any);
+            } as never);
 
             await expect(findPostBySlug("rascunho", "user-1", false)).rejects.toMatchObject({
                 statusCode: 404,
@@ -159,7 +160,7 @@ describe("blog-post.service", () => {
                 author: { fullName: "Autor" },
                 _count: { Like: 3, Comment: 2 },
                 Like: [{ id: "l-1" }],
-            } as any);
+            } as never);
 
             const res = await findPostBySlug("publicado", "u-1", false);
 
@@ -171,7 +172,7 @@ describe("blog-post.service", () => {
 
     describe("deletePostBySlug", () => {
         it("deleta post por slug", async () => {
-            vi.mocked(prisma.post.delete).mockResolvedValue({ id: "p-1" } as any);
+            vi.mocked(prisma.post.delete).mockResolvedValue({ id: "p-1" } as never);
 
             await expect(deletePostBySlug("slug-teste")).resolves.not.toThrow();
             expect(prisma.post.delete).toHaveBeenCalledWith({ where: { slug: "slug-teste" } });

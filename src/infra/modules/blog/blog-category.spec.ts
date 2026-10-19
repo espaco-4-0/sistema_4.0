@@ -23,7 +23,7 @@ describe("blog-category.service", () => {
     describe("listCategories", () => {
         it("retorna categorias mapeadas com contagem de posts", async () => {
             vi.mocked(prisma.postCategory.findMany).mockResolvedValue([
-                { id: "cat-1", name: "Tecnologia", _count: { Post: 5 } } as any,
+                { id: "cat-1", name: "Tecnologia", _count: { Post: 5 } } as never,
             ]);
 
             const result = await listCategories();

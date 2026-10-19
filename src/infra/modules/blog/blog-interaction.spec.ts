@@ -35,7 +35,7 @@ describe("blog-interaction.service", () => {
                     content: "Ótimo post!",
                     createdAt: mockDate,
                     author: { id: "u-1", fullName: "Aluno Teste" },
-                } as any,
+                } as never,
             ]);
             vi.mocked(prisma.comment.count).mockResolvedValue(1);
 
@@ -60,7 +60,7 @@ describe("blog-interaction.service", () => {
 
     describe("createComment", () => {
         it("cria comentário com sucesso", async () => {
-            vi.mocked(prisma.comment.create).mockResolvedValue({ id: "c-1" } as any);
+            vi.mocked(prisma.comment.create).mockResolvedValue({ id: "c-1" } as never);
 
             const res = await createComment("u-1", "p-1", "Meu comentário");
             expect(res).toEqual({ id: "c-1" });
@@ -94,7 +94,7 @@ describe("blog-interaction.service", () => {
             vi.mocked(prisma.comment.findUnique).mockResolvedValue({
                 id: "c-1",
                 authorId: "outro-autor",
-            } as any);
+            } as never);
 
             await expect(deleteComment("c-1", "u-1", false)).rejects.toMatchObject({
                 statusCode: 403,
@@ -106,8 +106,8 @@ describe("blog-interaction.service", () => {
             vi.mocked(prisma.comment.findUnique).mockResolvedValue({
                 id: "c-1",
                 authorId: "u-1",
-            } as any);
-            vi.mocked(prisma.comment.delete).mockResolvedValue({ id: "c-1" } as any);
+            } as never);
+            vi.mocked(prisma.comment.delete).mockResolvedValue({ id: "c-1" } as never);
 
             await expect(deleteComment("c-1", "u-1", false)).resolves.not.toThrow();
             expect(prisma.comment.delete).toHaveBeenCalledWith({ where: { id: "c-1" } });
@@ -117,8 +117,8 @@ describe("blog-interaction.service", () => {
             vi.mocked(prisma.comment.findUnique).mockResolvedValue({
                 id: "c-1",
                 authorId: "outro-autor",
-            } as any);
-            vi.mocked(prisma.comment.delete).mockResolvedValue({ id: "c-1" } as any);
+            } as never);
+            vi.mocked(prisma.comment.delete).mockResolvedValue({ id: "c-1" } as never);
 
             await expect(deleteComment("c-1", "admin-id", true)).resolves.not.toThrow();
             expect(prisma.comment.delete).toHaveBeenCalledWith({ where: { id: "c-1" } });
@@ -127,7 +127,7 @@ describe("blog-interaction.service", () => {
 
     describe("createLike", () => {
         it("cria like com sucesso", async () => {
-            vi.mocked(prisma.like.create).mockResolvedValue({ id: "l-1" } as any);
+            vi.mocked(prisma.like.create).mockResolvedValue({ id: "l-1" } as never);
 
             await expect(createLike("u-1", "p-1")).resolves.not.toThrow();
         });
@@ -148,7 +148,7 @@ describe("blog-interaction.service", () => {
 
     describe("deleteLike", () => {
         it("deleta like com sucesso", async () => {
-            vi.mocked(prisma.like.delete).mockResolvedValue({ id: "l-1" } as any);
+            vi.mocked(prisma.like.delete).mockResolvedValue({ id: "l-1" } as never);
 
             await expect(deleteLike("u-1", "p-1")).resolves.not.toThrow();
         });
