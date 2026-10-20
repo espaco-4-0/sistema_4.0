@@ -1,6 +1,7 @@
-import { Prisma } from "@/src/generated/prisma/client";
-import { prisma } from "@/src/infra/data/prisma";
+import { createComment } from "@/src/infra/modules/blog/blog-interaction.service";
 import { postCommentSchema } from "@/src/infra/modules/blog/blog.schema";
+import { UnauthorizedError, ValidationError } from "@/src/lib/errors/AppError";
+import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,30 +10,16 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+        if (!session) throw new UnauthorizedError("Não autenticado");
 
         const body = await req.json();
-
         const validatedPost = postCommentSchema.safeParse(body);
-        if (!validatedPost.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 422 });
+        if (!validatedPost.success) throw new ValidationError("Dados inválidos");
 
-        await prisma.comment.create({
-            data: {
-                authorId: session.user.id,
-                postId: validatedPost.data.postId,
-                content: validatedPost.data.comment,
-            },
-        });
+        await createComment(session.user.id, validatedPost.data.postId, validatedPost.data.comment);
 
         return NextResponse.json({ message: "Comentário criado com sucesso" }, { status: 200 });
     } catch (err) {
-        console.error(err);
-
-        if (err instanceof Prisma.PrismaClientKnownRequestError) {
-            if (err.code === "P2003")
-                return NextResponse.json({ error: "Usuário ou Post não encontrado" }, { status: 409 });
-        }
-
-        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+        return handleError(err);
     }
 }
