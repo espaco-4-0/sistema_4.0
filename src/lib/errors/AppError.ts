@@ -26,3 +26,15 @@ export class ConflictError extends AppError {
         super(message, 409, "CONFLICT");
     }
 }
+
+export class UnauthorizedError extends AppError {
+    constructor(message = "Não autenticado") {
+        super(message, 401, "UNAUTHORIZED");
+    }
+}
+
+export class ForbiddenError extends AppError {
+    constructor(message = "Sem permissão para realizar esta ação") {
+        super(message, 403, "FORBIDDEN");
+    }
+}
