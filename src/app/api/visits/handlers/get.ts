@@ -1,20 +1,16 @@
-import { prisma } from "@/src/infra/data/prisma";
-import { buildHolidayMap } from "@/src/lib/visits/holiday-utils";
+import {
+    CalendarEvent,
+    isAdmin,
+    listPublicCalendarEvents,
+    listVisitsForAdmin,
+} from "@/src/infra/modules/visits/visits.service";
+import { handleError } from "@/src/lib/errors/errorHandler";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-export interface CalendarEvent {
-    id: string | number;
-    instituicao: string;
-    dataVisita: string;
-    horaInicio: string;
-    horaFim: string;
-    status: string;
-    isHoliday?: boolean;
-    holidayName?: string;
-}
+export { isAdmin, type CalendarEvent };
 
 async function getSessionUser() {
     const session = await getServerSession(authOptions);
@@ -27,107 +23,19 @@ async function getSessionUser() {
     };
 }
 
-export function isAdmin(role: string) {
-    return role === "ADMIN" || role === "admin";
-}
-
-function toComparableDate(value: unknown): Date {
-    if (value instanceof Date) return value;
-    if (typeof value === "string") {
-        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            return new Date(`${value}T00:00:00`);
-        }
-        const d = new Date(value);
-        if (!isNaN(d.getTime())) return d;
-        return new Date(`${value}T00:00:00`);
-    }
-    return new Date(0);
-}
-
 export async function getHandlers() {
     try {
         const user = await getSessionUser();
         const adminUser = user && isAdmin(user.role);
 
         if (adminUser) {
-            const visits = await prisma.visit.findMany({
-                orderBy: { createdAt: "desc" },
-                include: {
-                    VisitDocument: {
-                        select: { id: true, fileName: true, fileType: true, fileSizeKb: true, uploadedAt: true },
-                    },
-                    VisitLocation: {
-                        include: {
-                            Location: {
-                                select: { name: true },
-                            },
-                        },
-                    },
-                },
-            });
+            const visits = await listVisitsForAdmin();
             return NextResponse.json(visits);
         }
 
-        const visits = await prisma.visit.findMany({
-            orderBy: { createdAt: "desc" },
-            select: { id: true, institution: true, visitDate: true, startTime: true, endTime: true, status: true },
-        });
-
-        const year = new Date().getFullYear();
-        const holidaysMap = buildHolidayMap(year);
-
-        let negativeId = -1;
-        const holidayEntries = Array.from(holidaysMap.entries());
-
-        const holidayEvents: CalendarEvent[] = holidayEntries.map(([dateIso, name]) => {
-            const ev: CalendarEvent = {
-                id: negativeId,
-                instituicao: `Feriado: ${name}`,
-                dataVisita: dateIso, // YYYY-MM-DD
-                horaInicio: "00:00",
-                horaFim: "23:59",
-                status: "feriado",
-                isHoliday: true,
-                holidayName: name,
-            };
-            negativeId -= 1;
-            return ev;
-        });
-
-        const statusMap: Record<string, string> = {
-            PENDING: "pendente",
-            APPROVED: "aprovado",
-            DENIED: "negado",
-        };
-
-        const normalizedVisits: CalendarEvent[] = visits.map((v) => {
-            const data = v.visitDate;
-            const dateStr = data instanceof Date ? data.toISOString().slice(0, 10) : String(data).slice(0, 10);
-            return {
-                id: v.id,
-                instituicao: v.institution,
-                dataVisita: dateStr,
-                horaInicio: v.startTime ?? "00:00",
-                horaFim: v.endTime ?? "00:00",
-                status: v.status ? (statusMap[v.status] ?? "pendente") : "pendente",
-            };
-        });
-
-        const merged: CalendarEvent[] = [...normalizedVisits, ...holidayEvents].sort((a, b) => {
-            const da = toComparableDate(a.dataVisita);
-            const db = toComparableDate(b.dataVisita);
-            if (da.getTime() !== db.getTime()) return da.getTime() - db.getTime();
-
-            const aStart = typeof a.horaInicio === "string" ? a.horaInicio : "00:00";
-            const bStart = typeof b.horaInicio === "string" ? b.horaInicio : "00:00";
-            const [ah, am] = aStart.split(":").map((s) => Number.parseInt(s, 10) || 0);
-            const [bh, bm] = bStart.split(":").map((s) => Number.parseInt(s, 10) || 0);
-            return ah * 60 + am - (bh * 60 + bm);
-        });
-
-        return NextResponse.json(merged);
+        const events = await listPublicCalendarEvents();
+        return NextResponse.json(events);
     } catch (error) {
-        console.error("[GET /api/visits]", error);
-        return NextResponse.json({ message: "Erro interno do servidor", error: String(error) }, { status: 500 });
+        return handleError(error);
     }
 }
