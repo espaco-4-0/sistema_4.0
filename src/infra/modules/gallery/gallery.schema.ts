@@ -25,7 +25,7 @@ export const getGalleryItemsSchema = z.object({
 
 export const createGalleryItemSchema = z
     .object({
-    title: z.string().min(1).max(100),
+        title: z.string().min(1).max(100),
         isActive: z.preprocess((val) => {
             if (val === "true") return true;
             if (val === "false") return false;
@@ -54,3 +54,7 @@ export const updateGalleryActiveSchema = z.object({
     }, z.boolean()),
     title: z.string().min(1).max(100),
 });
+
+export type GetGalleryItemsInput = z.infer<typeof getGalleryItemsSchema>;
+export type CreateGalleryItemInput = z.infer<typeof createGalleryItemSchema>;
+export type UpdateGalleryActiveInput = z.infer<typeof updateGalleryActiveSchema>;
