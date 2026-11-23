@@ -1,50 +1,25 @@
-import { prisma } from "@/src/infra/data/prisma";
-import { sendResetPasswordEmail } from "@/src/lib/email";
-import jwt from "jsonwebtoken";
+import { requestPasswordRecovery } from "@/src/infra/modules/auth/auth-server.service";
+import { recoveryPasswordSchema } from "@/src/infra/modules/auth/auth.schema";
+import { ValidationError } from "@/src/lib/errors/AppError";
+import { handleError } from "@/src/lib/errors/errorHandler";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { email } = body;
 
-        if (!email) {
-            return NextResponse.json({ message: "E-mail é obrigatório" }, { status: 400 });
+        const parsed = recoveryPasswordSchema.safeParse(body);
+        if (!parsed.success) {
+            throw new ValidationError(parsed.error.issues[0]?.message ?? "E-mail é obrigatório");
         }
 
-        const user = await prisma.user.findUnique({
-            where: { email },
-        });
-
-        if (user) {
-            const secretKey = process.env.JWT_SECRET;
-            if (!secretKey) throw new Error("JWT_SECRET não definido no .env");
-
-            const token = jwt.sign({ userId: user.id }, secretKey, { expiresIn: "1h" });
-
-            await prisma.user.update({
-                where: { id: user.id },
-                data: {
-                    resetToken: token,
-                    resetTokenExpiresAt: new Date(Date.now() + 3600000), // 1 hora
-                },
-            });
-
-            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-
-            const resetLink = `${baseUrl}/reset-password?token=${token}`;
-
-            await sendResetPasswordEmail(user.email, user.fullName ?? "Usuário", resetLink);
-        }
+        await requestPasswordRecovery(parsed.data.email);
 
         return NextResponse.json(
-            {
-                message: "Se o e-mail estiver cadastrado, um link de recuperação foi enviado.",
-            },
+            { message: "Se o e-mail estiver cadastrado, um link de recuperação foi enviado." },
             { status: 200 }
         );
     } catch (error) {
-        console.error("Erro no servidor:", error);
-        return NextResponse.json({ message: "Erro interno no servidor" }, { status: 500 });
+        return handleError(error);
     }
 }

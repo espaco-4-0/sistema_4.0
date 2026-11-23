@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { CertificateCardProps } from "@/src/infra/modules/student/certifications-mock";
 import { Button } from "@/src/ui/components/ui/button";
 import { Calendar, Clock, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+export interface CertificateCardProps {
+    id: string;
+    title: string;
+    institution: string;
+    completionDate: string;
+    hours: number;
+}
 
 export function CertificateCard(certificated: Readonly<CertificateCardProps>) {
     const [isDownloading, setIsDownloading] = useState(false);

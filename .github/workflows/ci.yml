@@ -132,5 +132,7 @@ jobs:
             - name: Gerar Prisma Client
               run: pnpm exec prisma generate
 
+            # `pnpm build` roda `prisma migrate deploy`, que exige um banco; este job
+            # não tem Postgres. O client já foi gerado acima, então basta o next build.
             - name: Build
-              run: pnpm build
+              run: pnpm exec next build

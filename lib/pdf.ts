@@ -1,138 +1,136 @@
+import { PAGE_HEIGHT, PAGE_WIDTH, normalizeLayout, type ElementStyle } from "@/src/infra/modules/certificates/layout";
 import { PDF, rgb } from "@libpdf/core";
 
 interface CertificateData {
-  titulo: string;
-  descricao: string;
-  alunoNome: string;
-  curso: string;
-  cargaHoraria?: number;
-  validadeAte?: Date;
-  emitidoEm: Date;
-  layout: {
-    corFundo: string;
-    corTitulo: string;
-    corNome: string;
-    corTexto: string;
-    corBorda: string;
-    assinante?: string;
-    cargo?: string;
-    logoUrl?: string;
-    assinaturaUrl?: string;
-  };
+    titulo: string;
+    descricao: string;
+    alunoNome: string;
+    curso: string;
+    cargaHoraria?: number;
+    validadeAte?: Date;
+    emitidoEm: Date;
+    layout: unknown;
 }
 
-const PAGE_WIDTH = 842;
-const PAGE_HEIGHT = 595;
 const MARGIN = 28;
 
-export async function generatePdf(data: CertificateData): Promise<Buffer> {
-    const pdf = PDF.create();
+/** Busca a imagem de fundo. Falha aqui não pode impedir a emissão. */
+async function fetchImage(url: string | null | undefined): Promise<Uint8Array | null> {
+    if (!url) return null;
 
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        return new Uint8Array(await response.arrayBuffer());
+    } catch {
+        console.warn(`[pdf] não foi possível carregar a imagem de fundo: ${url}`);
+        return null;
+    }
+}
+
+export async function generatePdf(data: CertificateData): Promise<Buffer> {
+    const layout = normalizeLayout(data.layout);
+
+    const pdf = PDF.create();
     pdf.setTitle(data.titulo);
     pdf.setAuthor("Sistema de Certificados");
     pdf.setCreator("CertificadosApp");
 
-    const page = pdf.addPage({
-        size: "a4",
-        orientation: "landscape",
-    });
+    const page = pdf.addPage({ size: "a4", orientation: "landscape" });
 
     page.drawRectangle({
         x: 0,
         y: 0,
         width: PAGE_WIDTH,
         height: PAGE_HEIGHT,
-        color: hexToRgb(data.layout.corFundo),
+        color: hexToRgb(layout.corFundo),
     });
 
-    page.drawRectangle({
-        x: MARGIN,
-        y: MARGIN,
-        width: PAGE_WIDTH - MARGIN * 2,
-        height: PAGE_HEIGHT - MARGIN * 2,
-        borderColor: hexToRgb(data.layout.corBorda),
-        borderWidth: 3,
-    });
+    // A imagem de fundo cobre a página inteira, por cima da cor sólida.
+    const background = await fetchImage(layout.backgroundUrl);
+    if (background) {
+        try {
+            const image = await pdf.embedImage(background);
+            page.drawImage(image, { x: 0, y: 0, width: PAGE_WIDTH, height: PAGE_HEIGHT });
+        } catch {
+            console.warn("[pdf] imagem de fundo inválida, seguindo com a cor sólida");
+        }
+    }
 
-    page.drawText(data.titulo, {
-        x: PAGE_WIDTH / 2 - estimateTextWidth(data.titulo, 28) / 2,
-        y: PAGE_HEIGHT - 80,
-        size: 28,
-        color: hexToRgb(data.layout.corTitulo),
-    });
-
-    const subtitulo = "Certificamos que";
-    page.drawText(subtitulo, {
-        x: PAGE_WIDTH / 2 - estimateTextWidth(subtitulo, 13) / 2,
-        y: PAGE_HEIGHT - 150,
-        size: 13,
-        color: hexToRgb(data.layout.corTexto),
-    });
-
-    page.drawText(data.alunoNome, {
-        x: PAGE_WIDTH / 2 - estimateTextWidth(data.alunoNome, 26) / 2,
-        y: PAGE_HEIGHT - 200,
-        size: 26,
-        color: hexToRgb(data.layout.corNome),
-    });
-
-    page.drawLine({
-        start: { x: PAGE_WIDTH / 2 - 180, y: PAGE_HEIGHT - 215 },
-        end: { x: PAGE_WIDTH / 2 + 180, y: PAGE_HEIGHT - 215 },
-        color: hexToRgb(data.layout.corNome),
-        thickness: 1,
-    });
-
-    page.drawText(data.descricao, {
-        x: PAGE_WIDTH / 2 - 220,
-        y: PAGE_HEIGHT - 260,
-        size: 12,
-        color: hexToRgb(data.layout.corTexto),
-        maxWidth: 440,
-        lineHeight: 1.5,
-    });
-
-    if (data.cargaHoraria) {
-        const chText = `Carga horária: ${data.cargaHoraria} horas`;
-        page.drawText(chText, {
-            x: PAGE_WIDTH / 2 - estimateTextWidth(chText, 11) / 2,
-            y: PAGE_HEIGHT - 320,
-            size: 11,
-            color: hexToRgb(data.layout.corTexto),
+    if (layout.showBorder) {
+        page.drawRectangle({
+            x: MARGIN,
+            y: MARGIN,
+            width: PAGE_WIDTH - MARGIN * 2,
+            height: PAGE_HEIGHT - MARGIN * 2,
+            borderColor: hexToRgb(layout.corBorda),
+            borderWidth: 3,
         });
     }
+
+    /** Posiciona o texto respeitando o alinhamento escolhido no editor. */
+    const drawAt = (text: string, style: ElementStyle, maxWidth?: number) => {
+        if (!style.visible || !text) return;
+
+        const width = estimateTextWidth(text, style.size);
+        let x = style.x;
+
+        if (style.align === "center") x = style.x - width / 2;
+        else if (style.align === "right") x = style.x - width;
+
+        page.drawText(text, {
+            x,
+            y: style.y,
+            size: style.size,
+            color: hexToRgb(style.color),
+            ...(maxWidth ? { maxWidth, lineHeight: 1.5 } : {}),
+        });
+    };
+
+    drawAt(data.titulo, layout.elements.titulo);
+    drawAt(data.descricao, layout.elements.descricao, 440);
+    drawAt(data.alunoNome, layout.elements.nome);
+
+    const cursoTexto = data.cargaHoraria ? `${data.curso} — ${data.cargaHoraria} horas` : data.curso;
+    drawAt(cursoTexto, layout.elements.curso);
 
     const emitidoEm = data.emitidoEm.toLocaleDateString("pt-BR");
-    page.drawText(`Emitido em: ${emitidoEm}`, {
-        x: MARGIN + 40,
-        y: MARGIN + 50,
-        size: 10,
-        color: hexToRgb(data.layout.corTexto),
-    });
+    const rodape = data.validadeAte
+        ? `Emitido em ${emitidoEm} · Válido até ${data.validadeAte.toLocaleDateString("pt-BR")}`
+        : `Emitido em ${emitidoEm}`;
+    drawAt(rodape, layout.elements.rodape);
 
-    if (data.validadeAte) {
-        const validade = data.validadeAte.toLocaleDateString("pt-BR");
-        page.drawText(`Válido até: ${validade}`, {
-            x: PAGE_WIDTH - MARGIN - 160,
-            y: MARGIN + 50,
-            size: 10,
-            color: hexToRgb(data.layout.corTexto),
+    const assinaturaStyle = layout.elements.assinatura;
+    if (assinaturaStyle.visible) {
+        const signature = await fetchImage(layout.assinaturaUrl);
+
+        if (signature) {
+            try {
+                const image = await pdf.embedImage(signature);
+                page.drawImage(image, {
+                    x: assinaturaStyle.x - 60,
+                    y: assinaturaStyle.y + 8,
+                    width: 120,
+                    height: 40,
+                });
+            } catch {
+                console.warn("[pdf] imagem de assinatura inválida");
+            }
+        }
+
+        page.drawLine({
+            start: { x: assinaturaStyle.x - 100, y: assinaturaStyle.y },
+            end: { x: assinaturaStyle.x + 100, y: assinaturaStyle.y },
+            color: hexToRgb(assinaturaStyle.color),
+            thickness: 0.5,
         });
+
+        const legenda = layout.assinante
+            ? `${layout.assinante}${layout.cargo ? ` — ${layout.cargo}` : ""}`
+            : "Assinatura do Responsável";
+
+        drawAt(legenda, { ...assinaturaStyle, y: assinaturaStyle.y - 14, size: 9 });
     }
-
-    page.drawLine({
-        start: { x: PAGE_WIDTH / 2 - 100, y: MARGIN + 45 },
-        end: { x: PAGE_WIDTH / 2 + 100, y: MARGIN + 45 },
-        color: hexToRgb(data.layout.corTexto),
-        thickness: 0.5,
-    });
-
-    page.drawText("Assinatura do Responsável", {
-        x: PAGE_WIDTH / 2 - estimateTextWidth("Assinatura do Responsável", 9) / 2,
-        y: MARGIN + 32,
-        size: 9,
-        color: hexToRgb(data.layout.corTexto),
-    });
 
     const uint8Array = await pdf.save();
     return Buffer.from(uint8Array);

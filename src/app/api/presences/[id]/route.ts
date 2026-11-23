@@ -1,4 +1,5 @@
 import { authOptions } from "@/src/app/api/auth/[...nextauth]/route";
+import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
 import { updatePresenceSchema } from "@/src/infra/modules/presences/[id]/presence-id.schema";
 import {
     buildPresenceUpdateData,
@@ -52,7 +53,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
         const updated = await updatePresenceById(id, updateData);
 
-        return NextResponse.json({ message: "Presenca atualizada com sucesso", data: updated });
+        // Só a confirmação pontua; marcar falta ou voltar para pendente não.
+        const gamification =
+            situation === "confirmed" ? await awardForEvent(updated.userId, "PRESENCE_CONFIRMED") : null;
+
+        return NextResponse.json({ message: "Presenca atualizada com sucesso", data: updated, gamification });
     } catch (err) {
         const errorMessage = getErrorMessage(err);
         logger.error({ err, route: getRequestInfo(request) }, errorMessage);

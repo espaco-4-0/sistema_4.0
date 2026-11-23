@@ -1,3 +1,4 @@
+import { awardForEvent } from "@/src/infra/modules/gamification/rules.service";
 import { taskStatusSchema } from "@/src/infra/modules/projects/projects.schema";
 import { canManageProject, getTask, updateTask } from "@/src/infra/modules/projects/projects.service";
 import { readJsonBody, requireUser } from "@/src/infra/modules/projects/session";
@@ -38,7 +39,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
         const updated = await updateTask(id, { status: parsed.data.status }, task.progress);
 
-        return NextResponse.json(updated, { status: 200 });
+        // Pontua só quem executou a tarefa, e só ao concluí-la.
+        const gamification =
+            parsed.data.status === "DONE" && updated.assignedToId
+                ? await awardForEvent(updated.assignedToId, "TASK_COMPLETED")
+                : null;
+
+        return NextResponse.json({ ...updated, gamification }, { status: 200 });
     } catch (error) {
         console.error("[PATCH /api/tasks/[id]/status]", error);
         return NextResponse.json({ message: "Erro interno" }, { status: 500 });

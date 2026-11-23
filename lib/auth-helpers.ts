@@ -42,7 +42,9 @@ export const getAuthenticatedUser = async () => {
 };
 
 export const requireRole = (userRole: string, ...allowedRoles: string[]) => {
-    if (!allowedRoles.includes(userRole)) {
+    const normalized = userRole.toUpperCase();
+
+    if (!allowedRoles.some((role) => role.toUpperCase() === normalized)) {
         return NextResponse.json({ message: "Sem permissão" }, { status: 403 });
     }
     return null;

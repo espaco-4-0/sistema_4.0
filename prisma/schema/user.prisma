@@ -90,4 +90,5 @@ model User {
   CertificateTemplate   CertificateTemplate[]   @relation("ProfessorCertificados")
   certificadosInscritos CertificateSubscription[]
   certificadosEmissoes  CertificateEmission[]
+  certificateSignature  CertificateSignature?
 }
