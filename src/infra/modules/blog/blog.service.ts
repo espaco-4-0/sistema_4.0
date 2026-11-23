@@ -84,7 +84,7 @@ export function normalizePostToCard(post: BlogPost): BlogCard {
 
 export async function getCategories(includeAll = false) {
     const { data } = await api.get("/api/blog/categoria", {
-        params: { includeAll }
+        params: { includeAll },
     });
     return data.data ?? [];
 }
